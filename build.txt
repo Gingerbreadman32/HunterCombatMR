@@ -1,0 +1,3 @@
+displayName = Hunter Combat for Terraria
+author = Mercedes-Benz
+version = 0.1
