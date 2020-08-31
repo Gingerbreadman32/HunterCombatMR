@@ -1,0 +1,52 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\warde\\Documents\\My Games\\Terraria\\ModLoader\\Mod Sources\\HunterCombatMR\\HunterCombatMR.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\warde\\Documents\\My Games\\Terraria\\ModLoader\\Mod Sources\\HunterCombatMR\\HunterCombatMR.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\warde\\Documents\\My Games\\Terraria\\ModLoader\\Mod Sources\\HunterCombatMR\\HunterCombatMR.csproj",
+        "projectName": "HunterCombatMR",
+        "projectPath": "C:\\Users\\warde\\Documents\\My Games\\Terraria\\ModLoader\\Mod Sources\\HunterCombatMR\\HunterCombatMR.csproj",
+        "packagesPath": "C:\\Users\\warde\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\warde\\Documents\\My Games\\Terraria\\ModLoader\\Mod Sources\\HunterCombatMR\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\warde\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net45"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net45": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net45": {
+          "dependencies": {
+            "tModLoader.CodeAssist": {
+              "target": "Package",
+              "version": "[0.1.*, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

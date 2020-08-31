@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "pnNsRLjibBfvYjOX5Nut2+cCFpSCcMKQ94Vx75l+9G4KobSJsolnLZ2w2lFBXVFOlzoH8Wem+4xepk2t6Frj1g==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\warde\\Documents\\My Games\\Terraria\\ModLoader\\Mod Sources\\HunterCombatMR\\HunterCombatMR.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\warde\\.nuget\\packages\\tmodloader.codeassist\\0.1.1\\tmodloader.codeassist.0.1.1.nupkg.sha512"
+  ],
+  "logs": []
+}
