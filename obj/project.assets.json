@@ -4,6 +4,29 @@
     ".NETFramework,Version=v4.5": {
       "tModLoader.CodeAssist/0.1.1": {
         "type": "package"
+      },
+      "Libvaxy/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
+        "dependencies": {
+          "tModLoader.CodeAssist": "0.1.0"
+        },
+        "compile": {
+          "bin/placeholder/Libvaxy.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Libvaxy.dll": {}
+        }
+      },
+      "Terraria/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.5",
+        "compile": {
+          "bin/placeholder/Terraria.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Terraria.dll": {}
+        }
       }
     }
   },
@@ -23,10 +46,22 @@
         "tools/install.ps1",
         "tools/uninstall.ps1"
       ]
+    },
+    "Libvaxy/1.0.0": {
+      "type": "project",
+      "path": "D:\\Git\\Libvaxy\\Libvaxy.csproj",
+      "msbuildProject": "D:\\Git\\Libvaxy\\Libvaxy.csproj"
+    },
+    "Terraria/1.0.0": {
+      "type": "project",
+      "path": "D:\\Steam Games\\steamapps\\common\\tModLoader\\Source\\tModLoader.csproj",
+      "msbuildProject": "D:\\Steam Games\\steamapps\\common\\tModLoader\\Source\\tModLoader.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETFramework,Version=v4.5": [
+      "Libvaxy >= 1.0.0",
+      "Terraria >= 1.0.0",
       "tModLoader.CodeAssist >= 0.1.*"
     ]
   },
@@ -57,7 +92,14 @@
       },
       "frameworks": {
         "net45": {
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Git\\Libvaxy\\Libvaxy.csproj": {
+              "projectPath": "D:\\Git\\Libvaxy\\Libvaxy.csproj"
+            },
+            "D:\\Steam Games\\steamapps\\common\\tModLoader\\Source\\tModLoader.csproj": {
+              "projectPath": "D:\\Steam Games\\steamapps\\common\\tModLoader\\Source\\tModLoader.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
@@ -74,7 +116,7 @@
             "version": "[0.1.*, )"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.401\\RuntimeIdentifierGraph.json"
       }
     }
   }
