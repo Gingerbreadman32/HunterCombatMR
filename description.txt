@@ -1,1 +1,1 @@
-Hunter Combat for Terraria is a pretty cool mod, it does...this. Modify this file with a description of your mod.
+A "melee rework" of Terraria focusing on game feel and combos. Currently adds one weapon style: the Sword and Shield, which combines defensive parry mechanics with acrobatic attacks.

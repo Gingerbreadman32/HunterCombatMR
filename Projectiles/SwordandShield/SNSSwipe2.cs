@@ -6,19 +6,19 @@ using Terraria;
 
 namespace HunterCombatMR.Projectiles.SwordandShield
 {
-    public sealed class SNSSwipe1
+    public sealed class SNSSwipe2
         : AttackProjectile
     {
-        private const int _sprites = 5;
+        private const int _sprites = 7;
 
         public override void SetupKeyFrameProfile()
         {
-            FrameProfile = new KeyFrameProfile(_sprites, 4, new Dictionary<int, int>() { { 0, 2 }, { 1, 2 }, { 4, 10 } });
+            FrameProfile = new KeyFrameProfile(_sprites, 2, new Dictionary<int, int>() { { 3, 1 }, { 4, 1 }, { 5, 1 }, { 6, 10 } });
         }
 
         public override void SetStaticDefaults()
         {
-            DisplayName.SetDefault("SNSSwipe1");
+            DisplayName.SetDefault("SNSSwipe2");
             Main.projFrames[projectile.type] = _sprites;
         }
 
@@ -29,13 +29,13 @@ namespace HunterCombatMR.Projectiles.SwordandShield
             projectile.friendly = true;
             projectile.melee = true;
             projectile.penetrate = -1;
-            projectile.timeLeft = 100;
+            projectile.timeLeft = 19;
             projectile.tileCollide = false;
             projectile.ignoreWater = true;
             projectile.ownerHitCheck = true;
             projectile.aiStyle = -1;
             projectile.usesLocalNPCImmunity = true;
-            projectile.localNPCHitCooldown = 0;
+            projectile.localNPCHitCooldown = Animation.TotalFrames;
         }
 
         public override void AI()
@@ -56,6 +56,16 @@ namespace HunterCombatMR.Projectiles.SwordandShield
             Owner.itemTime = Owner.itemAnimation;
 
             PostAnimate();
+        }
+
+        public override bool PreKill(int timeLeft)
+        {
+            Player Owner = Main.player[projectile.owner];
+
+            if (Owner.GetModPlayer<HunterCombatPlayer>().ActiveProjectiles.Contains(projectile.Name))
+                Owner.GetModPlayer<HunterCombatPlayer>().ActiveProjectiles.Remove(projectile.Name);
+
+            return true;
         }
     }
 }
