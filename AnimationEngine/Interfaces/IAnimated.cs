@@ -8,6 +8,12 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
 {
     public interface IAnimated
     {
-        IDictionary<string, IAnimation> Animations { get; set; }
+        IAnimation Animation { get; }
+
+        void Play();
+
+        void Stop();
+
+        void Pause();
     }
 }

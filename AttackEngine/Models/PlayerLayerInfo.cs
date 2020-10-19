@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace HunterCombatMR.AttackEngine.Models
 {
     /// <summary>
-    /// Information pertaining to custom player layers that the <see cref="PlayerAttackAnimation"/> will reference for each layer.
+    /// Information pertaining to custom player layers that the <see cref="PlayerAttackAnimationInfo"/> will reference for each layer.
     /// </summary>
     public class PlayerLayerInfo
     {
