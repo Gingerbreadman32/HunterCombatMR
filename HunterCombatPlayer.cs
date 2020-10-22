@@ -127,7 +127,7 @@ namespace HunterCombatMR
         public static void CombatLimbDraw(PlayerDrawInfo drawInfo,
             string layerName,
             string texturePath,
-            Rectangle firstframeRectangle)
+            Rectangle frameRectangle)
         {
             var drawPlayer = drawInfo.drawPlayer;
             var positions = drawPlayer.GetModPlayer<HunterCombatPlayer>().LayerPositions;
@@ -137,7 +137,7 @@ namespace HunterCombatMR
                     new Vector2(drawPlayer.headPosition.X + drawInfo.position.X - Main.screenPosition.X + (float)(drawPlayer.width / 2),
                         drawPlayer.headPosition.Y + drawInfo.position.Y - Main.screenPosition.Y + (float)(drawPlayer.height / 2)));
 
-            var value = new DrawData(ModContent.GetTexture(texturePath), positions[layerName], firstframeRectangle, Color.White);
+            var value = new DrawData(ModContent.GetTexture(texturePath), positions[layerName], frameRectangle, Color.White);
             value.effect = (drawPlayer.direction == 1) ? Microsoft.Xna.Framework.Graphics.SpriteEffects.None : Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally;
 
             if (HunterCombatMR.EditMode.Equals(EditorMode.EditMode))

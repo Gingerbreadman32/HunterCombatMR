@@ -15,5 +15,7 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         void Stop();
 
         void Pause();
+
+        void Restart();
     }
 }
