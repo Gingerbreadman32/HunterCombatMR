@@ -13,7 +13,6 @@ namespace HunterCombatMR.AnimationEngine.Services
         /// </summary>
         /// <param name="animation">The animation to fill</param>
         /// <param name="keyFrameAmount">The amount of key frames you want the animation to be not exceeding the amount of sprites in the sheet</param>
-        /// <param name="startingSpriteIndex">The sprite the animation will want to start at</param>
         /// <param name="averageKeyFrameSpeed">The average speed any keyframes not defined will linger for</param>
         /// <param name="keyFrameSpeeds">A dictionary determining how long each keyframe will linger for at which index</param>
         /// <param name="startPlaying">Whether or not to start playing the animation after.</param>
@@ -21,7 +20,6 @@ namespace HunterCombatMR.AnimationEngine.Services
             int keyFrameAmount, 
             int averageKeyFrameSpeed, 
             IDictionary<int, int> keyFrameSpeeds = null,
-            int startingSpriteIndex = 0,
             bool startPlaying = true)
         {
             animation.StopAnimation();
@@ -36,7 +34,7 @@ namespace HunterCombatMR.AnimationEngine.Services
                 else
                     frameSpeed = averageKeyFrameSpeed;
 
-                AppendKeyFrame(animation, startingSpriteIndex + k, frameSpeed);
+                AppendKeyFrame(animation, frameSpeed);
             }
 
             animation.KeyFrames.Sort();
@@ -56,7 +54,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             KeyFrameProfile frameProfile,
             bool startPlaying = true)
         {
-            FillAnimationKeyFrames(animation, frameProfile.KeyFrameAmount, frameProfile.DefaultKeyFrameSpeed, frameProfile.SpecificKeyFrameSpeeds, frameProfile.StartingSpriteIndex, startPlaying);
+            FillAnimationKeyFrames(animation, frameProfile.KeyFrameAmount, frameProfile.DefaultKeyFrameSpeed, frameProfile.SpecificKeyFrameSpeeds, startPlaying);
         }
 
         public void AppendKeyFrame(IAnimation animation,
@@ -75,10 +73,9 @@ namespace HunterCombatMR.AnimationEngine.Services
         }
 
         public void AppendKeyFrame(IAnimation animation,
-            int spriteIndex, 
             int keyFrameLength)
         {
-            KeyFrame newKeyFrame = new KeyFrame(spriteIndex, keyFrameLength);
+            KeyFrame newKeyFrame = new KeyFrame(keyFrameLength);
             AppendKeyFrame(animation, newKeyFrame);
         }
 

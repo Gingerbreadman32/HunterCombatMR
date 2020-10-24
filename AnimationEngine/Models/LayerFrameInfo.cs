@@ -1,24 +1,23 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace HunterCombatMR.AttackEngine.Models
+namespace HunterCombatMR.AnimationEngine.Models
 {
     public struct LayerFrameInfo
     {
         public LayerFrameInfo(int frame,
             Vector2 position,
-            Rectangle size,
-            string name,
+            byte? depth = null,
             float rotation = 0,
-            byte depth = 1,
+            SpriteEffects flip = SpriteEffects.None,
             string sheet = null)
         {
             SpriteFrame = frame;
             Position = position;
-            FrameRectangle = size;
-            Name = name;
             Rotation = rotation;
-            LayerDepth = depth;
+            LayerDepthOverride = depth;
             SheetNameOverride = sheet;
+            SpriteOrientation = flip;
         }
 
         /// <summary>
@@ -37,9 +36,9 @@ namespace HunterCombatMR.AttackEngine.Models
         public float Rotation { get; set; }
 
         /// <summary>
-        /// At what depth the layer will be drawn, with 0 being in front and 255 being in back.
+        /// At what depth the layer will be drawn, with 0 being in front and 255 being in back. This will override the layer's default if set.
         /// </summary>
-        public byte LayerDepth { get; set; }
+        public byte? LayerDepthOverride { get; set; }
 
         /// <summary>
         /// Optional parameter that represents a new spritesheet to use for this layer at the current frame.
@@ -47,13 +46,8 @@ namespace HunterCombatMR.AttackEngine.Models
         public string SheetNameOverride { get; set; }
 
         /// <summary>
-        /// The name of the layer, will be used if the override is empty or null for texture loading and is used
+        /// Whether or not the sprite will be flipped horizontally or vertically using <seealso cref="SpriteEffects"/>.
         /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// The size and offset of the frame being used. Leave x and y at 0, 0 if the sprite starts at the top-left.
-        /// </summary>
-        public Rectangle FrameRectangle { get; set; }
+        public SpriteEffects SpriteOrientation { get; set; }
     }
 }

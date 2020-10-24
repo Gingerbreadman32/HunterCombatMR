@@ -12,6 +12,7 @@ using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
+using HunterCombatMR.AnimationEngine.Models;
 
 namespace HunterCombatMR
 {
@@ -27,6 +28,8 @@ namespace HunterCombatMR
         private GameTime _lastUpdateUiGameTime;
 
         public static List<Attack> LoadedAttacks { get; set; }
+
+        public static List<LayeredAnimatedAction> LoadedAnimations { get; set; }
 
         public static KeyFrameManager AnimationKeyFrameManager { get; set; }
 
@@ -44,6 +47,18 @@ namespace HunterCombatMR
 
         internal UserInterface DebugUI;
         internal BufferDebugUIState DebugUIState;
+        internal AnimationLoader AnimLoader = new AnimationLoader();
+
+        private void LoadAnimations(Type[] types)
+        {
+            foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
+            {
+                AnimLoader.LoadContainer((ActionContainer)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
+            }
+
+            if (AnimLoader.Containers.Any())
+                AnimLoader.RegisterAnimations();
+        }
 
         public override void Load()
         {
@@ -52,11 +67,13 @@ namespace HunterCombatMR
                 YourCacheList.Add(Reflection.CreateInstance(type));
             */
 
+            Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
+
+            LoadAnimations(assemblyTypes);
+
             if (!Main.dedServ)
             {
                 // Loads all of the attacks into a static list for use later.
-                Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
-
                 LoadedAttacks = new List<Attack>();
 
                 foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
@@ -77,6 +94,19 @@ namespace HunterCombatMR
                 DebugUIState = new BufferDebugUIState();
                 DebugUIState.Activate();
                 ShowMyUI();
+            }
+        }
+
+        public override void PostSetupContent()
+        {
+            if (!Main.dedServ)
+            {
+                Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
+
+                foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
+                {
+                    type.GetMethod("Initialize").Invoke(GetProjectile(type.Name), null);
+                }
             }
         }
 

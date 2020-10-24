@@ -27,6 +27,11 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         bool IsPlaying { get; }
 
         /// <summary>
+        /// Whether or not the animation is being played but includes if it is paused.
+        /// </summary>
+        bool InProgress { get; }
+
+        /// <summary>
         /// Whether or not the animation has been initialized by a keyframe manager
         /// </summary>
         bool IsInitialized { get; }
@@ -76,8 +81,7 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         /// Go back a number of frames equal to the amount passed
         /// </summary>
         /// <param name="framesReversing">The amount of frames to reverse</param>
-        /// <param name="bypassPause">Wether or not to adhere to the isPlaying datapoint</param>
-        void ReverseFrame(int framesReversing = 1, bool bypassPause = false);
+        void ReverseFrame(int framesReversing = 1);
 
         /// <summary>
         /// Set the animation to a specific frame
@@ -106,6 +110,11 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         /// Stop update from animating the animation at the current frame
         /// </summary>
         void StopAnimation();
+
+        /// <summary>
+        /// Stop animating but don't reset
+        /// </summary>
+        void PauseAnimation();
 
         /// <summary>
         /// Reset the keyframes to an empty list

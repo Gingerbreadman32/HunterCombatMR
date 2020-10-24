@@ -1,22 +1,19 @@
 ﻿using System.Collections.Generic;
 
-namespace HunterCombatMR.AttackEngine.Models
+namespace HunterCombatMR.AnimationEngine.Models
 {
-    public sealed class KeyFrameProfile
+    public struct KeyFrameProfile
     {
         public int KeyFrameAmount { get; set; }
         public int DefaultKeyFrameSpeed { get; set; }
         public IDictionary<int, int> SpecificKeyFrameSpeeds { get; set; }
-        public int StartingSpriteIndex { get; set; }
 
         public KeyFrameProfile(int keyFrameAmount,
             int defaultKeyFrameSpeed,
-            IDictionary<int, int> keyFrameSpeeds = null,
-            int startingSpriteIndex = 0)
+            IDictionary<int, int> keyFrameSpeeds = null)
         {
             KeyFrameAmount = keyFrameAmount;
             DefaultKeyFrameSpeed = defaultKeyFrameSpeed;
-            StartingSpriteIndex = startingSpriteIndex;
 
             if (keyFrameSpeeds != null)
                 SpecificKeyFrameSpeeds = new Dictionary<int, int>(keyFrameSpeeds);

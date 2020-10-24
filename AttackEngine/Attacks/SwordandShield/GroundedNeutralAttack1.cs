@@ -22,7 +22,7 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
 
         public override void SetupAttackProjectiles()
         {
-            AttackProjectiles = new List<AttackProjectile>() { ModContent.GetModProjectile(ModContent.ProjectileType<SNSSwipe1>()) as AttackProjectile };
+            AttackProjectiles = new List<AttackProjectile>() { ModContent.GetInstance<SNSSwipe1>() };
         }
 
         public override void SetupKeyFrameProfile()

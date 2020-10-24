@@ -9,14 +9,6 @@ namespace HunterCombatMR.AnimationEngine.Models
         : IComparable<KeyFrame>
     {
         /// <summary>
-        /// The frame number relative to which sprite on the sprite sheet is being referenced
-        /// </summary>
-        /// <remarks>
-        /// Starting from 0
-        /// </remarks>
-        public int SpriteIndex { get; }
-
-        /// <summary>
         /// The first frame in the context of the animation that this keyframe will start at
         /// </summary>
         public int StartingFrameIndex { get; set; }
@@ -26,16 +18,14 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public int FrameLength { get; set; }
 
-        public KeyFrame (int spriteIndex, int length)
+        public KeyFrame (int length)
         {
-            SpriteIndex = spriteIndex;
             FrameLength = length;
             StartingFrameIndex = 0;
         }
 
-        public KeyFrame (int spriteIndex, int startingFrame, int length)
+        public KeyFrame (int startingFrame, int length)
         {
-            SpriteIndex = spriteIndex;
             StartingFrameIndex = startingFrame;
             FrameLength = length;
         }

@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -97,26 +98,19 @@ namespace HunterCombatMR
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
-            Dictionary<string, Rectangle> Layers = new Dictionary<string, Rectangle>() { { "HC_BackLeg", new Rectangle(0, 0, 18, 16) },
-                { "HC_BackArm", new Rectangle(0, 0, 32, 26) },
-                { "HC_Body", new Rectangle(0, 0, 26, 18) },
-                { "HC_FrontLeg", new Rectangle(0, 0, 22, 14) },
-                { "HC_Head", new Rectangle(0, 0, 16, 18) },
-                { "HC_FrontArm", new Rectangle(0, 0, 18, 14) } };
-
-            foreach (var layer in Layers)
-            {
-                layers.Add(new PlayerLayer(HunterCombatMR.ModName, layer.Key, delegate (PlayerDrawInfo drawInfo)
-                {
-                    CombatLimbDraw(drawInfo, layer.Key, CreateTextureString(layer.Key), layer.Value);
-                })
-                { visible = false });
-            }
-
             if (!HunterCombatMR.EditMode.Equals(EditorMode.None))
             {
-                //layers.ForEach((x) => { x.visible = false; });
-                //layers.Where(x => x.Name.ToLower().Contains("hair")).ToList().ForEach((x) => { x.visible = false; });
+                var sampleAnimation = HunterCombatMR.LoadedAnimations.First(x => x.Name.Equals("SNS-StandingLL"));
+
+                foreach (var layer in sampleAnimation.LayerData.Layers)
+                {
+                    layers.Add(new PlayerLayer(HunterCombatMR.ModName, layer.Name, delegate (PlayerDrawInfo drawInfo)
+                    {
+                        CombatLimbDraw(drawInfo, layer.Name, CreateTextureString(layer.Name), layer.SpriteFrameRectangle, layer.Frames[0]);
+                    })
+                    { visible = false });
+                }
+
                 layers.Where(x => x.Name.Contains("HC_")).ToList().ForEach((x) => { x.visible = true; });
             }
         }
@@ -127,18 +121,23 @@ namespace HunterCombatMR
         public static void CombatLimbDraw(PlayerDrawInfo drawInfo,
             string layerName,
             string texturePath,
-            Rectangle frameRectangle)
+            Rectangle frameRectangle,
+            LayerFrameInfo frameInfo)
         {
             var drawPlayer = drawInfo.drawPlayer;
+            var positionVector = new Vector2(drawPlayer.headPosition.X + drawInfo.position.X - Main.screenPosition.X + (float)(drawPlayer.width / 2),
+                        drawPlayer.headPosition.Y + drawInfo.position.Y - Main.screenPosition.Y + (float)(drawPlayer.height / 2));
             var positions = drawPlayer.GetModPlayer<HunterCombatPlayer>().LayerPositions;
 
             if (!positions.ContainsKey(layerName))
-                positions.Add(layerName,
-                    new Vector2(drawPlayer.headPosition.X + drawInfo.position.X - Main.screenPosition.X + (float)(drawPlayer.width / 2),
-                        drawPlayer.headPosition.Y + drawInfo.position.Y - Main.screenPosition.Y + (float)(drawPlayer.height / 2)));
+                positions.Add(layerName, positionVector + frameInfo.Position);
 
             var value = new DrawData(ModContent.GetTexture(texturePath), positions[layerName], frameRectangle, Color.White);
-            value.effect = (drawPlayer.direction == 1) ? Microsoft.Xna.Framework.Graphics.SpriteEffects.None : Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally;
+
+            value.effect = frameInfo.SpriteOrientation;
+            if (drawPlayer.direction != 1 && value.effect == Microsoft.Xna.Framework.Graphics.SpriteEffects.None) {
+                value.effect = Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally;
+            } else if (drawPlayer.direction != 1 && value.effect == Microsoft.Xna.Framework.Graphics.SpriteEffects.None)
 
             if (HunterCombatMR.EditMode.Equals(EditorMode.EditMode))
                 value = AdjustPositionLogic(value, positions, layerName);

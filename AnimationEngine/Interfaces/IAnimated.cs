@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HunterCombatMR.AnimationEngine.Interfaces
+﻿namespace HunterCombatMR.AnimationEngine.Interfaces
 {
     public interface IAnimated
     {
+        string Name { get; }
+
         IAnimation Animation { get; }
+
+        void Initialize();
 
         void Play();
 
@@ -17,5 +15,7 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         void Pause();
 
         void Restart();
+
+        void Update();
     }
 }

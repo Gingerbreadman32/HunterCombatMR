@@ -1,5 +1,4 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Services;
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +17,8 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public bool IsInitialized { get; set; }
 
+        public bool InProgress { get; set; }
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -28,19 +29,19 @@ namespace HunterCombatMR.AnimationEngine.Models
             TotalFrames = 0;
             CurrentFrame = 0;
             IsPlaying = false;
+            InProgress = false;
         }
 
         /// <summary>
         /// Copy constructor
         /// </summary>
         /// <param name="animation">The previous animation</param>
-        /// <param name="startPlaying">Whether or not to start the animation upon creation</param>
-        public StandardAnimation(IAnimation animation, 
-            bool startPlaying = true)
+        public StandardAnimation(IAnimation animation)
         {
             IsInitialized = false;
             CurrentFrame = animation.CurrentFrame;
-            IsPlaying = startPlaying;
+            IsPlaying = animation.IsPlaying;
+            InProgress = animation.InProgress;
             TotalFrames = animation.TotalFrames;
             KeyFrames = animation.KeyFrames;
             KeyFrames.Sort();
@@ -75,15 +76,12 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         /// <inheritdoc/>
-        public void ReverseFrame(int framesReversing = 1, bool bypassPause = false)
+        public void ReverseFrame(int framesReversing = 1)
         {
-            if (IsPlaying || bypassPause)
-            {
-                if (CurrentFrame - framesReversing >= 0)
-                    CurrentFrame -= framesReversing;
-                else
-                    CurrentFrame = 0;
-            }
+            if (CurrentFrame - framesReversing >= 0)
+                CurrentFrame -= framesReversing;
+            else
+                CurrentFrame = 0;
         }
 
         /// <inheritdoc/>
@@ -102,12 +100,21 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void StartAnimation()
         {
             IsPlaying = true;
+            InProgress = true;
         }
 
         /// <inheritdoc/>
         public void StopAnimation()
         {
             IsPlaying = false;
+            InProgress = false;
+            ResetAnimation(false);
+        }
+
+        public void PauseAnimation()
+        {
+            IsPlaying = false;
+            InProgress = true;
         }
 
         /// <inheritdoc/>
@@ -131,7 +138,6 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <inheritdoc/>
         public void ResetAnimation(bool startPlaying = true)
         {
-            StopAnimation();
             SetCurrentFrame(0);
 
             if (startPlaying)

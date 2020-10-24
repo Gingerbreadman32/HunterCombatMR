@@ -1,34 +1,33 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using System.Collections.Generic;
 
-namespace HunterCombatMR.AttackEngine.Models
+namespace HunterCombatMR.AnimationEngine.Models
 {
-    public class PlayerAttackAnimationInfo
+    public class LayeredAnimatedAction
         : IAnimated
     {
-        public List<Dictionary<int, LayerFrameInfo>> Layers { get; }
+        public string Name { get; }
+        public LayeredAnimatedActionData LayerData { get; }
         public IAnimation Animation { get; }
 
-        public PlayerAttackAnimationInfo(IAnimation animation)
+        public LayeredAnimatedAction(string name,
+            LayeredAnimatedActionData data)
         {
-            Animation = animation;
-            Layers = new List<Dictionary<int, LayerFrameInfo>>();
+            Name = name;
+            Animation = new StandardAnimation();
+            LayerData = new LayeredAnimatedActionData(data);
         }
 
-        public void InitializeLayer(Dictionary<int, LayerFrameInfo> layerInfo)
+        public virtual void Initialize()
         {
-            Layers.Add(layerInfo);
+            HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, LayerData.KeyFrameProfile, false);
         }
 
-        public void InitializeLayers(IEnumerable<Dictionary<int, LayerFrameInfo>> layers)
+        public void AddNewLayer(AnimationLayer layerInfo)
         {
-            foreach (var layer in layers)
-            {
-                InitializeLayer(layer);
-            }
+            LayerData.Layers.Add(layerInfo);
         }
 
-        public void Update()
+        public virtual void Update()
         {
             Animation.AdvanceFrame();
         }
