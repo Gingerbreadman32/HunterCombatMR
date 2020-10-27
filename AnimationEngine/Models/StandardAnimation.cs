@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
+using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +19,8 @@ namespace HunterCombatMR.AnimationEngine.Models
         public bool IsInitialized { get; set; }
 
         public bool InProgress { get; set; }
+
+        public LoopStyle LoopMode { get; set; }
 
         /// <summary>
         /// Default constructor
@@ -57,9 +60,27 @@ namespace HunterCombatMR.AnimationEngine.Models
             if (IsPlaying || bypassPause)
             {
                 if (CurrentFrame + framesAdvancing < TotalFrames)
+                {
                     CurrentFrame += framesAdvancing;
+                }
                 else
-                    CurrentFrame = (TotalFrames - 1);
+                {
+                    switch (LoopMode)
+                    {
+                        case LoopStyle.PlayPause:
+                            CurrentFrame = (TotalFrames - 1);
+                            PauseAnimation();
+                            break;
+                        case LoopStyle.Once:
+                            StopAnimation();
+                            break;
+                        case LoopStyle.Loop:
+                            ResetAnimation(true);
+                            break;
+                        default:
+                            throw new Exception("Loop mode not set!");
+                    }
+                }
             }
         }
 
@@ -121,6 +142,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void ResetKeyFrames()
         {
             KeyFrames = new List<KeyFrame>();
+            TotalFrames = 0;
         }
 
         /// <inheritdoc/>
@@ -154,6 +176,36 @@ namespace HunterCombatMR.AnimationEngine.Models
                 IsInitialized = true;
             else
                 throw new Exception($"No Keyframes to initialize in animation!");
+        }
+
+        public int GetCurrentKeyFrameIndex()
+            => KeyFrames.IndexOf(GetCurrentKeyFrame());
+
+        /// <inheritdoc/>
+        public void AdvanceToNextKeyFrame()
+        {
+            var nextKey = (GetCurrentKeyFrameIndex() < GetTotalKeyFrames() - 1) ? GetCurrentKeyFrameIndex() + 1 : GetCurrentKeyFrameIndex();
+
+            CurrentFrame = KeyFrames[nextKey].StartingFrameIndex;
+        }
+
+        /// <inheritdoc/>
+        public void ReverseToPreviousKeyFrame()
+        {
+            var lastKey = (GetCurrentKeyFrameIndex() > 0) ? GetCurrentKeyFrameIndex() - 1 : GetCurrentKeyFrameIndex();
+
+            CurrentFrame = KeyFrames[lastKey].StartingFrameIndex;
+        }
+
+        /// <inheritdoc/>
+        public void SetLoopMode(LoopStyle loopMode)
+            => LoopMode = loopMode;
+
+        /// <inheritdoc/>
+        public void Uninitialize()
+        {
+            StopAnimation();
+            IsInitialized = false;
         }
     }
 }

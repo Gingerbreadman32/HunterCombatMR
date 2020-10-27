@@ -19,7 +19,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public virtual void Initialize()
         {
-            HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, LayerData.KeyFrameProfile, false);
+            HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, LayerData.KeyFrameProfile, false, LayerData.Loop);
         }
 
         public void AddNewLayer(AnimationLayer layerInfo)
@@ -35,7 +35,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void Pause()
         {
             if (Animation.IsPlaying)
-                Animation.StopAnimation();
+                Animation.PauseAnimation();
         }
 
         public void Play()

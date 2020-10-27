@@ -9,6 +9,11 @@ namespace HunterCombatMR.AnimationEngine.Models
         : IComparable<KeyFrame>
     {
         /// <summary>
+        /// The order this keyframe will be positioned
+        /// </summary>
+        public int KeyFrameOrder { get; set; }
+
+        /// <summary>
         /// The first frame in the context of the animation that this keyframe will start at
         /// </summary>
         public int StartingFrameIndex { get; set; }
@@ -22,12 +27,23 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             FrameLength = length;
             StartingFrameIndex = 0;
+            KeyFrameOrder = 0;
         }
 
-        public KeyFrame (int startingFrame, int length)
+        public KeyFrame (int startingFrame, 
+            int length,
+            int order)
         {
             StartingFrameIndex = startingFrame;
             FrameLength = length;
+            KeyFrameOrder = order;
+        }
+
+        public KeyFrame(KeyFrame copy)
+        {
+            StartingFrameIndex = copy.StartingFrameIndex;
+            FrameLength = copy.FrameLength;
+            KeyFrameOrder = copy.KeyFrameOrder;
         }
 
         /// <summary>
@@ -37,6 +53,11 @@ namespace HunterCombatMR.AnimationEngine.Models
         public int GetFinalFrameIndex()
             => StartingFrameIndex + FrameLength;
 
+        /// <summary>
+        /// Gets whether the keyframe is currently active in the given animation
+        /// </summary>
+        /// <param name="currentFrame">The current frame index of the animation</param>
+        /// <returns>Yes if the keyframe is active</returns>
         public bool IsKeyFrameActive(int currentFrame)
             => currentFrame >= StartingFrameIndex && currentFrame < GetFinalFrameIndex();
 
@@ -44,7 +65,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public int CompareTo(KeyFrame other)
         {
             if (other != null)
-                return StartingFrameIndex.CompareTo(other.StartingFrameIndex);
+                return KeyFrameOrder.CompareTo(other.KeyFrameOrder);
             else
                 throw new ArgumentNullException("Compared keyframe is null!");
         }

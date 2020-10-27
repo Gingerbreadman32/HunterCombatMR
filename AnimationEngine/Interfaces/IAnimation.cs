@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AnimationEngine.Services;
+using HunterCombatMR.Enumerations;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.AnimationEngine.Interfaces
@@ -37,15 +38,31 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         bool IsInitialized { get; }
 
         /// <summary>
+        /// What kind of loop behavior the animation has
+        /// </summary>
+        LoopStyle LoopMode { get; }
+
+        /// <summary>
         /// Initialize the animation, only <seealso cref="KeyFrameManager"/> should be calling this
         /// </summary>
         void Initialize();
 
         /// <summary>
-        /// Gets the current keyframe index
+        /// Uninitialize the animation to perform maintenance or sync frames, only <seealso cref="KeyFrameManager"/> should be calling this
+        /// </summary>
+        void Uninitialize();
+
+        /// <summary>
+        /// Gets the current keyframe
         /// </summary>
         /// <returns>A <see cref="KeyFrame"/> object</returns>
         KeyFrame GetCurrentKeyFrame();
+
+        /// <summary>
+        /// Gets the current keyframe index
+        /// </summary>
+        /// <returns>The keyframe index</returns>
+        int GetCurrentKeyFrameIndex();
 
         /// <summary>
         /// Checks to see if the current keyframe is equal to the one provided
@@ -135,5 +152,21 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         /// Probably unecessary but it looks cleaner than doing this every time it's used
         /// </remarks>
         int GetFinalFrame();
+
+        /// <summary>
+        /// Move to next keyframe in sequence
+        /// </summary>
+        void AdvanceToNextKeyFrame();
+
+        /// <summary>
+        /// Move the previous keyframe in sequence
+        /// </summary>
+        void ReverseToPreviousKeyFrame();
+
+        /// <summary>
+        /// Set the loop mode
+        /// </summary>
+        /// <param name="loopMode">The new <see cref="LoopStyle"/></param>
+        void SetLoopMode(LoopStyle loopMode);
     }
 }

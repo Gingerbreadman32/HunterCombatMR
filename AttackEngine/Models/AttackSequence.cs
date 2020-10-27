@@ -45,7 +45,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public void InitializeAttack(Attack attack)
         {
             HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(attack.Animation, attack.FrameProfile);
-            PlayerPeforming.GetModPlayer<HunterCombatPlayer>().AttackState = Enumerations.PlayerAttackState.AttackStart;
+            PlayerPeforming.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.AttackStartup;
 
             if (!attack.Animation.IsPlaying)
                 attack.Animation.StartAnimation();

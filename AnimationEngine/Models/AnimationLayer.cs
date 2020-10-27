@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using HunterCombatMR.Extensions;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.AnimationEngine.Models
@@ -31,5 +32,24 @@ namespace HunterCombatMR.AnimationEngine.Models
             SpriteFrameRectangle = frameRect;
             DefaultDepth = defaultDepth;
         }
+
+        /// <summary>
+        /// This applies the layer depth to all of the frames, must be called before adding to an animation.
+        /// </summary>
+        public void Initialize()
+        {
+            var initializedFrames = new Dictionary<int, LayerFrameInfo>();
+
+            foreach (var frame in Frames)
+            {
+                LayerFrameInfo initializedFrame = new LayerFrameInfo(frame.Value, (frame.Value.LayerDepthOverride.HasValue) ? frame.Value.LayerDepthOverride.Value : DefaultDepth);
+                initializedFrames.Add(frame.Key, initializedFrame);
+            }
+
+            Frames = initializedFrames;
+        }
+
+        public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
+            => SpriteFrameRectangle.SetSheetPositionFromFrame(Frames[currentKeyFrame].SpriteFrame);
     }
 }

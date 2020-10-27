@@ -1,7 +1,9 @@
+using AnimationEngine.Services;
+using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.UI;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -12,13 +14,12 @@ using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using HunterCombatMR.AnimationEngine.Models;
 
 namespace HunterCombatMR
 {
-	public class HunterCombatMR 
+    public class HunterCombatMR
         : Mod
-	{
+    {
         /* Singleton code I should probably use at some point
         public static HunterCombatMR Instance { get; set; }
 
@@ -33,17 +34,9 @@ namespace HunterCombatMR
 
         public static KeyFrameManager AnimationKeyFrameManager { get; set; }
 
-        public static List<string> HighlightedLayers { get; set; }
-
-        public static Point? SelectedLayerNudgeAmount { get; set; }
-
-        public static int? NudgeCooldown { get; set; }
-
-        public static string SelectedLayer { get; set; }
+        public static AnimationEditor EditorInstance { get; set; }
 
         public static string ModName = "HunterCombat";
-
-        public static EditorMode EditMode { get; set; }
 
         internal UserInterface DebugUI;
         internal BufferDebugUIState DebugUIState;
@@ -53,11 +46,13 @@ namespace HunterCombatMR
         {
             foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
             {
-                AnimLoader.LoadContainer((ActionContainer)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
+                var container = (ActionContainer)type.GetConstructor(new Type[] { }).Invoke(new object[] { });
+                container.Load();
+                AnimLoader.LoadContainer(container);
             }
 
             if (AnimLoader.Containers.Any())
-                AnimLoader.RegisterAnimations();
+                LoadedAnimations = new List<LayeredAnimatedAction>(AnimLoader.RegisterAnimations());
         }
 
         public override void Load()
@@ -67,27 +62,25 @@ namespace HunterCombatMR
                 YourCacheList.Add(Reflection.CreateInstance(type));
             */
 
+            AnimationKeyFrameManager = new KeyFrameManager();
+
+            // Load all reflected types in the mod
             Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
 
+            // Load, register, and store all the animations
             LoadAnimations(assemblyTypes);
+
+            // Loads all of the attack information
+            LoadedAttacks = new List<Attack>();
+
+            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
+            {
+                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
+            }
 
             if (!Main.dedServ)
             {
-                // Loads all of the attacks into a static list for use later.
-                LoadedAttacks = new List<Attack>();
-
-                foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
-                {
-                    LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
-                }
-
-                AnimationKeyFrameManager = new KeyFrameManager();
-
-                HighlightedLayers = new List<string>();
-                SelectedLayer = "";
-                SelectedLayerNudgeAmount = new Point(0, 0);
-                NudgeCooldown = 2;
-                EditMode = EditorMode.None;
+                EditorInstance = new AnimationEditor();
 
                 // Debug UI stuff
                 DebugUI = new UserInterface();
@@ -99,14 +92,11 @@ namespace HunterCombatMR
 
         public override void PostSetupContent()
         {
-            if (!Main.dedServ)
-            {
-                Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
+            Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
 
-                foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
-                {
-                    type.GetMethod("Initialize").Invoke(GetProjectile(type.Name), null);
-                }
+            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
+            {
+                type.GetMethod("Initialize").Invoke(GetProjectile(type.Name), null);
             }
         }
 
@@ -116,10 +106,10 @@ namespace HunterCombatMR
             AnimationKeyFrameManager = null;
             DebugUIState = null;
             ModName = null;
-            HighlightedLayers = null;
-            SelectedLayer = null;
-            SelectedLayerNudgeAmount = null;
-            NudgeCooldown = null;
+            LoadedAnimations = null;
+
+            EditorInstance.Dispose();
+            EditorInstance = null;
         }
 
         public override void PreSaveAndQuit()
