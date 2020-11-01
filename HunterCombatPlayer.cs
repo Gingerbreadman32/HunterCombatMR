@@ -103,10 +103,8 @@ namespace HunterCombatMR
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
-            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && CurrentAnimation != null)
             {
-                var test = "SNS-StandingLL";
-                CurrentAnimation = HunterCombatMR.LoadedAnimations.First(x => x.Name.Equals(test));
                 var animLayers = CurrentAnimation.LayerData.Layers;
                 if (CurrentAnimation.Animation.IsInitialized)
                 {
@@ -190,6 +188,16 @@ namespace HunterCombatMR
         public override void PostUpdate()
         {
             base.PostUpdate();
+        }
+
+        public bool SetCurrentAnimation(LayeredAnimatedAction newAnimation)
+        {
+            CurrentAnimation = new LayeredAnimatedAction(newAnimation);
+
+            if (CurrentAnimation != null)
+                return true;
+            else
+                return false;
         }
     }
 }

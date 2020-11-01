@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.Enumerations;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.AnimationEngine.Models
@@ -12,7 +13,8 @@ namespace HunterCombatMR.AnimationEngine.Models
         public AnimationType ParentType { get; }
 
         public LoopStyle Loop { get; set; }
-
+        
+        [JsonConstructor]
         public LayeredAnimatedActionData(KeyFrameProfile frameProfile,
             IEnumerable<AnimationLayer> layers,
             AnimationType type,

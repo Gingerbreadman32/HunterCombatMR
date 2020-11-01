@@ -24,12 +24,12 @@ namespace HunterCombatMR.AnimationEngine.Models
         public byte DefaultDepth { get; set; }
 
         public AnimationLayer(string name,
-            Rectangle frameRect,
+            Rectangle spriteframeRectangle,
             byte defaultDepth = 1)
         {
             Name = name;
             Frames = new Dictionary<int, LayerFrameInfo>();
-            SpriteFrameRectangle = frameRect;
+            SpriteFrameRectangle = spriteframeRectangle;
             DefaultDepth = defaultDepth;
         }
 

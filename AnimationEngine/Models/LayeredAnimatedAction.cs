@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
+using Newtonsoft.Json;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -7,14 +8,24 @@ namespace HunterCombatMR.AnimationEngine.Models
     {
         public string Name { get; }
         public LayeredAnimatedActionData LayerData { get; }
+        [JsonIgnore]
         public IAnimation Animation { get; }
 
+        [JsonConstructor]
         public LayeredAnimatedAction(string name,
-            LayeredAnimatedActionData data)
+            LayeredAnimatedActionData layerData)
         {
             Name = name;
             Animation = new StandardAnimation();
-            LayerData = new LayeredAnimatedActionData(data);
+            LayerData = layerData;
+        }
+
+        public LayeredAnimatedAction(LayeredAnimatedAction copy)
+        {
+            Name = copy.Name;
+            Animation = new StandardAnimation(copy.Animation);
+            HunterCombatMR.AnimationKeyFrameManager.SyncFrames(Animation);
+            LayerData = copy.LayerData;
         }
 
         public virtual void Initialize()

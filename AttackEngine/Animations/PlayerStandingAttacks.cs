@@ -23,7 +23,7 @@ namespace HunterCombatMR.AttackEngine.Animations
         private void AddSnSStandingAttack2()
         {
             int keyframes = 8;
-            int holdframes = 10;
+            int holdframes = 12;
             var layers = new List<AnimationLayer>();
 
             // ---- Head
@@ -123,8 +123,10 @@ namespace HunterCombatMR.AttackEngine.Animations
             layers.Add(fleginfo);
             layers.Add(bleginfo);
 
+            var timings = new Dictionary<int, int>() { { 2, 4 }, { 3, 8 }, { 4, 14 }, { 5, 4 }, { 7, 52 } };
+
             AnimatedActions.Add("SNS-StandingLL",
-                new LayeredAnimatedActionData(new KeyFrameProfile(keyframes, holdframes),
+                new LayeredAnimatedActionData(new KeyFrameProfile(keyframes, holdframes, timings),
                     layers,
                     _animtype));
         }

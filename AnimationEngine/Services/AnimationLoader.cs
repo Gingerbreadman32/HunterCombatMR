@@ -32,5 +32,16 @@ namespace HunterCombatMR.AnimationEngine.Services
             }
             return actions;
         }
+
+        public IEnumerable<LayeredAnimatedAction> RegisterAnimations(IEnumerable<LayeredAnimatedAction> loadedActions)
+        {
+            var actions = new List<LayeredAnimatedAction>();
+            foreach (var animation in loadedActions)
+            {
+                animation.Initialize();
+                actions.Add(animation);
+            }
+            return actions;
+        }
     }
 }

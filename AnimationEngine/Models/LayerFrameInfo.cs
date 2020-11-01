@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -28,6 +29,24 @@ namespace HunterCombatMR.AnimationEngine.Models
             SheetNameOverride = sheet;
             SpriteOrientation = flip;
             LayerDepth = 255;
+        }
+
+        [JsonConstructor]
+        public LayerFrameInfo(int spriteFrame,
+            Vector2 position,
+            byte layerDepth,
+            float rotation,
+            SpriteEffects spriteOrientation,
+            string sheetNameOverride)
+        {
+            SpriteFrame = spriteFrame;
+            Position = position;
+            Rotation = rotation;
+            SheetNameOverride = sheetNameOverride;
+            SpriteOrientation = spriteOrientation;
+            LayerDepth = layerDepth;
+
+            LayerDepthOverride = null;
         }
 
         /// <summary>

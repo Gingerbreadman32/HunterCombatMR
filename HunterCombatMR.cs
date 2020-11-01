@@ -4,6 +4,7 @@ using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.UI;
+using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -28,21 +29,27 @@ namespace HunterCombatMR
 
         private GameTime _lastUpdateUiGameTime;
 
-        public static List<Attack> LoadedAttacks { get; set; }
+        public static List<Attack> LoadedAttacks { get; private set; }
 
-        public static List<LayeredAnimatedAction> LoadedAnimations { get; set; }
+        public static List<LayeredAnimatedAction> LoadedAnimations { get; private set; }
 
-        public static KeyFrameManager AnimationKeyFrameManager { get; set; }
+        public static KeyFrameManager AnimationKeyFrameManager { get; private set; }
 
-        public static AnimationEditor EditorInstance { get; set; }
+        public static AnimationFileManager FileManager { get; private set; }
+
+        public static AnimationEditor EditorInstance { get; private set; }
 
         public static string ModName = "HunterCombat";
+
+        public static string DataPath = Path.Combine(Program.SavePath, ModName, "Data");
+
+        internal static ILog StaticLogger;
 
         internal UserInterface DebugUI;
         internal BufferDebugUIState DebugUIState;
         internal AnimationLoader AnimLoader = new AnimationLoader();
 
-        private void LoadAnimations(Type[] types)
+        private void LoadInternalAnimations(Type[] types)
         {
             foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
             {
@@ -53,33 +60,26 @@ namespace HunterCombatMR
 
             if (AnimLoader.Containers.Any())
                 LoadedAnimations = new List<LayeredAnimatedAction>(AnimLoader.RegisterAnimations());
+
+            //Testing the save
+            foreach (var anim in LoadedAnimations)
+            {
+                FileManager.SaveAnimation(anim, true);
+            }
         }
 
         public override void Load()
         {
-            /* Libvaxy implementation, will use if I need anything else from it
-            foreach (Type type in Reflection.GetNonAbstractSubtypes(typeof(ParentType))
-                YourCacheList.Add(Reflection.CreateInstance(type));
-            */
-
+            StaticLogger = Logger;
             AnimationKeyFrameManager = new KeyFrameManager();
-
-            // Load all reflected types in the mod
-            Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
-
-            // Load, register, and store all the animations
-            LoadAnimations(assemblyTypes);
-
-            // Loads all of the attack information
+            FileManager = new AnimationFileManager();
             LoadedAttacks = new List<Attack>();
-
-            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
-            {
-                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
-            }
+            LoadedAnimations = new List<LayeredAnimatedAction>();
 
             if (!Main.dedServ)
             {
+                var animTypes = new List<AnimationType>() { AnimationType.Player };
+                FileManager.SetupFolders(animTypes);
                 EditorInstance = new AnimationEditor();
 
                 // Debug UI stuff
@@ -92,7 +92,25 @@ namespace HunterCombatMR
 
         public override void PostSetupContent()
         {
+            /* Libvaxy implementation, will use if I need anything else from it
+            foreach (Type type in Reflection.GetNonAbstractSubtypes(typeof(ParentType))
+                YourCacheList.Add(Reflection.CreateInstance(type));
+            */
             Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
+
+            if (!Main.dedServ)
+            {
+                // Load, register, and store all the animations
+                //LoadInternalAnimations(assemblyTypes);
+                var animTypes = new List<AnimationType>() { AnimationType.Player };
+                LoadedAnimations.AddRange(AnimLoader.RegisterAnimations(FileManager.LoadAnimations(animTypes)));
+            }
+
+            // Loads all of the attack information
+            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
+            {
+                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
+            }
 
             foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
             {
@@ -107,6 +125,9 @@ namespace HunterCombatMR
             DebugUIState = null;
             ModName = null;
             LoadedAnimations = null;
+            DataPath = null;
+            FileManager = null;
+            StaticLogger = null;
 
             EditorInstance.Dispose();
             EditorInstance = null;

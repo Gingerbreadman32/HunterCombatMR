@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -8,6 +9,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public int DefaultKeyFrameSpeed { get; set; }
         public IDictionary<int, int> SpecificKeyFrameSpeeds { get; set; }
 
+        [JsonConstructor]
         public KeyFrameProfile(int keyFrameAmount,
             int defaultKeyFrameSpeed,
             IDictionary<int, int> keyFrameSpeeds = null)
