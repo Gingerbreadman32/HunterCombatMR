@@ -1,10 +1,14 @@
-﻿using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameInput;
@@ -20,7 +24,7 @@ namespace HunterCombatMR
         private const string _texturePath = "HunterCombatMR/Textures/SnS/";
         private const string _textureSuffix = "Frames_LMB1";
 
-        public PlayerAttackState AttackState { get; set; }
+        public PlayerState State { get; set; }
 
         public ICollection<string> ActiveProjectiles { get; set; }
 
@@ -30,12 +34,14 @@ namespace HunterCombatMR
 
         public bool ShowLayersDebug { get; set; }
 
+        public LayeredAnimatedAction CurrentAnimation { get; private set; }
+
         public HunterCombatPlayer()
             : base()
         {
             ActiveProjectiles = new List<string>();
             InputBufferInfo = new PlayerBufferInformation();
-            AttackState = PlayerAttackState.NotAttacking;
+            State = PlayerState.Standing;
             ShowLayersDebug = true;
             LayerPositions = new Dictionary<string, Vector2>();
         }
@@ -48,7 +54,7 @@ namespace HunterCombatMR
 
         public override void OnEnterWorld(Player player)
         {
-            AttackState = PlayerAttackState.NotAttacking;
+            State = PlayerState.Standing;
             ShowLayersDebug = true;
 
             if (ActiveProjectiles != null)
@@ -64,7 +70,7 @@ namespace HunterCombatMR
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
-            if (!HunterCombatMR.EditMode.Equals(EditorMode.None))
+            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
                 string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
                     "faceColor", "bodyColor", "legColor", "shirtColor", "underShirtColor",
@@ -97,27 +103,30 @@ namespace HunterCombatMR
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
-            Dictionary<string, Rectangle> Layers = new Dictionary<string, Rectangle>() { { "HC_BackLeg", new Rectangle(0, 0, 18, 16) },
-                { "HC_BackArm", new Rectangle(0, 0, 32, 26) },
-                { "HC_Body", new Rectangle(0, 0, 26, 18) },
-                { "HC_FrontLeg", new Rectangle(0, 0, 22, 14) },
-                { "HC_Head", new Rectangle(0, 0, 16, 18) },
-                { "HC_FrontArm", new Rectangle(0, 0, 18, 14) } };
-
-            foreach (var layer in Layers)
+            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && CurrentAnimation != null)
             {
-                layers.Add(new PlayerLayer(HunterCombatMR.ModName, layer.Key, delegate (PlayerDrawInfo drawInfo)
+                var animLayers = CurrentAnimation.LayerData.Layers;
+                if (CurrentAnimation.Animation.IsInitialized)
                 {
-                    CombatLimbDraw(drawInfo, layer.Key, CreateTextureString(layer.Key), layer.Value);
-                })
-                { visible = false });
-            }
+                    var currentFrame = CurrentAnimation.Animation.GetCurrentKeyFrameIndex();
 
-            if (!HunterCombatMR.EditMode.Equals(EditorMode.None))
+                    foreach (var layer in animLayers.Where(f => f.Frames.ContainsKey(currentFrame)).OrderByDescending(x => x.Frames[currentFrame].LayerDepth))
+                    {
+                        var newLayer = new PlayerLayer(HunterCombatMR.ModName, layer.Name, delegate (PlayerDrawInfo drawInfo)
+                        {
+                            CombatLimbDraw(drawInfo, layer.Name, CreateTextureString(layer.Name), layer.GetCurrentFrameRectangle(currentFrame), layer.Frames[currentFrame], currentFrame);
+                        });
+                        layers.Add(newLayer);
+                    }
+
+                    CurrentAnimation.Update();
+                }
+            }
+            else
             {
-                //layers.ForEach((x) => { x.visible = false; });
-                //layers.Where(x => x.Name.ToLower().Contains("hair")).ToList().ForEach((x) => { x.visible = false; });
-                layers.Where(x => x.Name.Contains("HC_")).ToList().ForEach((x) => { x.visible = true; });
+                CurrentAnimation = null;
+                HunterCombatMR.EditorInstance.HighlightedLayers.Clear();
+                HunterCombatMR.EditorInstance.SelectedLayer = "";
             }
         }
 
@@ -127,114 +136,32 @@ namespace HunterCombatMR
         public static void CombatLimbDraw(PlayerDrawInfo drawInfo,
             string layerName,
             string texturePath,
-            Rectangle firstframeRectangle)
+            Rectangle frameRectangle,
+            LayerFrameInfo frameInfo,
+            int currentFrame)
         {
             var drawPlayer = drawInfo.drawPlayer;
+            var positionVector = new Vector2(drawInfo.position.X - Main.screenPosition.X,
+                        drawInfo.position.Y - Main.screenPosition.Y);
             var positions = drawPlayer.GetModPlayer<HunterCombatPlayer>().LayerPositions;
 
-            if (!positions.ContainsKey(layerName))
-                positions.Add(layerName,
-                    new Vector2(drawPlayer.headPosition.X + drawInfo.position.X - Main.screenPosition.X + (float)(drawPlayer.width / 2),
-                        drawPlayer.headPosition.Y + drawInfo.position.Y - Main.screenPosition.Y + (float)(drawPlayer.height / 2)));
+            if (!positions.ContainsKey($"{layerName}-{currentFrame}"))
+                positions.Add($"{layerName}-{currentFrame}", new Vector2());
 
-            var value = new DrawData(ModContent.GetTexture(texturePath), positions[layerName], firstframeRectangle, Color.White);
-            value.effect = (drawPlayer.direction == 1) ? Microsoft.Xna.Framework.Graphics.SpriteEffects.None : Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally;
+            frameRectangle.SetSheetPositionFromFrame(frameInfo.SpriteFrame);
+            DrawData value = new DrawData(ModContent.GetTexture(texturePath), positionVector + frameInfo.Position + positions.FirstOrDefault(x => x.Key.Equals($"{layerName}-{currentFrame}")).Value, frameRectangle, Color.White);
 
-            if (HunterCombatMR.EditMode.Equals(EditorMode.EditMode))
-                value = AdjustPositionLogic(value, positions, layerName);
+            value = value.SetSpriteOrientation(drawPlayer, frameInfo.SpriteOrientation);
 
+            if (HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
+                value = HunterCombatMR.EditorInstance.AdjustPositionLogic(value, positions, $"{layerName}-{currentFrame}");
+            
             Main.playerDrawData.Add(value);
-        }
-
-        public static DrawData AdjustPositionLogic(DrawData drawData,
-            IDictionary<string, Vector2> positions,
-            string layerName)
-        {
-            var value = drawData;
-            var MousePosition = new Vector2(Main.mouseX, Main.mouseY);
-            var texPosition = new Rectangle((int)positions[layerName].X, (int)positions[layerName].Y, value.sourceRect.GetValueOrDefault().Width, value.sourceRect.GetValueOrDefault().Height);
-            if (texPosition.Contains(MousePosition.ToPoint()))
-            {
-                if (!HunterCombatMR.HighlightedLayers.Contains(layerName))
-                    HunterCombatMR.HighlightedLayers.Add(layerName);
-
-                value.color = Color.Red;
-
-                if (PlayerInput.MouseInfoOld.LeftButton.Equals(ButtonState.Pressed) && Main.mouseLeft &&
-                    HunterCombatMR.HighlightedLayers.Last().Equals(layerName) && HunterCombatMR.SelectedLayer == "")
-                {
-                    HunterCombatMR.SelectedLayer = layerName;
-                }
-            }
-            else
-            {
-                if (HunterCombatMR.HighlightedLayers.Contains(layerName))
-                    HunterCombatMR.HighlightedLayers.Remove(layerName);
-            }
-
-            if (HunterCombatMR.SelectedLayer == layerName)
-            {
-                value.color = Color.Green;
-                var dragPosition = new Vector2(MousePosition.X - (value.sourceRect.GetValueOrDefault().Width / 2), MousePosition.Y - (value.sourceRect.GetValueOrDefault().Height / 2));
-
-                if (HunterCombatMR.SelectedLayerNudgeAmount.HasValue && HunterCombatMR.NudgeCooldown.HasValue)
-                {
-                    if (HunterCombatMR.NudgeCooldown.Value > 0 && HunterCombatMR.NudgeCooldown < 2)
-                    {
-                        HunterCombatMR.NudgeCooldown = HunterCombatMR.NudgeCooldown.Value - 1;
-                    }
-                    else if (HunterCombatMR.NudgeCooldown == 2)
-                    {
-                        if (PlayerInput.Triggers.JustReleased.Down)
-                        {
-                            var nudgeAmount = (positions[layerName].Y % 2 != 0) ? 2 : 1;
-                            var newNudge = new Point(HunterCombatMR.SelectedLayerNudgeAmount.Value.X, HunterCombatMR.SelectedLayerNudgeAmount.Value.Y + nudgeAmount);
-                            HunterCombatMR.SelectedLayerNudgeAmount = newNudge;
-                            HunterCombatMR.NudgeCooldown = HunterCombatMR.NudgeCooldown.Value - 1;
-                        }
-                        else if (PlayerInput.Triggers.JustReleased.Up)
-                        {
-                            var nudgeAmount = (positions[layerName].Y % 2 != 0) ? 2 : 1;
-                            var newNudge = new Point(HunterCombatMR.SelectedLayerNudgeAmount.Value.X, HunterCombatMR.SelectedLayerNudgeAmount.Value.Y - nudgeAmount);
-                            HunterCombatMR.SelectedLayerNudgeAmount = newNudge;
-                            HunterCombatMR.NudgeCooldown = HunterCombatMR.NudgeCooldown.Value - 1;
-                        }
-                        else if (PlayerInput.Triggers.JustReleased.Left)
-                        {
-                            var nudgeAmount = (positions[layerName].X % 2 == 0) ? 2 : 1;
-                            var newNudge = new Point(HunterCombatMR.SelectedLayerNudgeAmount.Value.X - nudgeAmount, HunterCombatMR.SelectedLayerNudgeAmount.Value.Y);
-                            HunterCombatMR.SelectedLayerNudgeAmount = newNudge;
-                            HunterCombatMR.NudgeCooldown = HunterCombatMR.NudgeCooldown.Value - 1;
-                        }
-                        else if (PlayerInput.Triggers.JustReleased.Right)
-                        {
-                            var nudgeAmount = (positions[layerName].X % 2 == 0) ? 2 : 1;
-                            var newNudge = new Point(HunterCombatMR.SelectedLayerNudgeAmount.Value.X + nudgeAmount, HunterCombatMR.SelectedLayerNudgeAmount.Value.Y);
-                            HunterCombatMR.SelectedLayerNudgeAmount = newNudge;
-                            HunterCombatMR.NudgeCooldown = HunterCombatMR.NudgeCooldown.Value - 1;
-                        }
-                    }
-                    else
-                    {
-                        HunterCombatMR.NudgeCooldown = 2;
-                    }
-                }
-
-                positions[layerName] = dragPosition + HunterCombatMR.SelectedLayerNudgeAmount.GetValueOrDefault().ToVector2();
-            }
-
-            if (Main.mouseLeftRelease)
-            {
-                HunterCombatMR.SelectedLayer = "";
-                HunterCombatMR.SelectedLayerNudgeAmount = new Point(0, 0);
-            }
-
-            return value;
         }
 
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
-            if (!HunterCombatMR.EditMode.Equals(EditorMode.None))
+            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
                 player.frozen = true;
             }
@@ -247,14 +174,30 @@ namespace HunterCombatMR
 
         public override void UpdateDead()
         {
-            AttackState = PlayerAttackState.NotAttacking;
+            State = PlayerState.Dead;
             ActiveProjectiles.Clear();
+            InputBufferInfo.ResetBuffers();
+        }
+
+        public override void OnRespawn(Player player)
+        {
+            State = PlayerState.Standing;
             InputBufferInfo.ResetBuffers();
         }
 
         public override void PostUpdate()
         {
             base.PostUpdate();
+        }
+
+        public bool SetCurrentAnimation(LayeredAnimatedAction newAnimation)
+        {
+            CurrentAnimation = new LayeredAnimatedAction(newAnimation);
+
+            if (CurrentAnimation != null)
+                return true;
+            else
+                return false;
         }
     }
 }

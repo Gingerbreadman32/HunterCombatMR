@@ -9,12 +9,9 @@ namespace HunterCombatMR.AnimationEngine.Models
         : IComparable<KeyFrame>
     {
         /// <summary>
-        /// The frame number relative to which sprite on the sprite sheet is being referenced
+        /// The order this keyframe will be positioned
         /// </summary>
-        /// <remarks>
-        /// Starting from 0
-        /// </remarks>
-        public int SpriteIndex { get; }
+        public int KeyFrameOrder { get; set; }
 
         /// <summary>
         /// The first frame in the context of the animation that this keyframe will start at
@@ -26,18 +23,27 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public int FrameLength { get; set; }
 
-        public KeyFrame (int spriteIndex, int length)
+        public KeyFrame (int length)
         {
-            SpriteIndex = spriteIndex;
             FrameLength = length;
             StartingFrameIndex = 0;
+            KeyFrameOrder = 0;
         }
 
-        public KeyFrame (int spriteIndex, int startingFrame, int length)
+        public KeyFrame (int startingFrame, 
+            int length,
+            int order)
         {
-            SpriteIndex = spriteIndex;
             StartingFrameIndex = startingFrame;
             FrameLength = length;
+            KeyFrameOrder = order;
+        }
+
+        public KeyFrame(KeyFrame copy)
+        {
+            StartingFrameIndex = copy.StartingFrameIndex;
+            FrameLength = copy.FrameLength;
+            KeyFrameOrder = copy.KeyFrameOrder;
         }
 
         /// <summary>
@@ -47,6 +53,11 @@ namespace HunterCombatMR.AnimationEngine.Models
         public int GetFinalFrameIndex()
             => StartingFrameIndex + FrameLength;
 
+        /// <summary>
+        /// Gets whether the keyframe is currently active in the given animation
+        /// </summary>
+        /// <param name="currentFrame">The current frame index of the animation</param>
+        /// <returns>Yes if the keyframe is active</returns>
         public bool IsKeyFrameActive(int currentFrame)
             => currentFrame >= StartingFrameIndex && currentFrame < GetFinalFrameIndex();
 
@@ -54,7 +65,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public int CompareTo(KeyFrame other)
         {
             if (other != null)
-                return StartingFrameIndex.CompareTo(other.StartingFrameIndex);
+                return KeyFrameOrder.CompareTo(other.KeyFrameOrder);
             else
                 throw new ArgumentNullException("Compared keyframe is null!");
         }

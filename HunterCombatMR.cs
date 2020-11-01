@@ -1,7 +1,10 @@
+using AnimationEngine.Services;
+using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.UI;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.UI;
+using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -15,9 +18,9 @@ using Terraria.UI;
 
 namespace HunterCombatMR
 {
-	public class HunterCombatMR 
+    public class HunterCombatMR
         : Mod
-	{
+    {
         /* Singleton code I should probably use at some point
         public static HunterCombatMR Instance { get; set; }
 
@@ -26,51 +29,58 @@ namespace HunterCombatMR
 
         private GameTime _lastUpdateUiGameTime;
 
-        public static List<Attack> LoadedAttacks { get; set; }
+        public static List<Attack> LoadedAttacks { get; private set; }
 
-        public static KeyFrameManager AnimationKeyFrameManager { get; set; }
+        public static List<LayeredAnimatedAction> LoadedAnimations { get; private set; }
 
-        public static List<string> HighlightedLayers { get; set; }
+        public static KeyFrameManager AnimationKeyFrameManager { get; private set; }
 
-        public static Point? SelectedLayerNudgeAmount { get; set; }
+        public static AnimationFileManager FileManager { get; private set; }
 
-        public static int? NudgeCooldown { get; set; }
-
-        public static string SelectedLayer { get; set; }
+        public static AnimationEditor EditorInstance { get; private set; }
 
         public static string ModName = "HunterCombat";
 
-        public static EditorMode EditMode { get; set; }
+        public static string DataPath = Path.Combine(Program.SavePath, ModName, "Data");
+
+        internal static ILog StaticLogger;
 
         internal UserInterface DebugUI;
         internal BufferDebugUIState DebugUIState;
+        internal AnimationLoader AnimLoader = new AnimationLoader();
+
+        private void LoadInternalAnimations(Type[] types)
+        {
+            foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
+            {
+                var container = (ActionContainer)type.GetConstructor(new Type[] { }).Invoke(new object[] { });
+                container.Load();
+                AnimLoader.LoadContainer(container);
+            }
+
+            if (AnimLoader.Containers.Any())
+                LoadedAnimations = new List<LayeredAnimatedAction>(AnimLoader.RegisterAnimations());
+
+            //Testing the save
+            foreach (var anim in LoadedAnimations)
+            {
+                FileManager.SaveAnimation(anim, true);
+            }
+        }
 
         public override void Load()
         {
-            /* Libvaxy implementation, will use if I need anything else from it
-            foreach (Type type in Reflection.GetNonAbstractSubtypes(typeof(ParentType))
-                YourCacheList.Add(Reflection.CreateInstance(type));
-            */
+            StaticLogger = Logger;
+            AnimationKeyFrameManager = new KeyFrameManager();
+            FileManager = new AnimationFileManager();
+            LoadedAttacks = new List<Attack>();
+            LoadedAnimations = new List<LayeredAnimatedAction>();
 
             if (!Main.dedServ)
             {
-                // Loads all of the attacks into a static list for use later.
-                Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
-
-                LoadedAttacks = new List<Attack>();
-
-                foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
-                {
-                    LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
-                }
-
-                AnimationKeyFrameManager = new KeyFrameManager();
-
-                HighlightedLayers = new List<string>();
-                SelectedLayer = "";
-                SelectedLayerNudgeAmount = new Point(0, 0);
-                NudgeCooldown = 2;
-                EditMode = EditorMode.None;
+                var animTypes = new List<AnimationType>() { AnimationType.Player };
+                FileManager.SetupFolders(animTypes);
+                EditorInstance = new AnimationEditor();
 
                 // Debug UI stuff
                 DebugUI = new UserInterface();
@@ -80,16 +90,47 @@ namespace HunterCombatMR
             }
         }
 
+        public override void PostSetupContent()
+        {
+            /* Libvaxy implementation, will use if I need anything else from it
+            foreach (Type type in Reflection.GetNonAbstractSubtypes(typeof(ParentType))
+                YourCacheList.Add(Reflection.CreateInstance(type));
+            */
+            Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
+
+            if (!Main.dedServ)
+            {
+                // Load, register, and store all the animations
+                //LoadInternalAnimations(assemblyTypes);
+                var animTypes = new List<AnimationType>() { AnimationType.Player };
+                LoadedAnimations.AddRange(AnimLoader.RegisterAnimations(FileManager.LoadAnimations(animTypes)));
+            }
+
+            // Loads all of the attack information
+            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
+            {
+                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
+            }
+
+            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
+            {
+                type.GetMethod("Initialize").Invoke(GetProjectile(type.Name), null);
+            }
+        }
+
         public override void Unload()
         {
             LoadedAttacks = null;
             AnimationKeyFrameManager = null;
             DebugUIState = null;
             ModName = null;
-            HighlightedLayers = null;
-            SelectedLayer = null;
-            SelectedLayerNudgeAmount = null;
-            NudgeCooldown = null;
+            LoadedAnimations = null;
+            DataPath = null;
+            FileManager = null;
+            StaticLogger = null;
+
+            EditorInstance.Dispose();
+            EditorInstance = null;
         }
 
         public override void PreSaveAndQuit()

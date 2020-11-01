@@ -1,5 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Services;
+using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +18,10 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public bool IsInitialized { get; set; }
 
+        public bool InProgress { get; set; }
+
+        public LoopStyle LoopMode { get; set; }
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -28,19 +32,19 @@ namespace HunterCombatMR.AnimationEngine.Models
             TotalFrames = 0;
             CurrentFrame = 0;
             IsPlaying = false;
+            InProgress = false;
         }
 
         /// <summary>
         /// Copy constructor
         /// </summary>
         /// <param name="animation">The previous animation</param>
-        /// <param name="startPlaying">Whether or not to start the animation upon creation</param>
-        public StandardAnimation(IAnimation animation, 
-            bool startPlaying = true)
+        public StandardAnimation(IAnimation animation)
         {
             IsInitialized = false;
             CurrentFrame = animation.CurrentFrame;
-            IsPlaying = startPlaying;
+            IsPlaying = animation.IsPlaying;
+            InProgress = animation.InProgress;
             TotalFrames = animation.TotalFrames;
             KeyFrames = animation.KeyFrames;
             KeyFrames.Sort();
@@ -56,9 +60,27 @@ namespace HunterCombatMR.AnimationEngine.Models
             if (IsPlaying || bypassPause)
             {
                 if (CurrentFrame + framesAdvancing < TotalFrames)
+                {
                     CurrentFrame += framesAdvancing;
+                }
                 else
-                    CurrentFrame = (TotalFrames - 1);
+                {
+                    switch (LoopMode)
+                    {
+                        case LoopStyle.PlayPause:
+                            CurrentFrame = (TotalFrames - 1);
+                            PauseAnimation();
+                            break;
+                        case LoopStyle.Once:
+                            StopAnimation();
+                            break;
+                        case LoopStyle.Loop:
+                            ResetAnimation(true);
+                            break;
+                        default:
+                            throw new Exception("Loop mode not set!");
+                    }
+                }
             }
         }
 
@@ -75,15 +97,12 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         /// <inheritdoc/>
-        public void ReverseFrame(int framesReversing = 1, bool bypassPause = false)
+        public void ReverseFrame(int framesReversing = 1)
         {
-            if (IsPlaying || bypassPause)
-            {
-                if (CurrentFrame - framesReversing >= 0)
-                    CurrentFrame -= framesReversing;
-                else
-                    CurrentFrame = 0;
-            }
+            if (CurrentFrame - framesReversing >= 0)
+                CurrentFrame -= framesReversing;
+            else
+                CurrentFrame = 0;
         }
 
         /// <inheritdoc/>
@@ -102,18 +121,28 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void StartAnimation()
         {
             IsPlaying = true;
+            InProgress = true;
         }
 
         /// <inheritdoc/>
         public void StopAnimation()
         {
             IsPlaying = false;
+            InProgress = false;
+            ResetAnimation(false);
+        }
+
+        public void PauseAnimation()
+        {
+            IsPlaying = false;
+            InProgress = true;
         }
 
         /// <inheritdoc/>
         public void ResetKeyFrames()
         {
             KeyFrames = new List<KeyFrame>();
+            TotalFrames = 0;
         }
 
         /// <inheritdoc/>
@@ -131,7 +160,6 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <inheritdoc/>
         public void ResetAnimation(bool startPlaying = true)
         {
-            StopAnimation();
             SetCurrentFrame(0);
 
             if (startPlaying)
@@ -148,6 +176,36 @@ namespace HunterCombatMR.AnimationEngine.Models
                 IsInitialized = true;
             else
                 throw new Exception($"No Keyframes to initialize in animation!");
+        }
+
+        public int GetCurrentKeyFrameIndex()
+            => KeyFrames.IndexOf(GetCurrentKeyFrame());
+
+        /// <inheritdoc/>
+        public void AdvanceToNextKeyFrame()
+        {
+            var nextKey = (GetCurrentKeyFrameIndex() < GetTotalKeyFrames() - 1) ? GetCurrentKeyFrameIndex() + 1 : GetCurrentKeyFrameIndex();
+
+            CurrentFrame = KeyFrames[nextKey].StartingFrameIndex;
+        }
+
+        /// <inheritdoc/>
+        public void ReverseToPreviousKeyFrame()
+        {
+            var lastKey = (GetCurrentKeyFrameIndex() > 0) ? GetCurrentKeyFrameIndex() - 1 : GetCurrentKeyFrameIndex();
+
+            CurrentFrame = KeyFrames[lastKey].StartingFrameIndex;
+        }
+
+        /// <inheritdoc/>
+        public void SetLoopMode(LoopStyle loopMode)
+            => LoopMode = loopMode;
+
+        /// <inheritdoc/>
+        public void Uninitialize()
+        {
+            StopAnimation();
+            IsInitialized = false;
         }
     }
 }

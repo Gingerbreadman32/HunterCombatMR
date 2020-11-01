@@ -22,7 +22,7 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
 
         public override void SetupAttackProjectiles()
         {
-            AttackProjectiles = new List<AttackProjectile>() { ModContent.GetModProjectile(ModContent.ProjectileType<SNSSwipe1>()) as AttackProjectile };
+            AttackProjectiles = new List<AttackProjectile>() { ModContent.GetInstance<SNSSwipe1>() };
         }
 
         public override void SetupKeyFrameProfile()
@@ -45,7 +45,7 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
             {
                 if (Animation.CurrentFrame.Equals(1))
                 {
-                    PerformingPlayer.GetModPlayer<HunterCombatPlayer>().AttackState = Enumerations.PlayerAttackState.Startup;
+                    PerformingPlayer.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.AttackStartup;
                 }
 
                 ItemAssociated.noUseGraphic = false;
@@ -68,7 +68,7 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
             }
             else if (Animation.CheckCurrentKeyFrame(1) && Animation.CheckCurrentKeyFrameProgress(0))
             {
-                PerformingPlayer.GetModPlayer<HunterCombatPlayer>().AttackState = Enumerations.PlayerAttackState.Active;
+                PerformingPlayer.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.ActiveAttack;
                 PerformingPlayer.bodyFrame.Y = PerformingPlayer.bodyFrame.Height * 2;
 
                 PerformingPlayer.GetModPlayer<HunterCombatPlayer>().ActiveProjectiles = new List<string>() { AttackProjectiles.First().projectile.Name };
@@ -88,7 +88,7 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
             }
             else if (Animation.CheckCurrentKeyFrame(3))
             {
-                PerformingPlayer.GetModPlayer<HunterCombatPlayer>().AttackState = Enumerations.PlayerAttackState.Recovery;
+                PerformingPlayer.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.AttackRecovery;
                 PerformingPlayer.bodyFrame.Y = PerformingPlayer.bodyFrame.Height * 4;
             }
             /*

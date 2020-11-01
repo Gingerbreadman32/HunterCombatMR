@@ -1,8 +1,11 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Services
 {
@@ -13,16 +16,15 @@ namespace HunterCombatMR.AnimationEngine.Services
         /// </summary>
         /// <param name="animation">The animation to fill</param>
         /// <param name="keyFrameAmount">The amount of key frames you want the animation to be not exceeding the amount of sprites in the sheet</param>
-        /// <param name="startingSpriteIndex">The sprite the animation will want to start at</param>
         /// <param name="averageKeyFrameSpeed">The average speed any keyframes not defined will linger for</param>
         /// <param name="keyFrameSpeeds">A dictionary determining how long each keyframe will linger for at which index</param>
         /// <param name="startPlaying">Whether or not to start playing the animation after.</param>
-        public void FillAnimationKeyFrames(IAnimation animation, 
+        public void FillAnimationKeyFrames(ref IAnimation animation, 
             int keyFrameAmount, 
             int averageKeyFrameSpeed, 
             IDictionary<int, int> keyFrameSpeeds = null,
-            int startingSpriteIndex = 0,
-            bool startPlaying = true)
+            bool startPlaying = true,
+            LoopStyle loopStyle = LoopStyle.Once)
         {
             animation.StopAnimation();
             animation.SetCurrentFrame(0);
@@ -36,10 +38,11 @@ namespace HunterCombatMR.AnimationEngine.Services
                 else
                     frameSpeed = averageKeyFrameSpeed;
 
-                AppendKeyFrame(animation, startingSpriteIndex + k, frameSpeed);
+                AppendKeyFrame(animation, frameSpeed);
             }
 
             animation.KeyFrames.Sort();
+            animation.SetLoopMode(loopStyle);
             animation.Initialize();
 
             if (startPlaying)
@@ -54,9 +57,10 @@ namespace HunterCombatMR.AnimationEngine.Services
         /// <param name="startPlaying">Whether or not to start playing the animation after.</param>
         public void FillAnimationKeyFrames(IAnimation animation,
             KeyFrameProfile frameProfile,
-            bool startPlaying = true)
+            bool startPlaying = true,
+            LoopStyle loopStyle = LoopStyle.Once)
         {
-            FillAnimationKeyFrames(animation, frameProfile.KeyFrameAmount, frameProfile.DefaultKeyFrameSpeed, frameProfile.SpecificKeyFrameSpeeds, frameProfile.StartingSpriteIndex, startPlaying);
+            FillAnimationKeyFrames(ref animation, frameProfile.KeyFrameAmount, frameProfile.DefaultKeyFrameSpeed, frameProfile.SpecificKeyFrameSpeeds, startPlaying, loopStyle);
         }
 
         public void AppendKeyFrame(IAnimation animation,
@@ -75,10 +79,9 @@ namespace HunterCombatMR.AnimationEngine.Services
         }
 
         public void AppendKeyFrame(IAnimation animation,
-            int spriteIndex, 
             int keyFrameLength)
         {
-            KeyFrame newKeyFrame = new KeyFrame(spriteIndex, keyFrameLength);
+            KeyFrame newKeyFrame = new KeyFrame(animation.TotalFrames, keyFrameLength, animation.GetTotalKeyFrames());
             AppendKeyFrame(animation, newKeyFrame);
         }
 
@@ -122,30 +125,35 @@ namespace HunterCombatMR.AnimationEngine.Services
 
         public void SyncFrames(IAnimation animation)
         {
-            var keyFrameActiveFrames = new Dictionary<KeyFrame, IEnumerable<int>>();
+            animation.Uninitialize();
+            var keyFrameActiveFrames = new Dictionary<int, int>();
 
-            foreach (var keyframe in animation.KeyFrames)
+            foreach (var keyframe in animation.KeyFrames.OrderBy(x => x.KeyFrameOrder))
             {
-                keyFrameActiveFrames.Add(keyframe, GetFramesKeyFrameIsActive(keyframe));
+                keyFrameActiveFrames.Add(keyframe.KeyFrameOrder, keyframe.FrameLength);
             }
 
-            foreach (var keyframe in keyFrameActiveFrames)
-            {
-            }
+            FillAnimationKeyFrames(ref animation, keyFrameActiveFrames.Count, 0, keyFrameActiveFrames, false, animation.LoopMode);
         }
 
-        public void AdjustKeyFrameLength(int keyFrameIndex, int newFrameLength)
+        public void AdjustKeyFrameLength(IAnimation animation,
+            int keyFrameIndex, 
+            int newFrameLength,
+            bool addToLength = false)
         {
-        }
+            var newKeyframe = new KeyFrame(animation.KeyFrames[keyFrameIndex]);
 
-        /// <summary>
-        /// Adjusts the entirety of the animation by the factor given
-        /// </summary>
-        /// <param name="speedFactor">The factor in which the frame timings will be multiplied</param>
-        /// <param name="adjustFaster">True will reduce the amount of frames keyframes will last, false will increase them. (True for faster, false for slower)</param>
-        /// <param name="roundUp">Whether or not to round up the new values, false will round them down instead</param>
-        public void AdjustAnimationSpeed(int speedFactor, bool adjustFaster, bool roundUp = false)
-        {
+            if (addToLength && newKeyframe.FrameLength + newFrameLength > 0)
+                newKeyframe.FrameLength += newFrameLength;
+            else if (!addToLength && newFrameLength > 0)
+                newKeyframe.FrameLength = newFrameLength;
+            else
+                throw new Exception("Invalid frame time: must be more than 0.");
+
+            animation.KeyFrames.Remove(animation.KeyFrames[keyFrameIndex]);
+            animation.KeyFrames.Add(newKeyframe);
+
+            SyncFrames(animation);
         }
     }
 }

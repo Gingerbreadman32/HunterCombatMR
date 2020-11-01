@@ -92,7 +92,7 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             PerformingPlayer.itemAnimation = 0;
             PerformingPlayer.itemTime = 0;
-            PerformingPlayer.GetModPlayer<HunterCombatPlayer>().AttackState = Enumerations.PlayerAttackState.NotAttacking;
+            PerformingPlayer.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.Standing;
             Animation.ResetAnimation(true);
             IsActive = false;
         }

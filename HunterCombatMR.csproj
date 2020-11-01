@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="C:\Users\pooko\Documents\My Games\Terraria\ModLoader\references\tModLoader.targets" />
-  <Import Project="C:\Users\pooko\Documents\My Games\Terraria\ModLoader\references\HunterCombat.targets" />
   <PropertyGroup>
     <AssemblyName>HunterCombatMR</AssemblyName>
     <TargetFramework>net45</TargetFramework>
     <PlatformTarget>x86</PlatformTarget>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <TerrariaSteamPath>D:\Steam Games\steamapps\common\tModLoader</TerrariaSteamPath>
+    <tMLPath>D:\Steam Games\steamapps\common\tModLoader\tModLoader.exe</tMLPath>
+    <tMLServerPath>D:\Steam Games\steamapps\common\tModLoader\tModLoaderServer.exe</tMLServerPath>
+    <tMLBuildServerPath>D:\Steam Games\steamapps\common\tModLoader\tModLoaderServer.exe</tMLBuildServerPath>
+  </PropertyGroup>
   <Target Name="BuildMod" AfterTargets="Build">
     <Exec Command="&quot;$(tMLBuildServerPath)&quot; -build $(ProjectDir) -eac $(TargetPath) -define &quot;$(DefineConstants)&quot; -unsafe $(AllowUnsafeBlocks)" />
   </Target>
   <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
+    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\..\..\Git\Libvaxy\Libvaxy.csproj" />
+    <ProjectReference Include="D:\Git\Libvaxy\Libvaxy.csproj" />
+    <ProjectReference Include="D:\Steam Games\steamapps\common\tModLoader\Source\tModLoader.csproj" />
   </ItemGroup>
+  <Import Project="HunterCombat.targets" />
 </Project>

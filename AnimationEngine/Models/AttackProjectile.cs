@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
@@ -8,7 +9,8 @@ using Terraria.ModLoader;
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public abstract class AttackProjectile
-        : ModProjectile
+        : ModProjectile,
+        IAnimated
     {
         public IAnimation Animation { get; set; }
 
@@ -24,41 +26,96 @@ namespace HunterCombatMR.AnimationEngine.Models
             SetupKeyFrameProfile();
         }
 
-        public abstract void SetupKeyFrameProfile();
-
-        /// <summary>
-        /// Call at the beginning of the AI method for the projectile
-        /// </summary>
-        public virtual void PreAnimate()
+        public override void SetDefaults()
         {
-            if (!Animation.IsInitialized)
-            {
-                HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, FrameProfile);
-                projectile.timeLeft = Animation.TotalFrames;
-                projectile.localNPCHitCooldown = Animation.TotalFrames;
-            }
-            projectile.frame = Animation.GetCurrentKeyFrame().SpriteIndex;
+            projectile.timeLeft = Animation.TotalFrames;
         }
 
-        /// <summary>
-        /// Call at the end of the AI method for the projectile
-        /// </summary>
-        public virtual void PostAnimate()
+        public override bool PreAI()
         {
-            if (Animation.IsPlaying && Animation.CurrentFrame < (Animation.TotalFrames - 1))
-                Animation.AdvanceFrame();
-            else if (Animation.CurrentFrame == (Animation.TotalFrames - 1))
+            if (!Main.player[projectile.owner].GetModPlayer<HunterCombatPlayer>().ActiveProjectiles.Contains(projectile.Name))
                 projectile.Kill();
+
+            return base.PreAI();
+        }
+
+        public abstract void SetupKeyFrameProfile();
+
+        public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor)
+        {
+            var projectiles = Main.player[projectile.owner].GetModPlayer<HunterCombatPlayer>().ActiveProjectiles;
+            var active = projectiles.Contains(projectile.Name);
+
+            if (!Animation.InProgress && active)
+                Play();
+
+            projectile.frame = Animation.KeyFrames.IndexOf(Animation.GetCurrentKeyFrame());
+
+            if (active)
+                return base.PreDraw(spriteBatch, lightColor);
+            else
+                return active;
+        }
+
+        public override void PostDraw(SpriteBatch spriteBatch, Color lightColor)
+        {
+            base.PostDraw(spriteBatch, lightColor);
+            Update();
         }
 
         public override bool PreKill(int timeLeft)
         {
-            Player Owner = Main.player[projectile.owner];
+            Stop();
+            var projectiles = Main.player[projectile.owner].GetModPlayer<HunterCombatPlayer>().ActiveProjectiles;
 
-            if (Owner.GetModPlayer<HunterCombatPlayer>().ActiveProjectiles.Contains(projectile.Name))
-                Owner.GetModPlayer<HunterCombatPlayer>().ActiveProjectiles.Remove(projectile.Name);
+            if (projectiles.Contains(projectile.Name))
+                projectiles.Remove(projectile.Name);
 
             return true;
+        }
+
+        public virtual void Initialize()
+        {
+            HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, FrameProfile, false);
+        }
+
+        public override ModProjectile NewInstance(Projectile projectileClone)
+        {
+            AttackProjectile obj = (AttackProjectile)base.NewInstance(projectileClone);
+            obj.Animation = Animation;
+            obj.Hitboxes = Hitboxes;
+            obj.projectile.timeLeft = Animation.TotalFrames;
+            return obj;
+        }
+
+        public void Pause()
+        {
+            if (Animation.IsPlaying)
+                Animation.PauseAnimation();
+        }
+
+        public void Play()
+        {
+            if (!Animation.IsPlaying)
+                Animation.StartAnimation();
+        }
+
+        public void Stop()
+        {
+            Animation.StopAnimation();
+        }
+
+        public void Restart()
+        {
+            Animation.ResetAnimation(true);
+        }
+
+        public virtual void Update()
+        {
+            if (Animation.IsPlaying && Animation.CurrentFrame < Animation.GetFinalFrame())
+            {
+                Animation.AdvanceFrame();
+            }
         }
     }
 }

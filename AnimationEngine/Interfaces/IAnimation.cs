@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AnimationEngine.Services;
+using HunterCombatMR.Enumerations;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.AnimationEngine.Interfaces
@@ -27,9 +28,19 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         bool IsPlaying { get; }
 
         /// <summary>
+        /// Whether or not the animation is being played but includes if it is paused.
+        /// </summary>
+        bool InProgress { get; }
+
+        /// <summary>
         /// Whether or not the animation has been initialized by a keyframe manager
         /// </summary>
         bool IsInitialized { get; }
+
+        /// <summary>
+        /// What kind of loop behavior the animation has
+        /// </summary>
+        LoopStyle LoopMode { get; }
 
         /// <summary>
         /// Initialize the animation, only <seealso cref="KeyFrameManager"/> should be calling this
@@ -37,10 +48,21 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         void Initialize();
 
         /// <summary>
-        /// Gets the current keyframe index
+        /// Uninitialize the animation to perform maintenance or sync frames, only <seealso cref="KeyFrameManager"/> should be calling this
+        /// </summary>
+        void Uninitialize();
+
+        /// <summary>
+        /// Gets the current keyframe
         /// </summary>
         /// <returns>A <see cref="KeyFrame"/> object</returns>
         KeyFrame GetCurrentKeyFrame();
+
+        /// <summary>
+        /// Gets the current keyframe index
+        /// </summary>
+        /// <returns>The keyframe index</returns>
+        int GetCurrentKeyFrameIndex();
 
         /// <summary>
         /// Checks to see if the current keyframe is equal to the one provided
@@ -76,8 +98,7 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         /// Go back a number of frames equal to the amount passed
         /// </summary>
         /// <param name="framesReversing">The amount of frames to reverse</param>
-        /// <param name="bypassPause">Wether or not to adhere to the isPlaying datapoint</param>
-        void ReverseFrame(int framesReversing = 1, bool bypassPause = false);
+        void ReverseFrame(int framesReversing = 1);
 
         /// <summary>
         /// Set the animation to a specific frame
@@ -108,6 +129,11 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         void StopAnimation();
 
         /// <summary>
+        /// Stop animating but don't reset
+        /// </summary>
+        void PauseAnimation();
+
+        /// <summary>
         /// Reset the keyframes to an empty list
         /// </summary>
         void ResetKeyFrames();
@@ -126,5 +152,21 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         /// Probably unecessary but it looks cleaner than doing this every time it's used
         /// </remarks>
         int GetFinalFrame();
+
+        /// <summary>
+        /// Move to next keyframe in sequence
+        /// </summary>
+        void AdvanceToNextKeyFrame();
+
+        /// <summary>
+        /// Move the previous keyframe in sequence
+        /// </summary>
+        void ReverseToPreviousKeyFrame();
+
+        /// <summary>
+        /// Set the loop mode
+        /// </summary>
+        /// <param name="loopMode">The new <see cref="LoopStyle"/></param>
+        void SetLoopMode(LoopStyle loopMode);
     }
 }
