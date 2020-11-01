@@ -234,18 +234,23 @@ namespace HunterCombatMR.UI
 
             Append(buttonEA);
 
+            var testlistpanelleft = new StyleDimension(_layerpanel.Width.Pixels, 0);
+
             _testlistpanel = new UIPanel();
             _testlistpanel.Width.Set(125, 0);
             _testlistpanel.Height.Set(150, 0);
             _testlistpanel.BackgroundColor = Microsoft.Xna.Framework.Color.YellowGreen;
             _testlistpanel.BackgroundColor.A = 50;
             _testlistpanel.VAlign = 0.5f;
-            _testlistpanel.Left = new StyleDimension(_layerpanel.Width.Pixels, 0);
+            _testlistpanel.Left = testlistpanelleft;
             Append(_testlistpanel);
 
             _testlist = new UIList();
-            _testlist.Width.Set(-25f, 1f);
-            _testlist.Height.Set(0f, 1f);
+            _testlist.Width.Set(40f, 0f);
+            _testlist.Height.Set(90f, 0f);
+            _testlist.Top.Set(5f, 0f);
+            //_testlist.VAlign = 0.5f;
+            _testlist.Left = testlistpanelleft;
             _testlist.ListPadding = 5f;
             UIAutoScaleTextTextPanel<string> testbut = new UIAutoScaleTextTextPanel<string>("test")
             {
@@ -256,7 +261,8 @@ namespace HunterCombatMR.UI
                 Height =
                         {
                             Pixels = 40f
-                        }
+                        },
+                VAlign = 0.5f
             }.WithFadedMouseOver();
             _testlist.Add(testbut);
 
