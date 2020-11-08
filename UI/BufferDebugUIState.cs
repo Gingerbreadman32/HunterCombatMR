@@ -332,17 +332,41 @@ namespace HunterCombatMR.UI
 
             if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.Animation.IsInitialized && saveTimer == 0)
             {
-                var saveStatus = HunterCombatMR.FileManager.SaveAnimation(_currentPlayer.CurrentAnimation, true);
+                FileSaveStatus saveStatus;
+                string animName = _currentPlayer.CurrentAnimation.Name;
+                string oldName;
+
+                if (_animationname.Interacting)
+                    return;
+                else if (!string.IsNullOrWhiteSpace(_animationname.Text) && _animationname.Text != animName)
+                {
+                    oldName = animName;
+                    animName = _animationname.Text;
+                    saveStatus = HunterCombatMR.FileManager.SaveAnimationNewName(_currentPlayer.CurrentAnimation, animName, true);
+
+                    if (HunterCombatMR.LoadedAnimations.Any(x => x.Name.Equals(oldName)))
+                    {
+                        HunterCombatMR.LoadedAnimations.Remove(HunterCombatMR.LoadedAnimations.First(x => x.Name.Equals(oldName)));
+                        _testlist.Clear();
+                    }
+                } else
+                {
+                    saveStatus = HunterCombatMR.FileManager.SaveAnimation(_currentPlayer.CurrentAnimation, true);
+                }
+
 
                 if (saveStatus == FileSaveStatus.Saved)
                 {
                     saveTimer++;
-                    HunterCombatMR.LoadAnimation(_currentPlayer.CurrentAnimation.LayerData.ParentType, _currentPlayer.CurrentAnimation.Name);
-                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.LoadedAnimations.First(x => x.Name.Equals(_currentPlayer.CurrentAnimation.Name)));
+                    HunterCombatMR.LoadAnimation(_currentPlayer.CurrentAnimation.LayerData.ParentType, animName);
+                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.LoadedAnimations.First(x => x.Name.Equals(animName)));
                 }
-                else
+                else if (saveStatus == FileSaveStatus.Error)
                 {
-                    throw new System.Exception($"Animation could not save! Save Status: {saveStatus}");
+                    throw new System.Exception($"Animation could not save!");
+                } else
+                {
+                    Main.NewText(saveStatus.ToString());
                 }
 
                 Main.PlaySound(SoundID.MenuTick);
@@ -621,6 +645,9 @@ namespace HunterCombatMR.UI
                     if (!_testlist._items.Any(x => (x as UIAutoScaleTextTextPanel<string>).Text.Equals(animationButton.Text)))
                         _testlist.Add(animationButton);
                 }
+
+                if (_testlist._items.Any())
+                    _testlist._items.ForEach(x => (x as UIAutoScaleTextTextPanel<string>).TextColor = Color.White);
 
                 if (_currentPlayer?.CurrentAnimation != null)
                 {

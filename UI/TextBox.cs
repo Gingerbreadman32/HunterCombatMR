@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using HunterCombatMR.Extensions;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
@@ -138,7 +139,7 @@ namespace HunterCombatMR.UI
                    
                 if (newString != _currentString)
                 {
-                    UpdateString(string.Concat(newString.Except(_forbiddenCharacters)));
+                    UpdateString(newString.RemoveCharacters(_forbiddenCharacters));
                 }
 
                 if (Main.inputTextEnter || Main.inputTextEscape)
