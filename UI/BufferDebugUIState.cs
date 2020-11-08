@@ -1,7 +1,9 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
@@ -40,6 +42,15 @@ namespace HunterCombatMR.UI
         private UIAutoScaleTextTextPanel<string> _addtimebutton;
         private UIAutoScaleTextTextPanel<string> _subtimebutton;
         private UIAutoScaleTextTextPanel<string> _defaulttimebutton;
+
+        private UIAutoScaleTextTextPanel<string> _savebutton;
+        private UIAutoScaleTextTextPanel<string> _loadbutton;
+
+        private int saveTimer = 0;
+        private int loadTimer = 0;
+        private const int SAVETIMERMAX = 120;
+
+        private TextBox _animationname;
 
         public override void OnInitialize()
         {
@@ -201,7 +212,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0.5f
             }.WithFadedMouseOver();
-            _defaulttimebutton.OnClick += DefaultFrameTime;
+            _defaulttimebutton.OnClick += ((evt, listen) => FrameTimeLogic(0, true));
 
             _frametotal = new UIText("0")
             {
@@ -245,35 +256,115 @@ namespace HunterCombatMR.UI
             _testlistpanel.Left = testlistpanelleft;
             Append(_testlistpanel);
 
-            _testlist = new UIList();
-            _testlist.Width.Set(40f, 0f);
-            _testlist.Height.Set(90f, 0f);
-            _testlist.Top.Set(5f, 0f);
-            //_testlist.VAlign = 0.5f;
-            _testlist.Left = testlistpanelleft;
-            _testlist.ListPadding = 5f;
-            UIAutoScaleTextTextPanel<string> testbut = new UIAutoScaleTextTextPanel<string>("test")
-            {
-                TextColor = Color.White,
-                Width = {
-                            Pixels = 40f
-                        },
-                Height =
-                        {
-                            Pixels = 40f
-                        },
-                VAlign = 0.5f
-            }.WithFadedMouseOver();
-            _testlist.Add(testbut);
+            int top = 20;
 
+            _testlist = new UIList();
+            _testlist.Top.Pixels = top;
+            _testlist.Width.Set(-25f, 1f);
+            _testlist.Height.Set(-top, 1f);
+            _testlist.ListPadding = 6f;
+            _testlist.OverflowHidden = true;
             _testlistpanel.Append(_testlist);
 
-            UIScrollbar uIScrollbar = new UIScrollbar();
-            uIScrollbar.SetView(100f, 1000f);
-            uIScrollbar.Height.Set(0f, 1f);
-            uIScrollbar.HAlign = 1f;
-            _testlistpanel.Append(uIScrollbar);
-            _testlist.SetScrollbar(uIScrollbar);
+            var interfaceLayerListScrollbar = new UIScrollbar();
+            interfaceLayerListScrollbar.SetView(100f, 1000f);
+            interfaceLayerListScrollbar.Top.Pixels = top;
+            interfaceLayerListScrollbar.Height.Set(-20f, 1f);
+            interfaceLayerListScrollbar.HAlign = 1f;
+            _testlistpanel.Append(interfaceLayerListScrollbar);
+            _testlist.SetScrollbar(interfaceLayerListScrollbar);
+
+            // Save and Load Buttons
+            _savebutton = new UIAutoScaleTextTextPanel<string>("Save")
+            {
+                TextColor = Color.White,
+                Width = new StyleDimension(70f, 0f),
+                Height =
+                {
+                    Pixels = 40f
+                },
+                Left = new StyleDimension(_animationpanel.Width.Pixels + _framepanel.Width.Pixels + _timingpanel.Width.Pixels, 0),
+                Top = new StyleDimension(_layerpanel.Height.Pixels + 500f, 0)
+            }.WithFadedMouseOver();
+            _savebutton.OnClick += SaveAnimation;
+            Append(_savebutton);
+
+            _loadbutton = new UIAutoScaleTextTextPanel<string>("Load")
+            {
+                TextColor = Color.White,
+                Width = new StyleDimension(70f, 0f),
+                Height =
+                {
+                    Pixels = 40f
+                },
+                Left = new StyleDimension(_animationpanel.Width.Pixels + _framepanel.Width.Pixels + _timingpanel.Width.Pixels + _savebutton.Width.Pixels, 0),
+                Top = new StyleDimension(_layerpanel.Height.Pixels + 500f, 0)
+            }.WithFadedMouseOver();
+            _loadbutton.OnClick += LoadAnimation;
+            Append(_loadbutton);
+
+            // Renameable Animation Name Text Box
+            _animationname = new TextBox("Animation Name", 64, true, true);
+            _animationname.Left.Set(0f, 0f);
+            _animationname.Top.Set(-_layerpanel.Height.Pixels, 0.5f);
+            _animationname.TextColor = Color.White;
+            _animationname.OnClick += Interact;
+            _animationname.ForbiddenCharacters = new char[] 
+                { (char)32, '>', '<', ':', '"', '/', '\u005C', '|', '?', '*', '.'  };
+            Append(_animationname);
+        }
+
+        private void Interact(UIMouseEvent evt, UIElement listeningElement)
+        {
+            TextBox element = (TextBox)listeningElement;
+            element.StartInteracting();
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+        }
+
+        private void SaveAnimation(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (_currentPlayer == null)
+                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
+
+            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.Animation.IsInitialized && saveTimer == 0)
+            {
+                var saveStatus = HunterCombatMR.FileManager.SaveAnimation(_currentPlayer.CurrentAnimation, true);
+
+                if (saveStatus == FileSaveStatus.Saved)
+                {
+                    saveTimer++;
+                    HunterCombatMR.LoadAnimation(_currentPlayer.CurrentAnimation.LayerData.ParentType, _currentPlayer.CurrentAnimation.Name);
+                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.LoadedAnimations.First(x => x.Name.Equals(_currentPlayer.CurrentAnimation.Name)));
+                }
+                else
+                {
+                    throw new System.Exception($"Animation could not save! Save Status: {saveStatus}");
+                }
+
+                Main.PlaySound(SoundID.MenuTick);
+            }
+        }
+
+        private void LoadAnimation(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (_currentPlayer == null)
+                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
+
+            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.Animation.IsInitialized && loadTimer == 0)
+            {
+                var loaded = HunterCombatMR.LoadAnimation(_currentPlayer.CurrentAnimation.LayerData.ParentType, _currentPlayer.CurrentAnimation.Name);
+                if (loaded)
+                {
+                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.LoadedAnimations.First(x => x.Name.Equals(_currentPlayer.CurrentAnimation.Name)));
+                    _currentPlayer.CurrentAnimation.Animation.SetCurrentFrame(0);
+                    loadTimer++;
+                    Main.PlaySound(SoundID.MenuTick);
+                }
+            }
         }
 
         private void AddFrameTime(UIMouseEvent evt, UIElement listeningElement)
@@ -302,16 +393,14 @@ namespace HunterCombatMR.UI
                 if (!_currentPlayer.CurrentAnimation.Animation.IsPlaying)
                 {
                     var currentKeyframe = _currentPlayer.CurrentAnimation.Animation.GetCurrentKeyFrameIndex();
+                    var defaultSpeed = false;
 
                     if (amount == 0 && setFrame)
-                        amount = _currentPlayer.CurrentAnimation.LayerData.KeyFrameProfile.DefaultKeyFrameSpeed;
+                        defaultSpeed = true;
                     else if (amount + _currentPlayer.CurrentAnimation.Animation.GetCurrentKeyFrame().FrameLength <= 0)
                         return;
 
-                    HunterCombatMR.AnimationKeyFrameManager.AdjustKeyFrameLength(_currentPlayer.CurrentAnimation.Animation,
-                        _currentPlayer.CurrentAnimation.Animation.GetCurrentKeyFrameIndex(),
-                        amount,
-                        !setFrame);
+                    _currentPlayer.CurrentAnimation.UpdateKeyFrameLength(currentKeyframe, amount, setFrame, defaultSpeed);
 
                     _currentPlayer.CurrentAnimation.Animation.SetCurrentFrame(_currentPlayer.CurrentAnimation.Animation.KeyFrames[currentKeyframe].StartingFrameIndex);
                 }
@@ -358,9 +447,9 @@ namespace HunterCombatMR.UI
             if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.Animation.IsInitialized)
             {
                 if (!_currentPlayer.CurrentAnimation.Animation.LoopMode.Equals(LoopStyle.PlayPause))
-                    _currentPlayer.CurrentAnimation.Animation.SetLoopMode(_currentPlayer.CurrentAnimation.Animation.LoopMode + 1);
+                    _currentPlayer.CurrentAnimation.UpdateLoopType(_currentPlayer.CurrentAnimation.Animation.LoopMode + 1);
                 else
-                    _currentPlayer.CurrentAnimation.Animation.SetLoopMode(0);
+                    _currentPlayer.CurrentAnimation.UpdateLoopType(0);
 
                 Main.PlaySound(SoundID.MenuTick);
             }
@@ -416,15 +505,58 @@ namespace HunterCombatMR.UI
 
         public override void Update(GameTime gameTime)
         {
+            // Editor Check
+            var inEditor = !HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None);
+
+            // Save Button
+            if (saveTimer > 0 && saveTimer < SAVETIMERMAX)
+            {
+                saveTimer++;
+                _savebutton.SetText("Saved!");
+                _savebutton.BackgroundColor = Color.DarkBlue;
+            }
+            else if (saveTimer >= SAVETIMERMAX)
+            {
+                saveTimer = 0;
+                _savebutton.SetText("Save");
+                _savebutton.BackgroundColor = UICommon.DefaultUIBlue;
+            }
+
+            // Load Button
+            if (loadTimer > 0 && loadTimer < SAVETIMERMAX)
+            {
+                loadTimer++;
+                _loadbutton.SetText("Loaded!");
+                _loadbutton.BackgroundColor = Color.DarkBlue;
+            }
+            else if (loadTimer >= SAVETIMERMAX)
+            {
+                loadTimer = 0;
+                _loadbutton.SetText("Load");
+                _loadbutton.BackgroundColor = UICommon.DefaultUIBlue;
+            }
+
+            // Get Player
             if (_currentPlayer == null)
                 _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
 
+            // Animation Name Text Box
+            _animationname.Hidden = (!inEditor || _currentPlayer == null || _currentPlayer.CurrentAnimation == null);
+            if (_currentPlayer?.CurrentAnimation != null)
+            {
+                _animationname.DefaultText = _currentPlayer.CurrentAnimation.Name;
+            }
+
+            // Buffer Window
             var buffers = new List<string>();
             foreach (var buffer in _currentPlayer.InputBufferInfo.BufferedComboInputs)
             {
                 buffers.Add($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered}");
             }
 
+            ListVariables(_bufferpanel, buffers);
+
+            // Layer Window
             var activelayers = new List<string>();
             var layers = PlayerHooks.GetDrawLayers(_currentPlayer.player);
             /*
@@ -458,40 +590,47 @@ namespace HunterCombatMR.UI
                 _layerpanel.RemoveAllChildren();
             }
 
-            ListVariables(_bufferpanel, buffers);
-
-            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (inEditor)
             {
+                // Current Keyframe Text
                 var frametext = (_currentPlayer.CurrentAnimation?.Animation.GetCurrentKeyFrameIndex() + 1).ToString() ?? "0";
                 _framenum.SetText(frametext);
 
+                // Current Keyframe Timing Text
                 var framenumtext = _currentPlayer.CurrentAnimation?.Animation.GetCurrentKeyFrame().FrameLength.ToString() ?? "0";
                 _currentframetime.SetText(framenumtext);
 
+                // Total Amount of Animation Frames
                 var totalframenumtext = _currentPlayer.CurrentAnimation?.Animation.TotalFrames.ToString() ?? "0";
                 _frametotal.SetText(totalframenumtext);
 
+                // Animation List Window
                 foreach (var animation in HunterCombatMR.LoadedAnimations)
                 {
                     UIAutoScaleTextTextPanel<string> animationButton = new UIAutoScaleTextTextPanel<string>(animation.Name)
                     {
                         TextColor = Color.White,
-                        Width = {
-                            Pixels = 40f
-                        },
+                        Width = new StyleDimension(-10f, 1f),
                         Height =
                         {
                             Pixels = 40f
-                        }
+                        },
+                        TextScale = 1f
                     }.WithFadedMouseOver();
                     animationButton.OnClick += SelectAnimation;
                     if (!_testlist._items.Any(x => (x as UIAutoScaleTextTextPanel<string>).Text.Equals(animationButton.Text)))
                         _testlist.Add(animationButton);
                 }
+
+                if (_currentPlayer?.CurrentAnimation != null)
+                {
+                    UIAutoScaleTextTextPanel<string> listSelected = (UIAutoScaleTextTextPanel<string>)_testlist._items.FirstOrDefault(x => _currentPlayer.CurrentAnimation.Name.Equals((x as UIAutoScaleTextTextPanel<string>).Text));
+                    listSelected.TextColor = Color.Aqua;
+                }
             }
             else
             {
-                _testlist.RemoveAllChildren();
+                _testlist.Clear();
             }
         }
 

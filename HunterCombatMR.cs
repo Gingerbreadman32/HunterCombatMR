@@ -45,9 +45,11 @@ namespace HunterCombatMR
 
         internal static ILog StaticLogger;
 
+        internal static AnimationLoader AnimLoader;
+
         internal UserInterface DebugUI;
         internal BufferDebugUIState DebugUIState;
-        internal AnimationLoader AnimLoader = new AnimationLoader();
+        
 
         private void LoadInternalAnimations(Type[] types)
         {
@@ -60,12 +62,6 @@ namespace HunterCombatMR
 
             if (AnimLoader.Containers.Any())
                 LoadedAnimations = new List<LayeredAnimatedAction>(AnimLoader.RegisterAnimations());
-
-            //Testing the save
-            foreach (var anim in LoadedAnimations)
-            {
-                FileManager.SaveAnimation(anim, true);
-            }
         }
 
         public override void Load()
@@ -75,6 +71,7 @@ namespace HunterCombatMR
             FileManager = new AnimationFileManager();
             LoadedAttacks = new List<Attack>();
             LoadedAnimations = new List<LayeredAnimatedAction>();
+            AnimLoader = new AnimationLoader();
 
             if (!Main.dedServ)
             {
@@ -87,6 +84,44 @@ namespace HunterCombatMR
                 DebugUIState = new BufferDebugUIState();
                 DebugUIState.Activate();
                 ShowMyUI();
+            }
+        }
+
+        public static void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
+        {
+            if (LoadedAnimations != null)
+            {
+                LoadedAnimations.Clear();
+                LoadedAnimations.AddRange(AnimLoader.RegisterAnimations(FileManager.LoadAnimations(typesToLoad)));
+            } else
+            {
+                LoadedAnimations = new List<LayeredAnimatedAction>();
+            }
+        }
+
+        public static bool LoadAnimation(AnimationType animationType,
+            string fileName)
+        {
+            if (LoadedAnimations != null)
+            {
+                var animation = FileManager.LoadAnimation(animationType, fileName);
+
+                if (animation == null)
+                {
+                    StaticLogger.Error($"Animation {fileName} failed to load!");
+                    return false;
+                }
+
+                if (LoadedAnimations.Any(x => x.Name.Equals(fileName)))
+                    LoadedAnimations.Remove(LoadedAnimations.First(x => x.Name.Equals(fileName)));
+
+                LoadedAnimations.Add(AnimLoader.RegisterAnimation(animation));
+
+                return true;
+            }
+            else
+            {
+                throw new Exception("Animation List Not Loaded!");
             }
         }
 
@@ -103,7 +138,7 @@ namespace HunterCombatMR
                 // Load, register, and store all the animations
                 //LoadInternalAnimations(assemblyTypes);
                 var animTypes = new List<AnimationType>() { AnimationType.Player };
-                LoadedAnimations.AddRange(AnimLoader.RegisterAnimations(FileManager.LoadAnimations(animTypes)));
+                LoadAnimations(animTypes);
             }
 
             // Loads all of the attack information
@@ -128,6 +163,7 @@ namespace HunterCombatMR
             DataPath = null;
             FileManager = null;
             StaticLogger = null;
+            AnimLoader = null;
 
             EditorInstance.Dispose();
             EditorInstance = null;

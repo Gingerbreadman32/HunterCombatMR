@@ -38,10 +38,15 @@ namespace HunterCombatMR.AnimationEngine.Services
             var actions = new List<LayeredAnimatedAction>();
             foreach (var animation in loadedActions)
             {
-                animation.Initialize();
-                actions.Add(animation);
+                actions.Add(RegisterAnimation(animation));
             }
             return actions;
+        }
+
+        public LayeredAnimatedAction RegisterAnimation(LayeredAnimatedAction action)
+        {
+            action.Initialize();
+            return action;
         }
     }
 }

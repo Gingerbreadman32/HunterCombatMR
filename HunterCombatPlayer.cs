@@ -32,8 +32,6 @@ namespace HunterCombatMR
 
         public PlayerBufferInformation InputBufferInfo { get; set; }
 
-        public bool ShowLayersDebug { get; set; }
-
         public LayeredAnimatedAction CurrentAnimation { get; private set; }
 
         public HunterCombatPlayer()
@@ -42,20 +40,21 @@ namespace HunterCombatMR
             ActiveProjectiles = new List<string>();
             InputBufferInfo = new PlayerBufferInformation();
             State = PlayerState.Standing;
-            ShowLayersDebug = true;
             LayerPositions = new Dictionary<string, Vector2>();
         }
 
-        public override TagCompound Save()
+        public override void PostSavePlayer()
         {
-            ShowLayersDebug = true;
-            return base.Save();
+            CurrentAnimation = null;
+            HunterCombatMR.EditorInstance.CurrentEditMode = EditorMode.None;
+            HunterCombatMR.EditorInstance.HighlightedLayers.Clear();
+            HunterCombatMR.EditorInstance.SelectedLayer = "";
+            base.PostSavePlayer();
         }
 
         public override void OnEnterWorld(Player player)
         {
             State = PlayerState.Standing;
-            ShowLayersDebug = true;
 
             if (ActiveProjectiles != null)
                 ActiveProjectiles.Clear();
