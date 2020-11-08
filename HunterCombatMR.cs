@@ -169,11 +169,6 @@ namespace HunterCombatMR
             EditorInstance = null;
         }
 
-        public override void PreSaveAndQuit()
-        {
-            HideMyUI();
-        }
-
         public override void UpdateUI(GameTime gameTime)
         {
             _lastUpdateUiGameTime = gameTime;
