@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Terraria;
 
 namespace HunterCombatMR.AnimationEngine.Services
@@ -28,6 +29,10 @@ namespace HunterCombatMR.AnimationEngine.Services
             serializerSettings.Converters.Add(new KeyFrameProfileConverter());
             serializerSettings.Converters.Add(new RectangleConverter());
         }
+
+        public static string AnimationPath(string name,
+            AnimationType type)
+                => Path.Combine(FilePath, type.ToString(), name + FileType);
 
         public bool SetupFolders(IEnumerable<AnimationType> types)
         {
@@ -56,7 +61,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             bool overwrite = false)
         {
             FileSaveStatus status;
-            var animPath = Path.Combine(FilePath, anim.LayerData.ParentType.ToString(), anim.Name + FileType);
+            var animPath = AnimationPath(anim.Name, anim.LayerData.ParentType);
 
             if (!overwrite & File.Exists(animPath))
             {
@@ -76,6 +81,24 @@ namespace HunterCombatMR.AnimationEngine.Services
                 HunterCombatMR.StaticLogger.Error(ex.Message);
                 HunterCombatMR.StaticLogger.Error(ex.StackTrace);
             }
+
+            return status;
+        }
+
+        public FileSaveStatus SaveAnimationNewName(LayeredAnimatedAction anim,
+            string newName,
+            bool overwrite = false)
+        {
+            FileSaveStatus status;
+            LayeredAnimatedAction renamedAction = new LayeredAnimatedAction(newName, anim.LayerData);
+
+            status = SaveAnimation(renamedAction, overwrite);
+
+            if (!status.Equals(FileSaveStatus.Saved))
+                return status;
+
+            if (File.Exists(AnimationPath(anim.Name, anim.LayerData.ParentType)))
+                File.Delete(AnimationPath(anim.Name, anim.LayerData.ParentType));
 
             return status;
         }
