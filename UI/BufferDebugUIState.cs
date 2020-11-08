@@ -26,17 +26,19 @@ namespace HunterCombatMR.UI
         private UIPanel _testlistpanel;
         private UIList _testlist;
 
-        private UIPanel _framepanel;
+        private UIPanel _animationtoolpanel;
+
+        private UIElement _framegroup;
         private UIAutoScaleTextTextPanel<string> _reverseframe;
         private UIText _framenum;
         private UIAutoScaleTextTextPanel<string> _advanceframe;
 
-        private UIPanel _animationpanel;
+        private UIElement _animationgroup;
         private UIAutoScaleTextTextPanel<string> _playpause;
         private UIAutoScaleTextTextPanel<string> _stop;
         private UIAutoScaleTextTextPanel<string> _looptype;
 
-        private UIPanel _timingpanel;
+        private UIElement _timinggroup;
         private UIText _frametotal;
         private UIText _currentframetime;
         private UIAutoScaleTextTextPanel<string> _addtimebutton;
@@ -54,31 +56,91 @@ namespace HunterCombatMR.UI
 
         public override void OnInitialize()
         {
+            // Mode Switch
+            var buttonEA = new UIAutoScaleTextTextPanel<string>(HunterCombatMR.EditorInstance.CurrentEditMode.GetDescription())
+            {
+                TextColor = Color.White,
+                Width = new StyleDimension(200f, 0),
+                Height =
+                {
+                    Pixels = 40f
+                },
+                VAlign = 1f,
+                Top =
+                {
+                    Pixels = -65f
+                }
+            }.WithFadedMouseOver();
+            buttonEA.OnClick += ModeSwitch;
+
+            Append(buttonEA);
+
             _bufferpanel = new UIPanel();
-            _bufferpanel.Width.Set(300, 0);
-            _bufferpanel.Height.Set(100, 0);
+            _bufferpanel.Width.Set(0f, 0.18f);
+            _bufferpanel.Height.Set(0f, 0.1f);
             _bufferpanel.BackgroundColor = Microsoft.Xna.Framework.Color.Red;
             _bufferpanel.BackgroundColor.A = 50;
-            _bufferpanel.HAlign = 0.5f;
-            _bufferpanel.VAlign = 0.95f;
+            _bufferpanel.HAlign = 0.65f;
+            _bufferpanel.VAlign = 0.05f;
+            _bufferpanel.OverflowHidden = true;
             Append(_bufferpanel);
 
             _layerpanel = new UIPanel();
-            _layerpanel.Width.Set(550, 0);
-            _layerpanel.Height.Set(150, 0);
+            _layerpanel.Width.Set(0, 0.25f);
+            _layerpanel.Height.Set(0, 0.15f);
             _layerpanel.BackgroundColor = Microsoft.Xna.Framework.Color.Blue;
             _layerpanel.BackgroundColor.A = 50;
             _layerpanel.HAlign = 0f;
             _layerpanel.VAlign = 0.5f;
+            _layerpanel.OverflowHidden = true;
             Append(_layerpanel);
 
-            _framepanel = new UIPanel();
-            _framepanel.Width.Set(100, 0);
-            _framepanel.Height.Set(50, 0);
-            _framepanel.BackgroundColor = Color.Transparent;
-            _framepanel.BorderColor = Color.Transparent;
-            _framepanel.Left = new StyleDimension(0, 0);
-            _framepanel.Top = new StyleDimension(_layerpanel.Height.Pixels + 500f, 0);
+            var underLayerPanel = new StyleDimension(_layerpanel.GetDimensions().Y + _layerpanel.GetDimensions().Height, 0);
+
+            var testlistpanelleft = new StyleDimension(_layerpanel.Width.Pixels, 0);
+
+            _testlistpanel = new UIPanel();
+            _testlistpanel.Width.Set(0, 0.2f);
+            _testlistpanel.Height.Set(0, 0.15f);
+            _testlistpanel.BackgroundColor = Microsoft.Xna.Framework.Color.YellowGreen;
+            _testlistpanel.BackgroundColor.A = 50;
+            _testlistpanel.Top = new StyleDimension(_layerpanel.GetDimensions().Y, 0f);
+            _testlistpanel.Left = new StyleDimension(_layerpanel.GetDimensions().X + _layerpanel.GetDimensions().Width, 0);
+            Append(_testlistpanel);
+
+            int top = 20;
+
+            _testlist = new UIList();
+            _testlist.Top.Pixels = top;
+            _testlist.Width.Set(-25f, 1f);
+            _testlist.Height.Set(-top, 1f);
+            _testlist.ListPadding = 6f;
+            _testlist.OverflowHidden = true;
+            _testlistpanel.Append(_testlist);
+
+            var interfaceLayerListScrollbar = new UIScrollbar();
+            interfaceLayerListScrollbar.SetView(100f, 1000f);
+            interfaceLayerListScrollbar.Top.Pixels = top;
+            interfaceLayerListScrollbar.Height.Set(-20f, 1f);
+            interfaceLayerListScrollbar.HAlign = 1f;
+            _testlistpanel.Append(interfaceLayerListScrollbar);
+            _testlist.SetScrollbar(interfaceLayerListScrollbar);
+
+            _animationtoolpanel = new UIPanel()
+            {
+                Width = new StyleDimension(0, 0.45f),
+                Height = new StyleDimension(64f, 0f),
+                Top = underLayerPanel
+            };
+            _animationtoolpanel.BackgroundColor.A = 50;
+
+            float panelPercent = 0f;
+
+            _framegroup = new UIElement();
+            _framegroup.Width.Set(0, 0.1f);
+            _framegroup.Height.Set(0, 1f);
+
+            panelPercent += _framegroup.Width.Percent;
 
             _reverseframe = new UIAutoScaleTextTextPanel<string>("<")
             {
@@ -109,19 +171,18 @@ namespace HunterCombatMR.UI
             }.WithFadedMouseOver();
             _advanceframe.OnClick += AdvanceFrame;
 
-            _framepanel.Append(_reverseframe);
-            _framepanel.Append(_framenum);
-            _framepanel.Append(_advanceframe);
+            _framegroup.Append(_reverseframe);
+            _framegroup.Append(_framenum);
+            _framegroup.Append(_advanceframe);
 
-            Append(_framepanel);
+            _animationtoolpanel.Append(_framegroup);
 
-            _animationpanel = new UIPanel();
-            _animationpanel.Width.Set(200, 0);
-            _animationpanel.Height.Set(50, 0);
-            _animationpanel.BackgroundColor = Color.Transparent;
-            _animationpanel.BorderColor = Color.Transparent;
-            _animationpanel.Left = new StyleDimension(_framepanel.Width.Pixels, 0);
-            _animationpanel.Top = new StyleDimension(_layerpanel.Height.Pixels + 500f, 0);
+            _animationgroup = new UIElement();
+            _animationgroup.Width.Set(0, 0.35f);
+            _animationgroup.Height.Set(50f, 0f);
+            _animationgroup.Left = new StyleDimension(0, panelPercent);
+
+            panelPercent += _animationgroup.Width.Percent;
 
             _playpause = new UIAutoScaleTextTextPanel<string>("Play")
             {
@@ -159,19 +220,18 @@ namespace HunterCombatMR.UI
             }.WithFadedMouseOver();
             _looptype.OnClick += LoopTypeChange;
 
-            _animationpanel.Append(_playpause);
-            _animationpanel.Append(_stop);
-            _animationpanel.Append(_looptype);
+            _animationgroup.Append(_playpause);
+            _animationgroup.Append(_stop);
+            _animationgroup.Append(_looptype);
 
-            Append(_animationpanel);
+            _animationtoolpanel.Append(_animationgroup);
 
-            _timingpanel = new UIPanel();
-            _timingpanel.Width.Set(250, 0);
-            _timingpanel.Height.Set(50, 0);
-            _timingpanel.BackgroundColor = Color.Transparent;
-            _timingpanel.BorderColor = Color.Transparent;
-            _timingpanel.Left = new StyleDimension(_animationpanel.Width.Pixels + _framepanel.Width.Pixels, 0);
-            _timingpanel.Top = new StyleDimension(_layerpanel.Height.Pixels + 500f, 0);
+            _timinggroup = new UIElement();
+            _timinggroup.Width.Set(0, 0.35f);
+            _timinggroup.Height.Set(50f, 0);
+            _timinggroup.Left = new StyleDimension(0, panelPercent);
+
+            panelPercent += _timinggroup.Width.Percent;
 
             _subtimebutton = new UIAutoScaleTextTextPanel<string>("-")
             {
@@ -219,94 +279,51 @@ namespace HunterCombatMR.UI
                 HAlign = 0.75f
             };
 
-            _timingpanel.Append(_subtimebutton);
-            _timingpanel.Append(_currentframetime);
-            _timingpanel.Append(_addtimebutton);
-            _timingpanel.Append(_defaulttimebutton);
-            _timingpanel.Append(_frametotal);
+            _timinggroup.Append(_subtimebutton);
+            _timinggroup.Append(_currentframetime);
+            _timinggroup.Append(_addtimebutton);
+            _timinggroup.Append(_defaulttimebutton);
+            _timinggroup.Append(_frametotal);
 
-            Append(_timingpanel);
-
-            var buttonEA = new UIAutoScaleTextTextPanel<string>(HunterCombatMR.EditorInstance.CurrentEditMode.GetDescription())
-            {
-                TextColor = Color.White,
-                Width = new StyleDimension(200f, 0),
-                Height =
-                {
-                    Pixels = 40f
-                },
-                VAlign = 1f,
-                Top =
-                {
-                    Pixels = -65f
-                }
-            }.WithFadedMouseOver();
-            buttonEA.OnClick += ModeSwitch;
-
-            Append(buttonEA);
-
-            var testlistpanelleft = new StyleDimension(_layerpanel.Width.Pixels, 0);
-
-            _testlistpanel = new UIPanel();
-            _testlistpanel.Width.Set(125, 0);
-            _testlistpanel.Height.Set(150, 0);
-            _testlistpanel.BackgroundColor = Microsoft.Xna.Framework.Color.YellowGreen;
-            _testlistpanel.BackgroundColor.A = 50;
-            _testlistpanel.VAlign = 0.5f;
-            _testlistpanel.Left = testlistpanelleft;
-            Append(_testlistpanel);
-
-            int top = 20;
-
-            _testlist = new UIList();
-            _testlist.Top.Pixels = top;
-            _testlist.Width.Set(-25f, 1f);
-            _testlist.Height.Set(-top, 1f);
-            _testlist.ListPadding = 6f;
-            _testlist.OverflowHidden = true;
-            _testlistpanel.Append(_testlist);
-
-            var interfaceLayerListScrollbar = new UIScrollbar();
-            interfaceLayerListScrollbar.SetView(100f, 1000f);
-            interfaceLayerListScrollbar.Top.Pixels = top;
-            interfaceLayerListScrollbar.Height.Set(-20f, 1f);
-            interfaceLayerListScrollbar.HAlign = 1f;
-            _testlistpanel.Append(interfaceLayerListScrollbar);
-            _testlist.SetScrollbar(interfaceLayerListScrollbar);
+            _animationtoolpanel.Append(_timinggroup);
 
             // Save and Load Buttons
             _savebutton = new UIAutoScaleTextTextPanel<string>("Save")
             {
                 TextColor = Color.White,
-                Width = new StyleDimension(70f, 0f),
+                Width = new StyleDimension(0, 0.1f),
                 Height =
                 {
                     Pixels = 40f
                 },
-                Left = new StyleDimension(_animationpanel.Width.Pixels + _framepanel.Width.Pixels + _timingpanel.Width.Pixels, 0),
-                Top = new StyleDimension(_layerpanel.Height.Pixels + 500f, 0)
+                Left = new StyleDimension(0, panelPercent)
             }.WithFadedMouseOver();
             _savebutton.OnClick += SaveAnimation;
-            Append(_savebutton);
+            _animationtoolpanel.Append(_savebutton);
+
+            panelPercent += _savebutton.Width.Percent;
 
             _loadbutton = new UIAutoScaleTextTextPanel<string>("Load")
             {
                 TextColor = Color.White,
-                Width = new StyleDimension(70f, 0f),
+                Width = new StyleDimension(0f, 0.1f),
                 Height =
                 {
                     Pixels = 40f
                 },
-                Left = new StyleDimension(_animationpanel.Width.Pixels + _framepanel.Width.Pixels + _timingpanel.Width.Pixels + _savebutton.Width.Pixels, 0),
-                Top = new StyleDimension(_layerpanel.Height.Pixels + 500f, 0)
+                Left = new StyleDimension(0, panelPercent)
             }.WithFadedMouseOver();
             _loadbutton.OnClick += LoadAnimation;
-            Append(_loadbutton);
+            _animationtoolpanel.Append(_loadbutton);
+
+            panelPercent += _loadbutton.Width.Percent;
+
+            Append(_animationtoolpanel);
 
             // Renameable Animation Name Text Box
             _animationname = new TextBox("Animation Name", 64, true, true);
             _animationname.Left.Set(0f, 0f);
-            _animationname.Top.Set(-_layerpanel.Height.Pixels, 0.5f);
+            _animationname.Top.Set(-_layerpanel.GetDimensions().Height, 0.5f);
             _animationname.TextColor = Color.White;
             _animationname.OnClick += Interact;
             _animationname.ForbiddenCharacters = new char[] 
