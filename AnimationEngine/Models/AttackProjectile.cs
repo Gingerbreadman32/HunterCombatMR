@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -116,6 +117,16 @@ namespace HunterCombatMR.AnimationEngine.Models
             {
                 Animation.AdvanceFrame();
             }
+        }
+
+        public void UpdateKeyFrameLength(int keyFrameIndex, int frameAmount, bool setAmount = false, bool setDefault = false)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void UpdateLoopType(LoopStyle newLoopType)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

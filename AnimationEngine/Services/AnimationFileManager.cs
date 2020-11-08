@@ -72,7 +72,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             catch (Exception ex)
             {
                 status = FileSaveStatus.Error;
-                Main.NewText("Error: Failed to save animation! Check log for stacktrace.", Color.Red);
+                Main.NewText($"Error: Failed to save animation {anim.Name}! Check log for stacktrace.", Color.Red);
                 HunterCombatMR.StaticLogger.Error(ex.Message);
                 HunterCombatMR.StaticLogger.Error(ex.StackTrace);
             }
@@ -89,7 +89,7 @@ namespace HunterCombatMR.AnimationEngine.Services
                 var path = Path.Combine(FilePath, animType.ToString());
                 if (!Directory.Exists(FilePath) && !Directory.Exists(path))
                 {
-                    HunterCombatMR.StaticLogger.Info($"No directory for animation type: {animType.ToString()}");
+                    HunterCombatMR.StaticLogger.Warn($"No directory for animation type: {animType.ToString()}");
                     return actions;
                 }
 
@@ -102,11 +102,36 @@ namespace HunterCombatMR.AnimationEngine.Services
                     if (action != null)
                         actions.Add(action);
                     else
-                        HunterCombatMR.StaticLogger.Warn($"{file} is not a valid animation {FileType} file!");
+                        HunterCombatMR.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
                 }
             }
 
             return actions;
+        }
+
+        public LayeredAnimatedAction LoadAnimation(AnimationType type,
+            string fileName)
+        {
+            var path = Path.Combine(FilePath, type.ToString());
+            if (!Directory.Exists(FilePath) && !Directory.Exists(path))
+            {
+                HunterCombatMR.StaticLogger.Warn($"No directory for animation type: {type.ToString()}");
+                return null;
+            }
+
+            var file = Path.Combine(path, fileName + FileType);
+
+            string json = File.ReadAllText(file);
+            var action = JsonConvert.DeserializeObject<LayeredAnimatedAction>(json, serializerSettings);
+            if (action != null)
+            {
+                return action;
+            }
+            else
+            {
+                HunterCombatMR.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
+                return null;
+            }
         }
     }
 }

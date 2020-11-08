@@ -1,4 +1,6 @@
-﻿namespace HunterCombatMR.AnimationEngine.Interfaces
+﻿using HunterCombatMR.Enumerations;
+
+namespace HunterCombatMR.AnimationEngine.Interfaces
 {
     public interface IAnimated
     {
@@ -17,5 +19,9 @@
         void Restart();
 
         void Update();
+
+        void UpdateKeyFrameLength(int keyFrameIndex, int frameAmount, bool setAmount = false, bool setDefault = false);
+
+        void UpdateLoopType(LoopStyle newLoopType);
     }
 }

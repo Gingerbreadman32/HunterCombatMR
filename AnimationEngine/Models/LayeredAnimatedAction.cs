@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
+using HunterCombatMR.Enumerations;
 using Newtonsoft.Json;
 
 namespace HunterCombatMR.AnimationEngine.Models
@@ -64,6 +65,41 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void Restart()
         {
             Animation.ResetAnimation(true);
+        }
+
+        public void UpdateKeyFrameLength(int keyFrameIndex, int frameAmount, bool setAmount = false, bool setDefault = false)
+        {
+            var isModified = LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex);
+
+            if (setDefault)
+            {
+                setAmount = true;
+                frameAmount = LayerData.KeyFrameProfile.DefaultKeyFrameSpeed;
+            }
+
+            HunterCombatMR.AnimationKeyFrameManager.AdjustKeyFrameLength(Animation,
+                        keyFrameIndex,
+                        frameAmount,
+                        !setAmount);
+
+            if (isModified)
+            {
+                LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Remove(keyFrameIndex);
+
+                if (!setDefault && Animation.KeyFrames[keyFrameIndex].FrameLength != LayerData.KeyFrameProfile.DefaultKeyFrameSpeed)
+                {
+                    LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Add(keyFrameIndex, Animation.KeyFrames[keyFrameIndex].FrameLength);
+                }
+            } else if (Animation.KeyFrames[keyFrameIndex].FrameLength != LayerData.KeyFrameProfile.DefaultKeyFrameSpeed)
+            {
+                LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Add(keyFrameIndex, Animation.KeyFrames[keyFrameIndex].FrameLength);
+            } 
+        }
+
+        public void UpdateLoopType(LoopStyle newLoopType)
+        {
+            Animation.SetLoopMode(newLoopType);
+            LayerData.Loop = newLoopType;
         }
     }
 }
