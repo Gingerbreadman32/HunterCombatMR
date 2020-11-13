@@ -1,10 +1,15 @@
-﻿using HunterCombatMR.Extensions;
+﻿using HunterCombatMR.Comparers;
+using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public class AnimationLayer
+        : IEquatable<AnimationLayer>
     {
         public Dictionary<int, LayerFrameInfo> Frames { get; set; }
 
@@ -23,6 +28,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public byte DefaultDepth { get; set; }
 
+        [JsonConstructor]
         public AnimationLayer(string name,
             Rectangle spriteframeRectangle,
             byte defaultDepth = 1)
@@ -31,6 +37,19 @@ namespace HunterCombatMR.AnimationEngine.Models
             Frames = new Dictionary<int, LayerFrameInfo>();
             SpriteFrameRectangle = spriteframeRectangle;
             DefaultDepth = defaultDepth;
+        }
+
+        public AnimationLayer(AnimationLayer copy)
+        {
+            Name = copy.Name;
+            Frames = new Dictionary<int, LayerFrameInfo>();
+            SpriteFrameRectangle = copy.SpriteFrameRectangle;
+            DefaultDepth = copy.DefaultDepth;
+
+            foreach (var frame in copy.Frames)
+            {
+                Frames.Add(frame.Key, new LayerFrameInfo(frame.Value, frame.Value.LayerDepth));
+            }
         }
 
         /// <summary>
@@ -49,7 +68,24 @@ namespace HunterCombatMR.AnimationEngine.Models
             Frames = initializedFrames;
         }
 
+        public void SetPositionAtFrame(int frame,
+            Vector2 newPosition)
+        {
+            Frames[frame] = new LayerFrameInfo(Frames[frame], Frames[frame].LayerDepth) { Position = newPosition };
+        }
+
         public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
             => SpriteFrameRectangle.SetSheetPositionFromFrame(Frames[currentKeyFrame].SpriteFrame);
+
+        public bool Equals(AnimationLayer other)
+        {
+            FrameEqualityComparer comparer = new FrameEqualityComparer();
+            bool framesEqual = comparer.Equals(Frames, other.Frames);
+
+            return framesEqual
+                && Name.Equals(other.Name)
+                && SpriteFrameRectangle.Equals(other.SpriteFrameRectangle)
+                && DefaultDepth.Equals(other.DefaultDepth);
+        }
     }
 }

@@ -21,31 +21,30 @@ namespace HunterCombatMR
     public class HunterCombatMR
         : Mod
     {
-        /* Singleton code I should probably use at some point
+
         public static HunterCombatMR Instance { get; set; }
 
         public HunterCombatMR() { Instance = this; }
-        */
+
+        public const string ModName = "HunterCombat";
 
         private GameTime _lastUpdateUiGameTime;
 
-        public static List<Attack> LoadedAttacks { get; private set; }
+        public List<Attack> LoadedAttacks { get; private set; }
 
-        public static List<LayeredAnimatedAction> LoadedAnimations { get; private set; }
+        public List<LayeredAnimatedAction> LoadedAnimations { get; private set; }
 
-        public static KeyFrameManager AnimationKeyFrameManager { get; private set; }
+        public KeyFrameManager AnimationKeyFrameManager { get; private set; }
 
-        public static AnimationFileManager FileManager { get; private set; }
+        public AnimationFileManager FileManager { get; private set; }
 
-        public static AnimationEditor EditorInstance { get; private set; }
+        public AnimationEditor EditorInstance { get; private set; }
 
-        public static string ModName = "HunterCombat";
+        public string DataPath = Path.Combine(Program.SavePath, ModName, "Data");
 
-        public static string DataPath = Path.Combine(Program.SavePath, ModName, "Data");
+        internal ILog StaticLogger;
 
-        internal static ILog StaticLogger;
-
-        internal static AnimationLoader AnimLoader;
+        internal AnimationLoader AnimLoader;
 
         internal UserInterface DebugUI;
         internal BufferDebugUIState DebugUIState;
@@ -87,7 +86,7 @@ namespace HunterCombatMR
             }
         }
 
-        public static void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
+        public void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
         {
             if (LoadedAnimations != null)
             {
@@ -99,7 +98,7 @@ namespace HunterCombatMR
             }
         }
 
-        public static bool LoadAnimation(AnimationType animationType,
+        public bool LoadAnimation(AnimationType animationType,
             string fileName)
         {
             if (LoadedAnimations != null)
@@ -155,15 +154,7 @@ namespace HunterCombatMR
 
         public override void Unload()
         {
-            LoadedAttacks = null;
-            AnimationKeyFrameManager = null;
-            DebugUIState = null;
-            ModName = null;
-            LoadedAnimations = null;
-            DataPath = null;
-            FileManager = null;
-            StaticLogger = null;
-            AnimLoader = null;
+            Instance = null;
 
             EditorInstance.Dispose();
             EditorInstance = null;
@@ -206,6 +197,19 @@ namespace HunterCombatMR
         {
             DebugUI?.SetState(null);
         }
+
+        public override void PreSaveAndQuit()
+        {
+            EditorInstance.CloseEditor();
+
+            base.PreSaveAndQuit();
+        }
+
+        internal void SetUIPlayer(HunterCombatPlayer player)
+        {
+            if (DebugUIState != null)
+                DebugUIState.Player = player;
+        } 
 
         internal static Texture2D ReadTexture(string file)
         {

@@ -1,10 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
+using System;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public struct LayerFrameInfo
+        : IEquatable<LayerFrameInfo>
     {
         /// <summary>
         /// General use constructor
@@ -100,5 +102,14 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// Whether or not the sprite will be flipped horizontally or vertically using <seealso cref="SpriteEffects"/>.
         /// </summary>
         public SpriteEffects SpriteOrientation { get; set; }
+
+        public bool Equals(LayerFrameInfo other)
+            => SpriteFrame.Equals(other.SpriteFrame)
+                && Position.Equals(other.Position)
+                && Rotation.Equals(other.Rotation)
+                && LayerDepthOverride == other.LayerDepthOverride
+                && LayerDepth.Equals(other.LayerDepth)
+                && SheetNameOverride == other.SheetNameOverride
+                && SpriteOrientation.Equals(other.SpriteOrientation);
     }
 }
