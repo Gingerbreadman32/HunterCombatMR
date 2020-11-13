@@ -34,6 +34,8 @@ namespace HunterCombatMR
 
         public LayeredAnimatedAction CurrentAnimation { get; private set; }
 
+        public bool ShowDefaultLayers { get; private set; }
+
         public HunterCombatPlayer()
             : base()
         {
@@ -41,20 +43,36 @@ namespace HunterCombatMR
             InputBufferInfo = new PlayerBufferInformation();
             State = PlayerState.Standing;
             LayerPositions = new Dictionary<string, Vector2>();
+            ShowDefaultLayers = true;
         }
 
         public override void PostSavePlayer()
         {
-            CurrentAnimation = null;
-            HunterCombatMR.EditorInstance.CurrentEditMode = EditorMode.None;
-            HunterCombatMR.EditorInstance.HighlightedLayers.Clear();
-            HunterCombatMR.EditorInstance.SelectedLayer = "";
+            if (Main.gameMenu)
+            {
+                CurrentAnimation = null;
+                ShowDefaultLayers = true;
+            }
+            
             base.PostSavePlayer();
+        }
+
+        public override bool PreItemCheck()
+        {
+            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None)) {
+                return false;
+            }
+            else
+            {
+                return base.PreItemCheck();
+            }
         }
 
         public override void OnEnterWorld(Player player)
         {
             State = PlayerState.Standing;
+            HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
+            ShowDefaultLayers = true;
 
             if (ActiveProjectiles != null)
                 ActiveProjectiles.Clear();
@@ -69,26 +87,31 @@ namespace HunterCombatMR
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
-            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
+                if (CurrentAnimation != null && CurrentAnimation.Animation.GetCurrentKeyFrameIndex() > 0)
+                    ShowDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo, CurrentAnimation.LayerData, CurrentAnimation.Animation.GetCurrentKeyFrameIndex() - 1, Color.White);
+                else
+                    ShowDefaultLayers = true;
+
+                if (ShowDefaultLayers)
+                {
+                    string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
                     "faceColor", "bodyColor", "legColor", "shirtColor", "underShirtColor",
                     "pantsColor", "shoeColor", "upperArmorColor", "middleArmorColor",
                     "lowerArmorColor" };
 
-                var properties = drawInfo.GetType().GetFields();
+                    var properties = drawInfo.GetType().GetFields();
 
-                object temp = drawInfo;
+                    object temp = drawInfo;
 
-                foreach (var prop in properties.Where(x => propertiesToChange.Contains(x.Name)))
-                {
-                    if (prop.Name != "hairColor")
+                    foreach (var prop in properties.Where(x => propertiesToChange.Contains(x.Name)))
+                    {
                         prop.SetValue(temp, MakeTransparent((Color)prop.GetValue(temp), 30));
-                    else
-                        prop.SetValue(temp, MakeTransparent((Color)prop.GetValue(temp), 0));
-                }
+                    }
 
-                drawInfo = (PlayerDrawInfo)temp;
+                    drawInfo = (PlayerDrawInfo)temp;
+                }
             }
         }
 
@@ -102,8 +125,16 @@ namespace HunterCombatMR
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
-            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && CurrentAnimation != null)
+            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && CurrentAnimation != null)
             {
+                if (!ShowDefaultLayers)
+                {
+                    foreach (PlayerLayer item in layers)
+                    {
+                        item.visible = false;
+                    }
+                }
+
                 var animLayers = CurrentAnimation.LayerData.Layers;
                 if (CurrentAnimation.Animation.IsInitialized)
                 {
@@ -113,7 +144,7 @@ namespace HunterCombatMR
                     {
                         var newLayer = new PlayerLayer(HunterCombatMR.ModName, layer.Name, delegate (PlayerDrawInfo drawInfo)
                         {
-                            CombatLimbDraw(drawInfo, layer.Name, CreateTextureString(layer.Name), layer.GetCurrentFrameRectangle(currentFrame), layer.Frames[currentFrame], currentFrame);
+                            Main.playerDrawData.Add(CombatLimbDraw(drawInfo, CreateTextureString(layer.Name), layer.GetCurrentFrameRectangle(currentFrame), layer.Frames[currentFrame], Color.White));
                         });
                         layers.Add(newLayer);
                     }
@@ -121,48 +152,39 @@ namespace HunterCombatMR
                     CurrentAnimation.Update();
                 }
             }
-            else
-            {
-                CurrentAnimation = null;
-                HunterCombatMR.EditorInstance.HighlightedLayers.Clear();
-                HunterCombatMR.EditorInstance.SelectedLayer = "";
-            }
         }
 
-        private string CreateTextureString(string layerName)
+        internal static string CreateTextureString(string layerName)
             => $"{_texturePath}{layerName.Split('_')[1]}{_textureSuffix}";
 
-        public static void CombatLimbDraw(PlayerDrawInfo drawInfo,
-            string layerName,
+        public static DrawData CombatLimbDraw(PlayerDrawInfo drawInfo,
             string texturePath,
             Rectangle frameRectangle,
             LayerFrameInfo frameInfo,
-            int currentFrame)
+            Color color)
         {
             var drawPlayer = drawInfo.drawPlayer;
-            var positionVector = new Vector2(drawInfo.position.X - Main.screenPosition.X,
-                        drawInfo.position.Y - Main.screenPosition.Y);
-            var positions = drawPlayer.GetModPlayer<HunterCombatPlayer>().LayerPositions;
 
-            if (!positions.ContainsKey($"{layerName}-{currentFrame}"))
-                positions.Add($"{layerName}-{currentFrame}", new Vector2());
+            var positionVector = new Vector2(drawInfo.position.X + (drawPlayer.width / 2) - Main.screenPosition.X,
+                        drawInfo.position.Y - Main.screenPosition.Y);
 
             frameRectangle.SetSheetPositionFromFrame(frameInfo.SpriteFrame);
-            DrawData value = new DrawData(ModContent.GetTexture(texturePath), positionVector + frameInfo.Position + positions.FirstOrDefault(x => x.Key.Equals($"{layerName}-{currentFrame}")).Value, frameRectangle, Color.White);
+            DrawData value = new DrawData(ModContent.GetTexture(texturePath), frameInfo.Position, frameRectangle, color);
 
-            value = value.SetSpriteOrientation(drawPlayer, frameInfo.SpriteOrientation);
+            value = value.SetSpriteOrientation(drawPlayer, frameInfo, frameRectangle);
+            value.position += (positionVector - frameRectangle.Size() / 2);
 
-            if (HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
-                value = HunterCombatMR.EditorInstance.AdjustPositionLogic(value, positions, $"{layerName}-{currentFrame}");
-            
-            Main.playerDrawData.Add(value);
+            return value;
         }
 
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
-            if (!HunterCombatMR.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                player.frozen = true;
+                player.stoned = true;
+                player.immune = true;
+                player.immuneNoBlink = true;
+                player.immuneTime = 2;
             }
             InputBufferInfo.Update();
             if (_bufferText && InputBufferInfo.BufferedComboInputs.Any(x => x.Input.Equals(ComboInputs.StandardAttack) && x.FramesSinceBuffered == 0))
@@ -186,17 +208,20 @@ namespace HunterCombatMR
 
         public override void PostUpdate()
         {
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode) && CurrentAnimation != null)
+            {
+                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(CurrentAnimation);
+            }
+
             base.PostUpdate();
         }
 
         public bool SetCurrentAnimation(LayeredAnimatedAction newAnimation)
         {
-            CurrentAnimation = new LayeredAnimatedAction(newAnimation);
+            LayeredAnimatedAction newAnim = new LayeredAnimatedAction(newAnimation);
+            CurrentAnimation = newAnim;
 
-            if (CurrentAnimation != null)
-                return true;
-            else
-                return false;
+            return CurrentAnimation != null;
         }
     }
 }

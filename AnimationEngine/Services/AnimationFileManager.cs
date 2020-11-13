@@ -14,7 +14,7 @@ namespace HunterCombatMR.AnimationEngine.Services
 {
     public sealed class AnimationFileManager
     {
-        public static string FilePath = Path.Combine(HunterCombatMR.DataPath, "Animations");
+        public static string FilePath = Path.Combine(HunterCombatMR.Instance.DataPath, "Animations");
         public static string FileType = ".json";
 
         public static JsonSerializerSettings serializerSettings = new JsonSerializerSettings
@@ -78,8 +78,8 @@ namespace HunterCombatMR.AnimationEngine.Services
             {
                 status = FileSaveStatus.Error;
                 Main.NewText($"Error: Failed to save animation {anim.Name}! Check log for stacktrace.", Color.Red);
-                HunterCombatMR.StaticLogger.Error(ex.Message);
-                HunterCombatMR.StaticLogger.Error(ex.StackTrace);
+                HunterCombatMR.Instance.StaticLogger.Error(ex.Message);
+                HunterCombatMR.Instance.StaticLogger.Error(ex.StackTrace);
             }
 
             return status;
@@ -112,7 +112,7 @@ namespace HunterCombatMR.AnimationEngine.Services
                 var path = Path.Combine(FilePath, animType.ToString());
                 if (!Directory.Exists(FilePath) && !Directory.Exists(path))
                 {
-                    HunterCombatMR.StaticLogger.Warn($"No directory for animation type: {animType.ToString()}");
+                    HunterCombatMR.Instance.StaticLogger.Warn($"No directory for animation type: {animType.ToString()}");
                     return actions;
                 }
 
@@ -125,7 +125,7 @@ namespace HunterCombatMR.AnimationEngine.Services
                     if (action != null)
                         actions.Add(action);
                     else
-                        HunterCombatMR.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
+                        HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
                 }
             }
 
@@ -138,7 +138,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             var path = Path.Combine(FilePath, type.ToString());
             if (!Directory.Exists(FilePath) && !Directory.Exists(path))
             {
-                HunterCombatMR.StaticLogger.Warn($"No directory for animation type: {type.ToString()}");
+                HunterCombatMR.Instance.StaticLogger.Warn($"No directory for animation type: {type.ToString()}");
                 return null;
             }
 
@@ -152,7 +152,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             }
             else
             {
-                HunterCombatMR.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
+                HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
                 return null;
             }
         }

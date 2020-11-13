@@ -77,7 +77,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public virtual void Initialize()
         {
-            HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, FrameProfile, false);
+            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, FrameProfile, false);
         }
 
         public override ModProjectile NewInstance(Projectile projectileClone)

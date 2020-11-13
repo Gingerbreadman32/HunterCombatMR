@@ -111,6 +111,11 @@ namespace HunterCombatMR.UI
             Interacting = true;
         }
 
+        public virtual void StopInteracting()
+        {
+            Interacting = false;
+        }
+
         private void UpdateString(string newString)
         {
             _currentString = newString;
@@ -128,6 +133,7 @@ namespace HunterCombatMR.UI
             if (Interacting)
             {
                 Main.chatRelease = false;
+                Main.drawingPlayerChat = false;
                 PlayerInput.WritingText = true;
                 Main.instance.HandleIME();
                 string newString = Main.GetInputText(_currentString);

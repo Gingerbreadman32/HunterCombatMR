@@ -1,11 +1,13 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.Enumerations;
 using Newtonsoft.Json;
+using System;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public class LayeredAnimatedAction
-        : IAnimated
+        : IAnimated,
+        IEquatable<LayeredAnimatedAction>
     {
         public string Name { get; }
         public LayeredAnimatedActionData LayerData { get; }
@@ -25,13 +27,13 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             Name = copy.Name;
             Animation = new StandardAnimation(copy.Animation);
-            HunterCombatMR.AnimationKeyFrameManager.SyncFrames(Animation);
-            LayerData = copy.LayerData;
+            HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(Animation);
+            LayerData = new LayeredAnimatedActionData(copy.LayerData);
         }
 
         public virtual void Initialize()
         {
-            HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, LayerData.KeyFrameProfile, false, LayerData.Loop);
+            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, LayerData.KeyFrameProfile, false, LayerData.Loop);
         }
 
         public void AddNewLayer(AnimationLayer layerInfo)
@@ -77,7 +79,7 @@ namespace HunterCombatMR.AnimationEngine.Models
                 frameAmount = LayerData.KeyFrameProfile.DefaultKeyFrameSpeed;
             }
 
-            HunterCombatMR.AnimationKeyFrameManager.AdjustKeyFrameLength(Animation,
+            HunterCombatMR.Instance.AnimationKeyFrameManager.AdjustKeyFrameLength(Animation,
                         keyFrameIndex,
                         frameAmount,
                         !setAmount);
@@ -101,5 +103,14 @@ namespace HunterCombatMR.AnimationEngine.Models
             Animation.SetLoopMode(newLoopType);
             LayerData.Loop = newLoopType;
         }
+
+        public bool Equals(LayeredAnimatedAction other)
+        {
+            if (other?.Name == null || other?.LayerData == null)
+                return false;
+
+            return Name.Equals(other.Name) && LayerData.Equals(other.LayerData);
+        }
+        
     }
 }

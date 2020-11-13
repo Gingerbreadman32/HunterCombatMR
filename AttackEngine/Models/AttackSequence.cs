@@ -44,7 +44,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public void InitializeAttack(Attack attack)
         {
-            HunterCombatMR.AnimationKeyFrameManager.FillAnimationKeyFrames(attack.Animation, attack.FrameProfile);
+            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(attack.Animation, attack.FrameProfile);
             PlayerPeforming.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.AttackStartup;
 
             if (!attack.Animation.IsPlaying)
@@ -64,7 +64,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public void AddPossibleAttackFromName(string attackName)
         {
-            var attack = HunterCombatMR.LoadedAttacks.First(x => x.Name.Equals(attackName));
+            var attack = HunterCombatMR.Instance.LoadedAttacks.First(x => x.Name.Equals(attackName));
 
             PossibleAttacks.Add(attack);
         }

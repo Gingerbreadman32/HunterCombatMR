@@ -1,10 +1,15 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Comparers;
+using HunterCombatMR.Enumerations;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public sealed class LayeredAnimatedActionData
+        : IEquatable<LayeredAnimatedActionData>
     {
         public KeyFrameProfile KeyFrameProfile { get; set; }
 
@@ -29,9 +34,26 @@ namespace HunterCombatMR.AnimationEngine.Models
         public LayeredAnimatedActionData(LayeredAnimatedActionData copy)
         {
             KeyFrameProfile = copy.KeyFrameProfile;
-            Layers = new List<AnimationLayer>(copy.Layers);
+            Layers = new List<AnimationLayer>();
             ParentType = copy.ParentType;
             Loop = copy.Loop;
+
+            foreach (AnimationLayer layer in copy.Layers)
+            {
+                Layers.Add(new AnimationLayer(layer));
+            }
+        }
+
+        public bool Equals(LayeredAnimatedActionData other)
+        {
+            bool paramEquals = KeyFrameProfile.Equals(other.KeyFrameProfile)
+                && ParentType.Equals(other.ParentType)
+                && Loop.Equals(other.Loop);
+            LayerEqualityComparer comparer = new LayerEqualityComparer();
+
+            bool listEquals = comparer.Equals(Layers, other.Layers);
+
+            return paramEquals && listEquals;
         }
     }
 }
