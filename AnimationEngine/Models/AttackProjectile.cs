@@ -13,7 +13,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         : ModProjectile,
         IAnimated
     {
-        public IAnimation Animation { get; set; }
+        public AnimatedData AnimationData { get; set; }
 
         public ICollection<Hitbox> Hitboxes { get; set; }
 
@@ -22,14 +22,14 @@ namespace HunterCombatMR.AnimationEngine.Models
         public AttackProjectile()
             : base()
         {
-            Animation = new StandardAnimation();
+            AnimationData = new AnimatedData();
             Hitboxes = new List<Hitbox>();
             SetupKeyFrameProfile();
         }
 
         public override void SetDefaults()
         {
-            projectile.timeLeft = Animation.TotalFrames;
+            projectile.timeLeft = AnimationData.TotalFrames;
         }
 
         public override bool PreAI()
@@ -47,10 +47,10 @@ namespace HunterCombatMR.AnimationEngine.Models
             var projectiles = Main.player[projectile.owner].GetModPlayer<HunterCombatPlayer>().ActiveProjectiles;
             var active = projectiles.Contains(projectile.Name);
 
-            if (!Animation.InProgress && active)
+            if (!AnimationData.InProgress && active)
                 Play();
 
-            projectile.frame = Animation.KeyFrames.IndexOf(Animation.GetCurrentKeyFrame());
+            projectile.frame = AnimationData.KeyFrames.IndexOf(AnimationData.GetCurrentKeyFrame());
 
             if (active)
                 return base.PreDraw(spriteBatch, lightColor);
@@ -77,45 +77,45 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public virtual void Initialize()
         {
-            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, FrameProfile, false);
+            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(AnimationData, FrameProfile, false);
         }
 
         public override ModProjectile NewInstance(Projectile projectileClone)
         {
             AttackProjectile obj = (AttackProjectile)base.NewInstance(projectileClone);
-            obj.Animation = Animation;
+            obj.AnimationData = AnimationData;
             obj.Hitboxes = Hitboxes;
-            obj.projectile.timeLeft = Animation.TotalFrames;
+            obj.projectile.timeLeft = AnimationData.TotalFrames;
             return obj;
         }
 
         public void Pause()
         {
-            if (Animation.IsPlaying)
-                Animation.PauseAnimation();
+            if (AnimationData.IsPlaying)
+                AnimationData.PauseAnimation();
         }
 
         public void Play()
         {
-            if (!Animation.IsPlaying)
-                Animation.StartAnimation();
+            if (!AnimationData.IsPlaying)
+                AnimationData.StartAnimation();
         }
 
         public void Stop()
         {
-            Animation.StopAnimation();
+            AnimationData.StopAnimation();
         }
 
         public void Restart()
         {
-            Animation.ResetAnimation(true);
+            AnimationData.ResetAnimation(true);
         }
 
         public virtual void Update()
         {
-            if (Animation.IsPlaying && Animation.CurrentFrame < Animation.GetFinalFrame())
+            if (AnimationData.IsPlaying && AnimationData.CurrentFrame < AnimationData.GetFinalFrame())
             {
-                Animation.AdvanceFrame();
+                AnimationData.AdvanceFrame();
             }
         }
 

@@ -5,8 +5,7 @@ using System.Collections.Generic;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public class StandardAnimation
-        : IAnimation
+    public class AnimatedData
     {
         public List<KeyFrame> KeyFrames { get; set; }
 
@@ -25,7 +24,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <summary>
         /// Default constructor
         /// </summary>
-        public StandardAnimation()
+        public AnimatedData()
         {
             IsInitialized = false;
             KeyFrames = new List<KeyFrame>();
@@ -39,7 +38,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// Copy constructor
         /// </summary>
         /// <param name="animation">The previous animation</param>
-        public StandardAnimation(IAnimation animation)
+        public AnimatedData(AnimatedData animation)
         {
             IsInitialized = false;
             CurrentFrame = animation.CurrentFrame;

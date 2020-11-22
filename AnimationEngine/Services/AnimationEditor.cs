@@ -2,6 +2,7 @@
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -53,7 +54,7 @@ namespace AnimationEngine.Services
         }
 
         public bool DrawOnionSkin(PlayerDrawInfo drawInfo,
-            LayeredAnimatedActionData layerData,
+            LayerData layerData,
             int keyFrameToDraw,
             Color color)
         {
@@ -75,12 +76,13 @@ namespace AnimationEngine.Services
             return true;
         }
 
-        public void AdjustPositionLogic(LayeredAnimatedAction animation)
+        public void AdjustPositionLogic(ActionAnimation animation,
+            int direction = 1)
         {
             List<string> framelessNames = new List<string>(HighlightedLayers);
             framelessNames.ForEach(layerName => layerName = layerName.Split('-')[0].Trim());
             Vector2 mousePosition = new Vector2(Main.mouseX, Main.mouseY);
-            int currentFrame = animation.Animation.GetCurrentKeyFrameIndex();
+            int currentFrame = animation.AnimationData.GetCurrentKeyFrameIndex();
             foreach (string layerName in framelessNames)
             {
                 AnimationLayer layer = animation.LayerData.Layers.FirstOrDefault(x => x.Name.Equals(layerName));
@@ -88,7 +90,10 @@ namespace AnimationEngine.Services
                 if (layer == null)
                     continue;
 
-                layer.SetPositionAtFrame(currentFrame, NudgeLogic(layer.Frames[currentFrame].Position));
+                if (layer.Frames[currentFrame].SpriteOrientation.Equals(SpriteEffects.FlipHorizontally))
+                    direction *= -1;
+
+                layer.SetPositionAtFrame(currentFrame, NudgeLogic(layer.Frames[currentFrame].Position, direction));
             }
             /*
             if (SelectedLayer == layerName)
@@ -107,7 +112,8 @@ namespace AnimationEngine.Services
             */
         }
 
-        private Vector2 NudgeLogic(Vector2 initialPosition)
+        private Vector2 NudgeLogic(Vector2 initialPosition,
+            int direction)
         {
             var highlightedNudge = new Point();
 
@@ -133,13 +139,13 @@ namespace AnimationEngine.Services
                 else if (PlayerInput.Triggers.JustReleased.Left)
                 {
                     var nudgeAmount = (initialPosition.X % 2 == 0 || initialPosition.X == 0) ? 2 : 1;
-                    var newNudge = new Point(-1, 0);
+                    var newNudge = new Point(-1 * direction, 0);
                     highlightedNudge = newNudge;
                 }
                 else if (PlayerInput.Triggers.JustReleased.Right)
                 {
                     var nudgeAmount = (initialPosition.X % 2 == 0 || initialPosition.X == 0) ? 2 : 1;
-                    var newNudge = new Point(1, 0);
+                    var newNudge = new Point(1 * direction, 0);
                     highlightedNudge = newNudge;
                 } else
                 {

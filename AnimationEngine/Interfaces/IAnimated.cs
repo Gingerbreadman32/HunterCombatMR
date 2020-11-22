@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Enumerations;
 
 namespace HunterCombatMR.AnimationEngine.Interfaces
 {
@@ -6,7 +7,7 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
     {
         string Name { get; }
 
-        IAnimation Animation { get; }
+        AnimatedData AnimationData { get; }
 
         void Initialize();
 

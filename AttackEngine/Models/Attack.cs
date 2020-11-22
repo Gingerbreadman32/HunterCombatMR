@@ -10,7 +10,7 @@ namespace HunterCombatMR.AttackEngine.Models
     public abstract class Attack
         : IComboable
     {
-        public IAnimation Animation { get; set; }
+        public AnimatedData Animation { get; set; }
 
         public IEnumerable<AttackProjectile> AttackProjectiles { get; set; }
 
@@ -28,7 +28,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public Attack()
         {
-            Animation = new StandardAnimation();
+            Animation = new AnimatedData();
             AttackProjectiles = new List<AttackProjectile>();
             Name = "Default";
             EstablishRoutes();
@@ -39,7 +39,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public Attack(Player player,
             Item item)
         {
-            Animation = new StandardAnimation();
+            Animation = new AnimatedData();
             AttackProjectiles = new List<AttackProjectile>();
             Name = "Default";
             PerformingPlayer = player;
@@ -50,7 +50,7 @@ namespace HunterCombatMR.AttackEngine.Models
         }
 
         public Attack(string name,
-            IAnimation animation,
+            AnimatedData animation,
             ICollection<AttackProjectile> attackProjectiles,
             Player player,
             Item item)

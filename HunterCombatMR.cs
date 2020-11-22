@@ -32,7 +32,7 @@ namespace HunterCombatMR
 
         public List<Attack> LoadedAttacks { get; private set; }
 
-        public List<LayeredAnimatedAction> LoadedAnimations { get; private set; }
+        public List<ActionAnimation> LoadedAnimations { get; private set; }
 
         public KeyFrameManager AnimationKeyFrameManager { get; private set; }
 
@@ -60,7 +60,7 @@ namespace HunterCombatMR
             }
 
             if (AnimLoader.Containers.Any())
-                LoadedAnimations = new List<LayeredAnimatedAction>(AnimLoader.RegisterAnimations());
+                LoadedAnimations = new List<ActionAnimation>(AnimLoader.RegisterAnimations());
         }
 
         public override void Load()
@@ -69,7 +69,7 @@ namespace HunterCombatMR
             AnimationKeyFrameManager = new KeyFrameManager();
             FileManager = new AnimationFileManager();
             LoadedAttacks = new List<Attack>();
-            LoadedAnimations = new List<LayeredAnimatedAction>();
+            LoadedAnimations = new List<ActionAnimation>();
             AnimLoader = new AnimationLoader();
 
             if (!Main.dedServ)
@@ -94,7 +94,7 @@ namespace HunterCombatMR
                 LoadedAnimations.AddRange(AnimLoader.RegisterAnimations(FileManager.LoadAnimations(typesToLoad)));
             } else
             {
-                LoadedAnimations = new List<LayeredAnimatedAction>();
+                LoadedAnimations = new List<ActionAnimation>();
             }
         }
 

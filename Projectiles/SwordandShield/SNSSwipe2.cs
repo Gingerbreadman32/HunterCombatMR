@@ -34,7 +34,7 @@ namespace HunterCombatMR.Projectiles.SwordandShield
             projectile.ownerHitCheck = true;
             projectile.aiStyle = -1;
             projectile.usesLocalNPCImmunity = true;
-            projectile.localNPCHitCooldown = Animation.TotalFrames;
+            projectile.localNPCHitCooldown = AnimationData.TotalFrames;
         }
 
         public override void AI()
