@@ -32,7 +32,7 @@ namespace HunterCombatMR
 
         public PlayerBufferInformation InputBufferInfo { get; set; }
 
-        public LayeredAnimatedAction CurrentAnimation { get; private set; }
+        public ActionAnimation CurrentAnimation { get; private set; }
 
         public bool ShowDefaultLayers { get; private set; }
 
@@ -89,8 +89,11 @@ namespace HunterCombatMR
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                if (CurrentAnimation != null && CurrentAnimation.Animation.GetCurrentKeyFrameIndex() > 0)
-                    ShowDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo, CurrentAnimation.LayerData, CurrentAnimation.Animation.GetCurrentKeyFrameIndex() - 1, Color.White);
+                if (CurrentAnimation != null && CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() > 0)
+                    ShowDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo, 
+                            CurrentAnimation.LayerData, 
+                            CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() - 1, 
+                            Color.White);
                 else
                     ShowDefaultLayers = true;
 
@@ -136,9 +139,9 @@ namespace HunterCombatMR
                 }
 
                 var animLayers = CurrentAnimation.LayerData.Layers;
-                if (CurrentAnimation.Animation.IsInitialized)
+                if (CurrentAnimation.AnimationData.IsInitialized)
                 {
-                    var currentFrame = CurrentAnimation.Animation.GetCurrentKeyFrameIndex();
+                    var currentFrame = CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex();
 
                     foreach (var layer in animLayers.Where(f => f.Frames.ContainsKey(currentFrame)).OrderByDescending(x => x.Frames[currentFrame].LayerDepth))
                     {
@@ -210,15 +213,15 @@ namespace HunterCombatMR
         {
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode) && CurrentAnimation != null)
             {
-                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(CurrentAnimation);
+                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(CurrentAnimation, player.direction);
             }
 
             base.PostUpdate();
         }
 
-        public bool SetCurrentAnimation(LayeredAnimatedAction newAnimation)
+        public bool SetCurrentAnimation(ActionAnimation newAnimation)
         {
-            LayeredAnimatedAction newAnim = new LayeredAnimatedAction(newAnimation);
+            ActionAnimation newAnim = new ActionAnimation(newAnimation);
             CurrentAnimation = newAnim;
 
             return CurrentAnimation != null;

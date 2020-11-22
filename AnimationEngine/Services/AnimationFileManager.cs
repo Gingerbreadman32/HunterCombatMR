@@ -57,7 +57,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             return true;
         }
 
-        public FileSaveStatus SaveAnimation(LayeredAnimatedAction anim,
+        public FileSaveStatus SaveAnimation(ActionAnimation anim,
             bool overwrite = false)
         {
             FileSaveStatus status;
@@ -85,12 +85,12 @@ namespace HunterCombatMR.AnimationEngine.Services
             return status;
         }
 
-        public FileSaveStatus SaveAnimationNewName(LayeredAnimatedAction anim,
+        public FileSaveStatus SaveAnimationNewName(ActionAnimation anim,
             string newName,
             bool overwrite = false)
         {
             FileSaveStatus status;
-            LayeredAnimatedAction renamedAction = new LayeredAnimatedAction(newName, anim.LayerData);
+            ActionAnimation renamedAction = new ActionAnimation(newName, anim.LayerData);
 
             status = SaveAnimation(renamedAction, overwrite);
 
@@ -103,9 +103,9 @@ namespace HunterCombatMR.AnimationEngine.Services
             return status;
         }
 
-        public IEnumerable<LayeredAnimatedAction> LoadAnimations(IEnumerable<AnimationType> types)
+        public IEnumerable<ActionAnimation> LoadAnimations(IEnumerable<AnimationType> types)
         {
-            var actions = new List<LayeredAnimatedAction>();
+            var actions = new List<ActionAnimation>();
 
             foreach (var animType in types)
             {
@@ -121,7 +121,7 @@ namespace HunterCombatMR.AnimationEngine.Services
                 foreach (var file in files.Where(x => x.Contains(FileType)))
                 {
                     string json = File.ReadAllText(file);
-                    var action = JsonConvert.DeserializeObject<LayeredAnimatedAction>(json, serializerSettings);
+                    var action = JsonConvert.DeserializeObject<ActionAnimation>(json, serializerSettings);
                     if (action != null)
                         actions.Add(action);
                     else
@@ -132,7 +132,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             return actions;
         }
 
-        public LayeredAnimatedAction LoadAnimation(AnimationType type,
+        public ActionAnimation LoadAnimation(AnimationType type,
             string fileName)
         {
             var path = Path.Combine(FilePath, type.ToString());
@@ -145,7 +145,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             var file = Path.Combine(path, fileName + FileType);
 
             string json = File.ReadAllText(file);
-            var action = JsonConvert.DeserializeObject<LayeredAnimatedAction>(json, serializerSettings);
+            var action = JsonConvert.DeserializeObject<ActionAnimation>(json, serializerSettings);
             if (action != null)
             {
                 return action;

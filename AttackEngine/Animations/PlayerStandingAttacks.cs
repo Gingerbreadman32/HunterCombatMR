@@ -126,7 +126,7 @@ namespace HunterCombatMR.AttackEngine.Animations
             var timings = new Dictionary<int, int>() { { 2, 4 }, { 3, 8 }, { 4, 14 }, { 5, 4 }, { 7, 52 } };
 
             AnimatedActions.Add("SNS-StandingLL",
-                new LayeredAnimatedActionData(new KeyFrameProfile(keyframes, holdframes, timings),
+                new LayerData(new KeyFrameProfile(keyframes, holdframes, timings),
                     layers,
                     _animtype));
         }

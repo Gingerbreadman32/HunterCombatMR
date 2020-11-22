@@ -8,8 +8,8 @@ using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public sealed class LayeredAnimatedActionData
-        : IEquatable<LayeredAnimatedActionData>
+    public sealed class LayerData
+        : IEquatable<LayerData>
     {
         public KeyFrameProfile KeyFrameProfile { get; set; }
 
@@ -20,7 +20,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public LoopStyle Loop { get; set; }
         
         [JsonConstructor]
-        public LayeredAnimatedActionData(KeyFrameProfile frameProfile,
+        public LayerData(KeyFrameProfile frameProfile,
             IEnumerable<AnimationLayer> layers,
             AnimationType type,
             LoopStyle loop = 0)
@@ -31,7 +31,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             Loop = loop;
         }
 
-        public LayeredAnimatedActionData(LayeredAnimatedActionData copy)
+        public LayerData(LayerData copy)
         {
             KeyFrameProfile = copy.KeyFrameProfile;
             Layers = new List<AnimationLayer>();
@@ -44,7 +44,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
         }
 
-        public bool Equals(LayeredAnimatedActionData other)
+        public bool Equals(LayerData other)
         {
             bool paramEquals = KeyFrameProfile.Equals(other.KeyFrameProfile)
                 && ParentType.Equals(other.ParentType)
