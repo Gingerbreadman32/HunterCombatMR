@@ -60,6 +60,7 @@ namespace HunterCombatMR
         public override bool PreItemCheck()
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None)) {
+                player.itemTime = 0;
                 return false;
             }
             else
@@ -126,6 +127,11 @@ namespace HunterCombatMR
             return newColor;
         }
 
+        public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
+        {
+            base.ModifyDrawHeadLayers(layers);
+        }
+
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && CurrentAnimation != null)
@@ -184,7 +190,7 @@ namespace HunterCombatMR
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                player.stoned = true;
+                player.frozen = true;
                 player.immune = true;
                 player.immuneNoBlink = true;
                 player.immuneTime = 2;
