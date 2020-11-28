@@ -1,11 +1,6 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.Enumerations;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -14,12 +9,31 @@ namespace HunterCombatMR.AnimationEngine.Models
     {
         public string Name { get; protected set; }
         public LayerData LayerData { get; protected set; }
+
+        public abstract AnimationType AnimationType { get; }
+
         [JsonIgnore]
         public AnimatedData AnimationData { get; protected set; }
 
+        public abstract Animation Duplicate(string name);
+
+        public bool IsAnimationInitialized()
+            => AnimationData.IsInitialized;
+
+        /// <summary>
+        /// Run this to allow this animation to run. Is run when first established and after any changes.
+        /// </summary>
         public virtual void Initialize()
         {
             HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(AnimationData, LayerData.KeyFrameProfile, false, LayerData.Loop);
+        }
+
+        /// <summary>
+        /// Run this if you need to make changes to an animation and want to prevent anything from affecting it.
+        /// </summary>
+        public virtual void Uninitialize()
+        {
+            AnimationData.Uninitialize();
         }
 
         public void AddNewLayer(AnimationLayer layerInfo)
@@ -32,6 +46,14 @@ namespace HunterCombatMR.AnimationEngine.Models
             AnimationData.AdvanceFrame();
         }
 
+        public virtual void Draw()
+        {
+        }
+
+        public virtual void DrawEffects()
+        {
+        }
+
         public void Pause()
         {
             if (AnimationData.IsPlaying)
@@ -40,7 +62,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public void Play()
         {
-            if (!AnimationData.IsPlaying)
+            if (!AnimationData.IsPlaying && IsAnimationInitialized())
                 AnimationData.StartAnimation();
         }
 
@@ -87,8 +109,11 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public void UpdateLoopType(LoopStyle newLoopType)
         {
-            AnimationData.SetLoopMode(newLoopType);
-            LayerData.Loop = newLoopType;
+            if (IsAnimationInitialized())
+            {
+                AnimationData.SetLoopMode(newLoopType);
+                LayerData.Loop = newLoopType;
+            }
         }
     }
 }

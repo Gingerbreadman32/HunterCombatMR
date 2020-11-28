@@ -127,8 +127,7 @@ namespace HunterCombatMR.AttackEngine.Animations
 
             AnimatedActions.Add("SNS-StandingLL",
                 new LayerData(new KeyFrameProfile(keyframes, holdframes, timings),
-                    layers,
-                    _animtype));
+                    layers));
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
 
@@ -7,19 +6,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 {
     public class AnimatedData
     {
-        public List<KeyFrame> KeyFrames { get; set; }
-
-        public int TotalFrames { get; set; }
-
-        public int CurrentFrame { get; set; }
-
-        public bool IsPlaying { get; set; }
-
-        public bool IsInitialized { get; set; }
-
-        public bool InProgress { get; set; }
-
-        public LoopStyle LoopMode { get; set; }
+        #region Public Constructors
 
         /// <summary>
         /// Default constructor
@@ -49,14 +36,33 @@ namespace HunterCombatMR.AnimationEngine.Models
             KeyFrames.Sort();
         }
 
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public int CurrentFrame { get; set; }
+        public bool InProgress { get; set; }
+        public bool IsInitialized { get; set; }
+        public bool IsPlaying { get; set; }
+        public List<KeyFrame> KeyFrames { get; set; }
+
+        public LoopStyle LoopMode { get; set; }
+        public int TotalFrames { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
         /// <inheritdoc/>
-        public int GetTotalKeyFrames()
-            => KeyFrames.Count;
+        public void AddFrames(int frameAmount)
+        {
+            TotalFrames += frameAmount;
+        }
 
         /// <inheritdoc/>
         public void AdvanceFrame(int framesAdvancing = 1, bool bypassPause = false)
         {
-            if (IsPlaying || bypassPause)
+            if ((IsPlaying || bypassPause) && IsInitialized)
             {
                 if (CurrentFrame + framesAdvancing < TotalFrames)
                 {
@@ -70,18 +76,40 @@ namespace HunterCombatMR.AnimationEngine.Models
                             CurrentFrame = (TotalFrames - 1);
                             PauseAnimation();
                             break;
+
                         case LoopStyle.Once:
                             StopAnimation();
                             break;
+
                         case LoopStyle.Loop:
                             ResetAnimation(true);
                             break;
+
                         default:
                             throw new Exception("Loop mode not set!");
                     }
                 }
             }
         }
+
+        /// <inheritdoc/>
+        public void AdvanceToNextKeyFrame()
+        {
+            if (IsInitialized)
+            {
+                var nextKey = (GetCurrentKeyFrameIndex() < GetTotalKeyFrames() - 1) ? GetCurrentKeyFrameIndex() + 1 : GetCurrentKeyFrameIndex();
+
+                CurrentFrame = KeyFrames[nextKey].StartingFrameIndex;
+            }
+        }
+
+        /// <inheritdoc/>
+        public bool CheckCurrentKeyFrame(int keyFrameIndex)
+            => KeyFrames[keyFrameIndex].StartingFrameIndex.Equals(GetCurrentKeyFrame().StartingFrameIndex);
+
+        /// <inheritdoc/>
+        public bool CheckCurrentKeyFrameProgress(int relativeFrame)
+            => GetCurrentKeyFrameProgress().Equals(relativeFrame);
 
         /// <inheritdoc/>
         public KeyFrame GetCurrentKeyFrame()
@@ -95,25 +123,84 @@ namespace HunterCombatMR.AnimationEngine.Models
             throw new Exception("Error, no keyframes reflect current frame index!");
         }
 
+        public int GetCurrentKeyFrameIndex()
+                    => KeyFrames.IndexOf(GetCurrentKeyFrame());
+
         /// <inheritdoc/>
-        public void ReverseFrame(int framesReversing = 1)
+        public int GetCurrentKeyFrameProgress()
+            => CurrentFrame - GetCurrentKeyFrame().StartingFrameIndex;
+
+        /// <inheritdoc/>
+        public int GetFinalFrame()
+            => TotalFrames - 1;
+
+        /// <inheritdoc/>
+        public int GetTotalKeyFrames()
+            => KeyFrames.Count;
+
+        public void Initialize()
         {
-            if (CurrentFrame - framesReversing >= 0)
-                CurrentFrame -= framesReversing;
+            if (KeyFrames.Count > 0)
+                IsInitialized = true;
             else
-                CurrentFrame = 0;
+                throw new Exception($"No Keyframes to initialize in animation!");
+        }
+
+        public void PauseAnimation()
+        {
+            IsPlaying = false;
+            InProgress = true;
         }
 
         /// <inheritdoc/>
-        public void AddFrames(int frameAmount)
+        public void ResetAnimation(bool startPlaying = true)
         {
-            TotalFrames += frameAmount;
+            SetCurrentFrame(0);
+
+            if (startPlaying)
+                StartAnimation();
+        }
+
+        /// <inheritdoc/>
+        public void ResetKeyFrames()
+        {
+            KeyFrames = new List<KeyFrame>();
+            TotalFrames = 0;
+        }
+
+        /// <inheritdoc/>
+        public void ReverseFrame(int framesReversing = 1)
+        {
+            if (IsInitialized)
+            {
+                if (CurrentFrame - framesReversing >= 0)
+                    CurrentFrame -= framesReversing;
+                else
+                    CurrentFrame = 0;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void ReverseToPreviousKeyFrame()
+        {
+            if (IsInitialized)
+            {
+                var lastKey = (GetCurrentKeyFrameIndex() > 0) ? GetCurrentKeyFrameIndex() - 1 : GetCurrentKeyFrameIndex();
+
+                CurrentFrame = KeyFrames[lastKey].StartingFrameIndex;
+            }
         }
 
         /// <inheritdoc/>
         public void SetCurrentFrame(int newFrame)
         {
             CurrentFrame = newFrame;
+        }
+
+        /// <inheritdoc/>
+        public void SetLoopMode(LoopStyle loopMode)
+        {
+            LoopMode = loopMode;
         }
 
         /// <inheritdoc/>
@@ -131,80 +218,13 @@ namespace HunterCombatMR.AnimationEngine.Models
             ResetAnimation(false);
         }
 
-        public void PauseAnimation()
-        {
-            IsPlaying = false;
-            InProgress = true;
-        }
-
-        /// <inheritdoc/>
-        public void ResetKeyFrames()
-        {
-            KeyFrames = new List<KeyFrame>();
-            TotalFrames = 0;
-        }
-
-        /// <inheritdoc/>
-        public bool CheckCurrentKeyFrame(int keyFrameIndex)
-            => KeyFrames[keyFrameIndex].StartingFrameIndex.Equals(GetCurrentKeyFrame().StartingFrameIndex);
-
-        /// <inheritdoc/>
-        public int GetCurrentKeyFrameProgress()
-            => CurrentFrame - GetCurrentKeyFrame().StartingFrameIndex;
-
-        /// <inheritdoc/>
-        public bool CheckCurrentKeyFrameProgress(int relativeFrame)
-            => GetCurrentKeyFrameProgress().Equals(relativeFrame);
-
-        /// <inheritdoc/>
-        public void ResetAnimation(bool startPlaying = true)
-        {
-            SetCurrentFrame(0);
-
-            if (startPlaying)
-                StartAnimation();
-        }
-
-        /// <inheritdoc/>
-        public int GetFinalFrame()
-            => TotalFrames - 1;
-
-        public void Initialize()
-        {
-            if (KeyFrames.Count > 0)
-                IsInitialized = true;
-            else
-                throw new Exception($"No Keyframes to initialize in animation!");
-        }
-
-        public int GetCurrentKeyFrameIndex()
-            => KeyFrames.IndexOf(GetCurrentKeyFrame());
-
-        /// <inheritdoc/>
-        public void AdvanceToNextKeyFrame()
-        {
-            var nextKey = (GetCurrentKeyFrameIndex() < GetTotalKeyFrames() - 1) ? GetCurrentKeyFrameIndex() + 1 : GetCurrentKeyFrameIndex();
-
-            CurrentFrame = KeyFrames[nextKey].StartingFrameIndex;
-        }
-
-        /// <inheritdoc/>
-        public void ReverseToPreviousKeyFrame()
-        {
-            var lastKey = (GetCurrentKeyFrameIndex() > 0) ? GetCurrentKeyFrameIndex() - 1 : GetCurrentKeyFrameIndex();
-
-            CurrentFrame = KeyFrames[lastKey].StartingFrameIndex;
-        }
-
-        /// <inheritdoc/>
-        public void SetLoopMode(LoopStyle loopMode)
-            => LoopMode = loopMode;
-
         /// <inheritdoc/>
         public void Uninitialize()
         {
             StopAnimation();
             IsInitialized = false;
         }
+
+        #endregion Public Methods
     }
 }

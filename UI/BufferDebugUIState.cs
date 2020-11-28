@@ -2,6 +2,8 @@
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -16,6 +18,8 @@ namespace HunterCombatMR.UI
     public class BufferDebugUIState
         : UIState
     {
+        #region Public Properties
+
         public HunterCombatPlayer Player
         {
             get
@@ -28,46 +32,72 @@ namespace HunterCombatMR.UI
             }
         }
 
+        #endregion Public Properties
+
+        #region Private Fields
+
+        private const int SAVETIMERMAX = 120;
+        private UIAutoScaleTextTextPanel<string> _addtimebutton;
+        private UIAutoScaleTextTextPanel<string> _advanceframe;
+        private UIElement _animationgroup;
+        private TextBox _animationname;
+        private UIPanel _animationtoolpanel;
+        private UIPanel _bufferpanel;
+        private UIText _currentframetime;
         private HunterCombatPlayer _currentPlayer;
 
-        private UIAutoScaleTextTextPanel<string> _modeswitch;
-
-        private UIPanel _bufferpanel;
-
-        private UIPanel _layerpanel;
-
-        private UIPanel _testlistpanel;
-        private UIList _testlist;
-
-        private UIPanel _animationtoolpanel;
-
-        private UIElement _framegroup;
-        private UIAutoScaleTextTextPanel<string> _reverseframe;
-        private UIText _framenum;
-        private UIAutoScaleTextTextPanel<string> _advanceframe;
-
-        private UIElement _animationgroup;
-        private UIAutoScaleTextTextPanel<string> _playpause;
-        private UIAutoScaleTextTextPanel<string> _stop;
-        private UIAutoScaleTextTextPanel<string> _looptype;
-
-        private UIElement _timinggroup;
-        private UIText _frametotal;
-        private UIText _currentframetime;
-        private UIAutoScaleTextTextPanel<string> _addtimebutton;
-        private UIAutoScaleTextTextPanel<string> _subtimebutton;
         private UIAutoScaleTextTextPanel<string> _defaulttimebutton;
-
-        private UIAutoScaleTextTextPanel<string> _savebutton;
+        private UIElement _framegroup;
+        private UIText _framenum;
+        private UIText _frametotal;
+        private UIPanel _layerpanel;
         private UIAutoScaleTextTextPanel<string> _loadbutton;
-
+        private UIAutoScaleTextTextPanel<string> _looptype;
+        private UIAutoScaleTextTextPanel<string> _modeswitch;
         private UIAutoScaleTextTextPanel<string> _onionskinbutton;
-
-        private int saveTimer = 0;
+        private UIAutoScaleTextTextPanel<string> _playpause;
+        private UIAutoScaleTextTextPanel<string> _reverseframe;
+        private UIAutoScaleTextTextPanel<string> _savebutton;
+        private UIAutoScaleTextTextPanel<string> _stop;
+        private UIAutoScaleTextTextPanel<string> _subtimebutton;
+        private UIList _testlist;
+        private UIPanel _testlistpanel;
+        private UIElement _timinggroup;
         private int loadTimer = 0;
-        private const int SAVETIMERMAX = 120;
+        private int saveTimer = 0;
 
-        private TextBox _animationname;
+        #endregion Private Fields
+
+        #region Public Methods
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            if (_currentPlayer != null)
+            {
+                /*
+                // Top Line
+                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.position, 0, _currentPlayer.player.width);
+
+                // Bottom Line
+                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.BottomLeft, 0, _currentPlayer.player.width);
+
+                // Left Line
+                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.position, MathHelper.PiOver2, _currentPlayer.player.height);
+
+                // Right Line
+                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.TopRight, MathHelper.PiOver2, _currentPlayer.player.height);
+
+                // Vertical Midline
+                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.Top, MathHelper.PiOver2, _currentPlayer.player.height);
+                */
+
+                if (HunterCombatMR.Instance.EditorInstance.OnionSkin)
+                    _onionskinbutton.BorderColor = Color.White;
+                else
+                    _onionskinbutton.BorderColor = Color.Black;
+            }
+            base.Draw(spriteBatch);
+        }
 
         public override void OnInitialize()
         {
@@ -86,7 +116,7 @@ namespace HunterCombatMR.UI
                     Pixels = -65f
                 }
             }.WithFadedMouseOver();
-            _modeswitch.OnClick += ModeSwitch;
+            _modeswitch.OnClick += (evt, list) => ButtonAction(ModeSwitch, evt, list);
 
             Append(_modeswitch);
 
@@ -167,7 +197,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0f
             }.WithFadedMouseOver();
-            _reverseframe.OnClick += ReverseFrame;
+            _reverseframe.OnClick += (evt, list) => ButtonAction(ReverseFrame, evt, list, EditorModePreset.InEditor);
 
             _framenum = new UIText("0")
             {
@@ -184,7 +214,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 1f
             }.WithFadedMouseOver();
-            _advanceframe.OnClick += AdvanceFrame;
+            _advanceframe.OnClick += (evt, list) => ButtonAction(AdvanceFrame, evt, list, EditorModePreset.InEditor, true);
 
             _framegroup.Append(_reverseframe);
             _framegroup.Append(_framenum);
@@ -209,7 +239,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0f
             }.WithFadedMouseOver();
-            _playpause.OnClick += PlayPauseAnimation;
+            _playpause.OnClick += (evt, list) => ButtonAction(PlayPauseAnimation, evt, list, EditorModePreset.InEditor, true);
 
             _stop = new UIAutoScaleTextTextPanel<string>("Stop")
             {
@@ -221,7 +251,7 @@ namespace HunterCombatMR.UI
                 },
                 Left = new StyleDimension(0f, 0.25f)
             }.WithFadedMouseOver();
-            _stop.OnClick += StopAnimation;
+            _stop.OnClick += (evt, list) => ButtonAction(StopAnimation, evt, list, EditorModePreset.InEditor, true);
 
             _looptype = new UIAutoScaleTextTextPanel<string>("Loop")
             {
@@ -233,7 +263,7 @@ namespace HunterCombatMR.UI
                 },
                 Left = new StyleDimension(0f, 0.5f)
             }.WithFadedMouseOver();
-            _looptype.OnClick += LoopTypeChange;
+            _looptype.OnClick += (evt, list) => ButtonAction(LoopTypeChange, evt, list, EditorModePreset.InEditor, true);
 
             _animationgroup.Append(_playpause);
             _animationgroup.Append(_stop);
@@ -258,7 +288,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0f
             }.WithFadedMouseOver();
-            _subtimebutton.OnClick += SubtractFrameTime;
+            _subtimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(-1), evt, listen, EditorModePreset.EditOnly, true));
 
             _currentframetime = new UIText("0")
             {
@@ -275,7 +305,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0.20f
             }.WithFadedMouseOver();
-            _addtimebutton.OnClick += AddFrameTime;
+            _addtimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(1), evt, listen, EditorModePreset.EditOnly, true));
 
             _defaulttimebutton = new UIAutoScaleTextTextPanel<string>("Default")
             {
@@ -287,7 +317,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0.5f
             }.WithFadedMouseOver();
-            _defaulttimebutton.OnClick += ((evt, listen) => FrameTimeLogic(0, true));
+            _defaulttimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(0, true), evt, listen, EditorModePreset.EditOnly, true));
 
             _frametotal = new UIText("0")
             {
@@ -313,7 +343,7 @@ namespace HunterCombatMR.UI
                 },
                 Left = new StyleDimension(0, panelPercent)
             }.WithFadedMouseOver();
-            _savebutton.OnClick += SaveAnimation;
+            _savebutton.OnClick += (evt, list) => ButtonAction(SaveAnimation, evt, list, EditorModePreset.InEditor, true);
             _animationtoolpanel.Append(_savebutton);
 
             panelPercent += _savebutton.Width.Percent;
@@ -328,7 +358,7 @@ namespace HunterCombatMR.UI
                 },
                 Left = new StyleDimension(0, panelPercent)
             }.WithFadedMouseOver();
-            _loadbutton.OnClick += LoadAnimation;
+            _loadbutton.OnClick += (evt, list) => ButtonAction(ReloadAnimation, evt, list, EditorModePreset.InEditor, true);
             _animationtoolpanel.Append(_loadbutton);
 
             panelPercent += _loadbutton.Width.Percent;
@@ -391,10 +421,28 @@ namespace HunterCombatMR.UI
             drawgroup.Append(_onionskinbutton);
             othertoolpanel.Append(drawgroup);
 
+            UIAutoScaleTextTextPanel<string> duplicatebutton = new UIAutoScaleTextTextPanel<string>("New")
+            {
+                TextColor = Color.White,
+                Width = new StyleDimension(0, 0.1f),
+                Height =
+                {
+                    Pixels = 40f
+                },
+                Left = new StyleDimension(0, panelPercent)
+            }.WithFadedMouseOver();
+            duplicatebutton.OnClick += (evt, list) => ButtonAction((x, y) => 
+            { 
+                var newAnim = HunterCombatMR.Instance.DuplicateAnimation(_currentPlayer?.CurrentAnimation); 
+                _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadAnimation(newAnim));
+                _animationname.Text = newAnim;
+            }, evt, list, EditorModePreset.InEditor, true);
+            othertoolpanel.Append(duplicatebutton);
+
             Append(othertoolpanel);
 
             // Renameable Animation Name Text Box
-            _animationname = new TextBox("Animation Name", 64, true, true);
+            _animationname = new TextBox("Animation Name", HunterCombatMR.AnimationNameMax, true, true);
             _animationname.Left.Set(0f, 0f);
             _animationname.Top.Set(-_layerpanel.GetDimensions().Height, 0.5f);
             _animationname.TextColor = Color.White;
@@ -402,248 +450,6 @@ namespace HunterCombatMR.UI
             _animationname.ForbiddenCharacters = new char[]
                 { (char)32, '>', '<', ':', '"', '/', '\u005C', '|', '?', '*', '.'  };
             Append(_animationname);
-        }
-
-        private void Interact(UIMouseEvent evt, UIElement listeningElement)
-        {
-            TextBox element = (TextBox)listeningElement;
-            element.StartInteracting();
-        }
-
-        public override void Draw(SpriteBatch spriteBatch)
-        {
-            if (_currentPlayer != null)
-            {
-                /*
-                // Top Line
-                DrawLine(spriteBatch, _currentPlayer.player.position, 0, _currentPlayer.player.width);
-
-                // Bottom Line
-                DrawLine(spriteBatch, _currentPlayer.player.BottomLeft, 0, _currentPlayer.player.width);
-
-                // Left Line
-                DrawLine(spriteBatch, _currentPlayer.player.position, MathHelper.PiOver2, _currentPlayer.player.height);
-
-                // Right Line
-                DrawLine(spriteBatch, _currentPlayer.player.TopRight, MathHelper.PiOver2, _currentPlayer.player.height);
-
-                // Vertical Midline
-                DrawLine(spriteBatch, _currentPlayer.player.Top, MathHelper.PiOver2, _currentPlayer.player.height);
-                */
-
-                if (HunterCombatMR.Instance.EditorInstance.OnionSkin)
-                    _onionskinbutton.BorderColor = Color.White;
-                else
-                    _onionskinbutton.BorderColor = Color.Black;
-            }
-            base.Draw(spriteBatch);
-        }
-
-        private void DrawLine(SpriteBatch spriteBatch,
-            Vector2 position,
-            float direction,
-            float length)
-        {
-            Texture2D SimpleTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-            SimpleTexture.SetData(new[] { Color.White });
-
-            var origin = new Vector2(0f, 0.5f);
-            var scale = new Vector2(length, 2f);
-            spriteBatch.Draw(SimpleTexture, position - Main.screenPosition, null, Color.Red, direction, origin, scale, SpriteEffects.None, 0);
-        }
-
-        private void SaveAnimation(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.AnimationData.IsInitialized && saveTimer == 0)
-            {
-                FileSaveStatus saveStatus;
-                string animName = _currentPlayer.CurrentAnimation.Name;
-                string oldName;
-
-                if (_animationname.Interacting)
-                    return;
-                else if (!string.IsNullOrWhiteSpace(_animationname.Text) && _animationname.Text != animName)
-                {
-                    oldName = animName;
-                    animName = _animationname.Text;
-                    saveStatus = HunterCombatMR.Instance.FileManager.SaveAnimationNewName(_currentPlayer.CurrentAnimation, animName, true);
-
-                    if (HunterCombatMR.Instance.LoadedAnimations.Any(x => x.Name.Equals(oldName)))
-                    {
-                        HunterCombatMR.Instance.LoadedAnimations.Remove(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(oldName)));
-                        _testlist.Clear();
-                    }
-                }
-                else
-                {
-                    saveStatus = HunterCombatMR.Instance.FileManager.SaveAnimation(_currentPlayer.CurrentAnimation, true);
-                }
-
-                if (saveStatus == FileSaveStatus.Saved)
-                {
-                    saveTimer++;
-                    HunterCombatMR.Instance.LoadAnimation(_currentPlayer.CurrentAnimation.LayerData.ParentType, animName);
-                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(animName)));
-                }
-                else if (saveStatus == FileSaveStatus.Error)
-                {
-                    throw new System.Exception($"Animation could not save!");
-                }
-                else
-                {
-                    Main.NewText(saveStatus.ToString());
-                }
-
-                Main.PlaySound(SoundID.MenuTick);
-            }
-        }
-
-        private void LoadAnimation(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.AnimationData.IsInitialized && loadTimer == 0)
-            {
-                var loaded = HunterCombatMR.Instance.LoadAnimation(_currentPlayer.CurrentAnimation.LayerData.ParentType, _currentPlayer.CurrentAnimation.Name);
-                if (loaded)
-                {
-                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(_currentPlayer.CurrentAnimation.Name)));
-                    _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(0);
-                    loadTimer++;
-                    Main.PlaySound(SoundID.MenuTick);
-                }
-            }
-        }
-
-        private void AddFrameTime(UIMouseEvent evt, UIElement listeningElement)
-        {
-            FrameTimeLogic(1);
-        }
-
-        private void SubtractFrameTime(UIMouseEvent evt, UIElement listeningElement)
-        {
-            FrameTimeLogic(-1);
-        }
-
-        private void DefaultFrameTime(UIMouseEvent evt, UIElement listeningElement)
-        {
-            FrameTimeLogic(0, true);
-        }
-
-        private void FrameTimeLogic(int amount,
-            bool setFrame = false)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (_currentPlayer.CurrentAnimation != null && HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode) && _currentPlayer.CurrentAnimation.AnimationData.IsInitialized)
-            {
-                if (!_currentPlayer.CurrentAnimation.AnimationData.IsPlaying)
-                {
-                    var currentKeyframe = _currentPlayer.CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex();
-                    var defaultSpeed = false;
-
-                    if (amount == 0 && setFrame)
-                        defaultSpeed = true;
-                    else if (amount + _currentPlayer.CurrentAnimation.AnimationData.GetCurrentKeyFrame().FrameLength <= 0)
-                        return;
-
-                    _currentPlayer.CurrentAnimation.UpdateKeyFrameLength(currentKeyframe, amount, setFrame, defaultSpeed);
-
-                    _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(_currentPlayer.CurrentAnimation.AnimationData.KeyFrames[currentKeyframe].StartingFrameIndex);
-                }
-
-                Main.PlaySound(SoundID.MenuTick);
-            }
-        }
-
-        private void PlayPauseAnimation(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.AnimationData.IsInitialized)
-            {
-                if (!_currentPlayer.CurrentAnimation.AnimationData.IsPlaying)
-                    _currentPlayer.CurrentAnimation.Play();
-                else
-                    _currentPlayer.CurrentAnimation.Pause();
-
-                Main.PlaySound(SoundID.MenuTick);
-            }
-        }
-
-        private void StopAnimation(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.AnimationData.IsInitialized)
-            {
-                if (_currentPlayer.CurrentAnimation.AnimationData.InProgress)
-                    _currentPlayer.CurrentAnimation.Stop();
-
-                Main.PlaySound(SoundID.MenuTick);
-            }
-        }
-
-        private void LoopTypeChange(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.AnimationData.IsInitialized)
-            {
-                if (!_currentPlayer.CurrentAnimation.AnimationData.LoopMode.Equals(LoopStyle.PlayPause))
-                    _currentPlayer.CurrentAnimation.UpdateLoopType(_currentPlayer.CurrentAnimation.AnimationData.LoopMode + 1);
-                else
-                    _currentPlayer.CurrentAnimation.UpdateLoopType(0);
-
-                Main.PlaySound(SoundID.MenuTick);
-            }
-        }
-
-        private void AdvanceFrame(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.AnimationData.IsInitialized)
-            {
-                _currentPlayer.CurrentAnimation.AnimationData.AdvanceToNextKeyFrame();
-                Main.PlaySound(SoundID.MenuTick);
-            }
-        }
-
-        private void ReverseFrame(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (_currentPlayer.CurrentAnimation != null && !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) && _currentPlayer.CurrentAnimation.AnimationData.IsInitialized)
-            {
-                _currentPlayer.CurrentAnimation?.AnimationData.ReverseToPreviousKeyFrame();
-                Main.PlaySound(SoundID.MenuTick);
-            }
-        }
-
-        private void ModeSwitch(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
-            {
-                HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.None;
-            }
-            else
-            {
-                HunterCombatMR.Instance.EditorInstance.CurrentEditMode++;
-            }
         }
 
         public override void Update(GameTime gameTime)
@@ -768,7 +574,7 @@ namespace HunterCombatMR.UI
                         },
                         TextScale = 1f
                     }.WithFadedMouseOver();
-                    animationButton.OnClick += SelectAnimation;
+                    animationButton.OnClick += (evt, list) => ButtonAction(SelectAnimation, evt, list, EditorModePreset.InEditor);
                     if (!_testlist._items.Any(x => (x as UIAutoScaleTextTextPanel<string>).Text.Equals(animationButton.Text)))
                         _testlist.Add(animationButton);
                 }
@@ -792,30 +598,89 @@ namespace HunterCombatMR.UI
             }
         }
 
-        private void SelectAnimation(UIMouseEvent evt, UIElement listeningElement)
+        #endregion Public Methods
+
+        #region Internal Methods
+
+        internal void ButtonAction(Action<UIMouseEvent, UIElement> action,
+            UIMouseEvent evt,
+            UIElement listen,
+            EditorMode[] modeRestriction = null,
+            bool animationNeeded = false)
         {
-            UIAutoScaleTextTextPanel<string> button = (UIAutoScaleTextTextPanel<string>)listeningElement;
             if (_currentPlayer == null)
                 _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
 
-            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (modeRestriction == null || modeRestriction.Contains(HunterCombatMR.Instance.EditorInstance.CurrentEditMode) &&
+                    (!animationNeeded || (animationNeeded && _currentPlayer.CurrentAnimation != null)))
             {
-                _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(button.Text)));
+                action(evt, listen);
                 Main.PlaySound(SoundID.MenuTick);
+            }
+        }
+
+        #endregion Internal Methods
+
+        #region Private Methods
+
+        private void AdvanceFrame(UIMouseEvent evt, UIElement listeningElement)
+        {
+            _currentPlayer.CurrentAnimation?.AnimationData.AdvanceToNextKeyFrame();
+        }
+
+        private void DeselectAllFrames(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers != null && HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any())
+                HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Clear();
+        }
+
+        private void FrameTimeLogic(int amount,
+            bool setFrame = false)
+        {
+            if (_currentPlayer.CurrentAnimation.IsAnimationInitialized() && !_currentPlayer.CurrentAnimation.AnimationData.IsPlaying)
+            {
+                var currentKeyframe = _currentPlayer.CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex();
+                var defaultSpeed = false;
+
+                if (amount == 0 && setFrame)
+                    defaultSpeed = true;
+                else if (amount + _currentPlayer.CurrentAnimation.AnimationData.GetCurrentKeyFrame().FrameLength <= 0)
+                    return;
+
+                _currentPlayer.CurrentAnimation.UpdateKeyFrameLength(currentKeyframe, amount, setFrame, defaultSpeed);
+
+                _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(_currentPlayer.CurrentAnimation.AnimationData.KeyFrames[currentKeyframe].StartingFrameIndex);
             }
         }
 
         private void HighlightFrame(UIMouseEvent evt, UIElement listeningElement)
         {
-            if (_currentPlayer == null)
-                _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
+            string text = (listeningElement as UIText).Text.Split('-')[0].Trim();
+            if (Main.keyState.GetPressedKeys().Any(x => x.Equals(Keys.LeftShift)))
             {
-                UIText text = (UIText)listeningElement;
-                HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Clear();
-                HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Add(text.Text.Split('-')[0].Trim());
+                if (!HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(text)))
+                {
+                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Add(text);
+                }
+                else
+                {
+                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Remove(text);
+                }
             }
+            else
+            {
+                HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Clear();
+                if (!HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(text)))
+                {
+                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Add(text);
+                }
+            }
+        }
+
+        private void Interact(UIMouseEvent evt, UIElement listeningElement)
+        {
+            TextBox element = (TextBox)listeningElement;
+            element.StartInteracting();
         }
 
         private void ListVariables(UIPanel panel,
@@ -832,7 +697,8 @@ namespace HunterCombatMR.UI
                 if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(text.Split('-')[0].Trim())))
                     vartext.TextColor = Color.Red;
 
-                vartext.OnClick += HighlightFrame;
+                vartext.OnClick += (evt, list) => ButtonAction(HighlightFrame, evt, list, EditorModePreset.EditOnly);
+                vartext.OnRightClick += (evt, list) => ButtonAction(DeselectAllFrames, evt, list, EditorModePreset.EditOnly);
                 panel.Append(vartext);
                 if (topPadding < 100)
                 {
@@ -845,5 +711,127 @@ namespace HunterCombatMR.UI
                 }
             }
         }
+
+        private void LoopTypeChange(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (!_currentPlayer.CurrentAnimation.AnimationData.LoopMode.Equals(LoopStyle.PlayPause))
+                _currentPlayer.CurrentAnimation?.UpdateLoopType(_currentPlayer.CurrentAnimation.AnimationData.LoopMode + 1);
+            else
+                _currentPlayer.CurrentAnimation?.UpdateLoopType(0);
+        }
+
+        private void ModeSwitch(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
+            {
+                HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.None;
+            }
+            else
+            {
+                HunterCombatMR.Instance.EditorInstance.CurrentEditMode++;
+            }
+        }
+
+        private void PlayPauseAnimation(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (!_currentPlayer.CurrentAnimation.AnimationData.IsPlaying)
+                _currentPlayer.CurrentAnimation.Play();
+            else
+                _currentPlayer.CurrentAnimation.Pause();
+        }
+
+        private void ReloadAnimation(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (_currentPlayer.CurrentAnimation.IsAnimationInitialized() && loadTimer == 0)
+            {
+                var currentFrame = _currentPlayer.CurrentAnimation.AnimationData.CurrentFrame;
+                var loaded = HunterCombatMR.Instance.LoadAnimationFile(_currentPlayer.CurrentAnimation.AnimationType, _currentPlayer.CurrentAnimation.Name);
+                if (loaded)
+                {
+                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(_currentPlayer.CurrentAnimation.Name)));
+
+                    if (currentFrame > _currentPlayer.CurrentAnimation.AnimationData.GetFinalFrame() && currentFrame <= 0)
+                        currentFrame = 0;
+
+                    _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(currentFrame);
+                    loadTimer++;
+                }
+            }
+        }
+
+        private void ReverseFrame(UIMouseEvent evt, UIElement listeningElement)
+        {
+            _currentPlayer.CurrentAnimation?.AnimationData.ReverseToPreviousKeyFrame();
+        }
+
+        private void SaveAnimation(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (_currentPlayer.CurrentAnimation.IsAnimationInitialized() && saveTimer == 0)
+            {
+                FileSaveStatus saveStatus;
+                int currentFrame = _currentPlayer.CurrentAnimation.AnimationData.CurrentFrame;
+                string animName = _currentPlayer.CurrentAnimation.Name;
+                string oldName;
+
+                if (_animationname.Interacting)
+                {
+                    return;
+                }
+                else if (!string.IsNullOrWhiteSpace(_animationname.Text) && _animationname.Text != animName)
+                {
+                    oldName = animName;
+                    animName = _animationname.Text;
+                    _currentPlayer.CurrentAnimation.Uninitialize();
+                    saveStatus = HunterCombatMR.Instance.FileManager.SaveAnimationNewName(_currentPlayer.CurrentAnimation, animName, true);
+
+                    if (HunterCombatMR.Instance.LoadedAnimations.Any(x => x.Name.Equals(oldName)))
+                    {
+                        HunterCombatMR.Instance.LoadedAnimations.Remove(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(oldName)));
+                        _testlist.Clear();
+                    }
+                }
+                else
+                {
+                    _currentPlayer.CurrentAnimation.Uninitialize();
+                    saveStatus = HunterCombatMR.Instance.FileManager.SaveAnimation(_currentPlayer.CurrentAnimation, true);
+                }
+
+                if (saveStatus == FileSaveStatus.Saved)
+                {
+                    saveTimer++;
+                    HunterCombatMR.Instance.LoadAnimationFile(_currentPlayer.CurrentAnimation.AnimationType, animName);
+                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(animName)));
+
+                    if (currentFrame > _currentPlayer.CurrentAnimation.AnimationData.GetFinalFrame() && currentFrame <= 0)
+                        currentFrame = 0;
+
+                    _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(currentFrame);
+                }
+                else if (saveStatus == FileSaveStatus.Error)
+                {
+                    _currentPlayer.CurrentAnimation.Initialize();
+                    throw new System.Exception($"Animation could not save!");
+                }
+                else
+                {
+                    Main.NewText(saveStatus.ToString());
+                    _currentPlayer.CurrentAnimation.Initialize();
+                }
+            }
+        }
+
+        private void SelectAnimation(UIMouseEvent evt, UIElement listeningElement)
+        {
+            _currentPlayer?.SetCurrentAnimation(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals((listeningElement as UIAutoScaleTextTextPanel<string>).Text)));
+            _animationname.Text = _currentPlayer?.CurrentAnimation?.Name;
+        }
+
+        private void StopAnimation(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (_currentPlayer.CurrentAnimation.AnimationData.InProgress)
+                _currentPlayer.CurrentAnimation.Stop();
+        }
+
+        #endregion Private Methods
     }
 }

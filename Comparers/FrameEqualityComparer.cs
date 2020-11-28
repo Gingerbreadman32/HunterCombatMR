@@ -3,34 +3,38 @@ using System.Collections.Generic;
 
 namespace HunterCombatMR.Comparers
 {
-    internal class FrameEqualityComparer
-        : IEqualityComparer<Dictionary<int, LayerFrameInfo>>
+    internal class KeyFrameProfileEqualityComparer
+        : IEqualityComparer<KeyFrameProfile>
     {
-        public bool Equals(Dictionary<int, LayerFrameInfo> x, Dictionary<int, LayerFrameInfo> y)
+        public bool Equals(KeyFrameProfile x, KeyFrameProfile y)
         {
             // early-exit checks
             if (null == y)
                 return null == x;
             if (null == x)
                 return false;
-            if (x.Count != y.Count)
+            if (x.DefaultKeyFrameSpeed != y.DefaultKeyFrameSpeed)
+                return false;
+            if (x.KeyFrameAmount != y.KeyFrameAmount)
+                return false;
+            if (x.SpecificKeyFrameSpeeds.Count != y.SpecificKeyFrameSpeeds.Count)
                 return false;
 
-            foreach (int k in x.Keys)
+            foreach (int k in x.SpecificKeyFrameSpeeds.Keys)
             {
-                if (!y.ContainsKey(k))
+                if (!y.SpecificKeyFrameSpeeds.ContainsKey(k))
                     return false;
 
-                if (!x[k].Equals(y[k]))
+                if (!x.SpecificKeyFrameSpeeds[k].Equals(y.SpecificKeyFrameSpeeds[k]))
                     return false;
             }
 
             return true;
         }
 
-        public int GetHashCode(Dictionary<int, LayerFrameInfo> obj)
+        public int GetHashCode(KeyFrameProfile obj)
         {
-            return obj.Values.GetHashCode(); // lol
+            return obj.GetHashCode(); // lol
         }
     }
 }
