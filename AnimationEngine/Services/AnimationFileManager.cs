@@ -57,11 +57,11 @@ namespace HunterCombatMR.AnimationEngine.Services
             return true;
         }
 
-        public FileSaveStatus SaveAnimation(ActionAnimation anim,
+        public FileSaveStatus SaveAnimation(PlayerActionAnimation anim,
             bool overwrite = false)
         {
             FileSaveStatus status;
-            var animPath = AnimationPath(anim.Name, anim.LayerData.ParentType);
+            var animPath = AnimationPath(anim.Name, anim.AnimationType);
 
             if (!overwrite & File.Exists(animPath))
             {
@@ -85,27 +85,27 @@ namespace HunterCombatMR.AnimationEngine.Services
             return status;
         }
 
-        public FileSaveStatus SaveAnimationNewName(ActionAnimation anim,
+        public FileSaveStatus SaveAnimationNewName(PlayerActionAnimation anim,
             string newName,
             bool overwrite = false)
         {
             FileSaveStatus status;
-            ActionAnimation renamedAction = new ActionAnimation(newName, anim.LayerData);
+            PlayerActionAnimation renamedAction = new PlayerActionAnimation(newName, anim.LayerData);
 
             status = SaveAnimation(renamedAction, overwrite);
 
             if (!status.Equals(FileSaveStatus.Saved))
                 return status;
 
-            if (File.Exists(AnimationPath(anim.Name, anim.LayerData.ParentType)))
-                File.Delete(AnimationPath(anim.Name, anim.LayerData.ParentType));
+            if (File.Exists(AnimationPath(anim.Name, anim.AnimationType)))
+                File.Delete(AnimationPath(anim.Name, anim.AnimationType));
 
             return status;
         }
 
-        public IEnumerable<ActionAnimation> LoadAnimations(IEnumerable<AnimationType> types)
+        public IEnumerable<PlayerActionAnimation> LoadAnimations(IEnumerable<AnimationType> types)
         {
-            var actions = new List<ActionAnimation>();
+            var actions = new List<PlayerActionAnimation>();
 
             foreach (var animType in types)
             {
@@ -121,7 +121,7 @@ namespace HunterCombatMR.AnimationEngine.Services
                 foreach (var file in files.Where(x => x.Contains(FileType)))
                 {
                     string json = File.ReadAllText(file);
-                    var action = JsonConvert.DeserializeObject<ActionAnimation>(json, serializerSettings);
+                    var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
                     if (action != null)
                         actions.Add(action);
                     else
@@ -132,7 +132,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             return actions;
         }
 
-        public ActionAnimation LoadAnimation(AnimationType type,
+        public PlayerActionAnimation LoadAnimation(AnimationType type,
             string fileName)
         {
             var path = Path.Combine(FilePath, type.ToString());
@@ -145,7 +145,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             var file = Path.Combine(path, fileName + FileType);
 
             string json = File.ReadAllText(file);
-            var action = JsonConvert.DeserializeObject<ActionAnimation>(json, serializerSettings);
+            var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
             if (action != null)
             {
                 return action;

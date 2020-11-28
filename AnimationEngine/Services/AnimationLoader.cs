@@ -18,14 +18,14 @@ namespace HunterCombatMR.AnimationEngine.Services
             Containers.Add(container);
         }
 
-        public IEnumerable<ActionAnimation> RegisterAnimations()
+        public IEnumerable<PlayerActionAnimation> RegisterAnimations()
         {
-            var actions = new List<ActionAnimation>();
+            var actions = new List<PlayerActionAnimation>();
             foreach (var animation in Containers.SelectMany(x => x.AnimatedActions))
             {
                 if (!actions.Any(x => x.Name.Equals(animation.Key)))
                 {
-                    var action = new ActionAnimation(animation.Key, animation.Value);
+                    var action = new PlayerActionAnimation(animation.Key, animation.Value);
                     action.Initialize();
                     actions.Add(action);
                 }
@@ -33,9 +33,9 @@ namespace HunterCombatMR.AnimationEngine.Services
             return actions;
         }
 
-        public IEnumerable<ActionAnimation> RegisterAnimations(IEnumerable<ActionAnimation> loadedActions)
+        public IEnumerable<PlayerActionAnimation> RegisterAnimations(IEnumerable<PlayerActionAnimation> loadedActions)
         {
-            var actions = new List<ActionAnimation>();
+            var actions = new List<PlayerActionAnimation>();
             foreach (var animation in loadedActions)
             {
                 actions.Add(RegisterAnimation(animation));
@@ -43,7 +43,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             return actions;
         }
 
-        public ActionAnimation RegisterAnimation(ActionAnimation action)
+        public PlayerActionAnimation RegisterAnimation(PlayerActionAnimation action)
         {
             action.Initialize();
             return action;

@@ -65,8 +65,8 @@ namespace AnimationEngine.Services
 
             foreach (var layer in layerData.Layers.Where(f => f.Frames.ContainsKey(keyFrameToDraw)).OrderByDescending(x => x.Frames[keyFrameToDraw].LayerDepth))
             {
-                HunterCombatPlayer.CombatLimbDraw(drawInfo, 
-                    HunterCombatPlayer.CreateTextureString(layer.Name), 
+                PlayerActionAnimation.CombatLimbDraw(drawInfo,
+                    PlayerActionAnimation.CreateTextureString(layer.Name), 
                     layer.GetCurrentFrameRectangle(keyFrameToDraw), 
                     layer.Frames[keyFrameToDraw],
                     color)
@@ -76,13 +76,16 @@ namespace AnimationEngine.Services
             return true;
         }
 
-        public void AdjustPositionLogic(ActionAnimation animation,
+        public void AdjustPositionLogic(PlayerActionAnimation animation,
             int direction = 1)
         {
             List<string> framelessNames = new List<string>(HighlightedLayers);
             framelessNames.ForEach(layerName => layerName = layerName.Split('-')[0].Trim());
             Vector2 mousePosition = new Vector2(Main.mouseX, Main.mouseY);
             int currentFrame = animation.AnimationData.GetCurrentKeyFrameIndex();
+
+            var nudgeAmount = NudgeLogic();
+
             foreach (string layerName in framelessNames)
             {
                 AnimationLayer layer = animation.LayerData.Layers.FirstOrDefault(x => x.Name.Equals(layerName));
@@ -93,7 +96,10 @@ namespace AnimationEngine.Services
                 if (layer.Frames[currentFrame].SpriteOrientation.Equals(SpriteEffects.FlipHorizontally))
                     direction *= -1;
 
-                layer.SetPositionAtFrame(currentFrame, NudgeLogic(layer.Frames[currentFrame].Position, direction));
+                var layerNudgeAmount = nudgeAmount;
+                layerNudgeAmount.X *= direction;
+
+                layer.SetPositionAtFrame(currentFrame, layer.Frames[currentFrame].Position + layerNudgeAmount);
             }
             /*
             if (SelectedLayer == layerName)
@@ -112,8 +118,7 @@ namespace AnimationEngine.Services
             */
         }
 
-        private Vector2 NudgeLogic(Vector2 initialPosition,
-            int direction)
+        private Vector2 NudgeLogic()
         {
             var highlightedNudge = new Point();
 
@@ -124,41 +129,35 @@ namespace AnimationEngine.Services
             else if (_nudgeCooldown == _nudgeCooldownMax)
             {
                 _nudgeCooldown--;
+                Point newNudge = new Point(0, 0);
                 if (PlayerInput.Triggers.JustReleased.Down)
                 {
-                    var nudgeAmount = (initialPosition.Y % 2 == 0 || initialPosition.Y == 0) ? 2 : 1;
-                    var newNudge = new Point(0, 1);
-                    highlightedNudge = newNudge;
+                    newNudge.Y = 1;
                 }
                 else if (PlayerInput.Triggers.JustReleased.Up)
                 {
-                    var nudgeAmount = (initialPosition.Y % 2 == 0 || initialPosition.Y == 0) ? 2 : 1;
-                    var newNudge = new Point(0, -1);
-                    highlightedNudge = newNudge;
+                    newNudge.Y = -1;
                 }
                 else if (PlayerInput.Triggers.JustReleased.Left)
                 {
-                    var nudgeAmount = (initialPosition.X % 2 == 0 || initialPosition.X == 0) ? 2 : 1;
-                    var newNudge = new Point(-1 * direction, 0);
-                    highlightedNudge = newNudge;
+                    newNudge.X = -1;
                 }
                 else if (PlayerInput.Triggers.JustReleased.Right)
                 {
-                    var nudgeAmount = (initialPosition.X % 2 == 0 || initialPosition.X == 0) ? 2 : 1;
-                    var newNudge = new Point(1 * direction, 0);
-                    highlightedNudge = newNudge;
+                    newNudge.X = 1;
                 } else
                 {
                     _nudgeCooldown++;
                 }
-                
+
+                highlightedNudge = newNudge;
             }
             else
             {
                 _nudgeCooldown = _nudgeCooldownMax;
             }
 
-            return initialPosition + highlightedNudge.ToVector2();
+            return highlightedNudge.ToVector2();
         }
     }
 }

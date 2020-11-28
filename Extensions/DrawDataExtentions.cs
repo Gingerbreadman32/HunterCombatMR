@@ -39,8 +39,8 @@ namespace HunterCombatMR.Extensions
 
             if (flippedHori && flippedVert)
             {
-                value.effect = SpriteEffects.None;
-                value.rotation += MathHelper.Pi;
+                value.effect = SpriteEffects.FlipVertically | SpriteEffects.FlipHorizontally;
+                value.position = Vector2.Transform(value.position, Microsoft.Xna.Framework.Matrix.CreateScale(-1f, 1f, 1f));
             }
             else if (flippedVert)
             {

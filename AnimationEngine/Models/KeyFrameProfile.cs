@@ -1,9 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using HunterCombatMR.Comparers;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public struct KeyFrameProfile
+    public class KeyFrameProfile
+        : IEquatable<KeyFrameProfile>
     {
         public int KeyFrameAmount { get; set; }
         public int DefaultKeyFrameSpeed { get; set; }
@@ -21,6 +25,24 @@ namespace HunterCombatMR.AnimationEngine.Models
                 SpecificKeyFrameSpeeds = new Dictionary<int, int>(keyFrameSpeeds);
             else
                 SpecificKeyFrameSpeeds = new Dictionary<int, int>();
+        }
+
+        public KeyFrameProfile(KeyFrameProfile copy)
+        {
+            KeyFrameAmount = copy.KeyFrameAmount;
+            DefaultKeyFrameSpeed = copy.DefaultKeyFrameSpeed;
+
+            if (copy.SpecificKeyFrameSpeeds != null && copy.SpecificKeyFrameSpeeds.Any())
+                SpecificKeyFrameSpeeds = new Dictionary<int, int>(copy.SpecificKeyFrameSpeeds);
+            else
+                SpecificKeyFrameSpeeds = new Dictionary<int, int>();
+        }
+
+        public bool Equals(KeyFrameProfile other)
+        {
+            KeyFrameProfileEqualityComparer comparer = new KeyFrameProfileEqualityComparer();
+
+            return comparer.Equals(this, other);
         }
     }
 }
