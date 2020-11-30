@@ -98,9 +98,8 @@ namespace HunterCombatMR.AnimationEngine.Models
             return animLayers;
         }
 
-        public override Animation Duplicate(string name,
-            bool newFile = false)
-            => new PlayerActionAnimation(this, newFile) { Name = name };
+        public override Animation Duplicate(string name)
+            => new PlayerActionAnimation(this) { Name = name };
 
         public bool Equals(Animation other)
         {

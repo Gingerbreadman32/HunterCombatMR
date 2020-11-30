@@ -191,7 +191,8 @@ namespace HunterCombatMR
             base.PostUpdate();
         }
 
-        public bool SetCurrentAnimation(AnimationEngine.Models.Animation newAnimation)
+        public bool SetCurrentAnimation(AnimationEngine.Models.Animation newAnimation,
+            bool newFile = false)
         {
             if (newAnimation == null)
             {
@@ -199,7 +200,7 @@ namespace HunterCombatMR
                 return true;
             }
 
-            PlayerActionAnimation newAnim = new PlayerActionAnimation(newAnimation);
+            PlayerActionAnimation newAnim = new PlayerActionAnimation(newAnimation, newFile);
             CurrentAnimation = newAnim;
 
             return CurrentAnimation != null;

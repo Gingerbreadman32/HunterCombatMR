@@ -434,7 +434,7 @@ namespace HunterCombatMR.UI
             duplicatebutton.OnClick += (evt, list) => ButtonAction((x, y) => 
             { 
                 var newAnim = HunterCombatMR.Instance.DuplicateAnimation(_currentPlayer?.CurrentAnimation); 
-                _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.GetLoadedAnimation(newAnim));
+                _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.GetLoadedAnimation(newAnim), true);
                 _animationname.Text = newAnim;
             }, evt, list, EditorModePreset.EditOnly, true);
             panelPercent2 += duplicatebutton.Width.Percent;
