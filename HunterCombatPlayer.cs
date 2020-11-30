@@ -193,6 +193,12 @@ namespace HunterCombatMR
 
         public bool SetCurrentAnimation(AnimationEngine.Models.Animation newAnimation)
         {
+            if (newAnimation == null)
+            {
+                CurrentAnimation = null;
+                return true;
+            }
+
             PlayerActionAnimation newAnim = new PlayerActionAnimation(newAnimation);
             CurrentAnimation = newAnim;
 

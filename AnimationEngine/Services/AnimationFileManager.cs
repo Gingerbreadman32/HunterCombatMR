@@ -7,13 +7,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Terraria;
 
 namespace HunterCombatMR.AnimationEngine.Services
 {
     public sealed class AnimationFileManager
     {
+        #region Public Fields
+
         public static string FilePath = Path.Combine(HunterCombatMR.Instance.DataPath, "Animations");
         public static string FileType = ".json";
 
@@ -24,37 +25,83 @@ namespace HunterCombatMR.AnimationEngine.Services
             Formatting = Formatting.Indented
         };
 
+        #endregion Public Fields
+
+        #region Public Constructors
+
         public AnimationFileManager()
         {
             serializerSettings.Converters.Add(new KeyFrameProfileConverter());
             serializerSettings.Converters.Add(new RectangleConverter());
         }
 
+        #endregion Public Constructors
+
+        #region Public Methods
+
         public static string AnimationPath(string name,
             AnimationType type)
                 => Path.Combine(FilePath, type.ToString(), name + FileType);
 
-        public bool SetupFolders(IEnumerable<AnimationType> types)
+        public bool AnimationFileExists(string name,
+            AnimationType type)
+            => File.Exists(AnimationPath(name, type));
+
+        public bool AnimationFileExists(AnimationEngine.Models.Animation animation)
+            => AnimationFileExists(animation.Name, animation.AnimationType);
+
+        public PlayerActionAnimation LoadAnimation(AnimationType type,
+            string fileName)
         {
-            if (!Directory.GetParent(FilePath).Exists)
+            var path = Path.Combine(FilePath, type.ToString());
+            if (!Directory.Exists(FilePath) && !Directory.Exists(path))
             {
-                Directory.GetParent(FilePath).Create();
-                if (!Directory.Exists(FilePath))
-                {
-                    Directory.CreateDirectory(FilePath);
-                }
+                HunterCombatMR.Instance.StaticLogger.Warn($"No directory for animation type: {type.ToString()}");
+                return null;
             }
+
+            var file = Path.Combine(path, fileName + FileType);
+
+            string json = File.ReadAllText(file);
+            var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
+            if (action != null)
+            {
+                return action;
+            }
+            else
+            {
+                HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
+                return null;
+            }
+        }
+
+        public IEnumerable<PlayerActionAnimation> LoadAnimations(IEnumerable<AnimationType> types)
+        {
+            var actions = new List<PlayerActionAnimation>();
 
             foreach (var animType in types)
             {
-                var directory = Path.Combine(FilePath, animType.ToString());
-                if (Directory.GetParent(directory).Exists && !Directory.Exists(directory))
+                var path = Path.Combine(FilePath, animType.ToString());
+                if (!Directory.Exists(FilePath) && !Directory.Exists(path))
                 {
-                    Directory.CreateDirectory(directory);
+                    HunterCombatMR.Instance.StaticLogger.Warn($"No directory for animation type: {animType.ToString()}");
+                    return actions;
+                }
+
+                var files = Directory.GetFiles(path);
+
+                foreach (var file in files.Where(x => x.Contains(FileType)))
+                {
+                    string json = File.ReadAllText(file);
+                    var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
+                    if (action != null)
+                        actions.Add(action);
+                    else
+                        HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
                 }
             }
 
-            return true;
+            return actions;
         }
 
         public FileSaveStatus SaveAnimation(PlayerActionAnimation anim,
@@ -103,58 +150,40 @@ namespace HunterCombatMR.AnimationEngine.Services
             return status;
         }
 
-        public IEnumerable<PlayerActionAnimation> LoadAnimations(IEnumerable<AnimationType> types)
+        public bool SetupFolders(IEnumerable<AnimationType> types)
         {
-            var actions = new List<PlayerActionAnimation>();
+            if (!Directory.GetParent(FilePath).Exists)
+            {
+                Directory.GetParent(FilePath).Create();
+                if (!Directory.Exists(FilePath))
+                {
+                    Directory.CreateDirectory(FilePath);
+                }
+            }
 
             foreach (var animType in types)
             {
-                var path = Path.Combine(FilePath, animType.ToString());
-                if (!Directory.Exists(FilePath) && !Directory.Exists(path))
+                var directory = Path.Combine(FilePath, animType.ToString());
+                if (Directory.GetParent(directory).Exists && !Directory.Exists(directory))
                 {
-                    HunterCombatMR.Instance.StaticLogger.Warn($"No directory for animation type: {animType.ToString()}");
-                    return actions;
-                }
-
-                var files = Directory.GetFiles(path);
-
-                foreach (var file in files.Where(x => x.Contains(FileType)))
-                {
-                    string json = File.ReadAllText(file);
-                    var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
-                    if (action != null)
-                        actions.Add(action);
-                    else
-                        HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
+                    Directory.CreateDirectory(directory);
                 }
             }
 
-            return actions;
+            return true;
         }
 
-        public PlayerActionAnimation LoadAnimation(AnimationType type,
+        #endregion Public Methods
+
+        #region Internal Methods
+
+        internal void DeleteAnimation(AnimationType type,
             string fileName)
         {
-            var path = Path.Combine(FilePath, type.ToString());
-            if (!Directory.Exists(FilePath) && !Directory.Exists(path))
-            {
-                HunterCombatMR.Instance.StaticLogger.Warn($"No directory for animation type: {type.ToString()}");
-                return null;
-            }
-
-            var file = Path.Combine(path, fileName + FileType);
-
-            string json = File.ReadAllText(file);
-            var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
-            if (action != null)
-            {
-                return action;
-            }
-            else
-            {
-                HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
-                return null;
-            }
+            if (AnimationFileExists(fileName, type))
+                File.Delete(AnimationPath(fileName, type));
         }
+
+        #endregion Internal Methods
     }
 }
