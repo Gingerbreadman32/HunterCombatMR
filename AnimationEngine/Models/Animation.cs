@@ -50,8 +50,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
         }
 
-        public abstract Animation Duplicate(string name,
-            bool newFile = false);
+        public abstract Animation Duplicate(string name);
 
         /// <summary>
         /// Run this to allow this animation to run. Is run when first established and after any changes.

@@ -227,7 +227,7 @@ namespace HunterCombatMR
 
         internal string DuplicateAnimation(AnimationEngine.Models.Animation duplicate)
         {
-            var newAnim = duplicate.Duplicate(DuplicateName(duplicate.Name, 0), true);
+            var newAnim = duplicate.Duplicate(DuplicateName(duplicate.Name, 0));
             LoadedAnimations.Add(newAnim);
 
             if (duplicate == null)
