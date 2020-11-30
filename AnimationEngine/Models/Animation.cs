@@ -7,43 +7,38 @@ namespace HunterCombatMR.AnimationEngine.Models
     public abstract class Animation
         : IAnimated
     {
-        public string Name { get; protected set; }
-        public LayerData LayerData { get; protected set; }
+        #region Private Fields
 
-        public abstract AnimationType AnimationType { get; }
+        private bool _modified;
+
+        #endregion Private Fields
+
+        #region Public Properties
 
         [JsonIgnore]
         public AnimatedData AnimationData { get; protected set; }
 
-        public abstract Animation Duplicate(string name);
+        public abstract AnimationType AnimationType { get; }
 
-        public bool IsAnimationInitialized()
-            => AnimationData.IsInitialized;
-
-        /// <summary>
-        /// Run this to allow this animation to run. Is run when first established and after any changes.
-        /// </summary>
-        public virtual void Initialize()
+        [JsonIgnore]
+        public bool IsModified
         {
-            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(AnimationData, LayerData.KeyFrameProfile, false, LayerData.Loop);
+            get
+            {
+                return _modified;
+            }
         }
 
-        /// <summary>
-        /// Run this if you need to make changes to an animation and want to prevent anything from affecting it.
-        /// </summary>
-        public virtual void Uninitialize()
-        {
-            AnimationData.Uninitialize();
-        }
+        public LayerData LayerData { get; protected set; }
+        public string Name { get; protected set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         public void AddNewLayer(AnimationLayer layerInfo)
         {
             LayerData.Layers.Add(layerInfo);
-        }
-
-        public virtual void Update()
-        {
-            AnimationData.AdvanceFrame();
         }
 
         public virtual void Draw()
@@ -53,6 +48,19 @@ namespace HunterCombatMR.AnimationEngine.Models
         public virtual void DrawEffects()
         {
         }
+
+        public abstract Animation Duplicate(string name);
+
+        /// <summary>
+        /// Run this to allow this animation to run. Is run when first established and after any changes.
+        /// </summary>
+        public virtual void Initialize()
+        {
+            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(AnimationData, LayerData.KeyFrameProfile, false, LayerData.Loop);
+        }
+
+        public bool IsAnimationInitialized()
+                    => AnimationData.IsInitialized;
 
         public void Pause()
         {
@@ -66,19 +74,33 @@ namespace HunterCombatMR.AnimationEngine.Models
                 AnimationData.StartAnimation();
         }
 
+        public void Restart()
+        {
+            AnimationData.ResetAnimation(true);
+        }
+
         public void Stop()
         {
             Pause();
             AnimationData.ResetAnimation(false);
         }
 
-        public void Restart()
+        /// <summary>
+        /// Run this if you need to make changes to an animation and want to prevent anything from affecting it.
+        /// </summary>
+        public virtual void Uninitialize()
         {
-            AnimationData.ResetAnimation(true);
+            AnimationData.Uninitialize();
+        }
+
+        public virtual void Update()
+        {
+            AnimationData.AdvanceFrame();
         }
 
         public void UpdateKeyFrameLength(int keyFrameIndex, int frameAmount, bool setAmount = false, bool setDefault = false)
         {
+            _modified = true;
             var isModified = LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex);
 
             if (setDefault)
@@ -111,9 +133,12 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             if (IsAnimationInitialized())
             {
+                _modified = true;
                 AnimationData.SetLoopMode(newLoopType);
                 LayerData.Loop = newLoopType;
             }
         }
+
+        #endregion Public Methods
     }
 }

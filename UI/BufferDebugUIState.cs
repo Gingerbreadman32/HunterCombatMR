@@ -429,15 +429,37 @@ namespace HunterCombatMR.UI
                 {
                     Pixels = 40f
                 },
-                Left = new StyleDimension(0, panelPercent)
+                Left = new StyleDimension(0, panelPercent2)
             }.WithFadedMouseOver();
             duplicatebutton.OnClick += (evt, list) => ButtonAction((x, y) => 
             { 
                 var newAnim = HunterCombatMR.Instance.DuplicateAnimation(_currentPlayer?.CurrentAnimation); 
-                _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadAnimation(newAnim));
+                _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.GetLoadedAnimation(newAnim));
                 _animationname.Text = newAnim;
-            }, evt, list, EditorModePreset.InEditor, true);
+            }, evt, list, EditorModePreset.EditOnly, true);
+            panelPercent2 += duplicatebutton.Width.Percent;
             othertoolpanel.Append(duplicatebutton);
+
+            UIAutoScaleTextTextPanel<string> deletebutton = new UIAutoScaleTextTextPanel<string>("Delete")
+            {
+                TextColor = Color.White,
+                Width = new StyleDimension(0, 0.1f),
+                Height =
+                {
+                    Pixels = 40f
+                },
+                Left = new StyleDimension(0, panelPercent2)
+            }.WithFadedMouseOver();
+            deletebutton.OnClick += (evt, list) => ButtonAction((x, y) =>
+            {
+                AnimationEngine.Models.Animation animToDelete = _currentPlayer?.CurrentAnimation;
+                _currentPlayer.SetCurrentAnimation(null);
+                HunterCombatMR.Instance.DeleteAnimation(animToDelete);
+                _animationname.Text = string.Empty;
+                _testlist.Clear();
+            }, evt, list, EditorModePreset.EditOnly, true);
+            panelPercent2 += deletebutton.Width.Percent;
+            othertoolpanel.Append(deletebutton);
 
             Append(othertoolpanel);
 
@@ -585,10 +607,14 @@ namespace HunterCombatMR.UI
                 if (_currentPlayer?.CurrentAnimation != null)
                 {
                     UIAutoScaleTextTextPanel<string> listSelected = (UIAutoScaleTextTextPanel<string>)_testlist._items.FirstOrDefault(x => _currentPlayer.CurrentAnimation.Name.Equals((x as UIAutoScaleTextTextPanel<string>).Text));
-                    listSelected.TextColor = Color.Aqua;
-                    if (!_currentPlayer.CurrentAnimation.Equals(HunterCombatMR.Instance.LoadedAnimations.FirstOrDefault(x => x.Name.Equals(_animationname.Text))))
+                    if (listSelected != null)
                     {
-                        listSelected.TextColor = Color.OrangeRed;
+                        listSelected.TextColor = Color.Aqua;
+                        if (!_currentPlayer.CurrentAnimation.Equals(HunterCombatMR.Instance.LoadedAnimations.FirstOrDefault(x => x.Name.Equals(_animationname.Text)))
+                                || !HunterCombatMR.Instance.FileManager.AnimationFileExists(_currentPlayer?.CurrentAnimation))
+                        {
+                            listSelected.TextColor = Color.OrangeRed;
+                        }
                     }
                 }
             }

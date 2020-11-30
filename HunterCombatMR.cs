@@ -89,10 +89,12 @@ namespace HunterCombatMR
             }
         }
 
-        public AnimationEngine.Models.Animation LoadAnimation(string name)
-        {
-            return LoadedAnimations.FirstOrDefault(x => x.Name.Equals(name));
-        }
+        public AnimationEngine.Models.Animation GetLoadedAnimation(string name)
+            => LoadedAnimations.FirstOrDefault(x => x.Name.Equals(name));
+
+        public bool DoesLoadedAnimationExist(string name)
+            => LoadedAnimations.Any(x => x.Name.Equals(name));
+
 
         public bool LoadAnimationFile(AnimationType animationType,
             string fileName)
@@ -234,6 +236,16 @@ namespace HunterCombatMR
             }
 
             return newAnim.Name;
+        }
+
+        internal void DeleteAnimation(AnimationEngine.Models.Animation animation)
+        {
+            if (DoesLoadedAnimationExist(animation.Name))
+            {
+                LoadedAnimations.Remove(GetLoadedAnimation(animation.Name));
+            }
+
+            FileManager.DeleteAnimation(animation.AnimationType, animation.Name);
         }
 
         internal void SetUIPlayer(HunterCombatPlayer player)

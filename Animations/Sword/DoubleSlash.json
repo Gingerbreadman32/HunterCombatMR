@@ -1,0 +1,524 @@
+{
+  "AnimationType": 0,
+  "Name": "DoubleSlash",
+  "LayerData": {
+    "KeyFrameProfile": {
+      "KeyFrameAmount": 8,
+      "DefaultKeyFrameSpeed": 12,
+      "SpecificKeyFrameSpeeds": {
+        "2": 4,
+        "3": 8,
+        "4": 14,
+        "5": 4,
+        "7": 52
+      }
+    },
+    "Layers": [
+      {
+        "Frames": {
+          "0": {
+            "SpriteFrame": 0,
+            "Position": "3, 13",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 2,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "1": {
+            "SpriteFrame": 0,
+            "Position": "5, 15",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 2,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "2": {
+            "SpriteFrame": 1,
+            "Position": "5, 13",
+            "Rotation": 0.0,
+            "LayerDepthOverride": 4,
+            "LayerDepth": 4,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "3": {
+            "SpriteFrame": 1,
+            "Position": "5, 11",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 2,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "4": {
+            "SpriteFrame": 2,
+            "Position": "5, 13",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 2,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "6": {
+            "SpriteFrame": 3,
+            "Position": "1, 13",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 2,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "7": {
+            "SpriteFrame": 0,
+            "Position": "3, 13",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 2,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "5": {
+            "SpriteFrame": 1,
+            "Position": "5, 13",
+            "Rotation": 0.0,
+            "LayerDepthOverride": 4,
+            "LayerDepth": 4,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          }
+        },
+        "Name": "HC_Head",
+        "SpriteFrameRectangle": {
+          "X": 0,
+          "Y": 0,
+          "Width": 18,
+          "Height": 18
+        },
+        "DefaultDepth": 2
+      },
+      {
+        "Frames": {
+          "0": {
+            "SpriteFrame": 0,
+            "Position": "-13, 19",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "1": {
+            "SpriteFrame": 1,
+            "Position": "-5, 27",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "2": {
+            "SpriteFrame": 0,
+            "Position": "-15, 21",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 1
+          },
+          "3": {
+            "SpriteFrame": 2,
+            "Position": "17, 17",
+            "Rotation": 0.0,
+            "LayerDepthOverride": 4,
+            "LayerDepth": 4,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "4": {
+            "SpriteFrame": 2,
+            "Position": "17, 19",
+            "Rotation": 0.0,
+            "LayerDepthOverride": 4,
+            "LayerDepth": 4,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "6": {
+            "SpriteFrame": 3,
+            "Position": "-17, 25",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "7": {
+            "SpriteFrame": 0,
+            "Position": "-13, 21",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 2
+          },
+          "5": {
+            "SpriteFrame": 0,
+            "Position": "-15, 21",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 1
+          }
+        },
+        "Name": "HC_FrontArm",
+        "SpriteFrameRectangle": {
+          "X": 0,
+          "Y": 0,
+          "Width": 18,
+          "Height": 14
+        },
+        "DefaultDepth": 1
+      },
+      {
+        "Frames": {
+          "0": {
+            "SpriteFrame": 0,
+            "Position": "16, 30",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 5,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "1": {
+            "SpriteFrame": 1,
+            "Position": "16, 26",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 5,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "2": {
+            "SpriteFrame": 1,
+            "Position": "14, 26",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 5,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "3": {
+            "SpriteFrame": 2,
+            "Position": "-2, 14",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 5,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "4": {
+            "SpriteFrame": 2,
+            "Position": "0, 16",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 5,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "6": {
+            "SpriteFrame": 3,
+            "Position": "14, 26",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 5,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "7": {
+            "SpriteFrame": 4,
+            "Position": "16, 24",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 5,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "5": {
+            "SpriteFrame": 1,
+            "Position": "14, 26",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 5,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          }
+        },
+        "Name": "HC_BackArm",
+        "SpriteFrameRectangle": {
+          "X": 0,
+          "Y": 0,
+          "Width": 16,
+          "Height": 12
+        },
+        "DefaultDepth": 5
+      },
+      {
+        "Frames": {
+          "0": {
+            "SpriteFrame": 0,
+            "Position": "5, 24",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 4,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "1": {
+            "SpriteFrame": 1,
+            "Position": "7, 28",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 4,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "2": {
+            "SpriteFrame": 2,
+            "Position": "7, 24",
+            "Rotation": 0.0,
+            "LayerDepthOverride": 2,
+            "LayerDepth": 2,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "3": {
+            "SpriteFrame": 3,
+            "Position": "7, 22",
+            "Rotation": 0.0,
+            "LayerDepthOverride": 1,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "4": {
+            "SpriteFrame": 4,
+            "Position": "7, 24",
+            "Rotation": 0.0,
+            "LayerDepthOverride": 1,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "6": {
+            "SpriteFrame": 5,
+            "Position": "3, 26",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 4,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "7": {
+            "SpriteFrame": 6,
+            "Position": "5, 24",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 4,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "5": {
+            "SpriteFrame": 2,
+            "Position": "7, 24",
+            "Rotation": 0.0,
+            "LayerDepthOverride": 2,
+            "LayerDepth": 2,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          }
+        },
+        "Name": "HC_Body",
+        "SpriteFrameRectangle": {
+          "X": 0,
+          "Y": 0,
+          "Width": 22,
+          "Height": 16
+        },
+        "DefaultDepth": 4
+      },
+      {
+        "Frames": {
+          "0": {
+            "SpriteFrame": 0,
+            "Position": "-2, 39",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 3,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "1": {
+            "SpriteFrame": 1,
+            "Position": "0, 39",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 3,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "2": {
+            "SpriteFrame": 2,
+            "Position": "0, 39",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 3,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "3": {
+            "SpriteFrame": 3,
+            "Position": "0, 37",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 3,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "4": {
+            "SpriteFrame": 3,
+            "Position": "2, 37",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 3,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "6": {
+            "SpriteFrame": 4,
+            "Position": "-6, 39",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 3,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "7": {
+            "SpriteFrame": 5,
+            "Position": "-4, 39",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 3,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "5": {
+            "SpriteFrame": 2,
+            "Position": "0, 39",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 3,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          }
+        },
+        "Name": "HC_FrontLeg",
+        "SpriteFrameRectangle": {
+          "X": 0,
+          "Y": 0,
+          "Width": 16,
+          "Height": 14
+        },
+        "DefaultDepth": 3
+      },
+      {
+        "Frames": {
+          "0": {
+            "SpriteFrame": 0,
+            "Position": "11, 40",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 6,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "1": {
+            "SpriteFrame": 0,
+            "Position": "11, 40",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 6,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "2": {
+            "SpriteFrame": 1,
+            "Position": "11, 40",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 6,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "3": {
+            "SpriteFrame": 2,
+            "Position": "11, 36",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 6,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "4": {
+            "SpriteFrame": 1,
+            "Position": "13, 40",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 6,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "6": {
+            "SpriteFrame": 3,
+            "Position": "9, 40",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 6,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "7": {
+            "SpriteFrame": 4,
+            "Position": "11, 40",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 6,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          },
+          "5": {
+            "SpriteFrame": 1,
+            "Position": "11, 40",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 6,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0
+          }
+        },
+        "Name": "HC_BackLeg",
+        "SpriteFrameRectangle": {
+          "X": 0,
+          "Y": 0,
+          "Width": 18,
+          "Height": 16
+        },
+        "DefaultDepth": 6
+      }
+    ],
+    "Loop": 0
+  }
+}
