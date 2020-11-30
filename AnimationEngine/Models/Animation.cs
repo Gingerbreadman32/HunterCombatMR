@@ -5,13 +5,14 @@ using Newtonsoft.Json;
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public abstract class Animation
-        : IAnimated
+        : IAnimated,
+        IModifiable
     {
-        #region Private Fields
+        #region Protected Fields
 
-        private bool _modified;
+        protected bool _modified;
 
-        #endregion Private Fields
+        #endregion Protected Fields
 
         #region Public Properties
 
@@ -49,7 +50,8 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
         }
 
-        public abstract Animation Duplicate(string name);
+        public abstract Animation Duplicate(string name,
+            bool newFile = false);
 
         /// <summary>
         /// Run this to allow this animation to run. Is run when first established and after any changes.
@@ -101,7 +103,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void UpdateKeyFrameLength(int keyFrameIndex, int frameAmount, bool setAmount = false, bool setDefault = false)
         {
             _modified = true;
-            var isModified = LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex);
+            var profileModified = LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex);
 
             if (setDefault)
             {
@@ -114,7 +116,7 @@ namespace HunterCombatMR.AnimationEngine.Models
                         frameAmount,
                         !setAmount);
 
-            if (isModified)
+            if (profileModified)
             {
                 LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Remove(keyFrameIndex);
 

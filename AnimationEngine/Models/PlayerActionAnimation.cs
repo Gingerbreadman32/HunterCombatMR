@@ -38,12 +38,14 @@ namespace HunterCombatMR.AnimationEngine.Models
             LayerData = layerData;
         }
 
-        public PlayerActionAnimation(Animation copy)
+        public PlayerActionAnimation(Animation copy,
+            bool newFile = false)
         {
             Name = copy.Name;
             AnimationData = new AnimatedData(copy.AnimationData);
             HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(AnimationData);
             LayerData = new LayerData(copy.LayerData);
+            _modified = newFile;
         }
 
         #endregion Public Constructors
@@ -96,8 +98,9 @@ namespace HunterCombatMR.AnimationEngine.Models
             return animLayers;
         }
 
-        public override Animation Duplicate(string name)
-            => new PlayerActionAnimation(this) { Name = name };
+        public override Animation Duplicate(string name,
+            bool newFile = false)
+            => new PlayerActionAnimation(this, newFile) { Name = name };
 
         public bool Equals(Animation other)
         {
