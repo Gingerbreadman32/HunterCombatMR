@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HunterCombatMR", "HunterCombatMR.csproj", "{F73560AC-EA22-4496-9915-211BC39BB9AB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libvaxy", "..\..\..\..\..\..\..\..\Git\Libvaxy\Libvaxy.csproj", "{1F403661-F7CA-4CE5-B996-72548167E84F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tModLoader", "..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\tModLoader\Source\tModLoader.csproj", "{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}"
 EndProject
 Global
@@ -19,10 +17,6 @@ Global
 		{F73560AC-EA22-4496-9915-211BC39BB9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F73560AC-EA22-4496-9915-211BC39BB9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F73560AC-EA22-4496-9915-211BC39BB9AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F403661-F7CA-4CE5-B996-72548167E84F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F403661-F7CA-4CE5-B996-72548167E84F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F403661-F7CA-4CE5-B996-72548167E84F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F403661-F7CA-4CE5-B996-72548167E84F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
