@@ -13,7 +13,7 @@
     <tMLBuildServerPath>D:\Steam Games\steamapps\common\tModLoader\tModLoaderServer.exe</tMLBuildServerPath>
   </PropertyGroup>
   <Target Name="BuildMod" AfterTargets="Build">
-    <Exec Command="&quot;$(tMLBuildServerPath)&quot; -build $(ProjectDir) -eac $(TargetPath) -define &quot;$(DefineConstants)&quot; -unsafe $(AllowUnsafeBlocks)" />
+    <Exec Command="&quot;$(tMLBuildServerPath)&quot; -build $(ProjectDir) -eac $(TargetPath) -unsafe $(AllowUnsafeBlocks)" />
   </Target>
   <ItemGroup>
     <None Remove="Animations\Sword\DoubleSlash.json" />
