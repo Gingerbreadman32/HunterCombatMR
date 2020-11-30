@@ -391,10 +391,10 @@ namespace HunterCombatMR.UI
                 Height = new StyleDimension(0, 1f),
                 Width = new StyleDimension(35f, 0)
             }.WithFadedMouseOver();
-            flipbutton.OnClick += (evt, list) =>
+            flipbutton.OnClick += (evt, list) => ButtonAction((e, l) =>
             {
-                if (_currentPlayer != null && !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None)) { _currentPlayer.player.ChangeDir(-_currentPlayer.player.direction); }
-            };
+                _currentPlayer.player.ChangeDir(-_currentPlayer.player.direction);
+            }, evt, list, EditorModePreset.InEditor, false);
 
             playergroup.Append(flipbutton);
             othertoolpanel.Append(playergroup);
@@ -609,11 +609,12 @@ namespace HunterCombatMR.UI
                     UIAutoScaleTextTextPanel<string> listSelected = (UIAutoScaleTextTextPanel<string>)_testlist._items.FirstOrDefault(x => _currentPlayer.CurrentAnimation.Name.Equals((x as UIAutoScaleTextTextPanel<string>).Text));
                     if (listSelected != null)
                     {
-                        listSelected.TextColor = Color.Aqua;
-                        if (!_currentPlayer.CurrentAnimation.Equals(HunterCombatMR.Instance.LoadedAnimations.FirstOrDefault(x => x.Name.Equals(_animationname.Text)))
-                                || !HunterCombatMR.Instance.FileManager.AnimationFileExists(_currentPlayer?.CurrentAnimation))
+                        if (_currentPlayer.CurrentAnimation.IsModified)
                         {
                             listSelected.TextColor = Color.OrangeRed;
+                        } else
+                        {
+                            listSelected.TextColor = Color.Aqua;
                         }
                     }
                 }
