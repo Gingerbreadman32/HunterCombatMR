@@ -25,7 +25,6 @@
     <PackageReference Include="tModLoader.CodeAssist" Version="0.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="D:\Git\Libvaxy\Libvaxy.csproj" />
     <ProjectReference Include="D:\Steam Games\steamapps\common\tModLoader\Source\tModLoader.csproj" />
   </ItemGroup>
   <Import Project="HunterCombat.targets" />
