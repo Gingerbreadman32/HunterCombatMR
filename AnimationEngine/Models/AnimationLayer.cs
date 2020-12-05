@@ -11,7 +11,7 @@ namespace HunterCombatMR.AnimationEngine.Models
     public class AnimationLayer
         : IEquatable<AnimationLayer>
     {
-        public Dictionary<int, LayerFrameInfo> Frames { get; set; }
+        public Dictionary<int, LayerFrameInfo> KeyFrames { get; set; }
 
         /// <summary>
         /// Name of the layer
@@ -34,7 +34,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             byte defaultDepth = 1)
         {
             Name = name;
-            Frames = new Dictionary<int, LayerFrameInfo>();
+            KeyFrames = new Dictionary<int, LayerFrameInfo>();
             SpriteFrameRectangle = spriteframeRectangle;
             DefaultDepth = defaultDepth;
         }
@@ -42,13 +42,13 @@ namespace HunterCombatMR.AnimationEngine.Models
         public AnimationLayer(AnimationLayer copy)
         {
             Name = copy.Name;
-            Frames = new Dictionary<int, LayerFrameInfo>();
+            KeyFrames = new Dictionary<int, LayerFrameInfo>();
             SpriteFrameRectangle = copy.SpriteFrameRectangle;
             DefaultDepth = copy.DefaultDepth;
 
-            foreach (var frame in copy.Frames)
+            foreach (var frame in copy.KeyFrames)
             {
-                Frames.Add(frame.Key, new LayerFrameInfo(frame.Value, frame.Value.LayerDepth));
+                KeyFrames.Add(frame.Key, new LayerFrameInfo(frame.Value, frame.Value.LayerDepth));
             }
         }
 
@@ -59,28 +59,41 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             var initializedFrames = new Dictionary<int, LayerFrameInfo>();
 
-            foreach (var frame in Frames)
+            foreach (var frame in KeyFrames)
             {
                 LayerFrameInfo initializedFrame = new LayerFrameInfo(frame.Value, (frame.Value.LayerDepthOverride.HasValue) ? frame.Value.LayerDepthOverride.Value : DefaultDepth);
                 initializedFrames.Add(frame.Key, initializedFrame);
             }
 
-            Frames = initializedFrames;
+            KeyFrames = initializedFrames;
         }
 
-        public void SetPositionAtFrame(int frame,
+        public Vector2 GetPositionAtKeyFrame(int keyFrame)
+            => KeyFrames[keyFrame].Position;
+
+        internal void SetPositionAtKeyFrame(int keyFrame,
             Vector2 newPosition)
         {
-            Frames[frame] = new LayerFrameInfo(Frames[frame], Frames[frame].LayerDepth) { Position = newPosition };
+            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { Position = newPosition };
+        }
+
+        public byte GetDepthAtKeyFrame(int keyFrame)
+            => KeyFrames[keyFrame].LayerDepth;
+
+        internal void SetDepthAtKeyFrame(int keyFrame,
+            byte depth)
+        {
+            byte? newDepth = depth;
+            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], newDepth.Value) { LayerDepthOverride = (newDepth == DefaultDepth) ? null : newDepth };
         }
 
         public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
-            => SpriteFrameRectangle.SetSheetPositionFromFrame(Frames[currentKeyFrame].SpriteFrame);
+            => SpriteFrameRectangle.SetSheetPositionFromFrame(KeyFrames[currentKeyFrame].SpriteFrame);
 
         public bool Equals(AnimationLayer other)
         {
             FrameEqualityComparer comparer = new FrameEqualityComparer();
-            bool framesEqual = comparer.Equals(Frames, other.Frames);
+            bool framesEqual = comparer.Equals(KeyFrames, other.KeyFrames);
 
             return framesEqual
                 && Name.Equals(other.Name)

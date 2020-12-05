@@ -22,7 +22,8 @@ namespace HunterCombatMR.AnimationEngine.Models
             byte? depth = null,
             float rotation = 0,
             SpriteEffects flip = SpriteEffects.None,
-            string sheet = null)
+            string sheet = null,
+            bool enabled = true)
         {
             SpriteFrame = frame;
             Position = position;
@@ -31,6 +32,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             SheetNameOverride = sheet;
             SpriteOrientation = flip;
             LayerDepth = 255;
+            IsEnabled = enabled;
         }
 
         [JsonConstructor]
@@ -39,7 +41,8 @@ namespace HunterCombatMR.AnimationEngine.Models
             byte layerDepth,
             float rotation,
             SpriteEffects spriteOrientation,
-            string sheetNameOverride)
+            string sheetNameOverride,
+            bool enabled)
         {
             SpriteFrame = spriteFrame;
             Position = position;
@@ -47,6 +50,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             SheetNameOverride = sheetNameOverride;
             SpriteOrientation = spriteOrientation;
             LayerDepth = layerDepth;
+            IsEnabled = enabled;
 
             LayerDepthOverride = null;
         }
@@ -66,6 +70,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             SheetNameOverride = copy.SheetNameOverride;
             SpriteOrientation = copy.SpriteOrientation;
             LayerDepth = depth;
+            IsEnabled = copy.IsEnabled;
         }
 
         /// <summary>
@@ -103,6 +108,11 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public SpriteEffects SpriteOrientation { get; set; }
 
+        /// <summary>
+        /// Whether or not the sprite is enabled for this frame. Hides if false.
+        /// </summary>
+        public bool IsEnabled { get; set; }
+
         public bool Equals(LayerFrameInfo other)
             => SpriteFrame.Equals(other.SpriteFrame)
                 && Position.Equals(other.Position)
@@ -110,6 +120,7 @@ namespace HunterCombatMR.AnimationEngine.Models
                 && LayerDepthOverride == other.LayerDepthOverride
                 && LayerDepth.Equals(other.LayerDepth)
                 && SheetNameOverride == other.SheetNameOverride
-                && SpriteOrientation.Equals(other.SpriteOrientation);
+                && SpriteOrientation.Equals(other.SpriteOrientation)
+                && IsEnabled.Equals(other.IsEnabled);
     }
 }

@@ -62,6 +62,12 @@ namespace HunterCombatMR.AnimationEngine.Services
 
             var file = Path.Combine(path, fileName + FileType);
 
+            if (!File.Exists(file))
+            {
+                HunterCombatMR.Instance.StaticLogger.Warn($"{file} does not exist!");
+                return null;
+            }
+
             string json = File.ReadAllText(file);
             var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
             if (action != null)

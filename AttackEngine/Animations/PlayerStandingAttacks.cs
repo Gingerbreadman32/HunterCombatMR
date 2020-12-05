@@ -28,7 +28,7 @@ namespace HunterCombatMR.AttackEngine.Animations
 
             // ---- Head
             var headinfo = new AnimationLayer(LayerNames.Head, new Rectangle(0, 0, 22, 18), DefaultPlayerLayerDepths.Head);
-            headinfo.Frames = new Dictionary<int, LayerFrameInfo>()
+            headinfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(2,4))},
                 {1, new LayerFrameInfo(0, new Vector2(4,6))},
@@ -38,12 +38,12 @@ namespace HunterCombatMR.AttackEngine.Animations
                 {6, new LayerFrameInfo(3, new Vector2(2,4))},
                 {7, new LayerFrameInfo(0, new Vector2(2,4))}
             };
-            headinfo.Frames.Add(5, new LayerFrameInfo(headinfo.Frames[2], headinfo.Frames[2].LayerDepthOverride.GetValueOrDefault(DefaultPlayerLayerDepths.Body)));
+            headinfo.KeyFrames.Add(5, new LayerFrameInfo(headinfo.KeyFrames[2], headinfo.KeyFrames[2].LayerDepthOverride.GetValueOrDefault(DefaultPlayerLayerDepths.Body)));
             headinfo.Initialize();
 
             // ---- Front Arm
             var farminfo = new AnimationLayer(LayerNames.FrontArm, new Rectangle(0, 0, 18, 14), DefaultPlayerLayerDepths.FrontArm);
-            farminfo.Frames = new Dictionary<int, LayerFrameInfo>()
+            farminfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(-12,10))},
                 {1, new LayerFrameInfo(1, new Vector2(-4,20))},
@@ -53,12 +53,12 @@ namespace HunterCombatMR.AttackEngine.Animations
                 {6, new LayerFrameInfo(3, new Vector2(-16,16))},
                 {7, new LayerFrameInfo(0, new Vector2(-12,16), flip:SpriteEffects.FlipVertically)}
             };
-            farminfo.Frames.Add(5, new LayerFrameInfo(farminfo.Frames[2], farminfo.DefaultDepth));
+            farminfo.KeyFrames.Add(5, new LayerFrameInfo(farminfo.KeyFrames[2], farminfo.DefaultDepth));
             farminfo.Initialize();
 
             // ---- Back Arm
             var barminfo = new AnimationLayer(LayerNames.BackArm, new Rectangle(0, 0, 32, 26), DefaultPlayerLayerDepths.BackArm);
-            barminfo.Frames = new Dictionary<int, LayerFrameInfo>()
+            barminfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(0,8))},
                 {1, new LayerFrameInfo(1, new Vector2(0,8))},
@@ -68,12 +68,12 @@ namespace HunterCombatMR.AttackEngine.Animations
                 {6, new LayerFrameInfo(3, new Vector2(0,8))},
                 {7, new LayerFrameInfo(4, new Vector2(0,8))}
             };
-            barminfo.Frames.Add(5, new LayerFrameInfo(barminfo.Frames[2], barminfo.DefaultDepth));
+            barminfo.KeyFrames.Add(5, new LayerFrameInfo(barminfo.KeyFrames[2], barminfo.DefaultDepth));
             barminfo.Initialize();
 
             // ---- Body
             var bodyinfo = new AnimationLayer(LayerNames.Body, new Rectangle(0, 0, 26, 18), DefaultPlayerLayerDepths.Body);
-            bodyinfo.Frames = new Dictionary<int, LayerFrameInfo>()
+            bodyinfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(2,14))},
                 {1, new LayerFrameInfo(1, new Vector2(2,14))},
@@ -83,12 +83,12 @@ namespace HunterCombatMR.AttackEngine.Animations
                 {6, new LayerFrameInfo(5, new Vector2(2,14))},
                 {7, new LayerFrameInfo(6, new Vector2(2,14))}
             };
-            bodyinfo.Frames.Add(5, new LayerFrameInfo(bodyinfo.Frames[2], bodyinfo.Frames[2].LayerDepthOverride.GetValueOrDefault(DefaultPlayerLayerDepths.Head)));
+            bodyinfo.KeyFrames.Add(5, new LayerFrameInfo(bodyinfo.KeyFrames[2], bodyinfo.KeyFrames[2].LayerDepthOverride.GetValueOrDefault(DefaultPlayerLayerDepths.Head)));
             bodyinfo.Initialize();
 
             // ---- Front Leg
             var fleginfo = new AnimationLayer(LayerNames.FrontLeg, new Rectangle(0, 0, 22, 14), DefaultPlayerLayerDepths.FrontLeg);
-            fleginfo.Frames = new Dictionary<int, LayerFrameInfo>()
+            fleginfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(-4,30))},
                 {1, new LayerFrameInfo(1, new Vector2(-4,30))},
@@ -98,12 +98,12 @@ namespace HunterCombatMR.AttackEngine.Animations
                 {6, new LayerFrameInfo(4, new Vector2(-4,30))},
                 {7, new LayerFrameInfo(5, new Vector2(-4,30))}
             };
-            fleginfo.Frames.Add(5, new LayerFrameInfo(fleginfo.Frames[2], fleginfo.DefaultDepth));
+            fleginfo.KeyFrames.Add(5, new LayerFrameInfo(fleginfo.KeyFrames[2], fleginfo.DefaultDepth));
             fleginfo.Initialize();
 
             // ---- Back Leg
             var bleginfo = new AnimationLayer(LayerNames.BackLeg, new Rectangle(0, 0, 18, 16), DefaultPlayerLayerDepths.BackLeg);
-            bleginfo.Frames = new Dictionary<int, LayerFrameInfo>()
+            bleginfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(10,28))},
                 {1, new LayerFrameInfo(0, new Vector2(10,28))},
@@ -113,7 +113,7 @@ namespace HunterCombatMR.AttackEngine.Animations
                 {6, new LayerFrameInfo(3, new Vector2(10,28))},
                 {7, new LayerFrameInfo(4, new Vector2(10,28))}
             };
-            bleginfo.Frames.Add(5, new LayerFrameInfo(bleginfo.Frames[2], bleginfo.DefaultDepth));
+            bleginfo.KeyFrames.Add(5, new LayerFrameInfo(bleginfo.KeyFrames[2], bleginfo.DefaultDepth));
             bleginfo.Initialize();
 
             layers.Add(headinfo);
