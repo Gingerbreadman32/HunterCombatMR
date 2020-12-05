@@ -32,8 +32,10 @@ namespace HunterCombatMR
         #region Internal Fields
 
         internal AnimationLoader AnimLoader;
-        internal UserInterface DebugUI;
-        internal BufferDebugUIState DebugUIState;
+        internal UserInterface EditorUIPanels;
+        internal UIEditorPanelState PanelState;
+        internal UserInterface EditorUIPopUp;
+        internal UIEditorPopUpState PopUpState;
         internal ILog StaticLogger;
 
         #endregion Internal Fields
@@ -81,10 +83,12 @@ namespace HunterCombatMR
                 FileManager.SetupFolders(animTypes);
                 EditorInstance = new AnimationEditor();
 
-                // Debug UI stuff
-                DebugUI = new UserInterface();
-                DebugUIState = new BufferDebugUIState();
-                DebugUIState.Activate();
+                EditorUIPanels = new UserInterface();
+                PanelState = new UIEditorPanelState();
+                PanelState.Activate();
+                EditorUIPopUp = new UserInterface();
+                PopUpState = new UIEditorPopUpState();
+                PopUpState.Activate();
                 ShowMyUI();
             }
         }
@@ -128,12 +132,26 @@ namespace HunterCombatMR
             if (mouseTextIndex != -1)
             {
                 layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
-                    "HunterCombat: Buffer Debug",
+                    "Hunter Combat Editor: Pop-Ups",
                     delegate
                     {
-                        if (_lastUpdateUiGameTime != null && DebugUI?.CurrentState != null)
+                        if (_lastUpdateUiGameTime != null && EditorUIPopUp?.CurrentState != null)
                         {
-                            DebugUI.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
+                            EditorUIPopUp.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
+                        }
+                        return true;
+                    },
+                       InterfaceScaleType.UI));
+
+                mouseTextIndex--;
+
+                layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
+                    "Hunter Combat Editor: Panels",
+                    delegate
+                    {
+                        if (_lastUpdateUiGameTime != null && EditorUIPanels?.CurrentState != null)
+                        {
+                            EditorUIPanels.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
                         }
                         return true;
                     },
@@ -187,9 +205,14 @@ namespace HunterCombatMR
         public override void UpdateUI(GameTime gameTime)
         {
             _lastUpdateUiGameTime = gameTime;
-            if (DebugUI?.CurrentState != null)
+            if (EditorUIPanels?.CurrentState != null)
             {
-                DebugUI.Update(gameTime);
+                EditorUIPanels.Update(gameTime);
+            }
+            if (EditorUIPopUp?.CurrentState != null)
+            {
+                PopUpState.UpdateActiveLayers(PanelState?.CurrentAnimationLayers ?? new List<LayerText>());
+                EditorUIPopUp.Update(gameTime);
             }
         }
 
@@ -209,7 +232,8 @@ namespace HunterCombatMR
 
         internal void HideMyUI()
         {
-            DebugUI?.SetState(null);
+            EditorUIPanels?.SetState(null);
+            EditorUIPopUp?.SetState(null);
         }
 
         internal void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
@@ -250,13 +274,14 @@ namespace HunterCombatMR
 
         internal void SetUIPlayer(HunterCombatPlayer player)
         {
-            if (DebugUIState != null)
-                DebugUIState.Player = player;
+            if (PanelState != null)
+                PanelState.Player = player;
         }
 
         internal void ShowMyUI()
         {
-            DebugUI?.SetState(DebugUIState);
+            EditorUIPanels?.SetState(PanelState);
+            EditorUIPopUp?.SetState(PopUpState);
         }
 
         #endregion Internal Methods

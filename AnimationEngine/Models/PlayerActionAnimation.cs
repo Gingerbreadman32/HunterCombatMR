@@ -85,11 +85,11 @@ namespace HunterCombatMR.AnimationEngine.Models
             {
                 var currentFrame = AnimationData.GetCurrentKeyFrameIndex();
 
-                foreach (var layer in LayerData.Layers.Where(f => f.Frames.ContainsKey(currentFrame)).OrderByDescending(x => x.Frames[currentFrame].LayerDepth))
+                foreach (var layer in LayerData.Layers.Where(f => f.KeyFrames.ContainsKey(currentFrame) && f.KeyFrames[currentFrame].IsEnabled).OrderByDescending(x => x.KeyFrames[currentFrame].LayerDepth))
                 {
                     var newLayer = new PlayerLayer(HunterCombatMR.ModName, layer.Name, delegate (PlayerDrawInfo drawInfo)
                     {
-                        Main.playerDrawData.Add(CombatLimbDraw(drawInfo, CreateTextureString(layer.Name), layer.GetCurrentFrameRectangle(currentFrame), layer.Frames[currentFrame], Color.White));
+                        Main.playerDrawData.Add(CombatLimbDraw(drawInfo, CreateTextureString(layer.Name), layer.GetCurrentFrameRectangle(currentFrame), layer.KeyFrames[currentFrame], Color.White));
                     });
                     animLayers.Add(newLayer);
                 }
@@ -99,7 +99,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         public override Animation Duplicate(string name)
-            => new PlayerActionAnimation(this) { Name = name };
+            => new PlayerActionAnimation(this) { Name = name, _modified = true };
 
         public bool Equals(Animation other)
         {

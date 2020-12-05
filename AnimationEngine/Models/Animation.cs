@@ -1,6 +1,9 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.Enumerations;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -51,6 +54,9 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         public abstract Animation Duplicate(string name);
+
+        public AnimationLayer GetLayer(string layerName)
+                    => LayerData.Layers.Find(x => x.Name.Equals(layerName));
 
         /// <summary>
         /// Run this to allow this animation to run. Is run when first established and after any changes.
@@ -138,6 +144,39 @@ namespace HunterCombatMR.AnimationEngine.Models
                 AnimationData.SetLoopMode(newLoopType);
                 LayerData.Loop = newLoopType;
             }
+        }
+
+        public void UpdateLayerDepth(int amount,
+            AnimationLayer layerToMove,
+            IEnumerable<AnimationLayer> layers)
+        {
+            if (amount == 0)
+                return;
+
+            int currentKeyFrame = AnimationData.GetCurrentKeyFrameIndex();
+
+            int newDepthInt = layerToMove.GetDepthAtKeyFrame(currentKeyFrame) + amount;
+            byte newDepthByte = (newDepthInt > byte.MaxValue) ? byte.MaxValue : (newDepthInt < byte.MinValue) ? byte.MinValue : (byte)newDepthInt;
+            var layerInNewPlace = layers.FirstOrDefault(x => x.KeyFrames[currentKeyFrame].LayerDepth.Equals(newDepthByte));
+            if (layerInNewPlace != null)
+            {
+                layerInNewPlace.SetDepthAtKeyFrame(currentKeyFrame, layerToMove.GetDepthAtKeyFrame(currentKeyFrame));
+            }
+            layerToMove.SetDepthAtKeyFrame(currentKeyFrame, newDepthByte);
+            _modified = true;
+            HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
+        }
+
+        public void UpdateLayerPosition(AnimationLayer layerToMove,
+            Vector2 newPosition)
+        {
+            var currentKeyFrame = AnimationData.GetCurrentKeyFrameIndex();
+
+            var oldPos = layerToMove.GetPositionAtKeyFrame(currentKeyFrame);
+            layerToMove.SetPositionAtKeyFrame(currentKeyFrame, newPosition);
+
+            if (oldPos != newPosition)
+                _modified = true;
         }
 
         #endregion Public Methods

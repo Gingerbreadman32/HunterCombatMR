@@ -30,6 +30,10 @@ namespace AnimationEngine.Services
 
         public EditorMode CurrentEditMode { get; set; }
 
+        public HunterCombatMR.AnimationEngine.Models.Animation CurrentAnimationEditing { get; set; }
+
+        public bool AnimationEdited { get; set; }
+
         public AnimationEditor()
         {
             HighlightedLayers = new List<string>();
@@ -63,12 +67,12 @@ namespace AnimationEngine.Services
 
             color.A = 30;
 
-            foreach (var layer in layerData.Layers.Where(f => f.Frames.ContainsKey(keyFrameToDraw)).OrderByDescending(x => x.Frames[keyFrameToDraw].LayerDepth))
+            foreach (var layer in layerData.Layers.Where(f => f.KeyFrames.ContainsKey(keyFrameToDraw)).OrderByDescending(x => x.KeyFrames[keyFrameToDraw].LayerDepth))
             {
                 PlayerActionAnimation.CombatLimbDraw(drawInfo,
                     PlayerActionAnimation.CreateTextureString(layer.Name), 
                     layer.GetCurrentFrameRectangle(keyFrameToDraw), 
-                    layer.Frames[keyFrameToDraw],
+                    layer.KeyFrames[keyFrameToDraw],
                     color)
                     .Draw(Main.spriteBatch);
             }
@@ -93,13 +97,13 @@ namespace AnimationEngine.Services
                 if (layer == null)
                     continue;
 
-                if (layer.Frames[currentFrame].SpriteOrientation.Equals(SpriteEffects.FlipHorizontally))
+                if (layer.KeyFrames[currentFrame].SpriteOrientation.Equals(SpriteEffects.FlipHorizontally))
                     direction *= -1;
 
                 var layerNudgeAmount = nudgeAmount;
                 layerNudgeAmount.X *= direction;
 
-                layer.SetPositionAtFrame(currentFrame, layer.Frames[currentFrame].Position + layerNudgeAmount);
+                animation.UpdateLayerPosition(layer, layer.KeyFrames[currentFrame].Position + layerNudgeAmount);
             }
             /*
             if (SelectedLayer == layerName)
