@@ -15,7 +15,7 @@
     },
     "Layers": [
       {
-        "Frames": {
+        "KeyFrames": {
           "0": {
             "SpriteFrame": 0,
             "Position": "3, 13",
@@ -99,7 +99,7 @@
         "DefaultDepth": 2
       },
       {
-        "Frames": {
+        "KeyFrames": {
           "0": {
             "SpriteFrame": 0,
             "Position": "-13, 19",
@@ -183,7 +183,7 @@
         "DefaultDepth": 1
       },
       {
-        "Frames": {
+        "KeyFrames": {
           "0": {
             "SpriteFrame": 0,
             "Position": "16, 30",
@@ -267,7 +267,7 @@
         "DefaultDepth": 5
       },
       {
-        "Frames": {
+        "KeyFrames": {
           "0": {
             "SpriteFrame": 0,
             "Position": "5, 24",
@@ -351,7 +351,7 @@
         "DefaultDepth": 4
       },
       {
-        "Frames": {
+        "KeyFrames": {
           "0": {
             "SpriteFrame": 0,
             "Position": "-2, 39",
@@ -435,7 +435,7 @@
         "DefaultDepth": 3
       },
       {
-        "Frames": {
+        "KeyFrames": {
           "0": {
             "SpriteFrame": 0,
             "Position": "11, 40",

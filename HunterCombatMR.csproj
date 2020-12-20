@@ -11,10 +11,7 @@
     <Exec Command="&quot;$(tMLBuildServerPath)&quot; -build $(ProjectDir) -eac $(TargetPath) -unsafe $(AllowUnsafeBlocks)" />
   </Target>
   <ItemGroup>
-    <None Remove="Animations\Sword\DoubleSlash.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Animations\Sword\DoubleSlash.json" />
+    <EmbeddedResource Include="Animations\Player\DoubleSlash.json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="tModLoader.CodeAssist" Version="0.1.1" />
