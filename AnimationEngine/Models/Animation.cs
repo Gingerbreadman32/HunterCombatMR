@@ -24,6 +24,8 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public abstract AnimationType AnimationType { get; }
 
+        public bool IsCustomAnimation { get; private set; }
+
         [JsonIgnore]
         public bool IsModified
         {
@@ -136,16 +138,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
         }
 
-        public void UpdateLoopType(LoopStyle newLoopType)
-        {
-            if (IsAnimationInitialized())
-            {
-                _modified = true;
-                AnimationData.SetLoopMode(newLoopType);
-                LayerData.Loop = newLoopType;
-            }
-        }
-
         public void UpdateLayerDepth(int amount,
             AnimationLayer layerToMove,
             IEnumerable<AnimationLayer> layers)
@@ -179,6 +171,25 @@ namespace HunterCombatMR.AnimationEngine.Models
                 _modified = true;
         }
 
+        public void UpdateLoopType(LoopStyle newLoopType)
+        {
+            if (IsAnimationInitialized())
+            {
+                _modified = true;
+                AnimationData.SetLoopMode(newLoopType);
+                LayerData.Loop = newLoopType;
+            }
+        }
+
         #endregion Public Methods
+
+        #region Internal Methods
+
+        internal void SetCustom()
+        {
+            IsCustomAnimation = true;
+        }
+
+        #endregion Internal Methods
     }
 }
