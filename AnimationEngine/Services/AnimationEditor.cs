@@ -70,7 +70,7 @@ namespace AnimationEngine.Services
             foreach (var layer in layerData.Layers.Where(f => f.KeyFrames.ContainsKey(keyFrameToDraw)).OrderByDescending(x => x.KeyFrames[keyFrameToDraw].LayerDepth))
             {
                 PlayerActionAnimation.CombatLimbDraw(drawInfo,
-                    PlayerActionAnimation.CreateTextureString(layer.Name), 
+                    layer.Texture, 
                     layer.GetCurrentFrameRectangle(keyFrameToDraw), 
                     layer.KeyFrames[keyFrameToDraw],
                     color)

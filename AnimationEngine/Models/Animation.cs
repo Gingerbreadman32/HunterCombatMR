@@ -58,7 +58,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public abstract Animation Duplicate(string name);
 
         public AnimationLayer GetLayer(string layerName)
-                    => LayerData.Layers.Find(x => x.Name.Equals(layerName));
+                    => LayerData.Layers.FirstOrDefault(x => x.Name.Equals(layerName));
 
         /// <summary>
         /// Run this to allow this animation to run. Is run when first established and after any changes.

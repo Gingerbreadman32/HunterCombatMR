@@ -1,10 +1,12 @@
 ﻿using HunterCombatMR.Comparers;
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Terraria.ModLoader;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -28,15 +30,28 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public byte DefaultDepth { get; set; }
 
+        [JsonIgnore]
+        /// <summary>
+        /// The texture this layer uses.
+        /// </summary>
+        public Texture2D Texture { get; set; }
+
+        /// <summary>
+        /// The path that will be used to load the texture.
+        /// </summary>
+        public string TexturePath { get; set; }
+
         [JsonConstructor]
         public AnimationLayer(string name,
             Rectangle spriteframeRectangle,
+            string texturePath,
             byte defaultDepth = 1)
         {
             Name = name;
             KeyFrames = new Dictionary<int, LayerFrameInfo>();
             SpriteFrameRectangle = spriteframeRectangle;
             DefaultDepth = defaultDepth;
+            TexturePath = texturePath;
         }
 
         public AnimationLayer(AnimationLayer copy)
@@ -45,6 +60,8 @@ namespace HunterCombatMR.AnimationEngine.Models
             KeyFrames = new Dictionary<int, LayerFrameInfo>();
             SpriteFrameRectangle = copy.SpriteFrameRectangle;
             DefaultDepth = copy.DefaultDepth;
+            Texture = copy.Texture;
+            TexturePath = copy.TexturePath;
 
             foreach (var frame in copy.KeyFrames)
             {
@@ -53,7 +70,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         /// <summary>
-        /// This applies the layer depth to all of the frames, must be called before adding to an animation.
+        /// This applies the layer depth to all of the frames and loads the texture, must be called before adding to an animation.
         /// </summary>
         public void Initialize()
         {
@@ -66,6 +83,8 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
 
             KeyFrames = initializedFrames;
+
+            Texture = ModContent.GetTexture(TexturePath);
         }
 
         public Vector2 GetPositionAtKeyFrame(int keyFrame)
@@ -98,7 +117,8 @@ namespace HunterCombatMR.AnimationEngine.Models
             return framesEqual
                 && Name.Equals(other.Name)
                 && SpriteFrameRectangle.Equals(other.SpriteFrameRectangle)
-                && DefaultDepth.Equals(other.DefaultDepth);
+                && DefaultDepth.Equals(other.DefaultDepth)
+                && TexturePath.Equals(other.TexturePath);
         }
     }
 }
