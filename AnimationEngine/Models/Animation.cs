@@ -24,7 +24,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public abstract AnimationType AnimationType { get; }
 
-        public bool IsCustomAnimation { get; private set; }
+        public bool IsInternal { get; internal set; }
 
         [JsonIgnore]
         public bool IsModified
@@ -183,13 +183,5 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         #endregion Public Methods
 
-        #region Internal Methods
-
-        internal void SetCustom()
-        {
-            IsCustomAnimation = true;
-        }
-
-        #endregion Internal Methods
     }
 }

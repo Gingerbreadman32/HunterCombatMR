@@ -788,7 +788,9 @@ namespace HunterCombatMR.UI
                     oldName = animName;
                     animName = _animationname.Text;
                     _currentPlayer.CurrentAnimation.Uninitialize();
-                    saveStatus = HunterCombatMR.Instance.FileManager.SaveCustomAnimationNewName(_currentPlayer.CurrentAnimation, animName, true);
+                    saveStatus = (_currentPlayer.CurrentAnimation.IsInternal) 
+                        ? HunterCombatMR.Instance.FileManager.SaveInternalAnimation(_currentPlayer.CurrentAnimation, animName, true)
+                        : HunterCombatMR.Instance.FileManager.SaveCustomAnimation(_currentPlayer.CurrentAnimation, animName, true);
 
                     if (HunterCombatMR.Instance.LoadedAnimations.Any(x => x.Name.Equals(oldName)))
                     {
@@ -799,7 +801,9 @@ namespace HunterCombatMR.UI
                 else
                 {
                     _currentPlayer.CurrentAnimation.Uninitialize();
-                    saveStatus = HunterCombatMR.Instance.FileManager.SaveCustomAnimation(_currentPlayer.CurrentAnimation, true);
+                    saveStatus = (_currentPlayer.CurrentAnimation.IsInternal)
+                        ? HunterCombatMR.Instance.FileManager.SaveInternalAnimation(_currentPlayer.CurrentAnimation, overwrite: true)
+                        : HunterCombatMR.Instance.FileManager.SaveCustomAnimation(_currentPlayer.CurrentAnimation, overwrite: true);
                 }
 
                 if (saveStatus == FileSaveStatus.Saved)

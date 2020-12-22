@@ -1,6 +1,7 @@
 {
   "AnimationType": 0,
   "Name": "DoubleSlash",
+  "IsInternal": true,
   "LayerData": {
     "KeyFrameProfile": {
       "KeyFrameAmount": 8,
