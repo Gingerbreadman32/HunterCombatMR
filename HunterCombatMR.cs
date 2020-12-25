@@ -101,11 +101,12 @@ namespace HunterCombatMR
 
 
         public bool LoadAnimationFile(AnimationType animationType,
-            string fileName)
+            string fileName,
+            bool overrideInternal = false)
         {
             if (LoadedAnimations != null)
             {
-                var animation = FileManager.LoadAnimation(animationType, fileName);
+                var animation = FileManager.LoadAnimation(animationType, fileName, overrideInternal);
 
                 if (animation == null)
                 {

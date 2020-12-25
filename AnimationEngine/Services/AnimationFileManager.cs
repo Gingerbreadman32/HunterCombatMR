@@ -60,12 +60,11 @@ namespace HunterCombatMR.AnimationEngine.Services
             bool overwrite,
             bool internalSave)
         {
-            bool rename = newName != null;
+            bool rename = !string.IsNullOrEmpty(newName);
             FileSaveStatus status;
-            PlayerActionAnimation action = (rename) ? anim : new PlayerActionAnimation(newName, anim.LayerData);
-            var animPath = (internalSave) ? InternalAnimationPath(anim.Name, anim.AnimationType) : CustomAnimationPath(anim.Name, anim.AnimationType);
-
-            anim.IsInternal = internalSave;
+            PlayerActionAnimation action = (rename) ? new PlayerActionAnimation(newName, anim.LayerData, anim.IsInternal) : anim;
+            var animPath = (internalSave) ? InternalAnimationPath(action.Name, action.AnimationType) : CustomAnimationPath(action.Name, action.AnimationType);
+            var oldPath = (internalSave) ? InternalAnimationPath(anim.Name, anim.AnimationType) : CustomAnimationPath(anim.Name, anim.AnimationType);
 
             if (!overwrite & File.Exists(animPath))
             {
@@ -78,13 +77,13 @@ namespace HunterCombatMR.AnimationEngine.Services
                 File.SetAttributes(animPath, FileAttributes.Normal);
                 status = FileSaveStatus.Saved;
 
-                if (rename && File.Exists(animPath))
-                    File.Delete(animPath);
+                if (rename && File.Exists(oldPath))
+                    File.Delete(oldPath);
             }
             catch (Exception ex)
             {
                 status = FileSaveStatus.Error;
-                Main.NewText($"Error: Failed to save animation {anim.Name}! Check log for stacktrace.", Color.Red);
+                Main.NewText($"Error: Failed to save animation {action.Name}! Check log for stacktrace.", Color.Red);
                 HunterCombatMR.Instance.StaticLogger.Error(ex.Message, ex);
             }
 

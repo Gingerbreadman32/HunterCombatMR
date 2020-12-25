@@ -181,6 +181,13 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
         }
 
+        public void UpdateLayerVisibility(AnimationLayer layer)
+        {
+            _modified = true;
+
+            layer.ToggleVisibilityAtKeyFrame(AnimationData.GetCurrentKeyFrameIndex());
+        }
+
         #endregion Public Methods
 
     }

@@ -25,7 +25,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             {
                 if (!actions.Any(x => x.Name.Equals(animation.Key)))
                 {
-                    var action = new PlayerActionAnimation(animation.Key, animation.Value);
+                    var action = new PlayerActionAnimation(animation.Key, animation.Value, true);
                     action.Initialize();
                     actions.Add(action);
                 }

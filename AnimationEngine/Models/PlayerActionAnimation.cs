@@ -22,11 +22,13 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         [JsonConstructor]
         public PlayerActionAnimation(string name,
-            LayerData layerData)
+            LayerData layerData,
+            bool isInternal)
         {
             Name = name;
             AnimationData = new AnimatedData();
             LayerData = layerData;
+            IsInternal = isInternal;
         }
 
         public PlayerActionAnimation(Animation copy,
@@ -37,6 +39,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(AnimationData);
             LayerData = new LayerData(copy.LayerData);
             _modified = newFile;
+            IsInternal = copy.IsInternal;
         }
 
         #endregion Public Constructors

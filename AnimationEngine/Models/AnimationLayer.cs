@@ -52,6 +52,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             SpriteFrameRectangle = spriteframeRectangle;
             DefaultDepth = defaultDepth;
             TexturePath = texturePath;
+            Initialize();
         }
 
         public AnimationLayer(AnimationLayer copy)
@@ -67,6 +68,8 @@ namespace HunterCombatMR.AnimationEngine.Models
             {
                 KeyFrames.Add(frame.Key, new LayerFrameInfo(frame.Value, frame.Value.LayerDepth));
             }
+
+            Initialize();
         }
 
         /// <summary>
@@ -104,6 +107,15 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             byte? newDepth = depth;
             KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], newDepth.Value) { LayerDepthOverride = (newDepth == DefaultDepth) ? null : newDepth };
+        }
+
+        internal void ToggleVisibilityAtKeyFrame(int keyFrame)
+        {
+            bool visible = KeyFrames[keyFrame].IsEnabled;
+
+            visible ^= true;
+
+            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { IsEnabled = visible };
         }
 
         public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
