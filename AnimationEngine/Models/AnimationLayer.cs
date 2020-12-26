@@ -121,6 +121,9 @@ namespace HunterCombatMR.AnimationEngine.Models
         public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
             => SpriteFrameRectangle.SetSheetPositionFromFrame(KeyFrames[currentKeyFrame].SpriteFrame);
 
+        public bool GetActiveAtFrame(int keyFrame)
+            => KeyFrames.ContainsKey(keyFrame) && KeyFrames[keyFrame].IsEnabled;
+
         public bool Equals(AnimationLayer other)
         {
             FrameEqualityComparer comparer = new FrameEqualityComparer();
