@@ -138,6 +138,50 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
         }
 
+        public void AddKeyFrame(KeyFrame duplicate,
+            IDictionary<AnimationLayer, LayerFrameInfo> layerInfo)
+        {
+            AddKeyFrame(duplicate.FrameLength, layerInfo);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="frameLength">Amount of frames this keyframe is active, set to -1 for default.</param>
+        /// <param name="layerInfo"></param>
+        public void AddKeyFrame(int frameLength = -1,
+            IDictionary<AnimationLayer, LayerFrameInfo> layerInfo = null)
+        {
+            _modified = true;
+            bool defaultSpeed = frameLength == -1;
+            Uninitialize();
+            HunterCombatMR.Instance.AnimationKeyFrameManager.AppendKeyFrame(AnimationData, (defaultSpeed) ? LayerData.KeyFrameProfile.DefaultKeyFrameSpeed : frameLength);
+
+            int newIndex = AnimationData.KeyFrames.Last().KeyFrameOrder;
+
+            if (!defaultSpeed)
+                LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Add(newIndex, frameLength);
+
+            LayerData.KeyFrameProfile.KeyFrameAmount++;
+
+            if (layerInfo != null)
+            {
+                foreach (var layer in layerInfo)
+                {
+                    layer.Key.AddKeyFrame(newIndex, layer.Value);
+                }
+            }
+            else
+            {
+                foreach (var layer in LayerData.Layers)
+                {
+                    layer.AddKeyFrame(newIndex, new LayerFrameInfo(0, Vector2.Zero));
+                }
+            }
+
+            Initialize();
+        }
+
         public void UpdateLayerDepth(int amount,
             AnimationLayer layerToMove,
             IEnumerable<AnimationLayer> layers)
@@ -189,6 +233,5 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         #endregion Public Methods
-
     }
 }

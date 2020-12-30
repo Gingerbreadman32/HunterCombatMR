@@ -90,6 +90,13 @@ namespace HunterCombatMR.AnimationEngine.Models
             Texture = ModContent.GetTexture(TexturePath);
         }
 
+        internal void AddKeyFrame(int frameIndex,
+            LayerFrameInfo frameInfo)
+        {
+            KeyFrames.Add(frameIndex, frameInfo);
+            Initialize();
+        } 
+
         public Vector2 GetPositionAtKeyFrame(int keyFrame)
             => KeyFrames[keyFrame].Position;
 
@@ -121,7 +128,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
             => SpriteFrameRectangle.SetSheetPositionFromFrame(KeyFrames[currentKeyFrame].SpriteFrame);
 
-        public bool GetActiveAtFrame(int keyFrame)
+        public bool GetActiveAtKeyFrame(int keyFrame)
             => KeyFrames.ContainsKey(keyFrame) && KeyFrames[keyFrame].IsEnabled;
 
         public bool Equals(AnimationLayer other)

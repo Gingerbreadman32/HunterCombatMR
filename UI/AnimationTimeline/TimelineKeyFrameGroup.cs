@@ -1,34 +1,33 @@
 ﻿using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace HunterCombatMR.UI.AnimationTimeline
 {
-    internal class KeyFrameGroup
-        : UIElement
+    internal class TimelineKeyFrameGroup
+        : UIElement,
+        IComparable<TimelineKeyFrameGroup>
     {
         #region Private Fields
 
         private const string _emptyFrame = UITexturePaths.TimelineTextures + "emptyframe";
         private const string _frame = UITexturePaths.TimelineTextures + "frame";
+        private const string _fSeperator = UITexturePaths.TimelineTextures + "frameseperator";
         private const string _keyFrame = UITexturePaths.TimelineTextures + "keyframe";
         private const string _seperator = UITexturePaths.TimelineTextures + "seperator";
-        private const string _fSeperator = UITexturePaths.TimelineTextures + "frameseperator";
         private int _frames;
         private Texture2D _seperatorTexture;
         private Texture2D _texture;
         private FrameType _type;
 
-        public delegate void SelectAction();
-
-        public event SelectAction SelectedAction;
-
         public bool IsActive { get; set; }
 
         public int KeyFrame { get; }
 
+        public Timeline ParentTimeline { get; }
         public int Scale { get; set; }
 
         public bool ShowAllFrames { get; set; }
@@ -37,11 +36,13 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Public Constructors
 
-        public KeyFrameGroup(FrameType frameType,
+        public TimelineKeyFrameGroup(Timeline parent,
+            FrameType frameType,
             int keyFrameNumber,
             int scale,
             int frameAmount = 1)
         {
+            ParentTimeline = parent;
             KeyFrame = keyFrameNumber;
             _frames = frameAmount;
             Scale = scale;
@@ -56,17 +57,29 @@ namespace HunterCombatMR.UI.AnimationTimeline
         public void ActivateKeyFrame()
         {
             if (!IsActive)
+            {
                 IsActive = true;
 
-            SetTexture();
+                SetTexture();
+            }
+        }
+
+        public int CompareTo(TimelineKeyFrameGroup other)
+        {
+            if (other != null)
+                return KeyFrame.CompareTo(other.KeyFrame);
+            else
+                throw new ArgumentNullException("Compared keyframe is null!");
         }
 
         public void DeactivateKeyFrame()
         {
             if (IsActive)
+            {
                 IsActive = false;
 
-            SetTexture();
+                SetTexture();
+            }
         }
 
         public override void OnInitialize()
@@ -74,10 +87,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
             base.OnInitialize();
             OnClick += (evt, list) =>
             {
-                ActivateKeyFrame();
-
-                if (IsActive)
-                    SelectedAction();
+                ParentTimeline.Animation.AnimationData.SetKeyFrame(KeyFrame);
+                ParentTimeline.ResetFrames();
             };
         }
 
@@ -93,12 +104,28 @@ namespace HunterCombatMR.UI.AnimationTimeline
             _type = newType;
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            if (ParentTimeline.Animation.AnimationData.GetCurrentKeyFrameIndex() == KeyFrame)
+                ActivateKeyFrame();
+            else
+                DeactivateKeyFrame();
+        }
+
         #endregion Public Methods
 
         #region Private Methods
 
         private string ActiveTexture(string texture)
             => (IsActive) ? texture + "active" : texture;
+
+        private int CalculateWidth()
+        {
+            int totalFrameLength = (!ShowAllFrames) ? 1 : _frames;
+            return ((_texture.Width * Scale) + (_seperatorTexture.Width * Scale)) * totalFrameLength + (_seperatorTexture.Width) * Scale;
+        }
 
         private void SetTexture()
         {
@@ -196,11 +223,5 @@ namespace HunterCombatMR.UI.AnimationTimeline
         }
 
         #endregion Protected Methods
-
-        private int CalculateWidth()
-        {
-            int totalFrameLength = (!ShowAllFrames) ? 1 : _frames ;
-            return ((_texture.Width * Scale) + (_seperatorTexture.Width * Scale)) * totalFrameLength + (_seperatorTexture.Width) * Scale;
-        }
     }
 }
