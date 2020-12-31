@@ -1,36 +1,67 @@
-﻿using Microsoft.Xna.Framework;
+﻿using HunterCombatMR.Enumerations;
+using HunterCombatMR.Extensions;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace HunterCombatMR.UI.AnimationTimeline
 {
     public class TimelineButton
-        : UIImage
+        : UIElement
     {
         #region Private Fields
 
         private const int _states = 3;
-        private int _clickCooldown = -1;
-        private Texture2D _texture;
+        private const string _defaultButtonTexturePath = UITexturePaths.TimelineTextures + "timelinebutton";
         private bool _active;
+        private Texture2D _buttonTexture;
+        private int _clickCooldown = -1;
+        private Texture2D _iconTexture;
+        private TimelineButtonIcon _icon;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public TimelineButton(Texture2D texture,
-            int scale)
-            : base(texture)
+        public TimelineButton(TimelineButtonIcon icon,
+            int scale,
+            Texture2D buttonTexture = null)
         {
-            _texture = texture;
+            Icon = icon;
             ImageScale = scale;
+
+            if (buttonTexture != null)
+                _buttonTexture = buttonTexture;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
+        public Vector2 ButtonPadding { get; set; } = new Vector2(4, 4);
+
+        public delegate void ClickAction();
+
+        public event ClickAction ClickActionEvent;
+
         public int ClickRate { get; set; } = 30;
+
+        public TimelineButtonIcon Icon
+        {
+            get
+            {
+                return _icon;
+            }
+            set
+            {
+                _icon = value;
+                _iconTexture = ModContent.GetTexture(value.GetTexturePath());
+            }
+        }
+
+        public int ImageScale { get; set; }
 
         public bool IsActive { get; set; }
 
@@ -47,17 +78,12 @@ namespace HunterCombatMR.UI.AnimationTimeline
             }
         }
 
-        public delegate void ClickAction();
-
-        public event ClickAction ClickActionEvent;
-
         #endregion Public Properties
 
         #region Public Methods
 
         public override void OnInitialize()
         {
-            base.OnInitialize();
             OnMouseDown += (e, l) => { IsHeld = true; };
             OnMouseUp += (e, l) => { IsHeld = false; };
             OnClick += (evt, list) =>
@@ -69,13 +95,18 @@ namespace HunterCombatMR.UI.AnimationTimeline
                     StartCooldown();
                 }
             };
-        }
 
-        public override void Recalculate()
+            if (_buttonTexture == null)
+                _buttonTexture = ModContent.GetTexture(_defaultButtonTexturePath);
+
+            _iconTexture = ModContent.GetTexture(Icon.GetTexturePath());
+
+            Width.Set(_buttonTexture.Width * ImageScale, 0f);
+            Height.Set((_buttonTexture.Height / _states) * ImageScale, 0f);
+        }
+        public void StartCooldown()
         {
-            base.Recalculate();
-            Width.Set(_texture.Width * ImageScale, 0f);
-            Height.Set((_texture.Height / _states) * ImageScale, 0f);
+            _clickCooldown = ClickRate;
         }
 
         public override void Update(GameTime gameTime)
@@ -96,14 +127,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
             }
             else if (_clickCooldown == -1)
             {
-                if (IsActive)
-                    _active = true;
+                _active = IsActive;
             }
-        }
-
-        public void StartCooldown()
-        {
-            _clickCooldown = ClickRate;
         }
 
         #endregion Public Methods
@@ -112,20 +137,20 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            // Change it so all of my ui draws in the same batch instead of doing this.
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
-
-            int height = _texture.Height / _states;
-            var source = new Rectangle(0, 0, _texture.Width, height);
+            Vector2 iconOffset = Vector2.Zero;
+            int height = _buttonTexture.Height / _states;
+            var source = new Rectangle(0, 0, _buttonTexture.Width, height);
 
             if (!IsHeld && _active && IsMouseHovering)
                 source.Y += height;
             else if (!_active || IsHeld)
+            {
                 source.Y += height * 2;
+                iconOffset.Y = 2;
+            }
 
             spriteBatch.Draw(position: GetDimensions().Position(),
-                texture: _texture,
+                texture: _buttonTexture,
                 sourceRectangle: source,
                 color: Color.White,
                 rotation: 0f,
@@ -134,8 +159,15 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 effects: SpriteEffects.None,
                 layerDepth: 0f);
 
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone);
+            spriteBatch.Draw(position: GetDimensions().Position() + (ButtonPadding * ImageScale) + (iconOffset * ImageScale),
+                texture: _iconTexture,
+                sourceRectangle: null,
+                color: Color.White,
+                rotation: 0f,
+                origin: Vector2.Zero,
+                scale: ImageScale,
+                effects: SpriteEffects.None,
+                layerDepth: 0f);
         }
 
         #endregion Protected Methods

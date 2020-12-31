@@ -28,9 +28,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
         public int KeyFrame { get; }
 
         public Timeline ParentTimeline { get; }
-        public int Scale { get; set; }
 
-        public bool ShowAllFrames { get; set; }
+        public int Scale { get; set; }
 
         #endregion Private Fields
 
@@ -89,6 +88,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             {
                 ParentTimeline.Animation.AnimationData.SetKeyFrame(KeyFrame);
                 ParentTimeline.ResetFrames();
+                HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
             };
         }
 
@@ -123,7 +123,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         private int CalculateWidth()
         {
-            int totalFrameLength = (!ShowAllFrames) ? 1 : _frames;
+            int totalFrameLength = (!ParentTimeline.ShowAllFrames) ? 1 : _frames;
             return ((_texture.Width * Scale) + (_seperatorTexture.Width * Scale)) * totalFrameLength + (_seperatorTexture.Width) * Scale;
         }
 
@@ -149,8 +149,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
+            //spriteBatch.End();
+            //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
 
             Vector2 position = GetDimensions().Position();
 
@@ -178,7 +178,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
             position.X += _texture.Width * Scale;
 
-            if (_frames > 1 && ShowAllFrames)
+            if (_frames > 1 && ParentTimeline.ShowAllFrames)
             {
                 for (int f = 1; f < _frames; f++)
                 {
@@ -218,8 +218,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 SpriteEffects.None,
                 0f);
 
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone);
+            //spriteBatch.End();
+            //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone);
         }
 
         #endregion Protected Methods

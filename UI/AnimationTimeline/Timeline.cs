@@ -22,13 +22,19 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private const string _timelineBarMiddlePath = UITexturePaths.TimelineTextures + "timelinebarmiddle";
         private const string _timelineEdgePath = UITexturePaths.TimelineTextures + "timelineedge";
         private const string _timelineMiddlePath = UITexturePaths.TimelineTextures + "timelinemiddle";
-        private int _size = 84;
+        private int _size = 54;
 
         private Texture2D _timelineEdgeTexture;
         private Texture2D _timelineMidTexture;
 
-        public Texture2D _timelineBarEdgeTexture { get; set; }
-        public Texture2D _timelineBarMidTexture { get; set; }
+        #endregion Private Fields
+
+        #region Public Properties
+
+        /// <summary>
+        /// Whether or not to show all of the frames associated with a keyframe or just the keyframe.
+        /// </summary>
+        public bool ShowAllFrames { get; set; }
 
         public int Size
         {
@@ -36,15 +42,20 @@ namespace HunterCombatMR.UI.AnimationTimeline
             set { _size = value; }
         }
 
-        #endregion Private Fields
+        public Texture2D TimelineBarEdgeTexture { get; set; }
+        public Texture2D TimelineBarMidTexture { get; set; }
+
+        #endregion Public Properties
 
         #region Public Constructors
 
-        public Timeline(int scale = 1)
+        public Timeline(int scale = 1,
+            bool showAllFrames = false)
         {
             Scale = scale;
-            FrameList = new HorizontalUIList<TimelineKeyFrameGroup>() { Width = new StyleDimension((_maxFrames * _segmentWidth) * Scale, 0f), Height = new StyleDimension(_segmentHeight * Scale, 0), ListPadding = 0f };
+            FrameList = new HorizontalUIList<TimelineKeyFrameGroup>() { Width = new StyleDimension(((_maxFrames + 2) * _segmentWidth) * Scale, 0f), Height = new StyleDimension(_segmentHeight * Scale, 0), ListPadding = 0f };
             OverflowHidden = true;
+            ShowAllFrames = showAllFrames;
         }
 
         #endregion Public Constructors
@@ -82,11 +93,11 @@ namespace HunterCombatMR.UI.AnimationTimeline
             base.OnInitialize();
             _timelineEdgeTexture = ModContent.GetTexture(_timelineEdgePath);
             _timelineMidTexture = ModContent.GetTexture(_timelineMiddlePath);
-            _timelineBarEdgeTexture = ModContent.GetTexture(_timelineBarEdgePath);
-            _timelineBarMidTexture = ModContent.GetTexture(_timelineBarMiddlePath);
+            TimelineBarEdgeTexture = ModContent.GetTexture(_timelineBarEdgePath);
+            TimelineBarMidTexture = ModContent.GetTexture(_timelineBarMiddlePath);
             Append(FrameList);
 
-            var addButton = new TimelineButton(ModContent.GetTexture(_addButtonPath), Scale)
+            var addButton = new TimelineButton(TimelineButtonIcon.Plus, Scale)
             {
                 Top = new StyleDimension(20f * Scale, 0f),
                 Left = new StyleDimension(28f, 0)
@@ -95,7 +106,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
             Append(addButton);
 
-            var copyButton = new TimelineButton(ModContent.GetTexture(_addButtonPath), Scale)
+            var copyButton = new TimelineButton(TimelineButtonIcon.Duplicate, Scale)
             {
                 Top = new StyleDimension(20f * Scale, 0f),
                 Left = new StyleDimension(88f, 0)
@@ -147,13 +158,15 @@ namespace HunterCombatMR.UI.AnimationTimeline
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
                 SetAnimation(null);
 
-            if (Animation == null || !Animation.IsAnimationInitialized())
+            if (Animation == null
+                || !Animation.IsAnimationInitialized()
+                || (!ShowAllFrames && Animation.AnimationData.GetTotalKeyFrames() == _maxFrames)
+                || (ShowAllFrames && Animation.AnimationData.TotalFrames == _maxFrames))
             {
                 foreach (TimelineButton button in Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))))
                 {
                     button.IsActive = false;
                 }
-                
             }
             else
             {
@@ -166,17 +179,23 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Protected Methods
 
+        protected override void DrawChildren(SpriteBatch spriteBatch)
+        {
+            DrawOverride(spriteBatch, false);
+            base.DrawChildren(spriteBatch);
+            DrawOverride(spriteBatch, true);
+        }
+
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
+            DrawOverride(spriteBatch, false);
 
             var position = GetDimensions().Position();
 
             position.X = (int)position.X - (4 * Scale);
             position.Y = (int)position.Y;
 
-            spriteBatch.Draw(_timelineBarEdgeTexture,
+            spriteBatch.Draw(TimelineBarEdgeTexture,
                 position,
                 null,
                 Color.White,
@@ -200,15 +219,15 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 SpriteEffects.None,
                 0);
 
-            var timelineRoad = new Rectangle((int)position.X + (_timelineEdgeTexture.Width * Scale), (int)position.Y, CalculateWidth(), _timelineMidTexture.Height * Scale);
+            var timelineRoad = new Rectangle((int)position.X + (_timelineEdgeTexture.Width * Scale), (int)position.Y, (_timelineMidTexture.Width * Scale) * (_size - 1), _timelineMidTexture.Height * Scale);
 
             spriteBatch.Draw(_timelineMidTexture,
                 timelineRoad,
                 Color.White);
 
-            var timelineBarRoad = new Rectangle(timelineRoad.X, timelineRoad.Y, timelineRoad.Width, _timelineBarMidTexture.Height * Scale);
+            var timelineBarRoad = new Rectangle(timelineRoad.X, timelineRoad.Y, timelineRoad.Width, TimelineBarMidTexture.Height * Scale);
 
-            spriteBatch.Draw(_timelineBarMidTexture,
+            spriteBatch.Draw(TimelineBarMidTexture,
                 timelineBarRoad,
                 Color.White);
 
@@ -223,9 +242,9 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 SpriteEffects.FlipHorizontally,
                 0f);
 
-            var barEdgeDestination = new Rectangle(endDestination.X, endDestination.Y, _timelineBarEdgeTexture.Width * Scale, _timelineBarEdgeTexture.Height * Scale);
+            var barEdgeDestination = new Rectangle(endDestination.X, endDestination.Y, TimelineBarEdgeTexture.Width * Scale, TimelineBarEdgeTexture.Height * Scale);
 
-            spriteBatch.Draw(_timelineBarEdgeTexture,
+            spriteBatch.Draw(TimelineBarEdgeTexture,
                 barEdgeDestination,
                 null,
                 Color.White,
@@ -234,8 +253,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 SpriteEffects.FlipHorizontally,
                 0f);
 
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone);
+            DrawOverride(spriteBatch, true);
         }
 
         #endregion Protected Methods
@@ -249,7 +267,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         }
 
         private int CalculateWidth()
-            => ((_timelineMidTexture != null) ? _timelineBarMidTexture.Width : 0 * Scale) * _size;
+            => ((_timelineMidTexture != null) ? TimelineBarMidTexture.Width : 0 * Scale) * _size;
 
         private void CopyButton_ClickActionEvent()
         {
@@ -257,6 +275,21 @@ namespace HunterCombatMR.UI.AnimationTimeline
             var layers = Animation.LayerData.Layers.ToDictionary(x => x, x => x.KeyFrames[copyKeyframe.KeyFrameOrder]);
             Animation.AddKeyFrame(copyKeyframe, layers);
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
+        }
+
+        private void DrawOverride(SpriteBatch spriteBatch,
+            bool end)
+        {
+            if (end)
+            {
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone);
+            }
+            else
+            {
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
+            }
         }
 
         #endregion Private Methods
