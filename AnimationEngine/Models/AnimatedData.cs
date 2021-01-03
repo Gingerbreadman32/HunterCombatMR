@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -103,6 +104,11 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
         }
 
+        public void SetKeyFrame(int keyFrameIndex)
+        {
+            CurrentFrame = KeyFrames[keyFrameIndex].StartingFrameIndex;
+        }
+
         /// <inheritdoc/>
         public bool CheckCurrentKeyFrame(int keyFrameIndex)
             => KeyFrames[keyFrameIndex].StartingFrameIndex.Equals(GetCurrentKeyFrame().StartingFrameIndex);
@@ -133,6 +139,12 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <inheritdoc/>
         public int GetFinalFrame()
             => TotalFrames - 1;
+
+        public int GetKeyFrameIndexOfFrame(int frame)
+                    => KeyFrames.FindIndex(x => x.IsKeyFrameActive(frame));
+
+        public KeyFrame GetKeyFrameOfFrame(int frame)
+            => KeyFrames.First(x => x.IsKeyFrameActive(frame));
 
         /// <inheritdoc/>
         public int GetTotalKeyFrames()

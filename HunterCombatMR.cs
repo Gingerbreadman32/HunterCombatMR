@@ -80,7 +80,7 @@ namespace HunterCombatMR
             if (!Main.dedServ)
             {
                 var animTypes = new List<AnimationType>() { AnimationType.Player };
-                FileManager.SetupFolders(animTypes);
+                FileManager.SetupCustomFolders(animTypes);
                 EditorInstance = new AnimationEditor();
 
                 EditorUIPanels = new UserInterface();
@@ -101,11 +101,12 @@ namespace HunterCombatMR
 
 
         public bool LoadAnimationFile(AnimationType animationType,
-            string fileName)
+            string fileName,
+            bool overrideInternal = false)
         {
             if (LoadedAnimations != null)
             {
-                var animation = FileManager.LoadAnimation(animationType, fileName);
+                var animation = FileManager.LoadAnimation(animationType, fileName, overrideInternal);
 
                 if (animation == null)
                 {
@@ -269,7 +270,7 @@ namespace HunterCombatMR
                 LoadedAnimations.Remove(GetLoadedAnimation(animation.Name));
             }
 
-            FileManager.DeleteAnimation(animation.AnimationType, animation.Name);
+            FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);
         }
 
         internal void SetUIPlayer(HunterCombatPlayer player)

@@ -2,6 +2,7 @@
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,25 +18,17 @@ namespace HunterCombatMR.AnimationEngine.Models
         IPlayerAnimation,
         IEquatable<Animation>
     {
-        #region Private Fields
-
-        [JsonIgnore]
-        private const string _texturePath = "HunterCombatMR/Textures/SnS/";
-
-        [JsonIgnore]
-        private const string _textureSuffix = "Frames_LMB1";
-
-        #endregion Private Fields
-
         #region Public Constructors
 
         [JsonConstructor]
         public PlayerActionAnimation(string name,
-            LayerData layerData)
+            LayerData layerData,
+            bool isInternal)
         {
             Name = name;
             AnimationData = new AnimatedData();
             LayerData = layerData;
+            IsInternal = isInternal;
         }
 
         public PlayerActionAnimation(Animation copy,
@@ -46,6 +39,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(AnimationData);
             LayerData = new LayerData(copy.LayerData);
             _modified = newFile;
+            IsInternal = copy.IsInternal;
         }
 
         #endregion Public Constructors
@@ -59,7 +53,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         #region Public Methods
 
         public static DrawData CombatLimbDraw(PlayerDrawInfo drawInfo,
-            string texturePath,
+            Texture2D texture,
             Rectangle frameRectangle,
             LayerFrameInfo frameInfo,
             Color color)
@@ -70,7 +64,7 @@ namespace HunterCombatMR.AnimationEngine.Models
                         drawInfo.position.Y - Main.screenPosition.Y);
 
             frameRectangle.SetSheetPositionFromFrame(frameInfo.SpriteFrame);
-            DrawData value = new DrawData(ModContent.GetTexture(texturePath), frameInfo.Position, frameRectangle, color);
+            DrawData value = new DrawData(texture, frameInfo.Position, frameRectangle, color);
 
             value = value.SetSpriteOrientation(drawPlayer, frameInfo, frameRectangle);
             value.position += (positionVector - frameRectangle.Size() / 2);
@@ -89,7 +83,7 @@ namespace HunterCombatMR.AnimationEngine.Models
                 {
                     var newLayer = new PlayerLayer(HunterCombatMR.ModName, layer.Name, delegate (PlayerDrawInfo drawInfo)
                     {
-                        Main.playerDrawData.Add(CombatLimbDraw(drawInfo, CreateTextureString(layer.Name), layer.GetCurrentFrameRectangle(currentFrame), layer.KeyFrames[currentFrame], Color.White));
+                        Main.playerDrawData.Add(CombatLimbDraw(drawInfo, layer.Texture, layer.GetCurrentFrameRectangle(currentFrame), layer.KeyFrames[currentFrame], Color.White));
                     });
                     animLayers.Add(newLayer);
                 }
@@ -112,12 +106,5 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         #endregion Public Methods
-
-        #region Internal Methods
-
-        internal static string CreateTextureString(string layerName)
-            => $"{_texturePath}{layerName.Split('_')[1]}{_textureSuffix}";
-
-        #endregion Internal Methods
     }
 }

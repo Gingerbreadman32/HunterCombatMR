@@ -1,16 +1,59 @@
 ﻿using HunterCombatMR.Comparers;
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Terraria.ModLoader;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public class AnimationLayer
         : IEquatable<AnimationLayer>
     {
+        #region Public Constructors
+
+        [JsonConstructor]
+        public AnimationLayer(string name,
+            Rectangle spriteframeRectangle,
+            string texturePath,
+            byte defaultDepth = 1)
+        {
+            Name = name;
+            KeyFrames = new Dictionary<int, LayerFrameInfo>();
+            SpriteFrameRectangle = spriteframeRectangle;
+            DefaultDepth = defaultDepth;
+            TexturePath = texturePath;
+            Initialize();
+        }
+
+        public AnimationLayer(AnimationLayer copy)
+        {
+            Name = copy.Name;
+            KeyFrames = new Dictionary<int, LayerFrameInfo>();
+            SpriteFrameRectangle = copy.SpriteFrameRectangle;
+            DefaultDepth = copy.DefaultDepth;
+            Texture = copy.Texture;
+            TexturePath = copy.TexturePath;
+
+            foreach (var frame in copy.KeyFrames)
+            {
+                KeyFrames.Add(frame.Key, new LayerFrameInfo(frame.Value, frame.Value.LayerDepth));
+            }
+
+            Initialize();
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        /// <summary>
+        /// The layer depth that should be set by default
+        /// </summary>
+        public byte DefaultDepth { get; set; }
+
         public Dictionary<int, LayerFrameInfo> KeyFrames { get; set; }
 
         /// <summary>
@@ -23,37 +66,47 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public Rectangle SpriteFrameRectangle { get; set; }
 
+        [JsonIgnore]
         /// <summary>
-        /// The layer depth that should be set by default
+        /// The texture this layer uses.
         /// </summary>
-        public byte DefaultDepth { get; set; }
-
-        [JsonConstructor]
-        public AnimationLayer(string name,
-            Rectangle spriteframeRectangle,
-            byte defaultDepth = 1)
-        {
-            Name = name;
-            KeyFrames = new Dictionary<int, LayerFrameInfo>();
-            SpriteFrameRectangle = spriteframeRectangle;
-            DefaultDepth = defaultDepth;
-        }
-
-        public AnimationLayer(AnimationLayer copy)
-        {
-            Name = copy.Name;
-            KeyFrames = new Dictionary<int, LayerFrameInfo>();
-            SpriteFrameRectangle = copy.SpriteFrameRectangle;
-            DefaultDepth = copy.DefaultDepth;
-
-            foreach (var frame in copy.KeyFrames)
-            {
-                KeyFrames.Add(frame.Key, new LayerFrameInfo(frame.Value, frame.Value.LayerDepth));
-            }
-        }
+        public Texture2D Texture { get; set; }
 
         /// <summary>
-        /// This applies the layer depth to all of the frames, must be called before adding to an animation.
+        /// The path that will be used to load the texture.
+        /// </summary>
+        public string TexturePath { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public bool Equals(AnimationLayer other)
+        {
+            FrameEqualityComparer comparer = new FrameEqualityComparer();
+            bool framesEqual = comparer.Equals(KeyFrames, other.KeyFrames);
+
+            return framesEqual
+                && Name.Equals(other.Name)
+                && SpriteFrameRectangle.Equals(other.SpriteFrameRectangle)
+                && DefaultDepth.Equals(other.DefaultDepth)
+                && TexturePath.Equals(other.TexturePath);
+        }
+
+        public bool GetActiveAtKeyFrame(int keyFrame)
+                    => KeyFrames.ContainsKey(keyFrame) && KeyFrames[keyFrame].IsEnabled;
+
+        public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
+                    => SpriteFrameRectangle.SetSheetPositionFromFrame(KeyFrames[currentKeyFrame].SpriteFrame);
+
+        public byte GetDepthAtKeyFrame(int keyFrame)
+                    => KeyFrames[keyFrame].LayerDepth;
+
+        public Vector2 GetPositionAtKeyFrame(int keyFrame)
+                    => KeyFrames[keyFrame].Position;
+
+        /// <summary>
+        /// This applies the layer depth to all of the frames and loads the texture, must be called before adding to an animation.
         /// </summary>
         public void Initialize()
         {
@@ -66,19 +119,26 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
 
             KeyFrames = initializedFrames;
+
+            Texture = ModContent.GetTexture(TexturePath);
         }
 
-        public Vector2 GetPositionAtKeyFrame(int keyFrame)
-            => KeyFrames[keyFrame].Position;
+        #endregion Public Methods
 
-        internal void SetPositionAtKeyFrame(int keyFrame,
-            Vector2 newPosition)
+        #region Internal Methods
+
+        internal void AddKeyFrame(int frameIndex,
+            LayerFrameInfo frameInfo)
         {
-            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { Position = newPosition };
+            KeyFrames.Add(frameIndex, frameInfo);
+            Initialize();
         }
 
-        public byte GetDepthAtKeyFrame(int keyFrame)
-            => KeyFrames[keyFrame].LayerDepth;
+        internal void RemoveKeyFrame(int keyFrameIndex)
+        {
+            KeyFrames.Remove(keyFrameIndex);
+            InheritPreviousKeyFrameProperties(keyFrameIndex);
+        }
 
         internal void SetDepthAtKeyFrame(int keyFrame,
             byte depth)
@@ -87,18 +147,36 @@ namespace HunterCombatMR.AnimationEngine.Models
             KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], newDepth.Value) { LayerDepthOverride = (newDepth == DefaultDepth) ? null : newDepth };
         }
 
-        public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
-            => SpriteFrameRectangle.SetSheetPositionFromFrame(KeyFrames[currentKeyFrame].SpriteFrame);
-
-        public bool Equals(AnimationLayer other)
+        internal void SetPositionAtKeyFrame(int keyFrame,
+                            Vector2 newPosition)
         {
-            FrameEqualityComparer comparer = new FrameEqualityComparer();
-            bool framesEqual = comparer.Equals(KeyFrames, other.KeyFrames);
-
-            return framesEqual
-                && Name.Equals(other.Name)
-                && SpriteFrameRectangle.Equals(other.SpriteFrameRectangle)
-                && DefaultDepth.Equals(other.DefaultDepth);
+            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { Position = newPosition };
         }
+
+        internal void ToggleVisibilityAtKeyFrame(int keyFrame)
+        {
+            bool visible = KeyFrames[keyFrame].IsEnabled;
+
+            visible ^= true;
+
+            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { IsEnabled = visible };
+        }
+
+        #endregion Internal Methods
+
+        #region Private Methods
+
+        private void InheritPreviousKeyFrameProperties(int keyFrameIndex)
+        {
+            int nextFrameIndex = keyFrameIndex + 1;
+            if (KeyFrames.ContainsKey(nextFrameIndex))
+            {
+                KeyFrames.Add(keyFrameIndex, KeyFrames[nextFrameIndex]);
+                KeyFrames.Remove(nextFrameIndex);
+                InheritPreviousKeyFrameProperties(nextFrameIndex);
+            }
+        }
+
+        #endregion Private Methods
     }
 }

@@ -1,16 +1,66 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Services
 {
     public class KeyFrameManager
     {
+        #region Public Methods
+
+        public void AdjustKeyFrameLength(AnimatedData animation,
+                    int keyFrameIndex,
+                    int newFrameLength,
+                    bool addToLength = false)
+        {
+            var newKeyframe = new KeyFrame(animation.KeyFrames[keyFrameIndex]);
+
+            if (addToLength && newKeyframe.FrameLength + newFrameLength > 0)
+                newKeyframe.FrameLength += newFrameLength;
+            else if (!addToLength && newFrameLength > 0)
+                newKeyframe.FrameLength = newFrameLength;
+            else
+                throw new Exception("Invalid frame time: must be more than 0.");
+
+            animation.KeyFrames.Remove(animation.KeyFrames[keyFrameIndex]);
+            animation.KeyFrames.Add(newKeyframe);
+
+            SyncFrames(animation);
+        }
+
+        public void AppendKeyFrame(AnimatedData animation,
+                    KeyFrame newKeyFrame)
+        {
+            if (newKeyFrame.FrameLength > 0)
+            {
+                newKeyFrame.StartingFrameIndex = animation.TotalFrames;
+                animation.AddFrames(newKeyFrame.FrameLength);
+                animation.KeyFrames.Add(newKeyFrame);
+            }
+            else
+            {
+                throw new Exception("Keyframe must be longer than 0 frames!");
+            }
+        }
+
+        public void AppendKeyFrame(AnimatedData animation,
+                    int keyFrameLength)
+        {
+            KeyFrame newKeyFrame = new KeyFrame(animation.TotalFrames, keyFrameLength, animation.GetTotalKeyFrames());
+            AppendKeyFrame(animation, newKeyFrame);
+        }
+
+        public void AppendKeyFrames(AnimatedData animation,
+                    IEnumerable<KeyFrame> newKeyFrames)
+        {
+            foreach (var keyframe in newKeyFrames)
+            {
+                AppendKeyFrame(animation, keyframe);
+            }
+        }
+
         /// <summary>
         /// Essentially creates an animation by filling an empty animation with keyframes, using this will replace current animation information so be careful.
         /// </summary>
@@ -19,9 +69,9 @@ namespace HunterCombatMR.AnimationEngine.Services
         /// <param name="averageKeyFrameSpeed">The average speed any keyframes not defined will linger for</param>
         /// <param name="keyFrameSpeeds">A dictionary determining how long each keyframe will linger for at which index</param>
         /// <param name="startPlaying">Whether or not to start playing the animation after.</param>
-        public void FillAnimationKeyFrames(ref AnimatedData animation, 
-            int keyFrameAmount, 
-            int averageKeyFrameSpeed, 
+        public void FillAnimationKeyFrames(ref AnimatedData animation,
+            int keyFrameAmount,
+            int averageKeyFrameSpeed,
             IDictionary<int, int> keyFrameSpeeds = null,
             bool startPlaying = true,
             LoopStyle loopStyle = LoopStyle.Once)
@@ -63,37 +113,6 @@ namespace HunterCombatMR.AnimationEngine.Services
             FillAnimationKeyFrames(ref animation, frameProfile.KeyFrameAmount, frameProfile.DefaultKeyFrameSpeed, frameProfile.SpecificKeyFrameSpeeds, startPlaying, loopStyle);
         }
 
-        public void AppendKeyFrame(AnimatedData animation,
-            KeyFrame newKeyFrame)
-        {
-            if (newKeyFrame.FrameLength > 0)
-            {
-                newKeyFrame.StartingFrameIndex = animation.TotalFrames;
-                animation.AddFrames(newKeyFrame.FrameLength);
-                animation.KeyFrames.Add(newKeyFrame);
-            }
-            else
-            {
-                throw new Exception("Keyframe must be longer than 0 frames!");
-            }
-        }
-
-        public void AppendKeyFrame(AnimatedData animation,
-            int keyFrameLength)
-        {
-            KeyFrame newKeyFrame = new KeyFrame(animation.TotalFrames, keyFrameLength, animation.GetTotalKeyFrames());
-            AppendKeyFrame(animation, newKeyFrame);
-        }
-
-        public void AppendKeyFrames(AnimatedData animation,
-            IEnumerable<KeyFrame> newKeyFrames)
-        {
-            foreach (var keyframe in newKeyFrames)
-            {
-                AppendKeyFrame(animation, keyframe);
-            }
-        }
-
         /// <summary>
         /// Helper method to return all of the exact frames that a keyframe is active during an animation
         /// </summary>
@@ -125,35 +144,21 @@ namespace HunterCombatMR.AnimationEngine.Services
 
         public void SyncFrames(AnimatedData animation)
         {
-            animation.Uninitialize();
+            if (animation.IsInitialized)
+                animation.Uninitialize();
+
             var keyFrameActiveFrames = new Dictionary<int, int>();
+            int index = 0;
 
             foreach (var keyframe in animation.KeyFrames.OrderBy(x => x.KeyFrameOrder))
             {
-                keyFrameActiveFrames.Add(keyframe.KeyFrameOrder, keyframe.FrameLength);
+                keyFrameActiveFrames.Add(index, keyframe.FrameLength);
+                index++;
             }
 
             FillAnimationKeyFrames(ref animation, keyFrameActiveFrames.Count, 0, keyFrameActiveFrames, false, animation.LoopMode);
         }
 
-        public void AdjustKeyFrameLength(AnimatedData animation,
-            int keyFrameIndex, 
-            int newFrameLength,
-            bool addToLength = false)
-        {
-            var newKeyframe = new KeyFrame(animation.KeyFrames[keyFrameIndex]);
-
-            if (addToLength && newKeyframe.FrameLength + newFrameLength > 0)
-                newKeyframe.FrameLength += newFrameLength;
-            else if (!addToLength && newFrameLength > 0)
-                newKeyframe.FrameLength = newFrameLength;
-            else
-                throw new Exception("Invalid frame time: must be more than 0.");
-
-            animation.KeyFrames.Remove(animation.KeyFrames[keyFrameIndex]);
-            animation.KeyFrames.Add(newKeyframe);
-
-            SyncFrames(animation);
-        }
+        #endregion Public Methods
     }
 }

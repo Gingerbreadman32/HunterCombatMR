@@ -1,6 +1,6 @@
 {
   "AnimationType": 0,
-  "Name": "DoubleSlash",
+  "IsInternal": true,
   "LayerData": {
     "KeyFrameProfile": {
       "KeyFrameAmount": 8,
@@ -8,7 +8,7 @@
       "SpecificKeyFrameSpeeds": {
         "2": 4,
         "3": 8,
-        "4": 14,
+        "4": 16,
         "5": 4,
         "7": 52
       }
@@ -23,7 +23,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 2,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "1": {
             "SpriteFrame": 0,
@@ -32,7 +33,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 2,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "2": {
             "SpriteFrame": 1,
@@ -41,7 +43,8 @@
             "LayerDepthOverride": 4,
             "LayerDepth": 4,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "3": {
             "SpriteFrame": 1,
@@ -50,7 +53,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 2,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "4": {
             "SpriteFrame": 2,
@@ -59,7 +63,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 2,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "6": {
             "SpriteFrame": 3,
@@ -68,7 +73,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 2,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "7": {
             "SpriteFrame": 0,
@@ -77,7 +83,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 2,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "5": {
             "SpriteFrame": 1,
@@ -86,7 +93,8 @@
             "LayerDepthOverride": 4,
             "LayerDepth": 4,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           }
         },
         "Name": "HC_Head",
@@ -96,7 +104,8 @@
           "Width": 18,
           "Height": 18
         },
-        "DefaultDepth": 2
+        "DefaultDepth": 2,
+        "TexturePath": "HunterCombatMR/Textures/SnS/Limbs/HeadFrames"
       },
       {
         "KeyFrames": {
@@ -107,7 +116,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 1,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "1": {
             "SpriteFrame": 1,
@@ -116,7 +126,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 1,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "2": {
             "SpriteFrame": 0,
@@ -125,7 +136,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 1,
             "SheetNameOverride": null,
-            "SpriteOrientation": 1
+            "SpriteOrientation": 1,
+            "IsEnabled": true
           },
           "3": {
             "SpriteFrame": 2,
@@ -134,7 +146,8 @@
             "LayerDepthOverride": 4,
             "LayerDepth": 4,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "4": {
             "SpriteFrame": 2,
@@ -143,7 +156,8 @@
             "LayerDepthOverride": 4,
             "LayerDepth": 4,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "6": {
             "SpriteFrame": 3,
@@ -152,7 +166,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 1,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "7": {
             "SpriteFrame": 0,
@@ -161,7 +176,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 1,
             "SheetNameOverride": null,
-            "SpriteOrientation": 2
+            "SpriteOrientation": 2,
+            "IsEnabled": true
           },
           "5": {
             "SpriteFrame": 0,
@@ -170,7 +186,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 1,
             "SheetNameOverride": null,
-            "SpriteOrientation": 1
+            "SpriteOrientation": 1,
+            "IsEnabled": true
           }
         },
         "Name": "HC_FrontArm",
@@ -180,7 +197,8 @@
           "Width": 18,
           "Height": 14
         },
-        "DefaultDepth": 1
+        "DefaultDepth": 1,
+        "TexturePath": "HunterCombatMR/Textures/SnS/Limbs/FrontArmFrames"
       },
       {
         "KeyFrames": {
@@ -191,7 +209,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 5,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "1": {
             "SpriteFrame": 1,
@@ -200,7 +219,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 5,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "2": {
             "SpriteFrame": 1,
@@ -209,7 +229,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 5,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "3": {
             "SpriteFrame": 2,
@@ -218,7 +239,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 5,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "4": {
             "SpriteFrame": 2,
@@ -227,7 +249,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 5,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "6": {
             "SpriteFrame": 3,
@@ -236,7 +259,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 5,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "7": {
             "SpriteFrame": 4,
@@ -245,7 +269,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 5,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "5": {
             "SpriteFrame": 1,
@@ -254,7 +279,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 5,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           }
         },
         "Name": "HC_BackArm",
@@ -264,7 +290,8 @@
           "Width": 16,
           "Height": 12
         },
-        "DefaultDepth": 5
+        "DefaultDepth": 5,
+        "TexturePath": "HunterCombatMR/Textures/SnS/Limbs/BackArmFrames"
       },
       {
         "KeyFrames": {
@@ -275,7 +302,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 4,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "1": {
             "SpriteFrame": 1,
@@ -284,7 +312,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 4,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "2": {
             "SpriteFrame": 2,
@@ -293,7 +322,8 @@
             "LayerDepthOverride": 2,
             "LayerDepth": 2,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "3": {
             "SpriteFrame": 3,
@@ -302,7 +332,8 @@
             "LayerDepthOverride": 1,
             "LayerDepth": 1,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "4": {
             "SpriteFrame": 4,
@@ -311,7 +342,8 @@
             "LayerDepthOverride": 1,
             "LayerDepth": 1,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "6": {
             "SpriteFrame": 5,
@@ -320,7 +352,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 4,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "7": {
             "SpriteFrame": 6,
@@ -329,7 +362,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 4,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "5": {
             "SpriteFrame": 2,
@@ -338,7 +372,8 @@
             "LayerDepthOverride": 2,
             "LayerDepth": 2,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           }
         },
         "Name": "HC_Body",
@@ -348,7 +383,8 @@
           "Width": 22,
           "Height": 16
         },
-        "DefaultDepth": 4
+        "DefaultDepth": 4,
+        "TexturePath": "HunterCombatMR/Textures/SnS/Limbs/BodyFrames"
       },
       {
         "KeyFrames": {
@@ -359,7 +395,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 3,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "1": {
             "SpriteFrame": 1,
@@ -368,7 +405,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 3,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "2": {
             "SpriteFrame": 2,
@@ -377,7 +415,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 3,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "3": {
             "SpriteFrame": 3,
@@ -386,7 +425,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 3,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "4": {
             "SpriteFrame": 3,
@@ -395,7 +435,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 3,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "6": {
             "SpriteFrame": 4,
@@ -404,7 +445,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 3,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "7": {
             "SpriteFrame": 5,
@@ -413,7 +455,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 3,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "5": {
             "SpriteFrame": 2,
@@ -422,7 +465,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 3,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           }
         },
         "Name": "HC_FrontLeg",
@@ -432,7 +476,8 @@
           "Width": 16,
           "Height": 14
         },
-        "DefaultDepth": 3
+        "DefaultDepth": 3,
+        "TexturePath": "HunterCombatMR/Textures/SnS/Limbs/FrontLegFrames"
       },
       {
         "KeyFrames": {
@@ -443,7 +488,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 6,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "1": {
             "SpriteFrame": 0,
@@ -452,7 +498,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 6,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "2": {
             "SpriteFrame": 1,
@@ -461,7 +508,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 6,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "3": {
             "SpriteFrame": 2,
@@ -470,7 +518,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 6,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "4": {
             "SpriteFrame": 1,
@@ -479,7 +528,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 6,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "6": {
             "SpriteFrame": 3,
@@ -488,7 +538,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 6,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "7": {
             "SpriteFrame": 4,
@@ -497,7 +548,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 6,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           },
           "5": {
             "SpriteFrame": 1,
@@ -506,7 +558,8 @@
             "LayerDepthOverride": null,
             "LayerDepth": 6,
             "SheetNameOverride": null,
-            "SpriteOrientation": 0
+            "SpriteOrientation": 0,
+            "IsEnabled": true
           }
         },
         "Name": "HC_BackLeg",
@@ -516,9 +569,11 @@
           "Width": 18,
           "Height": 16
         },
-        "DefaultDepth": 6
+        "DefaultDepth": 6,
+        "TexturePath": "HunterCombatMR/Textures/SnS/Limbs/BackLegFrames"
       }
     ],
     "Loop": 0
-  }
+  },
+  "Name": "DoubleSlash"
 }

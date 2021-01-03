@@ -14,52 +14,101 @@ namespace HunterCombatMR.AnimationEngine.Services
 {
     public sealed class AnimationFileManager
     {
-        #region Public Fields
+        #region Private Fields
 
-        public static string CustomFilePath = Path.Combine(HunterCombatMR.Instance.DataPath, "Animations");
-        public static string ManifestPath = "HunterCombatMR.Animations";
-        public static string FileType = ".json";
+        private const string _fileType = ".json";
 
-        public static JsonSerializerSettings serializerSettings = new JsonSerializerSettings
+        private readonly string _customFilePath = Path.Combine(HunterCombatMR.Instance.DataPath, "Animations");
+        private readonly string _internalFilePath = Path.Combine(Program.SavePath, "Mod Sources", "HunterCombatMR", "Animations");
+        private readonly string _manifestPath = "HunterCombatMR.Animations";
+
+        private JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Auto,
             MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead,
             Formatting = Formatting.Indented
         };
 
-        #endregion Public Fields
+        #endregion Private Fields
 
         #region Public Constructors
 
         public AnimationFileManager()
         {
-            serializerSettings.Converters.Add(new KeyFrameProfileConverter());
-            serializerSettings.Converters.Add(new RectangleConverter());
+            _serializerSettings.Converters.Add(new KeyFrameProfileConverter());
+            _serializerSettings.Converters.Add(new RectangleConverter());
         }
 
         #endregion Public Constructors
 
-        #region Public Methods
+        #region Private Methods
 
-        public static string AnimationPath(string name,
+        private string CustomAnimationPath(string name,
             AnimationType type)
-                => Path.Combine(CustomFilePath, type.ToString(), name + FileType);
+                => Path.Combine(_customFilePath, type.ToString(), name + _fileType);
+
+        private string InternalAnimationPath(string name,
+            AnimationType type)
+                => Path.Combine(_internalFilePath, type.ToString(), name + _fileType);
+
+        private string InternalAnimationManifest(string name,
+            AnimationType type)
+                => $"{_manifestPath}.{type.ToString()}.{name + _fileType}";
+
+        private FileSaveStatus SaveAnimation(PlayerActionAnimation anim,
+            string newName,
+            bool overwrite,
+            bool internalSave)
+        {
+            bool rename = !string.IsNullOrEmpty(newName);
+            FileSaveStatus status;
+            PlayerActionAnimation action = (rename) ? new PlayerActionAnimation(newName, anim.LayerData, anim.IsInternal) : anim;
+            var animPath = (internalSave) ? InternalAnimationPath(action.Name, action.AnimationType) : CustomAnimationPath(action.Name, action.AnimationType);
+            var oldPath = (internalSave) ? InternalAnimationPath(anim.Name, anim.AnimationType) : CustomAnimationPath(anim.Name, anim.AnimationType);
+
+            if (!overwrite & File.Exists(animPath))
+            {
+                return FileSaveStatus.FileExists;
+            }
+            try
+            {
+                var serialized = JsonConvert.SerializeObject(action, _serializerSettings);
+                File.WriteAllText(animPath, serialized);
+                File.SetAttributes(animPath, FileAttributes.Normal);
+                status = FileSaveStatus.Saved;
+
+                if (rename && File.Exists(oldPath))
+                    File.Delete(oldPath);
+            }
+            catch (Exception ex)
+            {
+                status = FileSaveStatus.Error;
+                Main.NewText($"Error: Failed to save animation {action.Name}! Check log for stacktrace.", Color.Red);
+                HunterCombatMR.Instance.StaticLogger.Error(ex.Message, ex);
+            }
+
+            return status;
+        }
+
+        #endregion Private Methods
+
+        #region Public Methods
 
         public CustomAnimationFileExistStatus CustomAnimationFileExists(string name,
             AnimationType type)
         {
-            if (!Directory.Exists(CustomFilePath))
+            if (!Directory.Exists(_customFilePath))
             {
                 return CustomAnimationFileExistStatus.BaseDirectoryMissing;
             }
 
-            if (!Directory.Exists(Path.Combine(CustomFilePath, type.ToString())))
+            if (!Directory.Exists(Path.Combine(_customFilePath, type.ToString())))
             {
                 HunterCombatMR.Instance.StaticLogger.Warn($"No custom animation directory for animation type: {type.ToString()}");
                 return CustomAnimationFileExistStatus.TypeDirectoryMissing;
             }
 
-            if (!File.Exists(AnimationPath(name, type)))
+            if (!File.Exists(CustomAnimationPath(name, type)))
             {
                 HunterCombatMR.Instance.StaticLogger.Warn($"Custom animation {name} does not exist!");
                 return CustomAnimationFileExistStatus.FileMissing;
@@ -83,14 +132,12 @@ namespace HunterCombatMR.AnimationEngine.Services
             if (!overrideInternal)
             {
                 var assembly = Assembly.GetExecutingAssembly();
-                var manifestFolder = Path.Combine(ManifestPath, type.ToString());
-                var manifestFile = Path.Combine(manifestFolder, fileName + FileType);
 
-                var manifestStream = assembly.GetManifestResourceStream(manifestFile);
+                var manifestStream = assembly.GetManifestResourceStream(InternalAnimationManifest(fileName, type));
 
                 if (manifestStream == null)
                 {
-                    HunterCombatMR.Instance.StaticLogger.Warn($"{manifestFile} does not exist!");
+                    HunterCombatMR.Instance.StaticLogger.Warn($"{InternalAnimationManifest(fileName, type)} does not exist!");
                     return null;
                 }
 
@@ -108,7 +155,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             if (!fileFound)
             {
                 if (CustomAnimationFileExists(fileName, type).Equals(CustomAnimationFileExistStatus.FileExists))
-                    json = File.ReadAllText(AnimationPath(fileName, type));
+                    json = File.ReadAllText(CustomAnimationPath(fileName, type));
                 else
                     return null;
             }
@@ -116,11 +163,11 @@ namespace HunterCombatMR.AnimationEngine.Services
             PlayerActionAnimation action = null;
 
             if (!string.IsNullOrEmpty(json))
-                action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
+                action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, _serializerSettings);
 
             if (action == null)
             {
-                HunterCombatMR.Instance.StaticLogger.Error($"{fileName} is not a valid animation {FileType} file!");
+                HunterCombatMR.Instance.StaticLogger.Error($"{fileName} is not a valid animation {_fileType} file!");
             }
 
             return action;
@@ -139,7 +186,7 @@ namespace HunterCombatMR.AnimationEngine.Services
 
             foreach (var animType in types)
             {
-                var manifestFolder = ManifestPath + "." + animType.ToString();
+                var manifestFolder = _manifestPath + "." + animType.ToString();
 
                 var typeStream = manifestStream.Where(x => x.StartsWith(manifestFolder));
 
@@ -156,17 +203,17 @@ namespace HunterCombatMR.AnimationEngine.Services
                         using (StreamReader reader = new StreamReader(stream))
                         {
                             string json = reader.ReadToEnd();
-                            var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
+                            var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, _serializerSettings);
                             if (action != null)
                                 actions.Add(action);
                             else
-                                HunterCombatMR.Instance.StaticLogger.Error($"{resource} is not a valid animation {FileType} file!");
+                                HunterCombatMR.Instance.StaticLogger.Error($"{resource} is not a valid animation {_fileType} file!");
                         }
                     }
                 }
 
-                var path = Path.Combine(CustomFilePath, animType.ToString());
-                if (!Directory.Exists(CustomFilePath) || !Directory.Exists(path))
+                var path = Path.Combine(_customFilePath, animType.ToString());
+                if (!Directory.Exists(_customFilePath) || !Directory.Exists(path))
                 {
                     HunterCombatMR.Instance.StaticLogger.Warn($"No custom animation directory for animation type: {animType.ToString()}");
                     return actions;
@@ -174,79 +221,48 @@ namespace HunterCombatMR.AnimationEngine.Services
 
                 var files = Directory.GetFiles(path);
 
-                foreach (var file in files.Where(x => x.Contains(FileType)))
+                foreach (var file in files.Where(x => x.Contains(_fileType)))
                 {
                     string json = File.ReadAllText(file);
-                    var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, serializerSettings);
+                    var action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, _serializerSettings);
                     if (action != null && !actions.Any(x => x.Name.Equals(action.Name)))
                         actions.Add(action);
                     else
-                        HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {FileType} file!");
+                        HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {_fileType} file!");
                 }
             }
 
             return actions;
         }
 
+        /// <summary>
+        /// Temporary method to save internal animations, remove/obfuscate on release.
+        /// </summary>
+        /// <returns>The save status</returns>
+        internal FileSaveStatus SaveInternalAnimation(PlayerActionAnimation anim,
+            string newName = null,
+            bool overwrite = false)
+            => SaveAnimation(anim, newName, overwrite, true);
+
         public FileSaveStatus SaveCustomAnimation(PlayerActionAnimation anim,
+            string newName = null,
             bool overwrite = false)
+            => SaveAnimation(anim, newName, overwrite, false);
+
+        public bool SetupCustomFolders(IEnumerable<AnimationType> types)
         {
-            FileSaveStatus status;
-            var animPath = AnimationPath(anim.Name, anim.AnimationType);
-
-            if (!overwrite & File.Exists(animPath))
+            if (!Directory.GetParent(_customFilePath).Exists)
             {
-                return FileSaveStatus.FileExists;
-            }
-            try
-            {
-                var serialized = JsonConvert.SerializeObject(anim, serializerSettings);
-                File.WriteAllText(animPath, serialized);
-                File.SetAttributes(animPath, FileAttributes.Normal);
-                status = FileSaveStatus.Saved;
-            }
-            catch (Exception ex)
-            {
-                status = FileSaveStatus.Error;
-                Main.NewText($"Error: Failed to save animation {anim.Name}! Check log for stacktrace.", Color.Red);
-                HunterCombatMR.Instance.StaticLogger.Error(ex.Message, ex);
-            }
-
-            return status;
-        }
-
-        public FileSaveStatus SaveCustomAnimationNewName(PlayerActionAnimation anim,
-            string newName,
-            bool overwrite = false)
-        {
-            FileSaveStatus status;
-            PlayerActionAnimation renamedAction = new PlayerActionAnimation(newName, anim.LayerData);
-
-            status = SaveCustomAnimation(renamedAction, overwrite);
-
-            if (!status.Equals(FileSaveStatus.Saved))
-                return status;
-
-            if (File.Exists(AnimationPath(anim.Name, anim.AnimationType)))
-                File.Delete(AnimationPath(anim.Name, anim.AnimationType));
-
-            return status;
-        }
-
-        public bool SetupFolders(IEnumerable<AnimationType> types)
-        {
-            if (!Directory.GetParent(CustomFilePath).Exists)
-            {
-                Directory.GetParent(CustomFilePath).Create();
-                if (!Directory.Exists(CustomFilePath))
+                Directory.GetParent(_customFilePath).Create();
+                if (!Directory.Exists(_customFilePath))
                 {
-                    Directory.CreateDirectory(CustomFilePath);
+                    Directory.CreateDirectory(_customFilePath);
                 }
             }
 
             foreach (var animType in types)
             {
-                var directory = Path.Combine(CustomFilePath, animType.ToString());
+                var directory = Path.Combine(_customFilePath, animType.ToString());
                 if (Directory.GetParent(directory).Exists && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
@@ -260,11 +276,11 @@ namespace HunterCombatMR.AnimationEngine.Services
 
         #region Internal Methods
 
-        internal void DeleteAnimation(AnimationType type,
+        internal void DeleteCustomAnimation(AnimationType type,
             string fileName)
         {
             if (CustomAnimationFileExists(fileName, type).Equals(CustomAnimationFileExistStatus.FileExists))
-                File.Delete(AnimationPath(fileName, type));
+                File.Delete(CustomAnimationPath(fileName, type));
         }
 
         #endregion Internal Methods

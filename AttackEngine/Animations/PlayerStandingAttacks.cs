@@ -10,7 +10,11 @@ namespace HunterCombatMR.AttackEngine.Animations
     public sealed class PlayerStandingAttacks
         : ActionContainer
     {
-        private const AnimationType _animtype = AnimationType.Player;
+        private const string _texturePath = "HunterCombatMR/Textures/SnS/Limbs/";
+        private const string _textureSuffix = "Frames";
+
+        private string CreateTextureString(string layerName)
+            => $"{_texturePath}{layerName.Split('_')[1]}{_textureSuffix}";
 
         public override void Load()
         {
@@ -20,6 +24,7 @@ namespace HunterCombatMR.AttackEngine.Animations
             AddSnSStandingAttack2();
         }
 
+        // Lol this is already outdated
         private void AddSnSStandingAttack2()
         {
             int keyframes = 8;
@@ -27,7 +32,7 @@ namespace HunterCombatMR.AttackEngine.Animations
             var layers = new List<AnimationLayer>();
 
             // ---- Head
-            var headinfo = new AnimationLayer(LayerNames.Head, new Rectangle(0, 0, 22, 18), DefaultPlayerLayerDepths.Head);
+            var headinfo = new AnimationLayer(LayerNames.Head, new Rectangle(0, 0, 22, 18), CreateTextureString(LayerNames.Head), DefaultPlayerLayerDepths.Head);
             headinfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(2,4))},
@@ -42,7 +47,7 @@ namespace HunterCombatMR.AttackEngine.Animations
             headinfo.Initialize();
 
             // ---- Front Arm
-            var farminfo = new AnimationLayer(LayerNames.FrontArm, new Rectangle(0, 0, 18, 14), DefaultPlayerLayerDepths.FrontArm);
+            var farminfo = new AnimationLayer(LayerNames.FrontArm, new Rectangle(0, 0, 18, 14), CreateTextureString(LayerNames.FrontArm), DefaultPlayerLayerDepths.FrontArm);
             farminfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(-12,10))},
@@ -57,7 +62,7 @@ namespace HunterCombatMR.AttackEngine.Animations
             farminfo.Initialize();
 
             // ---- Back Arm
-            var barminfo = new AnimationLayer(LayerNames.BackArm, new Rectangle(0, 0, 32, 26), DefaultPlayerLayerDepths.BackArm);
+            var barminfo = new AnimationLayer(LayerNames.BackArm, new Rectangle(0, 0, 32, 26), CreateTextureString(LayerNames.BackArm), DefaultPlayerLayerDepths.BackArm);
             barminfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(0,8))},
@@ -72,7 +77,7 @@ namespace HunterCombatMR.AttackEngine.Animations
             barminfo.Initialize();
 
             // ---- Body
-            var bodyinfo = new AnimationLayer(LayerNames.Body, new Rectangle(0, 0, 26, 18), DefaultPlayerLayerDepths.Body);
+            var bodyinfo = new AnimationLayer(LayerNames.Body, new Rectangle(0, 0, 26, 18), CreateTextureString(LayerNames.Body), DefaultPlayerLayerDepths.Body);
             bodyinfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(2,14))},
@@ -87,7 +92,7 @@ namespace HunterCombatMR.AttackEngine.Animations
             bodyinfo.Initialize();
 
             // ---- Front Leg
-            var fleginfo = new AnimationLayer(LayerNames.FrontLeg, new Rectangle(0, 0, 22, 14), DefaultPlayerLayerDepths.FrontLeg);
+            var fleginfo = new AnimationLayer(LayerNames.FrontLeg, new Rectangle(0, 0, 22, 14), CreateTextureString(LayerNames.FrontLeg), DefaultPlayerLayerDepths.FrontLeg);
             fleginfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(-4,30))},
@@ -102,7 +107,7 @@ namespace HunterCombatMR.AttackEngine.Animations
             fleginfo.Initialize();
 
             // ---- Back Leg
-            var bleginfo = new AnimationLayer(LayerNames.BackLeg, new Rectangle(0, 0, 18, 16), DefaultPlayerLayerDepths.BackLeg);
+            var bleginfo = new AnimationLayer(LayerNames.BackLeg, new Rectangle(0, 0, 18, 16), CreateTextureString(LayerNames.BackLeg), DefaultPlayerLayerDepths.BackLeg);
             bleginfo.KeyFrames = new Dictionary<int, LayerFrameInfo>()
             {
                 {0, new LayerFrameInfo(0, new Vector2(10,28))},
