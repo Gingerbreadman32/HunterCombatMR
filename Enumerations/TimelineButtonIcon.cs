@@ -12,6 +12,8 @@ namespace HunterCombatMR.Enumerations
         [TexturePath(UITexturePaths.TimelineTextures + "duplicateicon")]
         Duplicate = 2,
         [TexturePath(UITexturePaths.TimelineTextures + "moveicon")]
-        Arrow = 3
+        LeftArrow = 3,
+        [TexturePath(UITexturePaths.TimelineTextures + "moveicon")]
+        RightArrow = 4
     }
 }

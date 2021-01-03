@@ -42,6 +42,50 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         #region Public Methods
 
+        public void AddKeyFrame(KeyFrame duplicate,
+            IDictionary<AnimationLayer, LayerFrameInfo> layerInfo)
+        {
+            AddKeyFrame(duplicate.FrameLength, layerInfo);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="frameLength">Amount of frames this keyframe is active, set to -1 for default.</param>
+        /// <param name="layerInfo"></param>
+        public void AddKeyFrame(int frameLength = -1,
+            IDictionary<AnimationLayer, LayerFrameInfo> layerInfo = null)
+        {
+            _modified = true;
+            bool defaultSpeed = frameLength == -1;
+            Uninitialize();
+            HunterCombatMR.Instance.AnimationKeyFrameManager.AppendKeyFrame(AnimationData, (defaultSpeed) ? LayerData.KeyFrameProfile.DefaultKeyFrameSpeed : frameLength);
+
+            int newIndex = AnimationData.KeyFrames.Last().KeyFrameOrder;
+
+            if (!defaultSpeed)
+                LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Add(newIndex, frameLength);
+
+            LayerData.KeyFrameProfile.KeyFrameAmount++;
+
+            if (layerInfo != null)
+            {
+                foreach (var layer in layerInfo)
+                {
+                    layer.Key.AddKeyFrame(newIndex, layer.Value);
+                }
+            }
+            else
+            {
+                foreach (var layer in LayerData.Layers)
+                {
+                    layer.AddKeyFrame(newIndex, new LayerFrameInfo(0, Vector2.Zero));
+                }
+            }
+
+            Initialize();
+        }
+
         public void AddNewLayer(AnimationLayer layerInfo)
         {
             LayerData.Layers.Add(layerInfo);
@@ -81,6 +125,26 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             if (!AnimationData.IsPlaying && IsAnimationInitialized())
                 AnimationData.StartAnimation();
+        }
+
+        public void RemoveKeyFrame(int keyFrameIndex)
+        {
+            _modified = true;
+            Uninitialize();
+            AnimationData.KeyFrames.RemoveAt(keyFrameIndex);
+            LayerData.KeyFrameProfile.KeyFrameAmount--;
+            var speeds = LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds;
+
+            LayerData.KeyFrameProfile.RemoveKeyFrame(keyFrameIndex);
+
+            foreach (var layer in LayerData.Layers.Where(x => x.KeyFrames.ContainsKey(keyFrameIndex)))
+            {
+                layer.RemoveKeyFrame(keyFrameIndex);
+            }
+
+            HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(AnimationData);
+
+            Initialize();
         }
 
         public void Restart()
@@ -138,50 +202,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
         }
 
-        public void AddKeyFrame(KeyFrame duplicate,
-            IDictionary<AnimationLayer, LayerFrameInfo> layerInfo)
-        {
-            AddKeyFrame(duplicate.FrameLength, layerInfo);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="frameLength">Amount of frames this keyframe is active, set to -1 for default.</param>
-        /// <param name="layerInfo"></param>
-        public void AddKeyFrame(int frameLength = -1,
-            IDictionary<AnimationLayer, LayerFrameInfo> layerInfo = null)
-        {
-            _modified = true;
-            bool defaultSpeed = frameLength == -1;
-            Uninitialize();
-            HunterCombatMR.Instance.AnimationKeyFrameManager.AppendKeyFrame(AnimationData, (defaultSpeed) ? LayerData.KeyFrameProfile.DefaultKeyFrameSpeed : frameLength);
-
-            int newIndex = AnimationData.KeyFrames.Last().KeyFrameOrder;
-
-            if (!defaultSpeed)
-                LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Add(newIndex, frameLength);
-
-            LayerData.KeyFrameProfile.KeyFrameAmount++;
-
-            if (layerInfo != null)
-            {
-                foreach (var layer in layerInfo)
-                {
-                    layer.Key.AddKeyFrame(newIndex, layer.Value);
-                }
-            }
-            else
-            {
-                foreach (var layer in LayerData.Layers)
-                {
-                    layer.AddKeyFrame(newIndex, new LayerFrameInfo(0, Vector2.Zero));
-                }
-            }
-
-            Initialize();
-        }
-
         public void UpdateLayerDepth(int amount,
             AnimationLayer layerToMove,
             IEnumerable<AnimationLayer> layers)
@@ -215,6 +235,13 @@ namespace HunterCombatMR.AnimationEngine.Models
                 _modified = true;
         }
 
+        public void UpdateLayerVisibility(AnimationLayer layer)
+        {
+            _modified = true;
+
+            layer.ToggleVisibilityAtKeyFrame(AnimationData.GetCurrentKeyFrameIndex());
+        }
+
         public void UpdateLoopType(LoopStyle newLoopType)
         {
             if (IsAnimationInitialized())
@@ -223,13 +250,6 @@ namespace HunterCombatMR.AnimationEngine.Models
                 AnimationData.SetLoopMode(newLoopType);
                 LayerData.Loop = newLoopType;
             }
-        }
-
-        public void UpdateLayerVisibility(AnimationLayer layer)
-        {
-            _modified = true;
-
-            layer.ToggleVisibilityAtKeyFrame(AnimationData.GetCurrentKeyFrameIndex());
         }
 
         #endregion Public Methods

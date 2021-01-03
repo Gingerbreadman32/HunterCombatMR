@@ -2,6 +2,7 @@
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -25,10 +26,12 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Public Constructors
 
-        public TimelineButton(TimelineButtonIcon icon,
+        public TimelineButton(string name,
+            TimelineButtonIcon icon,
             int scale,
             Texture2D buttonTexture = null)
         {
+            Name = name;
             Icon = icon;
             ImageScale = scale;
 
@@ -44,7 +47,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public delegate void ClickAction();
 
-        public event ClickAction ClickActionEvent;
+        public event Action ClickActionEvent;
 
         public int ClickRate { get; set; } = 30;
 
@@ -66,6 +69,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
         public bool IsActive { get; set; }
 
         public bool IsHeld { get; private set; }
+
+        public string Name { get; set; }
 
         public Timeline ParentTimeline
         {
