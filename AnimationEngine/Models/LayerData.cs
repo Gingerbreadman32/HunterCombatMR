@@ -49,5 +49,8 @@ namespace HunterCombatMR.AnimationEngine.Models
 
             return paramEquals && listEquals;
         }
+
+        public IDictionary<AnimationLayer, LayerFrameInfo> GetFrameInfoForLayers(int keyFrameIndex)
+            => Layers.ToDictionary(x => x, x => x.KeyFrames[keyFrameIndex]);
     }
 }
