@@ -3,6 +3,7 @@ using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Linq;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -14,11 +15,15 @@ namespace HunterCombatMR.UI.AnimationTimeline
     {
         #region Private Fields
 
+        // Constants
         private const int _states = 3;
         private const string _defaultButtonTexturePath = UITexturePaths.TimelineTextures + "timelinebutton";
+        // Readonly
+        private readonly TimelineButtonIcon[] _flippedIcons = { TimelineButtonIcon.LeftArrow };
+        // Fields
         private bool _active;
         private Texture2D _buttonTexture;
-        private int _clickCooldown = -1;
+        private int _clickCooldown = -1; 
         private Texture2D _iconTexture;
         private TimelineButtonIcon _icon;
 
@@ -45,9 +50,9 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public Vector2 ButtonPadding { get; set; } = new Vector2(4, 4);
 
-        public delegate void ClickAction();
-
         public event Action ClickActionEvent;
+
+        public event Func<bool> ActiveConditionEvent; 
 
         public int ClickRate { get; set; } = 30;
 
@@ -171,7 +176,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 rotation: 0f,
                 origin: Vector2.Zero,
                 scale: ImageScale,
-                effects: SpriteEffects.None,
+                effects: (_flippedIcons.Contains(_icon)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
                 layerDepth: 0f);
         }
 

@@ -89,23 +89,6 @@ namespace HunterCombatMR.UI
         {
             if (_currentPlayer != null)
             {
-                /*
-                // Top Line
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.position, 0, _currentPlayer.player.width);
-
-                // Bottom Line
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.BottomLeft, 0, _currentPlayer.player.width);
-
-                // Left Line
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.position, MathHelper.PiOver2, _currentPlayer.player.height);
-
-                // Right Line
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.TopRight, MathHelper.PiOver2, _currentPlayer.player.height);
-
-                // Vertical Midline
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.Top, MathHelper.PiOver2, _currentPlayer.player.height);
-                */
-
                 if (HunterCombatMR.Instance.EditorInstance.OnionSkin)
                     _onionskinbutton.BorderColor = Color.White;
                 else

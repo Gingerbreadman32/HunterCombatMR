@@ -55,6 +55,22 @@ namespace HunterCombatMR.AnimationEngine.Models
             return comparer.Equals(this, other);
         }
 
+        public void SwitchKeyFrames(int keyFrameIndex,
+            int newFrameIndex)
+        {
+            int newCurrentFrame = 0;
+            int newReplacedFrame = 0;
+
+            if (SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex))
+                newReplacedFrame = SpecificKeyFrameSpeeds[keyFrameIndex];
+
+            if (SpecificKeyFrameSpeeds.ContainsKey(newFrameIndex))
+                newCurrentFrame = SpecificKeyFrameSpeeds[newFrameIndex];
+
+            SwitchIndex(keyFrameIndex, newCurrentFrame, (newCurrentFrame <= 0));
+            SwitchIndex(newFrameIndex, newReplacedFrame, (newReplacedFrame <= 0));
+        }
+
         public void RemoveKeyFrame(int keyFrameIndex)
         {
             if (SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex))
@@ -78,6 +94,16 @@ namespace HunterCombatMR.AnimationEngine.Models
 
             if (nextFrameIndex <= SpecificKeyFrameSpeeds.OrderBy(x => x.Key).Last().Key)
                 InheritPreviousKeyFrameProperties(nextFrameIndex);
+        }
+
+        private void SwitchIndex(int keyFrameIndex,
+            int newFrameTime,
+            bool defaultSpeed)
+        {
+            if (!defaultSpeed)
+                SpecificKeyFrameSpeeds[keyFrameIndex] = newFrameTime;
+            else if (SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex))
+                SpecificKeyFrameSpeeds.Remove(keyFrameIndex);
         }
 
         #endregion Private Methods

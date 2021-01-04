@@ -2,6 +2,7 @@
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -115,6 +116,30 @@ namespace HunterCombatMR.AnimationEngine.Models
         public bool IsAnimationInitialized()
                     => AnimationData.IsInitialized;
 
+        public void MoveKeyFrame(int keyFrameIndex,
+            int newFrameIndex)
+        {
+            _modified = true;
+            KeyFrame keyFrameMoving = AnimationData.KeyFrames.FirstOrDefault(x => x.KeyFrameOrder.Equals(keyFrameIndex));
+
+            if (keyFrameMoving == null)
+                throw new IndexOutOfRangeException($"Requested keyframe to move index {keyFrameIndex} does not exist!");
+
+            KeyFrame keyFrameReplacing = AnimationData.KeyFrames.FirstOrDefault(x => x.KeyFrameOrder.Equals(newFrameIndex));
+
+            if (keyFrameReplacing == null)
+                throw new IndexOutOfRangeException($"Requested keyframe to replace index {newFrameIndex} does not exist!");
+
+            LayerData.KeyFrameProfile.SwitchKeyFrames(keyFrameMoving.KeyFrameOrder, keyFrameReplacing.KeyFrameOrder);
+
+            foreach (var layer in LayerData.Layers.Where(x => x.KeyFrames.ContainsKey(keyFrameIndex)))
+            {
+                layer.MoveKeyFrame(keyFrameIndex, newFrameIndex);
+            }
+
+            Initialize();
+        }
+
         public void Pause()
         {
             if (AnimationData.IsPlaying)
@@ -131,6 +156,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             _modified = true;
             Uninitialize();
+
             AnimationData.KeyFrames.RemoveAt(keyFrameIndex);
             LayerData.KeyFrameProfile.KeyFrameAmount--;
             var speeds = LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds;
@@ -141,8 +167,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             {
                 layer.RemoveKeyFrame(keyFrameIndex);
             }
-
-            HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(AnimationData);
 
             Initialize();
         }

@@ -1,10 +1,10 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -31,7 +31,24 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #endregion Private Fields
 
+        #region Public Constructors
+
+        public Timeline(int scale = 1,
+                    bool showAllFrames = false)
+        {
+            Scale = scale;
+            FrameList = new HorizontalUIList<TimelineKeyFrameGroup>() { Width = new StyleDimension(((_maxFrames + 2) * _segmentWidth) * Scale, 0f), Height = new StyleDimension(_segmentHeight * Scale, 0), ListPadding = 0f };
+            OverflowHidden = true;
+            ShowAllFrames = showAllFrames;
+        }
+
+        #endregion Public Constructors
+
         #region Public Properties
+
+        public AnimationEngine.Models.Animation Animation { get; protected set; }
+
+        public int Scale { get; }
 
         /// <summary>
         /// Whether or not to show all of the frames associated with a keyframe or just the keyframe.
@@ -49,26 +66,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #endregion Public Properties
 
-        #region Public Constructors
-
-        public Timeline(int scale = 1,
-            bool showAllFrames = false)
-        {
-            Scale = scale;
-            FrameList = new HorizontalUIList<TimelineKeyFrameGroup>() { Width = new StyleDimension(((_maxFrames + 2) * _segmentWidth) * Scale, 0f), Height = new StyleDimension(_segmentHeight * Scale, 0), ListPadding = 0f };
-            OverflowHidden = true;
-            ShowAllFrames = showAllFrames;
-        }
-
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public AnimationEngine.Models.Animation Animation { get; protected set; }
-        public int Scale { get; }
-
-        #endregion Public Properties
-
         #region Internal Properties
 
         internal HorizontalUIList<TimelineKeyFrameGroup> FrameList { get; }
@@ -76,6 +73,21 @@ namespace HunterCombatMR.UI.AnimationTimeline
         #endregion Internal Properties
 
         #region Public Methods
+
+        public void AddButton(string name,
+            TimelineButtonIcon iconType,
+            Action buttonEvent)
+        {
+            var currentButtons = Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))).Count();
+            var newButton = new TimelineButton(name, iconType, Scale)
+            {
+                Top = new StyleDimension(20f * Scale, 0f),
+                Left = new StyleDimension((28f * Scale) + (30f * currentButtons * Scale), 0f)
+            };
+            newButton.ClickActionEvent += buttonEvent;
+
+            Append(newButton);
+        }
 
         public void InitializeAnimation()
         {
@@ -245,7 +257,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Private Methods
 
-        private void AddButton_ClickActionEvent()
+        private void AddButtonLogic()
         {
             Animation.AddKeyFrame();
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
@@ -254,15 +266,14 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private int CalculateWidth()
             => ((_timelineMidTexture != null) ? TimelineBarMidTexture.Width : 0 * Scale) * _size;
 
-        private void CopyButton_ClickActionEvent()
+        private void CopyButtonLogic()
         {
             var copyKeyframe = Animation.AnimationData.GetCurrentKeyFrame();
-            var layers = Animation.LayerData.Layers.ToDictionary(x => x, x => x.KeyFrames[copyKeyframe.KeyFrameOrder]);
-            Animation.AddKeyFrame(copyKeyframe, layers);
+            Animation.AddKeyFrame(copyKeyframe, Animation.LayerData.GetFrameInfoForLayers(copyKeyframe.KeyFrameOrder));
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
         }
 
-        private void DeleteButton_ClickActionEvent()
+        private void DeleteButtonLogic()
         {
             Animation.RemoveKeyFrame(Animation.AnimationData.GetCurrentKeyFrameIndex());
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
@@ -285,24 +296,21 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         private void InitializeButtons()
         {
-            AddButton("AddKeyFrame", TimelineButtonIcon.Plus, AddButton_ClickActionEvent);
-            AddButton("CopyKeyFrame", TimelineButtonIcon.Duplicate, CopyButton_ClickActionEvent);
-            AddButton("RemoveKeyFrame", TimelineButtonIcon.Minus, DeleteButton_ClickActionEvent);
+            AddButton(TimelineButtonNames.AddKeyButton, TimelineButtonIcon.Plus, AddButtonLogic);
+            AddButton(TimelineButtonNames.CopyKeyButton, TimelineButtonIcon.Duplicate, CopyButtonLogic);
+            AddButton(TimelineButtonNames.RemoveKeyButton, TimelineButtonIcon.Minus, DeleteButtonLogic);
+            AddButton(TimelineButtonNames.MoveLeftKeyButton, TimelineButtonIcon.LeftArrow, MoveButtonLogic(false));
+            AddButton(TimelineButtonNames.MoveRightKeyButton, TimelineButtonIcon.RightArrow, MoveButtonLogic(true));
         }
 
-        public void AddButton(string name,
-            TimelineButtonIcon iconType,
-            Action buttonEvent)
+        private Action MoveButtonLogic(bool forward)
         {
-            var currentButtons = Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))).Count();
-            var newButton = new TimelineButton(name, iconType, Scale)
+            return () =>
             {
-                Top = new StyleDimension(20f * Scale, 0f),
-                Left = new StyleDimension((28f * Scale) + (30f * currentButtons * Scale), 0f)
+                int currentKeyFrame = Animation.AnimationData.GetCurrentKeyFrameIndex();
+                Animation.MoveKeyFrame(currentKeyFrame, (forward) ? currentKeyFrame + 1 : currentKeyFrame - 1);
+                HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
             };
-            newButton.ClickActionEvent += buttonEvent;
-
-            Append(newButton);
         }
 
         #endregion Private Methods

@@ -110,15 +110,15 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public void Initialize()
         {
-            var initializedFrames = new Dictionary<int, LayerFrameInfo>();
+            var initializedKeyFrames = new Dictionary<int, LayerFrameInfo>();
 
-            foreach (var frame in KeyFrames)
+            foreach (var keyFrame in KeyFrames)
             {
-                LayerFrameInfo initializedFrame = new LayerFrameInfo(frame.Value, (frame.Value.LayerDepthOverride.HasValue) ? frame.Value.LayerDepthOverride.Value : DefaultDepth);
-                initializedFrames.Add(frame.Key, initializedFrame);
+                LayerFrameInfo initializedKeyFrame = new LayerFrameInfo(keyFrame.Value, (keyFrame.Value.LayerDepthOverride.HasValue) ? keyFrame.Value.LayerDepthOverride.Value : DefaultDepth);
+                initializedKeyFrames.Add(keyFrame.Key, initializedKeyFrame);
             }
 
-            KeyFrames = initializedFrames;
+            KeyFrames = initializedKeyFrames;
 
             Texture = ModContent.GetTexture(TexturePath);
         }
@@ -127,10 +127,19 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         #region Internal Methods
 
-        internal void AddKeyFrame(int frameIndex,
+        internal void AddKeyFrame(int keyFrameIndex,
             LayerFrameInfo frameInfo)
         {
-            KeyFrames.Add(frameIndex, frameInfo);
+            KeyFrames.Add(keyFrameIndex, frameInfo);
+            Initialize();
+        }
+
+        internal void MoveKeyFrame(int keyFrameIndex,
+            int newFrameIndex)
+        {
+            LayerFrameInfo temp = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth);
+            KeyFrames[keyFrameIndex] = KeyFrames[newFrameIndex];
+            KeyFrames[newFrameIndex] = temp;
             Initialize();
         }
 
@@ -140,26 +149,26 @@ namespace HunterCombatMR.AnimationEngine.Models
             InheritPreviousKeyFrameProperties(keyFrameIndex);
         }
 
-        internal void SetDepthAtKeyFrame(int keyFrame,
+        internal void SetDepthAtKeyFrame(int keyFrameIndex,
             byte depth)
         {
             byte? newDepth = depth;
-            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], newDepth.Value) { LayerDepthOverride = (newDepth == DefaultDepth) ? null : newDepth };
+            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], newDepth.Value) { LayerDepthOverride = (newDepth == DefaultDepth) ? null : newDepth };
         }
 
-        internal void SetPositionAtKeyFrame(int keyFrame,
+        internal void SetPositionAtKeyFrame(int keyFrameIndex,
                             Vector2 newPosition)
         {
-            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { Position = newPosition };
+            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { Position = newPosition };
         }
 
-        internal void ToggleVisibilityAtKeyFrame(int keyFrame)
+        internal void ToggleVisibilityAtKeyFrame(int keyFrameIndex)
         {
-            bool visible = KeyFrames[keyFrame].IsEnabled;
+            bool visible = KeyFrames[keyFrameIndex].IsEnabled;
 
             visible ^= true;
 
-            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { IsEnabled = visible };
+            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { IsEnabled = visible };
         }
 
         #endregion Internal Methods
