@@ -1,10 +1,10 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -15,17 +15,21 @@ namespace HunterCombatMR.UI.AnimationTimeline
     {
         #region Private Fields
 
+        private const string _defaultButtonTexturePath = UITexturePaths.TimelineTextures + "timelinebutton";
+
         // Constants
         private const int _states = 3;
-        private const string _defaultButtonTexturePath = UITexturePaths.TimelineTextures + "timelinebutton";
+
         // Readonly
         private readonly TimelineButtonIcon[] _flippedIcons = { TimelineButtonIcon.LeftArrow };
+
         // Fields
         private bool _active;
+
         private Texture2D _buttonTexture;
-        private int _clickCooldown = -1; 
-        private Texture2D _iconTexture;
+        private int _clickCooldown = -1;
         private TimelineButtonIcon _icon;
+        private Texture2D _iconTexture;
 
         #endregion Private Fields
 
@@ -34,7 +38,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
         public TimelineButton(string name,
             TimelineButtonIcon icon,
             int scale,
-            Texture2D buttonTexture = null)
+            Texture2D buttonTexture = null,
+            Func<Animation, bool> activeCondition = null)
         {
             Name = name;
             Icon = icon;
@@ -42,18 +47,22 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
             if (buttonTexture != null)
                 _buttonTexture = buttonTexture;
+
+            if (activeCondition != null)
+                ActiveConditionEvent = activeCondition;
+            else
+                ActiveConditionEvent = DefaultCondition;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public Vector2 ButtonPadding { get; set; } = new Vector2(4, 4);
+        public event Func<Animation, bool> ActiveConditionEvent;
 
         public event Action ClickActionEvent;
 
-        public event Func<bool> ActiveConditionEvent; 
-
+        public Vector2 ButtonPadding { get; set; } = new Vector2(4, 4);
         public int ClickRate { get; set; } = 30;
 
         public TimelineButtonIcon Icon
@@ -71,7 +80,18 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public int ImageScale { get; set; }
 
-        public bool IsActive { get; set; }
+        public bool IsActive
+        {
+            get
+            {
+                return _active;
+            }
+            set
+            {
+                if (_clickCooldown <= 0)
+                    _active = value;
+            }
+        }
 
         public bool IsHeld { get; private set; }
 
@@ -92,6 +112,9 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Public Methods
 
+        public bool CheckCondition(Animation animation)
+            => ActiveConditionEvent.Invoke(animation);
+
         public override void OnInitialize()
         {
             OnMouseDown += (e, l) => { IsHeld = true; };
@@ -100,9 +123,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
             {
                 if (_active)
                 {
-                    _active = false;
-                    ClickActionEvent();
                     StartCooldown();
+                    ClickActionEvent();
                 }
             };
 
@@ -114,6 +136,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             Width.Set(_buttonTexture.Width * ImageScale, 0f);
             Height.Set((_buttonTexture.Height / _states) * ImageScale, 0f);
         }
+
         public void StartCooldown()
         {
             _clickCooldown = ClickRate;
@@ -130,14 +153,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             }
             else if (_clickCooldown == 0)
             {
-                if (IsActive)
-                    _active = true;
-
                 _clickCooldown = -1;
-            }
-            else if (_clickCooldown == -1)
-            {
-                _active = IsActive;
             }
         }
 
@@ -181,5 +197,12 @@ namespace HunterCombatMR.UI.AnimationTimeline
         }
 
         #endregion Protected Methods
+
+        #region Internal Methods
+
+        internal static bool DefaultCondition(Animation animation)
+            => (animation != null && animation.IsAnimationInitialized());
+
+        #endregion Internal Methods
     }
 }
