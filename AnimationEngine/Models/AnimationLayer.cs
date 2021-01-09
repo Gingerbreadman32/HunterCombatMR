@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria.ModLoader;
 
 namespace HunterCombatMR.AnimationEngine.Models
@@ -13,33 +12,7 @@ namespace HunterCombatMR.AnimationEngine.Models
     public class AnimationLayer
         : IEquatable<AnimationLayer>
     {
-        public Dictionary<int, LayerFrameInfo> KeyFrames { get; set; }
-
-        /// <summary>
-        /// Name of the layer
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// The size and offset of the first frame the spritesheet being used. Leave x and y at 0, 0 if the sprite starts at the top-left.
-        /// </summary>
-        public Rectangle SpriteFrameRectangle { get; set; }
-
-        /// <summary>
-        /// The layer depth that should be set by default
-        /// </summary>
-        public byte DefaultDepth { get; set; }
-
-        [JsonIgnore]
-        /// <summary>
-        /// The texture this layer uses.
-        /// </summary>
-        public Texture2D Texture { get; set; }
-
-        /// <summary>
-        /// The path that will be used to load the texture.
-        /// </summary>
-        public string TexturePath { get; set; }
+        #region Public Constructors
 
         [JsonConstructor]
         public AnimationLayer(string name,
@@ -72,54 +45,41 @@ namespace HunterCombatMR.AnimationEngine.Models
             Initialize();
         }
 
+        #endregion Public Constructors
+
+        #region Public Properties
+
         /// <summary>
-        /// This applies the layer depth to all of the frames and loads the texture, must be called before adding to an animation.
+        /// The layer depth that should be set by default
         /// </summary>
-        public void Initialize()
-        {
-            var initializedFrames = new Dictionary<int, LayerFrameInfo>();
+        public byte DefaultDepth { get; set; }
 
-            foreach (var frame in KeyFrames)
-            {
-                LayerFrameInfo initializedFrame = new LayerFrameInfo(frame.Value, (frame.Value.LayerDepthOverride.HasValue) ? frame.Value.LayerDepthOverride.Value : DefaultDepth);
-                initializedFrames.Add(frame.Key, initializedFrame);
-            }
+        public Dictionary<int, LayerFrameInfo> KeyFrames { get; set; }
 
-            KeyFrames = initializedFrames;
+        /// <summary>
+        /// Name of the layer
+        /// </summary>
+        public string Name { get; set; }
 
-            Texture = ModContent.GetTexture(TexturePath);
-        }
+        /// <summary>
+        /// The size and offset of the first frame the spritesheet being used. Leave x and y at 0, 0 if the sprite starts at the top-left.
+        /// </summary>
+        public Rectangle SpriteFrameRectangle { get; set; }
 
-        public Vector2 GetPositionAtKeyFrame(int keyFrame)
-            => KeyFrames[keyFrame].Position;
+        [JsonIgnore]
+        /// <summary>
+        /// The texture this layer uses.
+        /// </summary>
+        public Texture2D Texture { get; set; }
 
-        internal void SetPositionAtKeyFrame(int keyFrame,
-            Vector2 newPosition)
-        {
-            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { Position = newPosition };
-        }
+        /// <summary>
+        /// The path that will be used to load the texture.
+        /// </summary>
+        public string TexturePath { get; set; }
 
-        public byte GetDepthAtKeyFrame(int keyFrame)
-            => KeyFrames[keyFrame].LayerDepth;
+        #endregion Public Properties
 
-        internal void SetDepthAtKeyFrame(int keyFrame,
-            byte depth)
-        {
-            byte? newDepth = depth;
-            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], newDepth.Value) { LayerDepthOverride = (newDepth == DefaultDepth) ? null : newDepth };
-        }
-
-        internal void ToggleVisibilityAtKeyFrame(int keyFrame)
-        {
-            bool visible = KeyFrames[keyFrame].IsEnabled;
-
-            visible ^= true;
-
-            KeyFrames[keyFrame] = new LayerFrameInfo(KeyFrames[keyFrame], KeyFrames[keyFrame].LayerDepth) { IsEnabled = visible };
-        }
-
-        public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
-            => SpriteFrameRectangle.SetSheetPositionFromFrame(KeyFrames[currentKeyFrame].SpriteFrame);
+        #region Public Methods
 
         public bool Equals(AnimationLayer other)
         {
@@ -132,5 +92,100 @@ namespace HunterCombatMR.AnimationEngine.Models
                 && DefaultDepth.Equals(other.DefaultDepth)
                 && TexturePath.Equals(other.TexturePath);
         }
+
+        public bool GetActiveAtKeyFrame(int keyFrame)
+                    => KeyFrames.ContainsKey(keyFrame) && KeyFrames[keyFrame].IsEnabled;
+
+        public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
+                    => SpriteFrameRectangle.SetSheetPositionFromFrame(KeyFrames[currentKeyFrame].SpriteFrame);
+
+        public byte GetDepthAtKeyFrame(int keyFrame)
+                    => KeyFrames[keyFrame].LayerDepth;
+
+        public Vector2 GetPositionAtKeyFrame(int keyFrame)
+                    => KeyFrames[keyFrame].Position;
+
+        /// <summary>
+        /// This applies the layer depth to all of the frames and loads the texture, must be called before adding to an animation.
+        /// </summary>
+        public void Initialize()
+        {
+            var initializedKeyFrames = new Dictionary<int, LayerFrameInfo>();
+
+            foreach (var keyFrame in KeyFrames)
+            {
+                LayerFrameInfo initializedKeyFrame = new LayerFrameInfo(keyFrame.Value, (keyFrame.Value.LayerDepthOverride.HasValue) ? keyFrame.Value.LayerDepthOverride.Value : DefaultDepth);
+                initializedKeyFrames.Add(keyFrame.Key, initializedKeyFrame);
+            }
+
+            KeyFrames = initializedKeyFrames;
+
+            Texture = ModContent.GetTexture(TexturePath);
+        }
+
+        #endregion Public Methods
+
+        #region Internal Methods
+
+        internal void AddKeyFrame(int keyFrameIndex,
+            LayerFrameInfo frameInfo)
+        {
+            KeyFrames.Add(keyFrameIndex, frameInfo);
+            Initialize();
+        }
+
+        internal void MoveKeyFrame(int keyFrameIndex,
+            int newFrameIndex)
+        {
+            LayerFrameInfo temp = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth);
+            KeyFrames[keyFrameIndex] = KeyFrames[newFrameIndex];
+            KeyFrames[newFrameIndex] = temp;
+            Initialize();
+        }
+
+        internal void RemoveKeyFrame(int keyFrameIndex)
+        {
+            KeyFrames.Remove(keyFrameIndex);
+            InheritPreviousKeyFrameProperties(keyFrameIndex);
+        }
+
+        internal void SetDepthAtKeyFrame(int keyFrameIndex,
+            byte depth)
+        {
+            byte? newDepth = depth;
+            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], newDepth.Value) { LayerDepthOverride = (newDepth == DefaultDepth) ? null : newDepth };
+        }
+
+        internal void SetPositionAtKeyFrame(int keyFrameIndex,
+                            Vector2 newPosition)
+        {
+            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { Position = newPosition };
+        }
+
+        internal void ToggleVisibilityAtKeyFrame(int keyFrameIndex)
+        {
+            bool visible = KeyFrames[keyFrameIndex].IsEnabled;
+
+            visible ^= true;
+
+            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { IsEnabled = visible };
+        }
+
+        #endregion Internal Methods
+
+        #region Private Methods
+
+        private void InheritPreviousKeyFrameProperties(int keyFrameIndex)
+        {
+            int nextFrameIndex = keyFrameIndex + 1;
+            if (KeyFrames.ContainsKey(nextFrameIndex))
+            {
+                KeyFrames.Add(keyFrameIndex, KeyFrames[nextFrameIndex]);
+                KeyFrames.Remove(nextFrameIndex);
+                InheritPreviousKeyFrameProperties(nextFrameIndex);
+            }
+        }
+
+        #endregion Private Methods
     }
 }

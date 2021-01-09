@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.UI.AnimationTimeline;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -66,6 +67,8 @@ namespace HunterCombatMR.UI
         private int loadTimer = 0;
         private int saveTimer = 0;
 
+        private Timeline _animationTimeline;
+
         #endregion Private Fields
 
         #region Internal Properties
@@ -86,23 +89,6 @@ namespace HunterCombatMR.UI
         {
             if (_currentPlayer != null)
             {
-                /*
-                // Top Line
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.position, 0, _currentPlayer.player.width);
-
-                // Bottom Line
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.BottomLeft, 0, _currentPlayer.player.width);
-
-                // Left Line
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.position, MathHelper.PiOver2, _currentPlayer.player.height);
-
-                // Right Line
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.TopRight, MathHelper.PiOver2, _currentPlayer.player.height);
-
-                // Vertical Midline
-                ShapeDrawingService.DrawLine(spriteBatch, _currentPlayer.player.Top, MathHelper.PiOver2, _currentPlayer.player.height);
-                */
-
                 if (HunterCombatMR.Instance.EditorInstance.OnionSkin)
                     _onionskinbutton.BorderColor = Color.White;
                 else
@@ -113,6 +99,7 @@ namespace HunterCombatMR.UI
 
         public override void OnInitialize()
         {
+            base.OnInitialize();
             // Mode Switch
             _modeswitch = new UIAutoScaleTextTextPanel<string>(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription())
             {
@@ -490,6 +477,14 @@ namespace HunterCombatMR.UI
 
             Append(othertoolpanel);
 
+            _animationTimeline = new Timeline()
+            {
+                Top = new StyleDimension(underLayerPanel.Pixels + _animationtoolpanel.GetDimensions().Height + othertoolpanel.GetDimensions().Height + 2f, 0),
+                Left = new StyleDimension(8f, 0f)
+            };
+
+            Append(_animationTimeline);
+
             // Renameable Animation Name Text Box
             _animationname = new TextBox("Animation Name", HunterCombatMR.AnimationNameMax, true, true);
             _animationname.Left.Set(0f, 0f);
@@ -503,6 +498,7 @@ namespace HunterCombatMR.UI
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
             _modeswitch.SetText(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription());
 
             if (Main.gameMenu || _currentPlayer == null)
@@ -840,6 +836,7 @@ namespace HunterCombatMR.UI
             _currentPlayer?.SetCurrentAnimation(newAnim, newAnim.IsModified);
             HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = _currentPlayer.CurrentAnimation;
             _animationname.Text = _currentPlayer?.CurrentAnimation?.Name;
+            _animationTimeline.SetAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
         }
 
         private void StopAnimation(UIMouseEvent evt, UIElement listeningElement)
