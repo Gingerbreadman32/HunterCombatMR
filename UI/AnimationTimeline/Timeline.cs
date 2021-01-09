@@ -1,16 +1,15 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace HunterCombatMR.UI.AnimationTimeline
 {
-    public class Timeline
+    public partial class Timeline
         : UIElement
     {
         #region Private Fields
@@ -30,6 +29,12 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private Texture2D _timelineMidTexture;
 
         #endregion Private Fields
+
+        #region Protected Properties
+
+        protected IEnumerable<TimelineButton> Buttons { get; set; }
+
+        #endregion Protected Properties
 
         #region Public Constructors
 
@@ -73,21 +78,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
         #endregion Internal Properties
 
         #region Public Methods
-
-        public void AddButton(string name,
-            TimelineButtonIcon iconType,
-            Action buttonEvent)
-        {
-            var currentButtons = Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))).Count();
-            var newButton = new TimelineButton(name, iconType, Scale)
-            {
-                Top = new StyleDimension(20f * Scale, 0f),
-                Left = new StyleDimension((28f * Scale) + (30f * currentButtons * Scale), 0f)
-            };
-            newButton.ClickActionEvent += buttonEvent;
-
-            Append(newButton);
-        }
 
         public void InitializeAnimation()
         {
@@ -140,11 +130,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
             if (Animation != null)
             {
                 InitializeAnimation();
-                // @@num:1
-                foreach (TimelineButton button in Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))))
-                {
-                    button.IsActive = true;
-                }
             }
         }
 
@@ -155,17 +140,12 @@ namespace HunterCombatMR.UI.AnimationTimeline
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
                 SetAnimation(null);
 
-            if (Animation == null
-                || !Animation.IsAnimationInitialized()
-                || (!ShowAllFrames && Animation.AnimationData.GetTotalKeyFrames() == _maxFrames)
-                || (ShowAllFrames && Animation.AnimationData.TotalFrames == _maxFrames))
+            foreach (TimelineButton button in Buttons)
             {
-                foreach (TimelineButton button in Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))))
-                {
-                    button.IsActive = false;
-                }
+                button.IsActive = button.CheckCondition(Animation);
             }
-            else
+
+            if (Animation != null)
             {
                 if (HunterCombatMR.Instance.EditorInstance.AnimationEdited)
                     SetAnimation(Animation);
@@ -257,27 +237,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Private Methods
 
-        private void AddButtonLogic()
-        {
-            Animation.AddKeyFrame();
-            HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
-        }
-
         private int CalculateWidth()
             => ((_timelineMidTexture != null) ? TimelineBarMidTexture.Width : 0 * Scale) * _size;
-
-        private void CopyButtonLogic()
-        {
-            var copyKeyframe = Animation.AnimationData.GetCurrentKeyFrame();
-            Animation.AddKeyFrame(copyKeyframe, Animation.LayerData.GetFrameInfoForLayers(copyKeyframe.KeyFrameOrder));
-            HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
-        }
-
-        private void DeleteButtonLogic()
-        {
-            Animation.RemoveKeyFrame(Animation.AnimationData.GetCurrentKeyFrameIndex());
-            HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
-        }
 
         private void DrawOverride(SpriteBatch spriteBatch,
             bool end)
@@ -292,25 +253,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 spriteBatch.End();
                 spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
             }
-        }
-
-        private void InitializeButtons()
-        {
-            AddButton(TimelineButtonNames.AddKeyButton, TimelineButtonIcon.Plus, AddButtonLogic);
-            AddButton(TimelineButtonNames.CopyKeyButton, TimelineButtonIcon.Duplicate, CopyButtonLogic);
-            AddButton(TimelineButtonNames.RemoveKeyButton, TimelineButtonIcon.Minus, DeleteButtonLogic);
-            AddButton(TimelineButtonNames.MoveLeftKeyButton, TimelineButtonIcon.LeftArrow, MoveButtonLogic(false));
-            AddButton(TimelineButtonNames.MoveRightKeyButton, TimelineButtonIcon.RightArrow, MoveButtonLogic(true));
-        }
-
-        private Action MoveButtonLogic(bool forward)
-        {
-            return () =>
-            {
-                int currentKeyFrame = Animation.AnimationData.GetCurrentKeyFrameIndex();
-                Animation.MoveKeyFrame(currentKeyFrame, (forward) ? currentKeyFrame + 1 : currentKeyFrame - 1);
-                HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
-            };
         }
 
         #endregion Private Methods
