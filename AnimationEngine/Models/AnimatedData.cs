@@ -161,13 +161,15 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void PauseAnimation()
         {
             IsPlaying = false;
-            InProgress = true;
+            if (GetCurrentKeyFrameIndex() > 0)
+                InProgress = true;
         }
 
         /// <inheritdoc/>
         public void ResetAnimation(bool startPlaying = true)
         {
             SetCurrentFrame(0);
+            InProgress = false;
 
             if (startPlaying)
                 StartAnimation();

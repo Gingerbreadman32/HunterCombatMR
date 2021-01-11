@@ -39,7 +39,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             TimelineButtonIcon icon,
             int scale,
             Texture2D buttonTexture = null,
-            Func<Animation, bool> activeCondition = null)
+            Func<Animation, TimelineButton, bool> activeCondition = null)
         {
             Name = name;
             Icon = icon;
@@ -58,12 +58,12 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Public Properties
 
-        public event Func<Animation, bool> ActiveConditionEvent;
+        public event Func<Animation, TimelineButton, bool> ActiveConditionEvent;
 
         public event Action ClickActionEvent;
 
         public Vector2 ButtonPadding { get; set; } = new Vector2(4, 4);
-        public int ClickRate { get; set; } = 30;
+        public int ClickRate { get; set; } = 5;
 
         public TimelineButtonIcon Icon
         {
@@ -113,7 +113,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         #region Public Methods
 
         public bool CheckCondition(Animation animation)
-            => ActiveConditionEvent.Invoke(animation);
+            => ActiveConditionEvent.Invoke(animation, this);
 
         public override void OnInitialize()
         {
@@ -200,7 +200,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Internal Methods
 
-        internal static bool DefaultCondition(Animation animation)
+        internal static bool DefaultCondition(Animation animation,
+            TimelineButton button)
             => (animation != null && animation.IsAnimationInitialized());
 
         #endregion Internal Methods

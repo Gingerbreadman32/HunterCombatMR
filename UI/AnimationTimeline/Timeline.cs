@@ -14,7 +14,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
     {
         #region Private Fields
 
-        private const string _addButtonPath = UITexturePaths.TimelineTextures + "addkeyframe";
         private const int _fullHeight = 44;
         private const int _maxFrames = 1024;
         private const int _segmentHeight = 18;
