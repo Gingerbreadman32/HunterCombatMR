@@ -3,7 +3,6 @@ using HunterCombatMR.Enumerations;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
@@ -11,12 +10,8 @@ namespace HunterCombatMR.AnimationEngine.Models
     public sealed class LayerData
         : IEquatable<LayerData>
     {
-        public KeyFrameProfile KeyFrameProfile { get; set; }
+        #region Public Constructors
 
-        public List<AnimationLayer> Layers { get; }
-
-        public LoopStyle Loop { get; set; }
-        
         [JsonConstructor]
         public LayerData(KeyFrameProfile frameProfile,
             IEnumerable<AnimationLayer> layers,
@@ -39,6 +34,20 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
         }
 
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public KeyFrameProfile KeyFrameProfile { get; set; }
+
+        public List<AnimationLayer> Layers { get; }
+
+        public LoopStyle Loop { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
         public bool Equals(LayerData other)
         {
             bool paramEquals = KeyFrameProfile.Equals(other.KeyFrameProfile)
@@ -52,5 +61,11 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public IDictionary<AnimationLayer, LayerFrameInfo> GetFrameInfoForLayers(int keyFrameIndex)
             => Layers.ToDictionary(x => x, x => x.KeyFrames[keyFrameIndex]);
+
+        public int GetTextureFrameAtKeyFrameForLayer(int keyFrameIndex,
+            string layerName)
+            => Layers.SingleOrDefault(x => x.Name.Equals(layerName))?.GetTextureFrameAtKeyFrame(keyFrameIndex) ?? 0;
+
+        #endregion Public Methods
     }
 }

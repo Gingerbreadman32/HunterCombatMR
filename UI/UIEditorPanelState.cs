@@ -38,36 +38,30 @@ namespace HunterCombatMR.UI
 
         private const int SAVETIMERMAX = 120;
         private UIAutoScaleTextTextPanel<string> _addtimebutton;
-        private UIAutoScaleTextTextPanel<string> _advanceframe;
         private UIElement _animationgroup;
         private TextBox _animationname;
+        private Timeline _animationTimeline;
         private UIPanel _animationtoolpanel;
         private UIPanel _bufferpanel;
         private UIText _currentframetime;
+        private UIText _currentlayertextureframe;
         private HunterCombatPlayer _currentPlayer;
 
         private UIAutoScaleTextTextPanel<string> _defaulttimebutton;
         private UIElement _framegroup;
-        private UIText _framenum;
         private UIText _frametotal;
         private UIList _layerlist;
         private UIPanel _layerpanel;
         private UIAutoScaleTextTextPanel<string> _loadbutton;
-        private UIAutoScaleTextTextPanel<string> _looptype;
         private UIAutoScaleTextTextPanel<string> _modeswitch;
         private UIAutoScaleTextTextPanel<string> _onionskinbutton;
-        private UIAutoScaleTextTextPanel<string> _playpause;
-        private UIAutoScaleTextTextPanel<string> _reverseframe;
         private UIAutoScaleTextTextPanel<string> _savebutton;
-        private UIAutoScaleTextTextPanel<string> _stop;
         private UIAutoScaleTextTextPanel<string> _subtimebutton;
         private UIList _testlist;
         private UIPanel _testlistpanel;
         private UIElement _timinggroup;
         private int loadTimer = 0;
         private int saveTimer = 0;
-
-        private Timeline _animationTimeline;
 
         #endregion Private Fields
 
@@ -201,7 +195,7 @@ namespace HunterCombatMR.UI
 
             panelPercent += _framegroup.Width.Percent;
 
-            _reverseframe = new UIAutoScaleTextTextPanel<string>("<")
+            var lasttexframe = new UIAutoScaleTextTextPanel<string>("<")
             {
                 TextColor = Color.White,
                 Width = new StyleDimension(25f, 0),
@@ -211,14 +205,14 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0f
             }.WithFadedMouseOver();
-            _reverseframe.OnClick += (evt, list) => ButtonAction(ReverseFrame, evt, list, EditorModePreset.InEditor);
+            lasttexframe.OnClick += (evt, list) => ButtonAction(PreviousTextureFrame, evt, list, EditorModePreset.InEditor, true);
 
-            _framenum = new UIText("0")
+            _currentlayertextureframe = new UIText("0")
             {
                 HAlign = 0.5f
             };
 
-            _advanceframe = new UIAutoScaleTextTextPanel<string>(">")
+            var nexttexframe = new UIAutoScaleTextTextPanel<string>(">")
             {
                 TextColor = Color.White,
                 Width = new StyleDimension(25f, 0),
@@ -228,11 +222,11 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 1f
             }.WithFadedMouseOver();
-            _advanceframe.OnClick += (evt, list) => ButtonAction(AdvanceFrame, evt, list, EditorModePreset.InEditor, true);
+            nexttexframe.OnClick += (evt, list) => ButtonAction(NextTextureFrame, evt, list, EditorModePreset.InEditor, true);
 
-            _framegroup.Append(_reverseframe);
-            _framegroup.Append(_framenum);
-            _framegroup.Append(_advanceframe);
+            _framegroup.Append(nexttexframe);
+            _framegroup.Append(_currentlayertextureframe);
+            _framegroup.Append(lasttexframe);
 
             _animationtoolpanel.Append(_framegroup);
 
@@ -242,46 +236,6 @@ namespace HunterCombatMR.UI
             _animationgroup.Left = new StyleDimension(0, panelPercent);
 
             panelPercent += _animationgroup.Width.Percent;
-
-            _playpause = new UIAutoScaleTextTextPanel<string>("Play")
-            {
-                TextColor = Color.Green,
-                Width = new StyleDimension(0, 0.25f),
-                Height =
-                {
-                    Pixels = 40f
-                },
-                HAlign = 0f
-            }.WithFadedMouseOver();
-            _playpause.OnClick += (evt, list) => ButtonAction(PlayPauseAnimation, evt, list, EditorModePreset.InEditor, true);
-
-            _stop = new UIAutoScaleTextTextPanel<string>("Stop")
-            {
-                TextColor = Color.Red,
-                Width = new StyleDimension(0f, 0.25f),
-                Height =
-                {
-                    Pixels = 40f
-                },
-                Left = new StyleDimension(0f, 0.25f)
-            }.WithFadedMouseOver();
-            _stop.OnClick += (evt, list) => ButtonAction(StopAnimation, evt, list, EditorModePreset.InEditor, true);
-
-            _looptype = new UIAutoScaleTextTextPanel<string>("Loop")
-            {
-                TextColor = Color.White,
-                Width = new StyleDimension(0f, 0.50f),
-                Height =
-                {
-                    Pixels = 40f
-                },
-                Left = new StyleDimension(0f, 0.5f)
-            }.WithFadedMouseOver();
-            _looptype.OnClick += (evt, list) => ButtonAction(LoopTypeChange, evt, list, EditorModePreset.InEditor, true);
-
-            _animationgroup.Append(_playpause);
-            _animationgroup.Append(_stop);
-            _animationgroup.Append(_looptype);
 
             _animationtoolpanel.Append(_animationgroup);
 
@@ -559,33 +513,16 @@ namespace HunterCombatMR.UI
 
             // Layer Window
             var layers = PlayerHooks.GetDrawLayers(_currentPlayer.player);
-            /*
-            foreach (var layer in layers.Where(x => x.visible))
-            {
-                var parent = layer.parent;
-                var parenttext = "";
-                if (parent != null)
-                    parenttext = $" - parent.Name";
 
-                activelayers.Add($"{layer.Name}{parent}");
-            }*/
-
-            if (_currentPlayer?.CurrentAnimation != null && _currentPlayer.CurrentAnimation.IsAnimationInitialized())
-            {
-                _playpause.SetText((_currentPlayer.CurrentAnimation.AnimationData.IsPlaying) ? "Pause" : "Play");
-                _looptype.SetText(_currentPlayer.CurrentAnimation.AnimationData.LoopMode.ToString());
-            }
-            else
+            if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing == null
+                || !HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsAnimationInitialized())
             {
                 _layerlist.Clear();
             }
 
             if (inEditor)
             {
-                // Current Keyframe Text
-                var frametext = (_currentPlayer.CurrentAnimation?.AnimationData.GetCurrentKeyFrameIndex() + 1).ToString() ?? "0";
-                _framenum.SetText(frametext);
-
+                var currentKeyFrame = _currentPlayer.CurrentAnimation?.AnimationData.GetCurrentKeyFrameIndex() ?? 0;
                 // Current Keyframe Timing Text
                 var framenumtext = _currentPlayer.CurrentAnimation?.AnimationData.GetCurrentKeyFrame().FrameLength.ToString() ?? "0";
                 _currentframetime.SetText(framenumtext);
@@ -593,6 +530,15 @@ namespace HunterCombatMR.UI
                 // Total Amount of Animation KeyFrames
                 var totalframenumtext = _currentPlayer.CurrentAnimation?.AnimationData.TotalFrames.ToString() ?? "0";
                 _frametotal.SetText(totalframenumtext);
+
+                // Current Layer's Texture Frame
+                int keyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing
+                    ?.AnimationData.GetCurrentKeyFrameIndex() 
+                    ?? 0;
+                string layertexframe = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing
+                    ?.LayerData.GetTextureFrameAtKeyFrameForLayer(keyFrame, HunterCombatMR.Instance.EditorInstance.HighlightedLayers.SingleOrDefault()).ToString() 
+                    ?? "";
+                _currentlayertextureframe.SetText(layertexframe);
 
                 // Animation List Window
                 foreach (var animation in HunterCombatMR.Instance.LoadedAnimations)
@@ -666,11 +612,6 @@ namespace HunterCombatMR.UI
 
         #region Private Methods
 
-        private void AdvanceFrame(UIMouseEvent evt, UIElement listeningElement)
-        {
-            _currentPlayer.CurrentAnimation?.AnimationData.AdvanceToNextKeyFrame();
-        }
-
         private void DisplayLayers(AnimationEngine.Models.Animation animation)
         {
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = false;
@@ -714,14 +655,6 @@ namespace HunterCombatMR.UI
             element.StartInteracting();
         }
 
-        private void LoopTypeChange(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (!_currentPlayer.CurrentAnimation.AnimationData.LoopMode.Equals(LoopStyle.PlayPause))
-                _currentPlayer.CurrentAnimation?.UpdateLoopType(_currentPlayer.CurrentAnimation.AnimationData.LoopMode + 1);
-            else
-                _currentPlayer.CurrentAnimation?.UpdateLoopType(0);
-        }
-
         private void ModeSwitch(UIMouseEvent evt, UIElement listeningElement)
         {
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
@@ -730,16 +663,44 @@ namespace HunterCombatMR.UI
             }
             else
             {
-                HunterCombatMR.Instance.EditorInstance.CurrentEditMode++;
+                HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.EditMode;
             }
         }
 
-        private void PlayPauseAnimation(UIMouseEvent evt, UIElement listeningElement)
+        private void NextTextureFrame(UIMouseEvent evt, UIElement listeningElement)
         {
-            if (!_currentPlayer.CurrentAnimation.AnimationData.IsPlaying)
-                _currentPlayer.CurrentAnimation.Play();
-            else
-                _currentPlayer.CurrentAnimation.Pause();
+            if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.IsAnimationInitialized() ?? false)
+            {
+                var layers = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
+                if (layers.Count() == 1)
+                {
+                    AnimationEngine.Models.Animation anim = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing;
+                    var layer = anim.LayerData.Layers.Single(x => x.Name.Equals(layers.Single()));
+                    var key = anim.AnimationData.GetCurrentKeyFrameIndex();
+                    if (layer.GetSpriteTextureFrameTotal() - 1 > layer.KeyFrames[key].SpriteFrame)
+                    {
+                        layer.SetTextureFrameAtKeyFrame(key, layer.KeyFrames[key].SpriteFrame + 1);
+                    }
+                }
+            }
+        }
+
+        private void PreviousTextureFrame(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.IsAnimationInitialized() ?? false)
+            {
+                var layers = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
+                if (layers.Count() == 1)
+                {
+                    AnimationEngine.Models.Animation anim = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing;
+                    var layer = anim.LayerData.Layers.Single(x => x.Name.Equals(layers.Single()));
+                    var key = anim.AnimationData.GetCurrentKeyFrameIndex();
+                    if (layer.KeyFrames[key].SpriteFrame > 0)
+                    {
+                        layer.SetTextureFrameAtKeyFrame(key, layer.KeyFrames[key].SpriteFrame - 1);
+                    }
+                }
+            }
         }
 
         private void ReloadAnimation(UIMouseEvent evt, UIElement listeningElement)
@@ -760,11 +721,6 @@ namespace HunterCombatMR.UI
                     loadTimer++;
                 }
             }
-        }
-
-        private void ReverseFrame(UIMouseEvent evt, UIElement listeningElement)
-        {
-            _currentPlayer.CurrentAnimation?.AnimationData.ReverseToPreviousKeyFrame();
         }
 
         private void SaveAnimation(UIMouseEvent evt, UIElement listeningElement)

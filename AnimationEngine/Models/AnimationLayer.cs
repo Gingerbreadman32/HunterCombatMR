@@ -105,6 +105,12 @@ namespace HunterCombatMR.AnimationEngine.Models
         public Vector2 GetPositionAtKeyFrame(int keyFrame)
                     => KeyFrames[keyFrame].Position;
 
+        public int GetSpriteTextureFrameTotal()
+            => Texture.Height / SpriteFrameRectangle.Height;
+
+        public int GetTextureFrameAtKeyFrame(int keyFrame)
+                => KeyFrames[keyFrame].SpriteFrame;
+
         /// <summary>
         /// This applies the layer depth to all of the frames and loads the texture, must be called before adding to an animation.
         /// </summary>
@@ -160,6 +166,12 @@ namespace HunterCombatMR.AnimationEngine.Models
                             Vector2 newPosition)
         {
             KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { Position = newPosition };
+        }
+
+        internal void SetTextureFrameAtKeyFrame(int keyFrameIndex,
+            int textureFrame)
+        {
+            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { SpriteFrame = textureFrame };
         }
 
         internal void ToggleVisibilityAtKeyFrame(int keyFrameIndex)
