@@ -3,6 +3,7 @@ using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -134,21 +135,22 @@ namespace AnimationEngine.Services
             {
                 _nudgeCooldown--;
                 Point newNudge = new Point(0, 0);
+                int nudgeamount = (Main.keyState.GetPressedKeys().Any(x => x.Equals(Keys.LeftShift))) ? 5 : 1;
                 if (PlayerInput.Triggers.JustReleased.Down)
                 {
-                    newNudge.Y = 1;
+                    newNudge.Y = nudgeamount;
                 }
                 else if (PlayerInput.Triggers.JustReleased.Up)
                 {
-                    newNudge.Y = -1;
+                    newNudge.Y = -nudgeamount;
                 }
                 else if (PlayerInput.Triggers.JustReleased.Left)
                 {
-                    newNudge.X = -1;
+                    newNudge.X = -nudgeamount;
                 }
                 else if (PlayerInput.Triggers.JustReleased.Right)
                 {
-                    newNudge.X = 1;
+                    newNudge.X = nudgeamount;
                 } else
                 {
                     _nudgeCooldown++;

@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -32,15 +33,23 @@ namespace HunterCombatMR.UI
             OnRightClick += DeselectAllFrames;
         }
 
+        public LayerText(AnimationLayer layer,
+            int currentKeyFrame,
+            LayerTextInfo infoArgs = LayerTextInfo.None)
+        {
+            CurrentKeyFrame = currentKeyFrame;
+            SetLayer(layer);
+            SetDisplayInformation(infoArgs);
+        }
+
         #endregion Public Constructors
 
         #region Public Properties
 
-        public LayerTextInfo DisplayInfo { get; protected set; }
         public AnimationEngine.Models.Animation AnimationReference { get; protected set; }
-        public AnimationLayer Layer { get; protected set; }
         public int CurrentKeyFrame { get; }
-        
+        public LayerTextInfo DisplayInfo { get; protected set; }
+        public AnimationLayer Layer { get; protected set; }
 
         public string Text
         {
@@ -58,8 +67,10 @@ namespace HunterCombatMR.UI
 
         public override void Recalculate()
         {
-            GenerateText();
             base.Recalculate();
+            Vector2 textSize = new Vector2(Main.fontMouseText.MeasureString(_displayText.ToString()).X, 16f);
+            MinWidth.Set(textSize.X + PaddingLeft + PaddingRight, 0f);
+            MinHeight.Set(textSize.Y + PaddingTop + PaddingBottom, 0f);
         }
 
         public void SetDisplayInformation(LayerTextInfo infoArgs)
@@ -76,6 +87,18 @@ namespace HunterCombatMR.UI
             GenerateText();
         }
 
+        public void SetLayer(AnimationLayer layer)
+        {
+            Layer = layer;
+            GenerateText();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            GenerateText();
+            base.Update(gameTime);
+        }
+
         #endregion Public Methods
 
         #region Protected Methods
@@ -83,8 +106,11 @@ namespace HunterCombatMR.UI
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
             Color displayColor = TextColor;
-
-            if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(Layer.Name)))
+            
+            var MousePosition = new Vector2(Main.mouseX, Main.mouseY);
+            if (Parent.GetElementAt(MousePosition) == this)
+                displayColor = Color.LightBlue;
+            else if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(Layer.Name)))
                 displayColor = Color.Red;
 
             CalculatedStyle innerDimensions = GetInnerDimensions();
@@ -98,35 +124,28 @@ namespace HunterCombatMR.UI
 
         protected void GenerateText()
         {
-            _displayText = Layer.Name;
-
-            if (DisplayInfo > 0)
+            if (Layer != null)
             {
-                _displayText += " - ";
-
-                if (DisplayInfo.HasFlag(LayerTextInfo.Coordinates))
-                    _displayText += CoordinateInfoText(CurrentKeyFrame, Layer);
-
-                if (DisplayInfo.HasFlag(LayerTextInfo.Depth))
-                    _displayText += DepthInfoText(CurrentKeyFrame, Layer);
+                foreach (LayerTextInfo info in DisplayInfo.GetFlags())
+                {
+                    _displayText = InfoText(info);
+                }
             }
-
-            Vector2 textSize = new Vector2(Main.fontMouseText.MeasureString(_displayText.ToString()).X, 16f);
-            MinWidth.Set(textSize.X + PaddingLeft + PaddingRight, 0f);
-            MinHeight.Set(textSize.Y + PaddingTop + PaddingBottom, 0f);
+            else
+            {
+                _displayText = "";
+            }
         }
 
         #endregion Protected Methods
 
         #region Private Methods
 
-        private string CoordinateInfoText(int currentFrame,
-            AnimationLayer layer)
-            => $"X: {layer.KeyFrames[currentFrame].Position.X} Y: {layer.KeyFrames[currentFrame].Position.Y} ";
+        private string CoordinateInfoText()
+            => $"Coords: X- {Layer.KeyFrames[CurrentKeyFrame].Position.X} Y- {Layer.KeyFrames[CurrentKeyFrame].Position.Y} ";
 
-        private string DepthInfoText(int currentFrame,
-            AnimationLayer layer)
-            => $"D: {layer.GetDepthAtKeyFrame(currentFrame)} ";
+        private string DepthInfoText()
+            => $"Default Depth: {Layer.GetDepthAtKeyFrame(CurrentKeyFrame)} ";
 
         private void DeselectAllFrames(UIMouseEvent evt, UIElement listeningElement)
         {
@@ -156,6 +175,74 @@ namespace HunterCombatMR.UI
                 }
             }
         }
+
+        private string OrientationInfoText()
+        {
+            string text = "Orientation: ";
+            SpriteEffects orientation = Layer.GetOrientationAtKeyFrame(CurrentKeyFrame);
+
+            switch (orientation)
+            {
+                case SpriteEffects.None:
+                    text += "None ";
+                    break;
+
+                case SpriteEffects.FlipHorizontally:
+                    text += "Horizontal ";
+                    break;
+
+                case SpriteEffects.FlipVertically:
+                    text += "Vertical ";
+                    break;
+
+                case SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically:
+                    text += "Both ";
+                    break;
+            }
+            return text;
+        }
+
+        private string InfoText(LayerTextInfo flag)
+        {
+            switch (flag)
+            {
+                case LayerTextInfo.Coordinates:
+                    return CoordinateInfoText();
+
+                case LayerTextInfo.DefaultDepth:
+                    return DepthInfoText();
+
+                case LayerTextInfo.Rotation:
+                    return RotationInfoText();
+
+                case LayerTextInfo.Orientation:
+                    return OrientationInfoText();
+
+                case LayerTextInfo.TextureFrames:
+                    return TextureFrameInfoText();
+
+                case LayerTextInfo.TextureName:
+                    return TextureNameInfoText();
+
+                case LayerTextInfo.TextureFrameRectangle:
+                    return TextureBoundsInfoText();
+
+                default:
+                    return Layer.Name;
+            }
+        }
+
+        private string RotationInfoText()
+            => $"Rotation: {MathHelper.ToDegrees(Layer.GetRotationAtKeyFrame(CurrentKeyFrame))}° ";
+
+        private string TextureBoundsInfoText()
+            => $"Bounds: W- {Layer.SpriteFrameRectangle.Width} H- {Layer.SpriteFrameRectangle.Height}";
+
+        private string TextureFrameInfoText()
+                    => $"Frame: {Layer.GetTextureFrameAtKeyFrame(CurrentKeyFrame)} / {Layer.GetSpriteTextureFrameTotal()} ";
+
+        private string TextureNameInfoText()
+            => $"Texture: {Layer.Texture.Name.Split('/')[Layer.Texture.Name.Split('/').Length - 1]}";
 
         #endregion Private Methods
     }

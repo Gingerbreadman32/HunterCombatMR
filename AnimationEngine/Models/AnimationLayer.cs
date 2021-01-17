@@ -63,6 +63,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         /// <summary>
         /// The size and offset of the first frame the spritesheet being used. Leave x and y at 0, 0 if the sprite starts at the top-left.
+        /// Saves the data of the size of each frame, but is transferred to the Texture tuple on load.
         /// </summary>
         public Rectangle SpriteFrameRectangle { get; set; }
 
@@ -70,12 +71,12 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <summary>
         /// The texture this layer uses.
         /// </summary>
-        public Texture2D Texture { get; set; }
+        public Texture2D Texture { get; protected set; }
 
         /// <summary>
         /// The path that will be used to load the texture.
         /// </summary>
-        public string TexturePath { get; set; }
+        public string TexturePath { get; protected set; }
 
         #endregion Public Properties
 
@@ -102,8 +103,14 @@ namespace HunterCombatMR.AnimationEngine.Models
         public byte GetDepthAtKeyFrame(int keyFrame)
                     => KeyFrames[keyFrame].LayerDepth;
 
+        public SpriteEffects GetOrientationAtKeyFrame(int keyFrame)
+            => KeyFrames[keyFrame].SpriteOrientation;
+
         public Vector2 GetPositionAtKeyFrame(int keyFrame)
                     => KeyFrames[keyFrame].Position;
+
+        public float GetRotationAtKeyFrame(int keyFrame)
+            => KeyFrames[keyFrame].Rotation;
 
         public int GetSpriteTextureFrameTotal()
             => Texture.Height / SpriteFrameRectangle.Height;
@@ -172,6 +179,18 @@ namespace HunterCombatMR.AnimationEngine.Models
             int textureFrame)
         {
             KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { SpriteFrame = textureFrame };
+        }
+
+        internal void SetTexture(string texturePath)
+        {
+            TexturePath = texturePath;
+            Texture = ModContent.GetTexture(texturePath);
+        }
+
+        internal void SetTexture(Texture2D texture)
+        {
+            Texture = texture;
+            TexturePath = texture.Name;
         }
 
         internal void ToggleVisibilityAtKeyFrame(int keyFrameIndex)

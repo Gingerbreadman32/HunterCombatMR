@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Attributes;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +12,8 @@ namespace HunterCombatMR.Extensions
     /// </summary>
     public static class EnumExtensions
     {
+        #region Public Methods
+
         /// <summary>
         /// Gets the description of the specified enumeration
         /// </summary>
@@ -25,6 +28,13 @@ namespace HunterCombatMR.Extensions
             ?.Description
             ?? value.ToString();
 
+        public static IEnumerable<Enum> GetFlags(this Enum value)
+        {
+            foreach (Enum flag in Enum.GetValues(value.GetType()))
+                if (value.HasFlag(flag))
+                    yield return flag;
+        }
+
         /// <summary>
         /// Gets the texture path of the specified enumeration
         /// </summary>
@@ -38,5 +48,7 @@ namespace HunterCombatMR.Extensions
             ?.GetCustomAttribute<TexturePath>()
             ?.TexurePathString
             ?? null;
+
+        #endregion Public Methods
     }
 }
