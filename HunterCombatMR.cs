@@ -37,12 +37,14 @@ namespace HunterCombatMR
         internal UserInterface EditorUIPopUp;
         internal UIEditorPopUpState PopUpState;
         internal ILog StaticLogger;
+        internal IDictionary<string, Texture2D> VariableTextures;
 
         #endregion Internal Fields
 
         #region Private Fields
 
         private GameTime _lastUpdateUiGameTime;
+        private const string _variableTexturePath = "Textures/SnS/";
 
         #endregion Private Fields
 
@@ -79,6 +81,7 @@ namespace HunterCombatMR
 
             if (!Main.dedServ)
             {
+                VariableTextures = new Dictionary<string, Texture2D>();
                 var animTypes = new List<AnimationType>() { AnimationType.Player };
                 FileManager.SetupCustomFolders(animTypes);
                 EditorInstance = new AnimationEditor();
@@ -186,6 +189,12 @@ namespace HunterCombatMR
             {
                 type.GetMethod("Initialize").Invoke(GetProjectile(type.Name), null);
             }
+
+            var modTextures = (IDictionary<string, Texture2D>)typeof(HunterCombatMR).GetField("textures", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Instance);
+            VariableTextures = modTextures.Where(x => x.Key.StartsWith(_variableTexturePath)).ToDictionary(x => x.Key, y => y.Value);
+            modTextures = null;
+            PanelState.PostSetupContent();
+
         }
 
         public override void PreSaveAndQuit()
@@ -206,6 +215,12 @@ namespace HunterCombatMR
         public override void UpdateUI(GameTime gameTime)
         {
             _lastUpdateUiGameTime = gameTime;
+
+            if (EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+                HideMyUI(EditorUIPanels);
+            else
+                ShowMyUI(EditorUIPanels, PanelState);
+
             if (EditorUIPanels?.CurrentState != null)
             {
                 EditorUIPanels.Update(gameTime);
@@ -235,6 +250,12 @@ namespace HunterCombatMR
         {
             EditorUIPanels?.SetState(null);
             EditorUIPopUp?.SetState(null);
+        }
+
+        internal void HideMyUI(UserInterface ui)
+        {
+            if (ui?.CurrentState != null)
+                ui?.SetState(null);
         }
 
         internal void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
@@ -283,6 +304,13 @@ namespace HunterCombatMR
         {
             EditorUIPanels?.SetState(PanelState);
             EditorUIPopUp?.SetState(PopUpState);
+        }
+
+        internal void ShowMyUI(UserInterface ui,
+            UIState state)
+        {
+            if (ui?.CurrentState != state)
+                ui?.SetState(state);
         }
 
         #endregion Internal Methods

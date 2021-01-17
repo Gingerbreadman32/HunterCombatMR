@@ -76,7 +76,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private void CopyButtonLogic()
         {
             var copyKeyframe = Animation.AnimationData.GetCurrentKeyFrame();
-            Animation.AddKeyFrame(copyKeyframe, Animation.LayerData.GetFrameInfoForLayers(copyKeyframe.KeyFrameOrder));
+            Animation.AddKeyFrame(copyKeyframe);
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
         }
 
@@ -115,6 +115,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 Animation.UpdateLoopType(Animation.AnimationData.LoopMode + 1);
             else
                 Animation.UpdateLoopType(0);
+
+            HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
         }
 
         #endregion Button Events

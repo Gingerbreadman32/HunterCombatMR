@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -43,17 +44,20 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         #region Public Methods
 
-        public void AddKeyFrame(KeyFrame duplicate,
-            IDictionary<AnimationLayer, LayerFrameInfo> layerInfo)
+        /// <summary>
+        /// Duplicate an existing keyframe.
+        /// </summary>
+        /// <param name="duplicate">Keyframe duplicating</param>
+        public void AddKeyFrame(KeyFrame duplicate)
         {
-            AddKeyFrame(duplicate.FrameLength, layerInfo);
+            AddKeyFrame(duplicate.FrameLength, LayerData.GetFrameInfoForLayers(duplicate.KeyFrameOrder));
         }
 
         /// <summary>
-        ///
+        /// Add a new keyframe.
         /// </summary>
         /// <param name="frameLength">Amount of frames this keyframe is active, set to -1 for default.</param>
-        /// <param name="layerInfo"></param>
+        /// <param name="layerInfo">Layer and keyframe information if being duplicated from another keyframe.</param>
         public void AddKeyFrame(int frameLength = -1,
             IDictionary<AnimationLayer, LayerFrameInfo> layerInfo = null)
         {
@@ -89,6 +93,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public void AddNewLayer(AnimationLayer layerInfo)
         {
+            _modified = true;
             LayerData.Layers.Add(layerInfo);
         }
 
@@ -244,19 +249,34 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
             layerToMove.SetDepthAtKeyFrame(currentKeyFrame, newDepthByte);
             _modified = true;
+            // @@num:1
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
         }
 
-        public void UpdateLayerPosition(AnimationLayer layerToMove,
+        public void UpdateLayerPosition(AnimationLayer layer,
             Vector2 newPosition)
         {
             var currentKeyFrame = AnimationData.GetCurrentKeyFrameIndex();
 
-            var oldPos = layerToMove.GetPositionAtKeyFrame(currentKeyFrame);
-            layerToMove.SetPositionAtKeyFrame(currentKeyFrame, newPosition);
+            var oldPos = layer.GetPositionAtKeyFrame(currentKeyFrame);
+            layer.SetPositionAtKeyFrame(currentKeyFrame, newPosition);
 
             if (oldPos != newPosition)
                 _modified = true;
+        }
+
+        public void UpdateLayerTexture(AnimationLayer layer,
+            Texture2D texture)
+        {
+            layer.SetTexture(texture);
+            _modified = true;
+        }
+
+        public void UpdateLayerTextureFrame(AnimationLayer layer,
+            int textureFrame)
+        {
+            layer.SetTextureFrameAtKeyFrame(AnimationData.GetCurrentKeyFrameIndex(), textureFrame);
+            _modified = true;
         }
 
         public void UpdateLayerVisibility(AnimationLayer layer)

@@ -1,5 +1,5 @@
-﻿using HunterCombatMR.Enumerations;
-using HunterCombatMR.Extensions;
+﻿using HunterCombatMR.AnimationEngine.Services;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.UI.AnimationTimeline;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -39,13 +39,14 @@ namespace HunterCombatMR.UI
         private const int SAVETIMERMAX = 120;
         private UIAutoScaleTextTextPanel<string> _addtimebutton;
         private UIElement _animationgroup;
-        private TextBox _animationname;
+        private TextBoxBase _animationname;
         private Timeline _animationTimeline;
         private UIPanel _animationtoolpanel;
         private UIPanel _bufferpanel;
         private UIText _currentframetime;
         private UIText _currentlayertextureframe;
         private HunterCombatPlayer _currentPlayer;
+        private IList<Texture2D> _textures;
 
         private UIAutoScaleTextTextPanel<string> _defaulttimebutton;
         private UIElement _framegroup;
@@ -53,15 +54,16 @@ namespace HunterCombatMR.UI
         private UIList _layerlist;
         private UIPanel _layerpanel;
         private UIAutoScaleTextTextPanel<string> _loadbutton;
-        private UIAutoScaleTextTextPanel<string> _modeswitch;
         private UIAutoScaleTextTextPanel<string> _onionskinbutton;
         private UIAutoScaleTextTextPanel<string> _savebutton;
         private UIAutoScaleTextTextPanel<string> _subtimebutton;
+        private UIAutoScaleTextTextPanel<string> _layertexturebutton;
         private UIList _testlist;
         private UIPanel _testlistpanel;
         private UIElement _timinggroup;
         private int loadTimer = 0;
         private int saveTimer = 0;
+        private LayerInformationPanel _layerInfoPanel;
 
         #endregion Private Fields
 
@@ -94,24 +96,6 @@ namespace HunterCombatMR.UI
         public override void OnInitialize()
         {
             base.OnInitialize();
-            // Mode Switch
-            _modeswitch = new UIAutoScaleTextTextPanel<string>(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription())
-            {
-                TextColor = Color.White,
-                Width = new StyleDimension(200f, 0),
-                Height =
-                {
-                    Pixels = 40f
-                },
-                VAlign = 1f,
-                Top =
-                {
-                    Pixels = -65f
-                }
-            }.WithFadedMouseOver();
-            _modeswitch.OnClick += (evt, list) => ButtonAction(ModeSwitch, evt, list);
-
-            Append(_modeswitch);
 
             _bufferpanel = new UIPanel();
             _bufferpanel.Width.Set(0f, 0.18f);
@@ -124,7 +108,7 @@ namespace HunterCombatMR.UI
             Append(_bufferpanel);
 
             _layerpanel = new UIPanel();
-            _layerpanel.Width.Set(0, 0.2f);
+            _layerpanel.Width.Set(0, 0.15f);
             _layerpanel.Height.Set(0, 0.15f);
             _layerpanel.BackgroundColor = Microsoft.Xna.Framework.Color.Blue;
             _layerpanel.BackgroundColor.A = 50;
@@ -237,6 +221,15 @@ namespace HunterCombatMR.UI
 
             panelPercent += _animationgroup.Width.Percent;
 
+            _layertexturebutton = new UIAutoScaleTextTextPanel<string>("")
+            {
+                TextColor = Color.White,
+                Width = new StyleDimension(0, 1f),
+                Height = new StyleDimension(0, 1f)
+            }.WithFadedMouseOver();
+            _layertexturebutton.OnClick += (evt, list) => ButtonAction(CycleTexture, evt, list, EditorModePreset.EditOnly, true);
+
+            _animationgroup.Append(_layertexturebutton);
             _animationtoolpanel.Append(_animationgroup);
 
             _timinggroup = new UIElement();
@@ -440,20 +433,25 @@ namespace HunterCombatMR.UI
             Append(_animationTimeline);
 
             // Renameable Animation Name Text Box
-            _animationname = new TextBox("Animation Name", HunterCombatMR.AnimationNameMax, true, true);
-            _animationname.Left.Set(0f, 0f);
-            _animationname.Top.Set(-_layerpanel.GetDimensions().Height, 0.5f);
-            _animationname.TextColor = Color.White;
-            _animationname.OnClick += Interact;
-            _animationname.ForbiddenCharacters = new char[]
-                { (char)32, '>', '<', ':', '"', '/', '\u005C', '|', '?', '*', '.'  };
+            _animationname = new PlainTextBox("Animation Name", HunterCombatMR.AnimationNameMax, true, true, characterPerms: InputPermissions.FileSafe)
+            {
+                Top = new StyleDimension(-_layerpanel.GetDimensions().Height, 0.5f),
+                TextColor = Color.White
+            };
             Append(_animationname);
+
+            _layerInfoPanel = LayerInformationPanel.Default(new StyleDimension(-300f, 1f), new StyleDimension(0f, 0.5f));
+            Append(_layerInfoPanel);
+        }
+
+        public void PostSetupContent()
+        {
+            _textures = ModContentLoadingService.GetTexturesFromPath("Textures/SnS/Limbs/").Select(x => x.Value).ToList();
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            _modeswitch.SetText(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription());
 
             if (Main.gameMenu || _currentPlayer == null)
             {
@@ -531,14 +529,40 @@ namespace HunterCombatMR.UI
                 var totalframenumtext = _currentPlayer.CurrentAnimation?.AnimationData.TotalFrames.ToString() ?? "0";
                 _frametotal.SetText(totalframenumtext);
 
-                // Current Layer's Texture Frame
-                int keyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing
-                    ?.AnimationData.GetCurrentKeyFrameIndex() 
-                    ?? 0;
-                string layertexframe = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing
-                    ?.LayerData.GetTextureFrameAtKeyFrameForLayer(keyFrame, HunterCombatMR.Instance.EditorInstance.HighlightedLayers.SingleOrDefault()).ToString() 
-                    ?? "";
-                _currentlayertextureframe.SetText(layertexframe);
+                if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Count() == 1)
+                {
+                    // Current Layer's Texture Frame
+                    int keyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing
+                        ?.AnimationData.GetCurrentKeyFrameIndex()
+                        ?? 0;
+                    string layertexframe = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing
+                        ?.LayerData.GetTextureFrameAtKeyFrameForLayer(keyFrame, HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Single()).ToString()
+                        ?? "";
+                    _currentlayertextureframe.SetText(layertexframe);
+
+                    // Current Layer's Texture
+                    var layer = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing
+                        ?.GetLayer(HunterCombatMR.Instance.EditorInstance.HighlightedLayers.SingleOrDefault());
+                    string layertexture = layer
+                        ?.Texture.ToString().Split('/')[4]
+                        ?? "";
+                    _layertexturebutton.SetText(layertexture);
+
+                    if (_layerInfoPanel.Layer != layer || _layerInfoPanel.KeyFrame != keyFrame)
+                    {
+                        _layerInfoPanel.SetLayerAndKeyFrame(layer, keyFrame);
+                    }
+
+                    if (_layerInfoPanel.IsCollapsed && _layerInfoPanel.Layer != null)
+                        _layerInfoPanel.Reveal();
+                }
+                else
+                {
+                    _currentlayertextureframe.SetText("");
+                    _layertexturebutton.SetText("");
+                    if (!_layerInfoPanel.IsCollapsed)
+                        _layerInfoPanel.Collapse();
+                }
 
                 // Animation List Window
                 foreach (var animation in HunterCombatMR.Instance.LoadedAnimations)
@@ -625,7 +649,7 @@ namespace HunterCombatMR.UI
             {
                 if (!_layerlist._items.Any(x => (x as LayerText).Layer.Equals(layer)))
                 {
-                    _layerlist.Add(new LayerText(animation, layer.Name, currentKeyFrame, LayerTextInfo.Coordinates));
+                    _layerlist.Add(new LayerText(animation, layer.Name, currentKeyFrame, LayerTextInfo.None));
                 }
             }
         }
@@ -649,24 +673,6 @@ namespace HunterCombatMR.UI
             }
         }
 
-        private void Interact(UIMouseEvent evt, UIElement listeningElement)
-        {
-            TextBox element = (TextBox)listeningElement;
-            element.StartInteracting();
-        }
-
-        private void ModeSwitch(UIMouseEvent evt, UIElement listeningElement)
-        {
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
-            {
-                HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.None;
-            }
-            else
-            {
-                HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.EditMode;
-            }
-        }
-
         private void NextTextureFrame(UIMouseEvent evt, UIElement listeningElement)
         {
             if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.IsAnimationInitialized() ?? false)
@@ -679,7 +685,7 @@ namespace HunterCombatMR.UI
                     var key = anim.AnimationData.GetCurrentKeyFrameIndex();
                     if (layer.GetSpriteTextureFrameTotal() - 1 > layer.KeyFrames[key].SpriteFrame)
                     {
-                        layer.SetTextureFrameAtKeyFrame(key, layer.KeyFrames[key].SpriteFrame + 1);
+                        anim.UpdateLayerTextureFrame(layer, layer.KeyFrames[key].SpriteFrame + 1);
                     }
                 }
             }
@@ -697,7 +703,7 @@ namespace HunterCombatMR.UI
                     var key = anim.AnimationData.GetCurrentKeyFrameIndex();
                     if (layer.KeyFrames[key].SpriteFrame > 0)
                     {
-                        layer.SetTextureFrameAtKeyFrame(key, layer.KeyFrames[key].SpriteFrame - 1);
+                        anim.UpdateLayerTextureFrame(layer, layer.KeyFrames[key].SpriteFrame - 1);
                     }
                 }
             }
@@ -795,10 +801,23 @@ namespace HunterCombatMR.UI
             _animationTimeline.SetAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
         }
 
-        private void StopAnimation(UIMouseEvent evt, UIElement listeningElement)
+        private void CycleTexture(UIMouseEvent evt, UIElement listeningElement)
         {
-            if (_currentPlayer.CurrentAnimation.AnimationData.InProgress)
-                _currentPlayer.CurrentAnimation.Stop();
+            if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.IsAnimationInitialized() ?? false)
+            {
+                var layers = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
+                if (layers.Count() == 1)
+                {
+                    AnimationEngine.Models.Animation anim = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing;
+                    var layer = anim.GetLayer(layers.Single());
+                    int textureIndex = _textures.IndexOf(layer.Texture);
+
+                    if (_textures.Count() - 1 > textureIndex)
+                        anim.UpdateLayerTexture(layer, _textures[textureIndex + 1]);
+                    else
+                        anim.UpdateLayerTexture(layer, _textures[0]);
+                }
+            }
         }
 
         #endregion Private Methods

@@ -10,7 +10,9 @@ namespace HunterCombatMR.Enumerations
         Rotation = 2,
         Orientation = 4,
         TextureName = 8,
-        Depth = 16,
-        Scale = 32
+        DefaultDepth = 16,
+        TextureFrameRectangle = 32,
+        TextureFrames = 64,
+        All = ~0
     }
 }
