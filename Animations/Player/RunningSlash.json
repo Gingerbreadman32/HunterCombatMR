@@ -1,0 +1,114 @@
+{
+  "AnimationType": 0,
+  "IsInternal": true,
+  "LayerData": {
+    "KeyFrameProfile": {
+      "KeyFrameAmount": 8,
+      "DefaultKeyFrameSpeed": 10,
+      "SpecificKeyFrameSpeeds": {
+        "2": 16,
+        "3": 20,
+        "4": 5,
+        "5": 16,
+        "7": 52
+      }
+    },
+    "Layers": [
+      {
+        "DefaultDepth": 1,
+        "KeyFrames": {
+          "0": {
+            "SpriteFrame": 0,
+            "Position": "-7, 23",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0,
+            "IsEnabled": true
+          },
+          "1": {
+            "SpriteFrame": 1,
+            "Position": "-3, 23",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0,
+            "IsEnabled": true
+          },
+          "2": {
+            "SpriteFrame": 2,
+            "Position": "-5, 23",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0,
+            "IsEnabled": true
+          },
+          "3": {
+            "SpriteFrame": 3,
+            "Position": "-5, 23",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0,
+            "IsEnabled": true
+          },
+          "4": {
+            "SpriteFrame": 4,
+            "Position": "-5, 23",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0,
+            "IsEnabled": true
+          },
+          "5": {
+            "SpriteFrame": 5,
+            "Position": "-5, 23",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0,
+            "IsEnabled": true
+          },
+          "6": {
+            "SpriteFrame": 6,
+            "Position": "-5, 23",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0,
+            "IsEnabled": true
+          },
+          "7": {
+            "SpriteFrame": 7,
+            "Position": "-5, 23",
+            "Rotation": 0.0,
+            "LayerDepthOverride": null,
+            "LayerDepth": 1,
+            "SheetNameOverride": null,
+            "SpriteOrientation": 0,
+            "IsEnabled": true
+          }
+        },
+        "Name": "FullBodyTest",
+        "SpriteFrameRectangle": {
+          "X": 0,
+          "Y": 0,
+          "Width": 50,
+          "Height": 42
+        },
+        "TexturePath": "HunterCombatMR/Textures/SnS/Limbs/runningslashtest"
+      }
+    ],
+    "Loop": 1
+  },
+  "Name": "RunningSlash"
+}

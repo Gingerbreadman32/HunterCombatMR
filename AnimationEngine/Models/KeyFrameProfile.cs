@@ -92,7 +92,7 @@ namespace HunterCombatMR.AnimationEngine.Models
                 SpecificKeyFrameSpeeds.Remove(nextFrameIndex);
             }
 
-            if (nextFrameIndex <= SpecificKeyFrameSpeeds.OrderBy(x => x.Key).Last().Key)
+            if (SpecificKeyFrameSpeeds.Any() && nextFrameIndex <= SpecificKeyFrameSpeeds.OrderBy(x => x.Key).Last().Key)
                 InheritPreviousKeyFrameProperties(nextFrameIndex);
         }
 

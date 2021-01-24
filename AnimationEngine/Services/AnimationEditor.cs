@@ -68,7 +68,7 @@ namespace AnimationEngine.Services
 
             color.A = 30;
 
-            foreach (var layer in layerData.Layers.Where(f => f.KeyFrames.ContainsKey(keyFrameToDraw)).OrderByDescending(x => x.KeyFrames[keyFrameToDraw].LayerDepth))
+            foreach (var layer in layerData.Layers.Where(f => f.KeyFrames.ContainsKey(keyFrameToDraw) && f.GetActiveAtKeyFrame(keyFrameToDraw)).OrderByDescending(x => x.KeyFrames[keyFrameToDraw].LayerDepth))
             {
                 PlayerActionAnimation.CombatLimbDraw(drawInfo,
                     layer.Texture, 

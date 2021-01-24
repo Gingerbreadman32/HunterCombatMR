@@ -1,11 +1,8 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Terraria;
 
 namespace HunterCombatMR.UI
 {
@@ -13,10 +10,11 @@ namespace HunterCombatMR.UI
     {
         #region Internal Fields
 
-        internal static IDictionary<LayerTextInfo, Func<AnimationLayer, int, string, int, string>> InfoToLogicMap
-            = new Dictionary<LayerTextInfo, Func<AnimationLayer, int, string, int, string>>
+        internal static IDictionary<LayerTextInfo, Func<AnimationLayer, int, string, int, bool, string>> InfoToLogicMap
+            = new Dictionary<LayerTextInfo, Func<AnimationLayer, int, string, int, bool, string>>
             {
-                { LayerTextInfo.Coordinates, CoordinateLogic }
+                { LayerTextInfo.Coordinates, CoordinateLogic },
+                { LayerTextInfo.TextureFrameRectangle, TextureFrameBoundsLogic }
             };
 
         #endregion Internal Fields
@@ -26,44 +24,56 @@ namespace HunterCombatMR.UI
         internal static string CoordinateLogic(AnimationLayer layer,
             int keyframe,
             string newText,
-            int infoMod)
+            int infoMod,
+            bool interacting)
         {
             Vector2 currentCoords = layer.GetPositionAtKeyFrame(keyframe);
+            var coordList = new string[2];
+            coordList[0] = currentCoords.X.ToString();
+            coordList[1] = currentCoords.Y.ToString();
 
-            if (string.IsNullOrWhiteSpace(newText))
-                return (infoMod == 1) ? currentCoords.Y.ToString() : currentCoords.X.ToString();
+            if (string.IsNullOrWhiteSpace(newText) || newText.Equals(coordList[infoMod]))
+                return coordList[infoMod];
 
-            if (Main.keyState.GetPressedKeys().Any(x => x.Equals(Keys.Subtract)))
+            if (interacting)
             {
-                if (newText.Contains('-'))
-                    newText = newText.Remove(0);
+                if (infoMod == 1)
+                    layer.SetPositionAtKeyFrame(keyframe, new Vector2(currentCoords.X, float.Parse(newText)));
                 else
-                    newText = newText.Insert(0, "-");
+                    layer.SetPositionAtKeyFrame(keyframe, new Vector2(float.Parse(newText), currentCoords.Y));
+            } else
+            {
+                newText = coordList[infoMod];
             }
+
+            return newText;
+        }
+
+        internal static string TextureFrameBoundsLogic(AnimationLayer layer,
+            int keyframe,
+            string newText,
+            int infoMod,
+            bool interacting)
+        {
+            Rectangle currentBounds = layer.SpriteFrameRectangle;
+            var boundList = new string[2];
+            boundList[0] = currentBounds.Width.ToString();
+            boundList[1] = currentBounds.Height.ToString();
+
+            if (string.IsNullOrWhiteSpace(newText) || newText.Equals(boundList[infoMod]))
+                return boundList[infoMod];
 
             if (infoMod == 1)
-            {
-                if (currentCoords.Y.ToString().Equals(newText))
-                    return currentCoords.Y.ToString();
-                else
-                {
-                    layer.SetPositionAtKeyFrame(keyframe, new Vector2(currentCoords.X, float.Parse(newText)));
-                    return newText;
-                }
-            }
+                currentBounds.Height = int.Parse(newText);
             else
-            {
-                if (currentCoords.X.ToString().Equals(newText))
-                    return currentCoords.X.ToString();
-                else
-                {
-                    layer.SetPositionAtKeyFrame(keyframe, new Vector2(float.Parse(newText), currentCoords.Y));
-                    return newText;
-                }
-            }
+                currentBounds.Width = int.Parse(newText);
+
+            layer.SpriteFrameRectangle = currentBounds;
+            return newText;
         }
 
         #endregion Internal Methods
+
     }
 
     internal class LayerInfoTextBox
@@ -94,7 +104,7 @@ namespace HunterCombatMR.UI
 
         #region Internal Events
 
-        internal event Func<AnimationLayer, int, string, int, string> UpdateLogic;
+        internal event Func<AnimationLayer, int, string, int, bool, string> UpdateLogic;
 
         #endregion Internal Events
 
@@ -126,8 +136,10 @@ namespace HunterCombatMR.UI
 
         public override void Update(GameTime gameTime)
         {
-            if (Layer != null)
-                Text = UpdateLogic(Layer, KeyFrame, Text, InfoModifier);
+            if (Layer != null && Layer.GetActiveAtKeyFrame(KeyFrame))
+                Text = UpdateLogic(Layer, KeyFrame, Text, InfoModifier, Interacting);
+            else
+                Text = "";
 
             base.Update(gameTime);
         }

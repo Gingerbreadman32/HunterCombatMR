@@ -124,7 +124,7 @@ namespace HunterCombatMR.UI
 
         protected void GenerateText()
         {
-            if (Layer != null)
+            if (Layer != null && (Layer.GetActiveAtKeyFrame(CurrentKeyFrame) || DisplayInfo == LayerTextInfo.None))
             {
                 foreach (LayerTextInfo info in DisplayInfo.GetFlags())
                 {

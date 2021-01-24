@@ -65,6 +65,9 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// The size and offset of the first frame the spritesheet being used. Leave x and y at 0, 0 if the sprite starts at the top-left.
         /// Saves the data of the size of each frame, but is transferred to the Texture tuple on load.
         /// </summary>
+        /// <remarks>
+        /// @@warn Transfer this to a texture object instead so that it can be judge by texture rather than by animation.
+        /// </remarks>
         public Rectangle SpriteFrameRectangle { get; set; }
 
         [JsonIgnore]

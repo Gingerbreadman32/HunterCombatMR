@@ -97,23 +97,29 @@ namespace HunterCombatMR.UI
         {
             InformationList.Clear();
 
+            if (Layer == null || !Layer.GetActiveAtKeyFrame(KeyFrame))
+                return; 
+
+            var boxes = new List<LayerInfoTextBox>();
+
             var infoBlocks = _infoFlags.GetFlags();
 
             foreach (LayerTextInfo block in infoBlocks.Where(x => !x.Equals(LayerTextInfo.None)))
             {
                 InformationList.Add(new LayerText(layer: Layer, KeyFrame, block));
-                if (block == LayerTextInfo.Coordinates)
+                if (block == LayerTextInfo.Coordinates || block == LayerTextInfo.TextureFrameRectangle)
                 {
-                    var boxes = new List<LayerInfoTextBox>();
-                    boxes.Add(new LayerInfoTextBox("0", block, 4, false, false, null) { TextColor = Color.White });
-                    boxes.Add(new LayerInfoTextBox("0", block, 4, false, false, null, 1) { TextColor = Color.White });
-                    foreach (var box in boxes)
-                    {
-                        InformationList.Add(box);
-                    }
-                    _textBoxes = boxes;
+                    var box1 = new LayerInfoTextBox("0", block, 4, false, false, null) 
+                        { TextColor = Color.White, PositiveIntegersOnly = (block == LayerTextInfo.TextureFrameRectangle), ZeroNotAllowed = (block == LayerTextInfo.TextureFrameRectangle) };
+                    boxes.Add(box1);
+                    InformationList.Add(box1);
+                    var box2 = new LayerInfoTextBox("0", block, 4, false, false, null, 1) 
+                        { TextColor = Color.White, PositiveIntegersOnly = (block == LayerTextInfo.TextureFrameRectangle), ZeroNotAllowed = (block == LayerTextInfo.TextureFrameRectangle) };
+                    boxes.Add(box2);
+                    InformationList.Add(box2);
                 }
             }
+            _textBoxes = boxes;
         }
 
         public void SetLayerAndKeyFrame(AnimationLayer layer,
