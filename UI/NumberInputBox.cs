@@ -10,6 +10,10 @@ namespace HunterCombatMR.UI
 
         private char[] _availableCharacters;
 
+        public bool PositiveIntegersOnly { get; set; }
+
+        public bool ZeroNotAllowed { get; set; }
+
         public NumberInputBox(string hintText,
             int maxLength = 0,
             bool isLarge = false,
@@ -25,7 +29,7 @@ namespace HunterCombatMR.UI
 
         protected override void DrawDetails(string newString)
         {
-            float textValue = 0;
+            float textValue = (ZeroNotAllowed) ? 1 : 0;
 
             if (newString == _currentString)
                 return;
@@ -35,6 +39,16 @@ namespace HunterCombatMR.UI
                 newString = textValue.ToString();
                 UpdateString(string.Concat(newString.Where(x => _availableCharacters.Contains(x))));
                 return;
+            }
+
+            if (newString.Contains("+")) 
+            {
+                newString = newString.Replace("+", "");
+                if (float.TryParse(newString, out textValue))
+                {
+                    textValue++;
+                    newString = textValue.ToString();
+                }
             }
 
             if (newString.Length + 1 > MaxLength && !newString.Contains("-"))
@@ -47,7 +61,7 @@ namespace HunterCombatMR.UI
            if (wrongNegative > 0)
             {
                 newString = newString.Remove(wrongNegative);
-                if (float.TryParse(newString, out textValue))
+                if (!PositiveIntegersOnly && float.TryParse(newString, out textValue))
                 {
                     textValue *= -1;
                     newString = textValue.ToString();
@@ -62,7 +76,7 @@ namespace HunterCombatMR.UI
             }
             else
             {
-                newString = "0";
+                newString = (ZeroNotAllowed) ? "1" : "0";
             }
 
             UpdateString(string.Concat(newString.Where(x => _availableCharacters.Contains(x))));

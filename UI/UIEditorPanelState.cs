@@ -724,6 +724,7 @@ namespace HunterCombatMR.UI
 
                     _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(currentFrame);
                     HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = _currentPlayer.CurrentAnimation;
+                    _animationTimeline.SetAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
                     loadTimer++;
                 }
             }
@@ -778,6 +779,7 @@ namespace HunterCombatMR.UI
                         currentFrame = 0;
 
                     _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(currentFrame);
+                    _animationTimeline.SetAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
                 }
                 else if (saveStatus == FileSaveStatus.Error)
                 {
