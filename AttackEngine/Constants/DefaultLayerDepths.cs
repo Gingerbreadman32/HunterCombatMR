@@ -5,31 +5,31 @@
         /// <summary>
         /// 2: Represents the head
         /// </summary>
-        public static byte Head = 2;
+        public const byte Head = 2;
 
         /// <summary>
         /// 4
         /// </summary>
-        public static byte Body = 4;
+        public const byte Body = 4;
 
         /// <summary>
         /// 1
         /// </summary>
-        public static byte FrontArm = 1;
+        public const byte FrontArm = 1;
 
         /// <summary>
         /// 5
         /// </summary>
-        public static byte BackArm = 5;
+        public const byte BackArm = 5;
 
         /// <summary>
         /// 6
         /// </summary>
-        public static byte BackLeg = 6;
+        public const byte BackLeg = 6;
 
         /// <summary>
         /// 3
         /// </summary>
-        public static byte FrontLeg = 3;
+        public const byte FrontLeg = 3;
     }
 }

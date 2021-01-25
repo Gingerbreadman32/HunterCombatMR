@@ -1,4 +1,5 @@
 using HunterCombatMR.AttackEngine.Attacks.SwordandShield;
+using HunterCombatMR.AttackEngine.Constants;
 using HunterCombatMR.AttackEngine.Models;
 using System.Collections.Generic;
 using Terraria;
@@ -13,8 +14,16 @@ namespace HunterCombatMR.Items
 
         protected void InitilizeAttacks(Player player)
         {
-            var Attacks = new List<string>() { "SNS-LMB1", "SNS-LMB2" };
-            Sequence = new AttackSequence("SNS-LMB1", Attacks, player, item);
+            var StartingAttack = new ComboAction("RunningSlash", 
+                HunterCombatMR.Instance.GetLoadedAttack("RunningSlash"), 
+                new List<ComboRoute>() { new ComboRoute("DoubleSlashFollowup", 
+                    DefaultAttackDetails.DefaultBufferWindow,
+                    Enumerations.ComboInputs.StandardAttack,
+                    0) });
+            var FollowUps = new List<ComboAction>() {
+                new ComboAction("DoubleSlashFollowup", HunterCombatMR.Instance.GetLoadedAttack("DoubleSlash"), null) 
+            };
+            Sequence = new AttackSequence(StartingAttack, FollowUps, player, item);
         }
 
         public override void SetStaticDefaults()
@@ -51,7 +60,7 @@ namespace HunterCombatMR.Items
 
         public override bool CanUseItem(Player player)
         {
-            if (base.CanUseItem(player))
+            if (base.CanUseItem(player) && (Sequence == null || Sequence.PlayerPeforming != player))
             {
                 InitilizeAttacks(player);
                 return true;

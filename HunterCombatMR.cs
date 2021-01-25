@@ -23,8 +23,8 @@ namespace HunterCombatMR
     {
         #region Public Fields
 
-        public const string ModName = "HunterCombat";
         public const int AnimationNameMax = 64;
+        public const string ModName = "HunterCombat";
         public string DataPath = Path.Combine(Program.SavePath, ModName, "Data");
 
         #endregion Public Fields
@@ -33,8 +33,8 @@ namespace HunterCombatMR
 
         internal AnimationLoader AnimLoader;
         internal UserInterface EditorUIPanels;
-        internal UIEditorPanelState PanelState;
         internal UserInterface EditorUIPopUp;
+        internal UIEditorPanelState PanelState;
         internal UIEditorPopUpState PopUpState;
         internal ILog StaticLogger;
         internal IDictionary<string, Texture2D> VariableTextures;
@@ -43,8 +43,8 @@ namespace HunterCombatMR
 
         #region Private Fields
 
-        private GameTime _lastUpdateUiGameTime;
         private const string _variableTexturePath = "Textures/SnS/";
+        private GameTime _lastUpdateUiGameTime;
 
         #endregion Private Fields
 
@@ -69,6 +69,15 @@ namespace HunterCombatMR
         #endregion Public Properties
 
         #region Public Methods
+
+        public bool DoesLoadedAnimationExist(string name)
+            => LoadedAnimations.Any(x => x.Name.Equals(name));
+
+        public AnimationEngine.Models.Animation GetLoadedAnimation(string name)
+            => LoadedAnimations.FirstOrDefault(x => x.Name.Equals(name));
+
+        public Attack GetLoadedAttack(string name)
+            => LoadedAttacks.FirstOrDefault(x => x.Name.Equals(name));
 
         public override void Load()
         {
@@ -95,13 +104,6 @@ namespace HunterCombatMR
                 ShowMyUI();
             }
         }
-
-        public AnimationEngine.Models.Animation GetLoadedAnimation(string name)
-            => LoadedAnimations.FirstOrDefault(x => x.Name.Equals(name));
-
-        public bool DoesLoadedAnimationExist(string name)
-            => LoadedAnimations.Any(x => x.Name.Equals(name));
-
 
         public bool LoadAnimationFile(AnimationType animationType,
             string fileName,
@@ -182,7 +184,7 @@ namespace HunterCombatMR
             // Loads all of the attack information
             foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
             {
-                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
+                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { type.Name }));
             }
 
             foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
@@ -194,7 +196,6 @@ namespace HunterCombatMR
             VariableTextures = modTextures.Where(x => x.Key.StartsWith(_variableTexturePath)).ToDictionary(x => x.Key, y => y.Value);
             modTextures = null;
             PanelState.PostSetupContent();
-
         }
 
         public override void PreSaveAndQuit()
@@ -246,6 +247,29 @@ namespace HunterCombatMR
             return Texture2D.FromStream(Main.instance.GraphicsDevice, stream);
         }
 
+        internal void DeleteAnimation(AnimationEngine.Models.Animation animation)
+        {
+            if (DoesLoadedAnimationExist(animation.Name))
+            {
+                LoadedAnimations.Remove(GetLoadedAnimation(animation.Name));
+            }
+
+            FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);
+        }
+
+        internal string DuplicateAnimation(AnimationEngine.Models.Animation duplicate)
+        {
+            var newAnim = duplicate.Duplicate(DuplicateName(duplicate.Name, 0));
+            LoadedAnimations.Add(newAnim);
+
+            if (duplicate == null)
+            {
+                throw new ArgumentNullException("No animation to duplicate!");
+            }
+
+            return newAnim.Name;
+        }
+
         internal void HideMyUI()
         {
             EditorUIPanels?.SetState(null);
@@ -271,29 +295,6 @@ namespace HunterCombatMR
             }
         }
 
-        internal string DuplicateAnimation(AnimationEngine.Models.Animation duplicate)
-        {
-            var newAnim = duplicate.Duplicate(DuplicateName(duplicate.Name, 0));
-            LoadedAnimations.Add(newAnim);
-
-            if (duplicate == null)
-            {
-                throw new ArgumentNullException("No animation to duplicate!");
-            }
-
-            return newAnim.Name;
-        }
-
-        internal void DeleteAnimation(AnimationEngine.Models.Animation animation)
-        {
-            if (DoesLoadedAnimationExist(animation.Name))
-            {
-                LoadedAnimations.Remove(GetLoadedAnimation(animation.Name));
-            }
-
-            FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);
-        }
-
         internal void SetUIPlayer(HunterCombatPlayer player)
         {
             if (PanelState != null)
@@ -316,19 +317,6 @@ namespace HunterCombatMR
         #endregion Internal Methods
 
         #region Private Methods
-
-        private void LoadInternalAnimations(Type[] types)
-        {
-            foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
-            {
-                var container = (ActionContainer)type.GetConstructor(new Type[] { }).Invoke(new object[] { });
-                container.Load();
-                AnimLoader.LoadContainer(container);
-            }
-
-            if (AnimLoader.Containers.Any())
-                LoadedAnimations = new List<AnimationEngine.Models.Animation>(AnimLoader.RegisterAnimations());
-        }
 
         private string DuplicateName(string name,
             int counter)
@@ -355,10 +343,24 @@ namespace HunterCombatMR
             if (newName.Count() > AnimationNameMax)
             {
                 return DuplicateNameFormat(name.Substring(0, name.Count() - 1), suffix);
-            } else
+            }
+            else
             {
                 return newName;
             }
+        }
+
+        private void LoadInternalAnimations(Type[] types)
+        {
+            foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
+            {
+                var container = (ActionContainer)type.GetConstructor(new Type[] { }).Invoke(new object[] { });
+                container.Load();
+                AnimLoader.LoadContainer(container);
+            }
+
+            if (AnimLoader.Containers.Any())
+                LoadedAnimations = new List<AnimationEngine.Models.Animation>(AnimLoader.RegisterAnimations());
         }
 
         #endregion Private Methods

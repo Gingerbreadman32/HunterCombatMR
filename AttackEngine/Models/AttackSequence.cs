@@ -7,86 +7,82 @@ namespace HunterCombatMR.AttackEngine.Models
 {
     public class AttackSequence
     {
+        #region Private Fields
+
         private const bool _historyDebug = false;
 
-        public int currentAttackIndex { get; set; }
+        #endregion Private Fields
 
-        public ComboSequenceManager ComboManager { get; set; }
+        #region Public Constructors
 
-        public IDictionary<int, string> AttackHistory { get; set; }
-
-        public ICollection<Attack> PossibleAttacks { get; set; }
-
-        public Attack CurrentAttack { get; set; }
-
-        public Player PlayerPeforming { get; set; }
-
-        public Item ItemUsing { get; set; }
-
-        public AttackSequence(string startingAttackName,
-            IEnumerable<string> possibleAttacksInSequence,
+        public AttackSequence(ComboAction startingAction,
+            IEnumerable<ComboAction> actions,
             Player player,
             Item item)
         {
-            currentAttackIndex = 0;
-            AttackHistory = new Dictionary<int, string>();
+            ActionHistory = new Dictionary<int, string>();
+            Actions = actions;
+            CurrentAction = startingAction;
             PlayerPeforming = player;
             ItemUsing = item;
-            SetPossibleAttacksFromNames(possibleAttacksInSequence);
-            SetCurrentAttackFromName(startingAttackName);
-            AddAttackToHistory(CurrentAttack);
+            AddAttackToHistory(CurrentAction);
+
+            if (!Actions.Any(x => x.Name.Equals(startingAction.Name)))
+                AddAction(startingAction);
         }
 
-        public void Update()
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public IDictionary<int, string> ActionHistory { get; }
+        public IEnumerable<ComboAction> Actions { get; private set; }
+        public ComboSequenceManager ComboManager { get; }
+        public ComboAction CurrentAction { get; private set; }
+
+        public Item ItemUsing { get; }
+        public Player PlayerPeforming { get; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public void AddAction(ComboAction action)
         {
-            CurrentAttack.Update();
-        }
+            var oldList = new List<ComboAction>(Actions);
+            InitializeAttack(action.Attack);
 
-        public void InitializeAttack(Attack attack)
-        {
-            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(attack.Animation, attack.FrameProfile);
-            PlayerPeforming.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.AttackStartup;
+            oldList.Add(action);
 
-            if (!attack.Animation.IsPlaying)
-                attack.Animation.StartAnimation();
-
-            attack.SetOwners(PlayerPeforming, ItemUsing);
-        }
-
-        public void SetPossibleAttacksFromNames(IEnumerable<string> attackNames)
-        {
-            PossibleAttacks = new List<Attack>();
-            foreach (string name in attackNames)
-            {
-                AddPossibleAttackFromName(name);
-            }
-        }
-
-        public void AddPossibleAttackFromName(string attackName)
-        {
-            var attack = HunterCombatMR.Instance.LoadedAttacks.First(x => x.Name.Equals(attackName));
-
-            PossibleAttacks.Add(attack);
-        }
-
-        public void SetCurrentAttackFromName(string attackName)
-        {
-            CurrentAttack = PossibleAttacks.First(x => x.Name.Equals(attackName));
-            if (!CurrentAttack.Animation.IsInitialized)
-                InitializeAttack(CurrentAttack);
+            Actions = oldList;
         }
 
         public void AddAttackToHistory(string attackName)
         {
-            AttackHistory.Add(currentAttackIndex, attackName);
+            ActionHistory.Add(ActionHistory.Count(), attackName);
             if (_historyDebug)
                 Main.NewText(attackName, Microsoft.Xna.Framework.Color.White);
-            currentAttackIndex++;
         }
 
-        public void AddAttackToHistory(Attack attack)
+        public void AddAttackToHistory(ComboAction attack)
         {
             AddAttackToHistory(attack.Name);
         }
+
+        public void InitializeAttack(Attack attack)
+        {
+            attack.SetOwners(PlayerPeforming, ItemUsing);
+        }
+
+        public void Start()
+        {
+        }
+
+        public void Update()
+        {
+            CurrentAction.Attack.Update();
+        }
+
+        #endregion Public Methods
     }
 }

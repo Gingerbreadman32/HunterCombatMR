@@ -1,38 +1,26 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
-using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 
 namespace HunterCombatMR
 {
     public class HunterCombatPlayer
         : ModPlayer
     {
+        #region Private Fields
+
         private const bool _bufferText = false;
 
-        public PlayerState State { get; set; }
+        #endregion Private Fields
 
-        public ICollection<string> ActiveProjectiles { get; set; }
-
-        public IDictionary<string, Vector2> LayerPositions { get; set; }
-
-        public PlayerBufferInformation InputBufferInfo { get; set; }
-
-        public PlayerActionAnimation CurrentAnimation { get; private set; }
-
-        public bool ShowDefaultLayers { get; private set; }
+        #region Public Constructors
 
         public HunterCombatPlayer()
             : base()
@@ -44,44 +32,24 @@ namespace HunterCombatMR
             ShowDefaultLayers = true;
         }
 
-        public override void PostSavePlayer()
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public ICollection<string> ActiveProjectiles { get; set; }
+        public PlayerActionAnimation CurrentAnimation { get; private set; }
+        public PlayerBufferInformation InputBufferInfo { get; set; }
+        public IDictionary<string, Vector2> LayerPositions { get; set; }
+        public bool ShowDefaultLayers { get; private set; }
+        public PlayerState State { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
         {
-            if (Main.gameMenu)
-            {
-                CurrentAnimation = null;
-                ShowDefaultLayers = true;
-            }
-            
-            base.PostSavePlayer();
-        }
-
-        public override bool PreItemCheck()
-        {
-            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None)) {
-                if (player.itemTime > 0)
-                    player.itemTime = 0;
-                if (player.itemAnimation > 0)
-                    player.itemAnimation = 0;
-            }
-
-            return base.PreItemCheck();
-        }
-
-        public override void OnEnterWorld(Player player)
-        {
-            State = PlayerState.Standing;
-            HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
-            ShowDefaultLayers = true;
-
-            if (ActiveProjectiles != null)
-                ActiveProjectiles.Clear();
-            else
-                throw new Exception("Player's active projectiles not initialized!");
-
-            if (InputBufferInfo != null)
-                InputBufferInfo.ResetBuffers();
-            else
-                throw new Exception("Player's input buffer information not initialized!");
+            base.ModifyDrawHeadLayers(layers);
         }
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
@@ -89,9 +57,9 @@ namespace HunterCombatMR
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
                 if (CurrentAnimation != null && CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() > 0)
-                    ShowDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo, 
-                            CurrentAnimation.LayerData, 
-                            CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() - 1, 
+                    ShowDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
+                            CurrentAnimation.LayerData,
+                            CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() - 1,
                             Color.White);
                 else
                     ShowDefaultLayers = true;
@@ -117,19 +85,6 @@ namespace HunterCombatMR
             }
         }
 
-        private Color MakeTransparent(Color original,
-            byte amount)
-        {
-            var newColor = original;
-            newColor.A = amount;
-            return newColor;
-        }
-
-        public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
-        {
-            base.ModifyDrawHeadLayers(layers);
-        }
-
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
@@ -151,26 +106,38 @@ namespace HunterCombatMR
             }
         }
 
-        public override void ProcessTriggers(TriggersSet triggersSet)
+        public override void OnEnterWorld(Player player)
         {
-            InputBufferInfo.Update();
-            if (_bufferText && InputBufferInfo.BufferedComboInputs.Any(x => x.Input.Equals(ComboInputs.StandardAttack) && x.FramesSinceBuffered == 0))
-            {
-                CombatText.NewText(new Rectangle((int)Main.player[player.whoAmI].Top.X, (int)Main.player[player.whoAmI].Top.Y, 40, 20), Color.White, "Buffered!");
-            }
-        }
+            State = PlayerState.Standing;
+            HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
+            ShowDefaultLayers = true;
 
-        public override void UpdateDead()
-        {
-            State = PlayerState.Dead;
-            ActiveProjectiles.Clear();
-            InputBufferInfo.ResetBuffers();
+            if (ActiveProjectiles != null)
+                ActiveProjectiles.Clear();
+            else
+                throw new Exception("Player's active projectiles not initialized!");
+
+            if (InputBufferInfo != null)
+                InputBufferInfo.ResetBuffers();
+            else
+                throw new Exception("Player's input buffer information not initialized!");
         }
 
         public override void OnRespawn(Player player)
         {
             State = PlayerState.Standing;
             InputBufferInfo.ResetBuffers();
+        }
+
+        public override void PostSavePlayer()
+        {
+            if (Main.gameMenu)
+            {
+                CurrentAnimation = null;
+                ShowDefaultLayers = true;
+            }
+
+            base.PostSavePlayer();
         }
 
         public override void PostUpdate()
@@ -191,6 +158,28 @@ namespace HunterCombatMR
             base.PostUpdate();
         }
 
+        public override bool PreItemCheck()
+        {
+            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            {
+                if (player.itemTime > 0)
+                    player.itemTime = 0;
+                if (player.itemAnimation > 0)
+                    player.itemAnimation = 0;
+            }
+
+            return base.PreItemCheck();
+        }
+
+        public override void ProcessTriggers(TriggersSet triggersSet)
+        {
+            InputBufferInfo.Update();
+            if (_bufferText && InputBufferInfo.BufferedComboInputs.Any(x => x.Input.Equals(ComboInputs.StandardAttack) && x.FramesSinceBuffered == 0))
+            {
+                CombatText.NewText(new Rectangle((int)Main.player[player.whoAmI].Top.X, (int)Main.player[player.whoAmI].Top.Y, 40, 20), Color.White, "Buffered!");
+            }
+        }
+
         public bool SetCurrentAnimation(AnimationEngine.Models.Animation newAnimation,
             bool newFile = false)
         {
@@ -205,5 +194,26 @@ namespace HunterCombatMR
 
             return CurrentAnimation != null;
         }
+
+        public override void UpdateDead()
+        {
+            State = PlayerState.Dead;
+            ActiveProjectiles.Clear();
+            InputBufferInfo.ResetBuffers();
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private Color MakeTransparent(Color original,
+                                    byte amount)
+        {
+            var newColor = original;
+            newColor.A = amount;
+            return newColor;
+        }
+
+        #endregion Private Methods
     }
 }
