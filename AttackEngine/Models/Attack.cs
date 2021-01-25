@@ -1,80 +1,58 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Interfaces;
+﻿using HunterCombatMR.AnimationEngine.Models;
 using System.Collections.Generic;
 using Terraria;
-using Terraria.ModLoader;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
     public abstract class Attack
-        : IComboable
     {
-        public AnimatedData Animation { get; set; }
-
-        public IEnumerable<AttackProjectile> AttackProjectiles { get; set; }
-
-        public Player PerformingPlayer { get; set; }
-
-        public Item ItemAssociated { get; set; }
-
-        public string Name { get; set; }
-
-        public bool IsActive { get; set; } = false;
-
-        public IEnumerable<ComboRoute> Routes { get; set; }
-
-        public KeyFrameProfile FrameProfile { get; set; }
+        #region Public Constructors
 
         public Attack()
         {
             Animation = new AnimatedData();
-            AttackProjectiles = new List<AttackProjectile>();
             Name = "Default";
-            EstablishRoutes();
-            SetupKeyFrameProfile();
-            SetupAttackProjectiles();
+            SetupAttack();
         }
 
-        public Attack(Player player,
-            Item item)
+        public Attack(string name)
         {
             Animation = new AnimatedData();
-            AttackProjectiles = new List<AttackProjectile>();
-            Name = "Default";
-            PerformingPlayer = player;
-            ItemAssociated = item;
-            EstablishRoutes();
-            SetupKeyFrameProfile();
-            SetupAttackProjectiles();
+            Name = name;
+            SetupAttack();
         }
 
         public Attack(string name,
             AnimatedData animation,
-            ICollection<AttackProjectile> attackProjectiles,
             Player player,
             Item item)
         {
             Name = name;
             Animation = animation;
-            AttackProjectiles = new List<AttackProjectile>(attackProjectiles);
             PerformingPlayer = player;
             ItemAssociated = item;
-            EstablishRoutes();
-            SetupKeyFrameProfile();
-            SetupAttackProjectiles();
+            SetupAttack();
         }
 
-        public abstract void SetupAttackProjectiles();
+        #endregion Public Constructors
 
-        public abstract void SetupKeyFrameProfile();
+        #region Public Properties
 
-        protected abstract void UpdateLogic();
+        public AnimatedData Animation { get; set; }
 
-        /// <inheritdoc/>
-        public virtual void EstablishRoutes()
-        {
-        }
+        public IEnumerable<PlayerActionAnimation> PlayerAnimations { get; set; }
+
+        public abstract IEnumerable<AttackProjectile> AttackProjectiles { get; }
+
+        protected abstract KeyFrameProfile FrameProfile { get; }
+        public bool IsActive { get; set; } = false;
+        public Item ItemAssociated { get; set; }
+        public string Name { get; set; }
+        public Player PerformingPlayer { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         public virtual void Advance()
         {
@@ -97,13 +75,6 @@ namespace HunterCombatMR.AttackEngine.Models
             IsActive = false;
         }
 
-        public virtual void Update()
-        {
-            UpdateLogic();
-
-            Advance();
-        }
-
         public virtual void SetOwners(Player player,
             Item item)
         {
@@ -111,9 +82,24 @@ namespace HunterCombatMR.AttackEngine.Models
             ItemAssociated = item;
         }
 
-        public void CopyRoutes(IEnumerable<ComboRoute> newRoutes)
+        public virtual void SetupAttack()
         {
-            Routes = new List<ComboRoute>(newRoutes);
+            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, FrameProfile);
         }
+
+        public virtual void Update()
+        {
+            UpdateLogic();
+
+            Advance();
+        }
+
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected abstract void UpdateLogic();
+
+        #endregion Protected Methods
     }
 }

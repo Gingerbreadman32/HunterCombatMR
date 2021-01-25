@@ -1,5 +1,4 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Interfaces;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Projectiles.SwordandShield;
 using Microsoft.Xna.Framework;
@@ -14,30 +13,10 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
     public sealed class GroundedNeutralAttack1
         : Attack
     {
-        public GroundedNeutralAttack1()
-            : base()
-        {
-            Name = "SNS-LMB1";
-        }
-
-        public override void SetupAttackProjectiles()
-        {
-            AttackProjectiles = new List<AttackProjectile>() { ModContent.GetInstance<SNSSwipe1>() };
-        }
-
-        public override void SetupKeyFrameProfile()
-        {
-            FrameProfile = new KeyFrameProfile(6, 4, new Dictionary<int, int>() { { 0, 10 }, { 3, 2 }, { 4, 2 }, { 5, 10 } });
-        }
-
-        /// <inheritdoc/>
-        public override void EstablishRoutes()
-        {
-            Routes = new List<ComboRoute>()
-            {
-                new ComboRoute("SNS-LMB2", 5, 10, Enumerations.ComboInputs.StandardAttack, 1)
-            };
-        }
+        public override IEnumerable<AttackProjectile> AttackProjectiles 
+            => new List<AttackProjectile>() { ModContent.GetInstance<SNSSwipe1>() };
+        protected override KeyFrameProfile FrameProfile 
+            => new KeyFrameProfile(6, 4, new Dictionary<int, int>() { { 0, 10 }, { 3, 2 }, { 4, 2 }, { 5, 10 } });
 
         protected override void UpdateLogic()
         {
