@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Services;
+﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.UI.AnimationTimeline;
 using Microsoft.Xna.Framework;
@@ -395,7 +396,8 @@ namespace HunterCombatMR.UI
             duplicatebutton.OnClick += (evt, list) => ButtonAction((x, y) =>
             {
                 var newAnim = HunterCombatMR.Instance.DuplicateAnimation(_currentPlayer?.CurrentAnimation);
-                _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.GetLoadedAnimation(newAnim), true);
+                HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing =
+                    HunterCombatMR.Instance.GetLoadedAnimation(newAnim);
                 _animationname.Text = newAnim;
             }, evt, list, EditorModePreset.EditOnly, true);
             panelPercent2 += duplicatebutton.Width.Percent;
@@ -494,10 +496,10 @@ namespace HunterCombatMR.UI
                 _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
 
             // Animation Name Text Box
-            _animationname.Hidden = (!inEditor || _currentPlayer == null || _currentPlayer.CurrentAnimation == null);
+            _animationname.Hidden = (!inEditor || _currentPlayer == null || HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing == null);
             if (_currentPlayer?.CurrentAnimation != null)
             {
-                _animationname.DefaultText = _currentPlayer.CurrentAnimation.Name;
+                _animationname.DefaultText = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name;
             }
             if (Main.mouseLeft && !_animationname.IsMouseHovering)
                 _animationname.StopInteracting();
@@ -520,13 +522,13 @@ namespace HunterCombatMR.UI
 
             if (inEditor)
             {
-                var currentKeyFrame = _currentPlayer.CurrentAnimation?.AnimationData.GetCurrentKeyFrameIndex() ?? 0;
+                var currentKeyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationData.GetCurrentKeyFrameIndex() ?? 0;
                 // Current Keyframe Timing Text
-                var framenumtext = _currentPlayer.CurrentAnimation?.AnimationData.GetCurrentKeyFrame().FrameLength.ToString() ?? "0";
+                var framenumtext = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationData.GetCurrentKeyFrame().FrameLength.ToString() ?? "0";
                 _currentframetime.SetText(framenumtext);
 
                 // Total Amount of Animation KeyFrames
-                var totalframenumtext = _currentPlayer.CurrentAnimation?.AnimationData.TotalFrames.ToString() ?? "0";
+                var totalframenumtext = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationData.TotalFrames.ToString() ?? "0";
                 _frametotal.SetText(totalframenumtext);
 
                 if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Count() == 1)
@@ -587,10 +589,10 @@ namespace HunterCombatMR.UI
 
                 if (_currentPlayer?.CurrentAnimation != null)
                 {
-                    UIAutoScaleTextTextPanel<string> listSelected = (UIAutoScaleTextTextPanel<string>)_testlist._items.FirstOrDefault(x => _currentPlayer.CurrentAnimation.Name.Equals((x as UIAutoScaleTextTextPanel<string>).Text));
+                    UIAutoScaleTextTextPanel<string> listSelected = (UIAutoScaleTextTextPanel<string>)_testlist._items.FirstOrDefault(x => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name.Equals((x as UIAutoScaleTextTextPanel<string>).Text));
                     if (listSelected != null)
                     {
-                        if (_currentPlayer.CurrentAnimation.IsModified)
+                        if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsModified)
                         {
                             listSelected.TextColor = Color.OrangeRed;
                         }
@@ -624,11 +626,11 @@ namespace HunterCombatMR.UI
                 _currentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
 
             if (modeRestriction == null || modeRestriction.Contains(HunterCombatMR.Instance.EditorInstance.CurrentEditMode) &&
-                    (!animationNeeded || (animationNeeded && _currentPlayer.CurrentAnimation != null)))
+                    (!animationNeeded || (animationNeeded && HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing != null)))
             {
                 action(evt, listen);
                 Main.PlaySound(SoundID.MenuTick);
-                DisplayLayers(_currentPlayer.CurrentAnimation);
+                DisplayLayers(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
             }
         }
 
@@ -657,19 +659,19 @@ namespace HunterCombatMR.UI
         private void FrameTimeLogic(int amount,
                     bool setFrame = false)
         {
-            if (_currentPlayer.CurrentAnimation.IsAnimationInitialized() && !_currentPlayer.CurrentAnimation.AnimationData.IsPlaying)
+            if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsAnimationInitialized() && !HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.IsPlaying)
             {
-                var currentKeyframe = _currentPlayer.CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex();
+                var currentKeyframe = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.GetCurrentKeyFrameIndex();
                 var defaultSpeed = false;
 
                 if (amount == 0 && setFrame)
                     defaultSpeed = true;
-                else if (amount + _currentPlayer.CurrentAnimation.AnimationData.GetCurrentKeyFrame().FrameLength <= 0)
+                else if (amount + HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.GetCurrentKeyFrame().FrameLength <= 0)
                     return;
 
-                _currentPlayer.CurrentAnimation.UpdateKeyFrameLength(currentKeyframe, amount, setFrame, defaultSpeed);
+                HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.UpdateKeyFrameLength(currentKeyframe, amount, setFrame, defaultSpeed);
 
-                _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(_currentPlayer.CurrentAnimation.AnimationData.KeyFrames[currentKeyframe].StartingFrameIndex);
+                HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.SetCurrentFrame(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.KeyFrames[currentKeyframe].StartingFrameIndex);
             }
         }
 
@@ -711,19 +713,19 @@ namespace HunterCombatMR.UI
 
         private void ReloadAnimation(UIMouseEvent evt, UIElement listeningElement)
         {
-            if (_currentPlayer.CurrentAnimation.IsAnimationInitialized() && loadTimer == 0)
+            if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsAnimationInitialized() && loadTimer == 0)
             {
-                var currentFrame = _currentPlayer.CurrentAnimation.AnimationData.CurrentFrame;
-                var loaded = HunterCombatMR.Instance.LoadAnimationFile(_currentPlayer.CurrentAnimation.AnimationType, _currentPlayer.CurrentAnimation.Name, true);
+                var currentFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.CurrentFrame;
+                var loaded = HunterCombatMR.Instance.LoadAnimationFile(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationType, HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name, true);
                 if (loaded)
                 {
-                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(_currentPlayer.CurrentAnimation.Name)));
+                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing =
+                        HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name));
 
-                    if (currentFrame > _currentPlayer.CurrentAnimation.AnimationData.GetFinalFrame() && currentFrame <= 0)
+                    if (currentFrame > HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.GetFinalFrame() && currentFrame <= 0)
                         currentFrame = 0;
 
-                    _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(currentFrame);
-                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = _currentPlayer.CurrentAnimation;
+                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.SetCurrentFrame(currentFrame);
                     _animationTimeline.SetAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
                     loadTimer++;
                 }
@@ -732,11 +734,11 @@ namespace HunterCombatMR.UI
 
         private void SaveAnimation(UIMouseEvent evt, UIElement listeningElement)
         {
-            if (_currentPlayer.CurrentAnimation.IsAnimationInitialized() && saveTimer == 0)
+            if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsAnimationInitialized() && saveTimer == 0)
             {
                 FileSaveStatus saveStatus;
-                int currentFrame = _currentPlayer.CurrentAnimation.AnimationData.CurrentFrame;
-                string animName = _currentPlayer.CurrentAnimation.Name;
+                int currentFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.CurrentFrame;
+                string animName = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name;
                 string oldName;
 
                 if (_animationname.Interacting)
@@ -747,11 +749,11 @@ namespace HunterCombatMR.UI
                 {
                     oldName = animName;
                     animName = _animationname.Text;
-                    _currentPlayer.CurrentAnimation.Uninitialize();
-                    saveStatus = HunterCombatMR.Instance.FileManager.SaveCustomAnimation(_currentPlayer.CurrentAnimation, animName, true);
+                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Uninitialize();
+                    saveStatus = HunterCombatMR.Instance.FileManager.SaveCustomAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerActionAnimation, animName, true);
 
-                    if (_currentPlayer.CurrentAnimation.IsInternal)
-                        HunterCombatMR.Instance.FileManager.SaveInternalAnimation(_currentPlayer.CurrentAnimation, animName, true);
+                    if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsInternal)
+                        HunterCombatMR.Instance.FileManager.SaveInternalAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerActionAnimation, animName, true);
 
                     if (HunterCombatMR.Instance.LoadedAnimations.Any(x => x.Name.Equals(oldName)))
                     {
@@ -761,35 +763,35 @@ namespace HunterCombatMR.UI
                 }
                 else
                 {
-                    _currentPlayer.CurrentAnimation.Uninitialize();
-                    saveStatus = HunterCombatMR.Instance.FileManager.SaveCustomAnimation(_currentPlayer.CurrentAnimation, overwrite: true);
+                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Uninitialize();
+                    saveStatus = HunterCombatMR.Instance.FileManager.SaveCustomAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerActionAnimation, overwrite: true);
 
-                    if (_currentPlayer.CurrentAnimation.IsInternal)
-                        HunterCombatMR.Instance.FileManager.SaveInternalAnimation(_currentPlayer.CurrentAnimation, overwrite: true);
+                    if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsInternal)
+                        HunterCombatMR.Instance.FileManager.SaveInternalAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerActionAnimation, overwrite: true);
                 }
 
                 if (saveStatus == FileSaveStatus.Saved)
                 {
                     saveTimer++;
-                    HunterCombatMR.Instance.LoadAnimationFile(_currentPlayer.CurrentAnimation.AnimationType, animName, true);
-                    _currentPlayer.SetCurrentAnimation(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(animName)));
-                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = _currentPlayer.CurrentAnimation;
+                    HunterCombatMR.Instance.LoadAnimationFile(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationType, animName, true);
+                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing =
+                        HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(animName));
 
-                    if (currentFrame > _currentPlayer.CurrentAnimation.AnimationData.GetFinalFrame() && currentFrame <= 0)
+                    if (currentFrame > HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.GetFinalFrame() && currentFrame <= 0)
                         currentFrame = 0;
 
-                    _currentPlayer.CurrentAnimation.AnimationData.SetCurrentFrame(currentFrame);
+                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.SetCurrentFrame(currentFrame);
                     _animationTimeline.SetAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
                 }
                 else if (saveStatus == FileSaveStatus.Error)
                 {
-                    _currentPlayer.CurrentAnimation.Initialize();
+                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Initialize();
                     throw new System.Exception($"Animation could not save!");
                 }
                 else
                 {
                     Main.NewText(saveStatus.ToString());
-                    _currentPlayer.CurrentAnimation.Initialize();
+                    HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Initialize();
                 }
             }
         }
@@ -797,9 +799,8 @@ namespace HunterCombatMR.UI
         private void SelectAnimation(UIMouseEvent evt, UIElement listeningElement)
         {
             var newAnim = HunterCombatMR.Instance.LoadedAnimations.FirstOrDefault(x => x.Name.Equals((listeningElement as UIAutoScaleTextTextPanel<string>).Text));
-            _currentPlayer?.SetCurrentAnimation(newAnim, newAnim.IsModified);
-            HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = _currentPlayer.CurrentAnimation;
-            _animationname.Text = _currentPlayer?.CurrentAnimation?.Name;
+            HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = newAnim;
+            _animationname.Text = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.Name;
             _animationTimeline.SetAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
         }
 

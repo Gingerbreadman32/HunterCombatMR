@@ -15,8 +15,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 {
     public class PlayerActionAnimation
         : Animation,
-        IPlayerAnimation,
-        IEquatable<Animation>
+        IPlayerAnimation
     {
         #region Public Constructors
 
@@ -31,7 +30,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             IsInternal = isInternal;
         }
 
-        public PlayerActionAnimation(Animation copy,
+        public PlayerActionAnimation(PlayerActionAnimation copy,
             bool newFile = false)
         {
             Name = copy.Name;
@@ -94,16 +93,6 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public override Animation Duplicate(string name)
             => new PlayerActionAnimation(this) { Name = name, _modified = true };
-
-        public bool Equals(Animation other)
-        {
-            if (other?.Name == null || other?.LayerData == null || other?.AnimationType == null)
-                return false;
-
-            return Name.Equals(other.Name)
-                && LayerData.Equals(other.LayerData)
-                && AnimationType.Equals(other.AnimationType);
-        }
 
         #endregion Public Methods
     }

@@ -5,7 +5,7 @@
     /// </summary>
     public enum PlayerState
     {
-        Standing = 0,
+        Neutral = 0,
         AttackStartup = 1,
         ActiveAttack = 2,
         AttackRecovery = 3,

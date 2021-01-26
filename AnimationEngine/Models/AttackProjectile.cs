@@ -11,7 +11,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 {
     public abstract class AttackProjectile
         : ModProjectile,
-        IAnimated
+        IAnimation
     {
         public AnimatedData AnimationData { get; set; }
 

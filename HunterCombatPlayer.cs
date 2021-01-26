@@ -1,4 +1,6 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using AnimationEngine.Services;
+using HunterCombatMR.AnimationEngine.Interfaces;
+using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
@@ -12,7 +14,8 @@ using Terraria.ModLoader;
 namespace HunterCombatMR
 {
     public class HunterCombatPlayer
-        : ModPlayer
+        : ModPlayer,
+        IAnimated<PlayerActionAnimation>
     {
         #region Private Fields
 
@@ -27,7 +30,7 @@ namespace HunterCombatMR
         {
             ActiveProjectiles = new List<string>();
             InputBufferInfo = new PlayerBufferInformation();
-            State = PlayerState.Standing;
+            State = PlayerState.Neutral;
             LayerPositions = new Dictionary<string, Vector2>();
             ShowDefaultLayers = true;
         }
@@ -108,7 +111,7 @@ namespace HunterCombatMR
 
         public override void OnEnterWorld(Player player)
         {
-            State = PlayerState.Standing;
+            State = PlayerState.Neutral;
             HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
             ShowDefaultLayers = true;
 
@@ -125,7 +128,7 @@ namespace HunterCombatMR
 
         public override void OnRespawn(Player player)
         {
-            State = PlayerState.Standing;
+            State = PlayerState.Neutral;
             InputBufferInfo.ResetBuffers();
         }
 
@@ -148,6 +151,12 @@ namespace HunterCombatMR
                 player.immune = true;
                 player.immuneNoBlink = true;
                 player.immuneTime = 2;
+            }
+
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode)
+                    && (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationType.Equals(AnimationType.Player) ?? false))
+            {
+                SetCurrentAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerActionAnimation);
             }
 
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode) && CurrentAnimation != null)
@@ -180,7 +189,7 @@ namespace HunterCombatMR
             }
         }
 
-        public bool SetCurrentAnimation(AnimationEngine.Models.Animation newAnimation,
+        public bool SetCurrentAnimation(PlayerActionAnimation newAnimation,
             bool newFile = false)
         {
             if (newAnimation == null)
@@ -189,8 +198,11 @@ namespace HunterCombatMR
                 return true;
             }
 
-            PlayerActionAnimation newAnim = new PlayerActionAnimation(newAnimation, newFile);
-            CurrentAnimation = newAnim;
+            if (newAnimation == CurrentAnimation)
+                return true;
+
+            //PlayerActionAnimation newAnim = new PlayerActionAnimation(newAnimation, newFile);
+            CurrentAnimation = newAnimation;
 
             return CurrentAnimation != null;
         }

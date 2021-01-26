@@ -2,7 +2,6 @@
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Projectiles.SwordandShield;
 using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -13,9 +12,15 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
     public sealed class GroundedNeutralAttack1
         : Attack
     {
-        public override IEnumerable<AttackProjectile> AttackProjectiles 
+        public GroundedNeutralAttack1(string name) 
+            : base(name)
+        {
+        }
+
+        public override IEnumerable<AttackProjectile> AttackProjectiles
             => new List<AttackProjectile>() { ModContent.GetInstance<SNSSwipe1>() };
-        protected override KeyFrameProfile FrameProfile 
+
+        protected override KeyFrameProfile FrameProfile
             => new KeyFrameProfile(6, 4, new Dictionary<int, int>() { { 0, 10 }, { 3, 2 }, { 4, 2 }, { 5, 10 } });
 
         protected override void UpdateLogic()
@@ -24,51 +29,51 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
             {
                 if (Animation.CurrentFrame.Equals(1))
                 {
-                    PerformingPlayer.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.AttackStartup;
+                    ActionObject.State = Enumerations.PlayerState.AttackStartup;
                 }
 
                 ItemAssociated.noUseGraphic = false;
-                PerformingPlayer.itemRotation = MathHelper.ToRadians(-90 * PerformingPlayer.direction);
-                PerformingPlayer.bodyFrame.Y = PerformingPlayer.bodyFrame.Height;
+                ActionObject.player.itemRotation = MathHelper.ToRadians(-90 * ActionObject.player.direction);
+                ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height;
 
-                var CurrentHandOffset = Main.OffsetsPlayerOnhand[PerformingPlayer.bodyFrame.Y / 56];
-                if (PerformingPlayer.direction != 1)
+                var CurrentHandOffset = Main.OffsetsPlayerOnhand[ActionObject.player.bodyFrame.Y / 56];
+                if (ActionObject.player.direction != 1)
                 {
-                    CurrentHandOffset.X = PerformingPlayer.bodyFrame.Width - CurrentHandOffset.X;
+                    CurrentHandOffset.X = ActionObject.player.bodyFrame.Width - CurrentHandOffset.X;
                 }
-                if (PerformingPlayer.gravDir != 1f)
+                if (ActionObject.player.gravDir != 1f)
                 {
-                    CurrentHandOffset.Y = PerformingPlayer.bodyFrame.Height - CurrentHandOffset.Y;
+                    CurrentHandOffset.Y = ActionObject.player.bodyFrame.Height - CurrentHandOffset.Y;
                 }
-                CurrentHandOffset -= new Vector2(PerformingPlayer.bodyFrame.Width - PerformingPlayer.width, PerformingPlayer.bodyFrame.Height - 42) / 2f;
-                CurrentHandOffset += new Vector2(8 * PerformingPlayer.direction, 10);
+                CurrentHandOffset -= new Vector2(ActionObject.player.bodyFrame.Width - ActionObject.player.width, ActionObject.player.bodyFrame.Height - 42) / 2f;
+                CurrentHandOffset += new Vector2(8 * ActionObject.player.direction, 10);
 
-                PerformingPlayer.itemLocation = PerformingPlayer.position + CurrentHandOffset;
+                ActionObject.player.itemLocation = ActionObject.player.position + CurrentHandOffset;
             }
             else if (Animation.CheckCurrentKeyFrame(1) && Animation.CheckCurrentKeyFrameProgress(0))
             {
-                PerformingPlayer.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.ActiveAttack;
-                PerformingPlayer.bodyFrame.Y = PerformingPlayer.bodyFrame.Height * 2;
+                ActionObject.State = Enumerations.PlayerState.ActiveAttack;
+                ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 2;
 
-                PerformingPlayer.GetModPlayer<HunterCombatPlayer>().ActiveProjectiles = new List<string>() { AttackProjectiles.First().projectile.Name };
-                Projectile.NewProjectileDirect(new Vector2(PerformingPlayer.MountedCenter.X - (AttackProjectiles.First().projectile.width / 2) - (6 * PerformingPlayer.direction),
-                        PerformingPlayer.MountedCenter.Y - (AttackProjectiles.First().projectile.height / 2) - 10),
+                ActionObject.ActiveProjectiles = new List<string>() { AttackProjectiles.First().projectile.Name };
+                Projectile.NewProjectileDirect(new Vector2(ActionObject.player.MountedCenter.X - (AttackProjectiles.First().projectile.width / 2) - (6 * ActionObject.player.direction),
+                        ActionObject.player.MountedCenter.Y - (AttackProjectiles.First().projectile.height / 2) - 10),
                     new Vector2(0, 0),
                     AttackProjectiles.First().projectile.type,
                     ItemAssociated.damage,
                     ItemAssociated.knockBack,
-                    PerformingPlayer.whoAmI);
+                    ActionObject.player.whoAmI);
 
                 ItemAssociated.noUseGraphic = true;
             }
             else if (Animation.CheckCurrentKeyFrame(2))
             {
-                PerformingPlayer.bodyFrame.Y = PerformingPlayer.bodyFrame.Height * 3;
+                ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 3;
             }
             else if (Animation.CheckCurrentKeyFrame(3))
             {
-                PerformingPlayer.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.AttackRecovery;
-                PerformingPlayer.bodyFrame.Y = PerformingPlayer.bodyFrame.Height * 4;
+                ActionObject.State = Enumerations.PlayerState.AttackRecovery;
+                ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 4;
             }
             /*
             else if (Animation.CheckCurrentKeyFrame(5))

@@ -1,36 +1,20 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Interfaces;
+using HunterCombatMR.AnimationEngine.Models;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
     public abstract class Attack
+        : ActionBase<HunterCombatPlayer, PlayerActionAnimation>
     {
         #region Public Constructors
-
-        public Attack()
-        {
-            Animation = new AnimatedData();
-            Name = "Default";
-            SetupAttack();
-        }
 
         public Attack(string name)
         {
             Animation = new AnimatedData();
             Name = name;
-            SetupAttack();
-        }
-
-        public Attack(string name,
-            AnimatedData animation,
-            Player player,
-            Item item)
-        {
-            Name = name;
-            Animation = animation;
-            PerformingPlayer = player;
-            ItemAssociated = item;
             SetupAttack();
         }
 
@@ -40,15 +24,11 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public AnimatedData Animation { get; set; }
 
-        public IEnumerable<PlayerActionAnimation> PlayerAnimations { get; set; }
-
         public abstract IEnumerable<AttackProjectile> AttackProjectiles { get; }
-
-        protected abstract KeyFrameProfile FrameProfile { get; }
         public bool IsActive { get; set; } = false;
         public Item ItemAssociated { get; set; }
         public string Name { get; set; }
-        public Player PerformingPlayer { get; set; }
+        protected abstract KeyFrameProfile FrameProfile { get; }
 
         #endregion Public Properties
 
@@ -68,23 +48,28 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public virtual void KillAttack()
         {
-            PerformingPlayer.itemAnimation = 0;
-            PerformingPlayer.itemTime = 0;
-            PerformingPlayer.GetModPlayer<HunterCombatPlayer>().State = Enumerations.PlayerState.Standing;
-            Animation.ResetAnimation(true);
+            ActionObject.player.itemAnimation = 0;
+            ActionObject.player.itemTime = 0;
+            ActionObject.State = Enumerations.PlayerState.Neutral;
+            Animation.ResetAnimation(false);
             IsActive = false;
         }
 
-        public virtual void SetOwners(Player player,
+        public virtual void SetOwners(HunterCombatPlayer player,
             Item item)
         {
-            PerformingPlayer = player;
+            ActionObject = player;
             ItemAssociated = item;
         }
 
         public virtual void SetupAttack()
         {
             HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(Animation, FrameProfile);
+        }
+
+        public virtual void Start()
+        {
+            Animation.StartAnimation();
         }
 
         public virtual void Update()
@@ -97,6 +82,12 @@ namespace HunterCombatMR.AttackEngine.Models
         #endregion Public Methods
 
         #region Protected Methods
+
+        protected virtual void SetAnimation(PlayerActionAnimation animation)
+        {
+            if (Animations.Contains(animation))
+                ActionObject.SetCurrentAnimation(animation);
+        }
 
         protected abstract void UpdateLogic();
 

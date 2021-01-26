@@ -12,7 +12,7 @@ namespace HunterCombatMR.Items
     {
         private AttackSequence Sequence;
 
-        protected void InitilizeAttacks(Player player)
+        protected void InitilizeAttacks(HunterCombatPlayer player)
         {
             var StartingAttack = new ComboAction("RunningSlash", 
                 HunterCombatMR.Instance.GetLoadedAttack("RunningSlash"), 
@@ -60,9 +60,9 @@ namespace HunterCombatMR.Items
 
         public override bool CanUseItem(Player player)
         {
-            if (base.CanUseItem(player) && (Sequence == null || Sequence.PlayerPeforming != player))
+            if (base.CanUseItem(player) && (Sequence == null || Sequence.PlayerPeforming.player != player))
             {
-                InitilizeAttacks(player);
+                InitilizeAttacks(player.GetModPlayer<HunterCombatPlayer>());
                 return true;
             }
             else
