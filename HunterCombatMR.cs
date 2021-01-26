@@ -184,7 +184,7 @@ namespace HunterCombatMR
             // Loads all of the attack information
             foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
             {
-                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { }).Invoke(new object[] { type.Name }));
+                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { typeof(string) }).Invoke(new object[] { type.Name }));
             }
 
             foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))

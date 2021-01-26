@@ -17,7 +17,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public AttackSequence(ComboAction startingAction,
             IEnumerable<ComboAction> actions,
-            Player player,
+            HunterCombatPlayer player,
             Item item)
         {
             ActionHistory = new Dictionary<int, string>();
@@ -41,7 +41,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public ComboAction CurrentAction { get; private set; }
 
         public Item ItemUsing { get; }
-        public Player PlayerPeforming { get; }
+        public HunterCombatPlayer PlayerPeforming { get; }
 
         #endregion Public Properties
 

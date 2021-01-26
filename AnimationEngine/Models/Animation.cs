@@ -10,7 +10,7 @@ using System.Linq;
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public abstract class Animation
-        : IAnimated,
+        : IAnimation,
         IModifiable
     {
         #region Protected Fields

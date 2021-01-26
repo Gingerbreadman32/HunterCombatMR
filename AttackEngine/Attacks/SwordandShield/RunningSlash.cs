@@ -1,6 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
-using System;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
@@ -8,12 +7,33 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
     public sealed class RunningSlash
         : Attack
     {
-        public override IEnumerable<AttackProjectile> AttackProjectiles => throw new NotImplementedException();
+        #region Public Constructors
 
-        protected override KeyFrameProfile FrameProfile => throw new NotImplementedException();
+        public RunningSlash(string name)
+            : base(name)
+        {
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public override IEnumerable<AttackProjectile> AttackProjectiles => new List<AttackProjectile>();
+
+        #endregion Public Properties
+
+        #region Protected Properties
+
+        protected override KeyFrameProfile FrameProfile => new KeyFrameProfile(1, 100);
+
+        #endregion Protected Properties
+
+        #region Protected Methods
 
         protected override void UpdateLogic()
         {
         }
+
+        #endregion Protected Methods
     }
 }
