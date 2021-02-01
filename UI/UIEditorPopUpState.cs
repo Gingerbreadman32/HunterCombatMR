@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
@@ -15,16 +16,19 @@ namespace HunterCombatMR.UI
     {
         #region Private Fields
 
-        private UIAutoScaleTextTextPanel<string> _modeswitch;
-        private List<PopUpButton> PopUps;
+        private UIAutoScaleTextTextPanel<string> _modeSwitch;
+        private List<PopUpButton> _popUps;
+        private PlayerInformationPanel _playerInfoPanel;
 
         #endregion Private Fields
+
+        public HunterCombatPlayer Player { get; set; }
 
         #region Internal Constructors
 
         internal UIEditorPopUpState()
         {
-            PopUps = new List<PopUpButton>();
+            _popUps = new List<PopUpButton>();
         }
 
         #endregion Internal Constructors
@@ -42,7 +46,7 @@ namespace HunterCombatMR.UI
             base.OnInitialize();
 
             // Mode Switch
-            _modeswitch = new UIAutoScaleTextTextPanel<string>(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription())
+            _modeSwitch = new UIAutoScaleTextTextPanel<string>(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription())
             {
                 TextColor = Color.White,
                 Width = new StyleDimension(200f, 0),
@@ -56,9 +60,13 @@ namespace HunterCombatMR.UI
                     Pixels = -65f
                 }
             }.WithFadedMouseOver();
-            _modeswitch.OnClick += (evt, list) => ModeSwitch(evt, list);
+            _modeSwitch.OnClick += (evt, list) => ModeSwitch(evt, list);
 
-            Append(_modeswitch);
+            _playerInfoPanel = new PlayerInformationPanel();
+            _playerInfoPanel.Initialize();
+
+            Append(_modeSwitch);
+            Append(_playerInfoPanel);
         }
 
         public void RemoveAllChildrenOfType<T>() where T : UIElement
@@ -74,9 +82,15 @@ namespace HunterCombatMR.UI
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
+            if (Player == null || Player != Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>())
+            {
+                Player = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
+                _playerInfoPanel.SetPlayer(Player);
+            }
 
-            _modeswitch.SetText(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription());
+            _modeSwitch.SetText(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription());
+
+            base.Update(gameTime);
         }
 
         #endregion Public Methods
@@ -92,23 +106,23 @@ namespace HunterCombatMR.UI
             {
                 var selected = layers.FirstOrDefault(y => y.Layer.Name.Equals(highlighted.FirstOrDefault()));
                 var currentKeyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.GetCurrentKeyFrameIndex();
-                if (!PopUps.Any(x => x.AttachedElement == selected))
+                if (!_popUps.Any(x => x.AttachedElement == selected))
                 {
                     ClearPopUps();
 
                     var upButton = new PopUpButton('\u25B2', 40f, 40f, selected, new Vector2(120f, -50f)).WithFadedMouseOver();
                     upButton.OnClick += (evt, list) => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.UpdateLayerDepth(-1, selected.Layer, layers.Select(x => x.Layer));
-                    PopUps.Add(upButton);
+                    _popUps.Add(upButton);
 
                     var enableButton = new PopUpButton((selected.Layer.KeyFrames[currentKeyFrame].IsEnabled) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
                     enableButton.OnClick += (evt, list) => { HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.UpdateLayerVisibility(selected.Layer); HunterCombatMR.Instance.EditorInstance.AnimationEdited = true; };
-                    PopUps.Add(enableButton);
+                    _popUps.Add(enableButton);
 
                     var downButton = new PopUpButton('\u25BC', 40f, 40f, selected, new Vector2(120f, 50f)).WithFadedMouseOver();
                     downButton.OnClick += (evt, list) => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.UpdateLayerDepth(1, selected.Layer, layers.Select(x => x.Layer));
-                    PopUps.Add(downButton);
+                    _popUps.Add(downButton);
 
-                    PopUps.ForEach(x => Append(x));
+                    _popUps.ForEach(x => Append(x));
                 }
             }
             else
@@ -124,13 +138,14 @@ namespace HunterCombatMR.UI
         private void ClearPopUps()
         {
             RemoveAllChildrenOfType<PopUpButton>();
-            PopUps.Clear();
+            _popUps.Clear();
         }
 
         private void ModeSwitch(UIMouseEvent evt, UIElement listeningElement)
         {
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
             {
+                Player.SetCurrentAnimation(null);
                 HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.None;
             }
             else

@@ -1,11 +1,6 @@
-﻿using HunterCombatMR.Enumerations;
-using HunterCombatMR.Extensions;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.UI;
@@ -186,10 +181,6 @@ namespace HunterCombatMR.UI
             }
         }
 
-        #endregion Protected Methods
-
-        #region protected Methods
-
         protected void UpdateString(string newString)
         {
             _currentString = newString;
@@ -199,6 +190,6 @@ namespace HunterCombatMR.UI
             MinHeight.Set(textSize.Y + PaddingTop + PaddingBottom, 0f);
         }
 
-        #endregion protected Methods
+        #endregion Protected Methods
     }
 }

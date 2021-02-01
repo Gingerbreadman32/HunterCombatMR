@@ -6,12 +6,14 @@
     public enum PlayerState
     {
         Neutral = 0,
-        AttackStartup = 1,
-        ActiveAttack = 2,
-        AttackRecovery = 3,
-        HitPause = 4,
-        Jumping = 5,
-        BlockStun = 6,
-        Dead = 7
+        Walking = 1,
+        Aerial = 2,
+        AttackStartup = 3,
+        ActiveAttack = 4,
+        AttackRecovery = 5,
+        HitPause = 6,
+        Jumping = 7,
+        BlockStun = 8,
+        Dead = 9
     }
 }
