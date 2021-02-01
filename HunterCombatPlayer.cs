@@ -3,6 +3,7 @@ using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -164,7 +165,7 @@ namespace HunterCombatMR
                 HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(CurrentAnimation, player.direction);
             }
 
-            base.PostUpdate();
+            SetState();
         }
 
         public override bool PreItemCheck()
@@ -224,6 +225,24 @@ namespace HunterCombatMR
             var newColor = original;
             newColor.A = amount;
             return newColor;
+        }
+
+        private void SetState()
+        {
+            if (State == PlayerState.Dead)
+                return;
+
+            State = PlayerState.Neutral;
+
+            if (player.IsPlayerWalking())
+                State = PlayerState.Walking;
+
+            if (player.IsPlayerAerial())
+                State = PlayerState.Aerial;
+
+            if (player.IsPlayerJumping())
+                State = PlayerState.Jumping;
+
         }
 
         #endregion Private Methods
