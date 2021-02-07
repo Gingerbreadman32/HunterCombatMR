@@ -1,6 +1,7 @@
 using HunterCombatMR.AttackEngine.Attacks.SwordandShield;
 using HunterCombatMR.AttackEngine.Constants;
 using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Enumerations;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
@@ -11,6 +12,8 @@ namespace HunterCombatMR.Items
     public class guineapig : ModItem
     {
         private AttackSequence Sequence;
+
+        private IDictionary<ComboInputs, AttackSequence> Sequences;
 
         protected void InitilizeAttacks(HunterCombatPlayer player)
         {
