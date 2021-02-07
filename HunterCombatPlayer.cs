@@ -42,6 +42,8 @@ namespace HunterCombatMR
 
         public ICollection<string> ActiveProjectiles { get; set; }
         public PlayerActionAnimation CurrentAnimation { get; private set; }
+
+        public PlayerAttackState AttackState { get; private set; }
         public PlayerBufferInformation InputBufferInfo { get; set; }
         public IDictionary<string, Vector2> LayerPositions { get; set; }
         public bool ShowDefaultLayers { get; private set; }

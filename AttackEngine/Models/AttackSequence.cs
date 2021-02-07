@@ -9,7 +9,7 @@ namespace HunterCombatMR.AttackEngine.Models
     {
         #region Private Fields
 
-        private const bool _historyDebug = false;
+        private const bool _historyDebug = true;
 
         #endregion Private Fields
 
@@ -22,7 +22,6 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             ActionHistory = new Dictionary<int, string>();
             Actions = actions;
-            CurrentAction = startingAction;
             PlayerPeforming = player;
             ItemUsing = item;
             AddAttackToHistory(CurrentAction);
@@ -38,7 +37,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public IDictionary<int, string> ActionHistory { get; }
         public IEnumerable<ComboAction> Actions { get; private set; }
         public ComboSequenceManager ComboManager { get; }
-        public ComboAction CurrentAction { get; private set; }
+        public ComboAction CurrentAction { get => Actions.SingleOrDefault(x => x.Attack.IsActive); }
 
         public Item ItemUsing { get; }
         public HunterCombatPlayer PlayerPeforming { get; }
@@ -76,6 +75,15 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public void Start()
         {
+        }
+
+        public void Reset()
+        {
+            foreach (var action in Actions)
+            {
+                action.Attack.IsActive = false;
+            }
+            ActionHistory.Clear();
         }
 
         public void Update()
