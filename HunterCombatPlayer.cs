@@ -186,10 +186,6 @@ namespace HunterCombatMR
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
             InputBufferInfo.Update();
-            if (_bufferText && InputBufferInfo.BufferedComboInputs.Any(x => x.Input.Equals(ComboInputs.StandardAttack) && x.FramesSinceBuffered == 0))
-            {
-                CombatText.NewText(new Rectangle((int)Main.player[player.whoAmI].Top.X, (int)Main.player[player.whoAmI].Top.Y, 40, 20), Color.White, "Buffered!");
-            }
         }
 
         public bool SetCurrentAnimation(PlayerActionAnimation newAnimation,

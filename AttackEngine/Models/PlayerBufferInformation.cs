@@ -3,14 +3,30 @@ using HunterCombatMR.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
     public sealed class PlayerBufferInformation
     {
+        #region Private Fields
+
+        private const int _maxSameInput = 6;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        public PlayerBufferInformation()
+        {
+            BufferedComboInputs = new List<BufferedInput>();
+            HeldComboInputs = new Dictionary<ComboInputs, int>();
+            PopulateHoldCommands();
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
         /// <summary>
         /// A dictionary containing the list of combo inputs that have been recently pressed and how long since they've been buffered.
         /// </summary>
@@ -21,11 +37,17 @@ namespace HunterCombatMR.AttackEngine.Models
         /// </summary>
         public IDictionary<ComboInputs, int> HeldComboInputs { get; set; }
 
-        public PlayerBufferInformation()
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public void AddToBuffers(ComboInputs input)
         {
-            BufferedComboInputs = new List<BufferedInput>();
-            HeldComboInputs = new Dictionary<ComboInputs, int>();
-            PopulateHoldCommands();
+            var alreadyBuffered = BufferedComboInputs.Where(x => x.Input.Equals(input));
+            if (alreadyBuffered.Count() >= _maxSameInput)
+                BufferedComboInputs.Remove(alreadyBuffered.OrderByDescending(x => x.FramesSinceBuffered).First());
+
+            BufferedComboInputs.Add(new BufferedInput(input));
         }
 
         public void PopulateHoldCommands()
@@ -34,6 +56,12 @@ namespace HunterCombatMR.AttackEngine.Models
             {
                 HeldComboInputs.Add(input, 0);
             }
+        }
+
+        public void ResetBuffers()
+        {
+            BufferedComboInputs.Clear();
+            ResetHoldTimes();
         }
 
         public void ResetHoldTimes()
@@ -46,28 +74,13 @@ namespace HunterCombatMR.AttackEngine.Models
             HeldComboInputs = tempHeldKeys;
         }
 
-        public void ResetBuffers()
-        {
-            BufferedComboInputs.Clear();
-            ResetHoldTimes();
-        }
-
-        public void AddToBuffers(ComboInputs input)
-        {
-            var alreadyBuffered = BufferedComboInputs.Where(x => x.Input.Equals(input));
-            if (alreadyBuffered.Count() >= 3)
-                BufferedComboInputs.Remove(alreadyBuffered.OrderByDescending(x => x.FramesSinceBuffered).First());
-
-            BufferedComboInputs.Add(new BufferedInput(input));
-        }
-
         public void Update()
         {
             var tempBuffKeys = new List<BufferedInput>(BufferedComboInputs);
             foreach (var binput in BufferedComboInputs)
             {
                 if (binput.FramesSinceBuffered < binput.MaximumBufferFrames - 1)
-                    binput.FramesSinceBuffered++;
+                    binput.AddFramestoBuffer(1);
                 else
                     tempBuffKeys.Remove(binput);
             }
@@ -92,5 +105,7 @@ namespace HunterCombatMR.AttackEngine.Models
                 }
             }
         }
+
+        #endregion Public Methods
     }
 }
