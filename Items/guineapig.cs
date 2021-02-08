@@ -13,7 +13,12 @@ namespace HunterCombatMR.Items
     {
         private AttackSequence Sequence;
 
-        private IDictionary<ComboInputs, AttackSequence> Sequences;
+        public IDictionary<ComboInputs, AttackSequence> Sequences { get; set; }
+
+        public guineapig()
+        {
+            Sequences = new Dictionary<ComboInputs, AttackSequence>();
+        }
 
         protected void InitilizeAttacks(HunterCombatPlayer player)
         {
@@ -63,40 +68,7 @@ namespace HunterCombatMR.Items
 
         public override bool CanUseItem(Player player)
         {
-            if (base.CanUseItem(player) && (Sequence == null || Sequence.PlayerPeforming.player != player))
-            {
-                InitilizeAttacks(player.GetModPlayer<HunterCombatPlayer>());
-                return true;
-            }
-            else
-            {
-                return base.CanUseItem(player);
-            }
+            return false;
         }
-
-        public override void UseStyle(Player player)
-        {
-            if (Sequence != null)
-                Sequence.Update();
-        }
-
-        /*
-				player.itemRotation = MathHelper.ToRadians(56) * player.direction;
-
-				var CurrentHandOffset = Main.OffsetsPlayerOnhand[player.bodyFrame.Y / 56];
-				if (player.direction != 1)
-				{
-					CurrentHandOffset.X = player.bodyFrame.Width - CurrentHandOffset.X;
-				}
-				if (player.gravDir != 1f)
-				{
-					CurrentHandOffset.Y = player.bodyFrame.Height - CurrentHandOffset.Y;
-				}
-				CurrentHandOffset -= new Vector2(player.bodyFrame.Width - player.width, player.bodyFrame.Height - 42) / 2f;
-				CurrentHandOffset += new Vector2(10 * player.direction, 18);
-
-				player.itemLocation = player.position + CurrentHandOffset;
-				item.noUseGraphic = false;
-				*/
     }
 }
