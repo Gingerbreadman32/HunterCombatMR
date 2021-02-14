@@ -17,79 +17,83 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
         {
         }
 
-        public override IEnumerable<AttackProjectile> AttackProjectiles
-            => new List<AttackProjectile>() { ModContent.GetInstance<SNSSwipe1>() };
+        public override KeyFrameProfile FrameProfile => throw new System.NotImplementedException();
 
-        protected override KeyFrameProfile FrameProfile
-            => new KeyFrameProfile(6, 4, new Dictionary<int, int>() { { 0, 10 }, { 3, 2 }, { 4, 2 }, { 5, 10 } });
+        public override SortedList<int, ActionLogicMethod<HunterCombatPlayer, PlayerActionAnimation>> LogicMethods => throw new System.NotImplementedException();
+        /*
+public override IEnumerable<AttackProjectile> AttackProjectiles
+=> new List<AttackProjectile>() { ModContent.GetInstance<SNSSwipe1>() };
 
-        protected override void UpdateLogic()
-        {
-            if (Animation.CheckCurrentKeyFrame(0))
-            {
-                if (Animation.CurrentFrame.Equals(1))
-                {
-                    ActionObject.State = Enumerations.PlayerState.AttackStartup;
-                }
+protected override KeyFrameProfile FrameProfile
+=> new KeyFrameProfile(6, 4, new Dictionary<int, int>() { { 0, 10 }, { 3, 2 }, { 4, 2 }, { 5, 10 } });
 
-                ItemAssociated.noUseGraphic = false;
-                ActionObject.player.itemRotation = MathHelper.ToRadians(-90 * ActionObject.player.direction);
-                ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height;
+protected override void UpdateLogic()
+{
+if (Animation.CheckCurrentKeyFrame(0))
+{
+if (Animation.CurrentFrame.Equals(1))
+{
+ActionObject.State = Enumerations.PlayerState.AttackStartup;
+}
 
-                var CurrentHandOffset = Main.OffsetsPlayerOnhand[ActionObject.player.bodyFrame.Y / 56];
-                if (ActionObject.player.direction != 1)
-                {
-                    CurrentHandOffset.X = ActionObject.player.bodyFrame.Width - CurrentHandOffset.X;
-                }
-                if (ActionObject.player.gravDir != 1f)
-                {
-                    CurrentHandOffset.Y = ActionObject.player.bodyFrame.Height - CurrentHandOffset.Y;
-                }
-                CurrentHandOffset -= new Vector2(ActionObject.player.bodyFrame.Width - ActionObject.player.width, ActionObject.player.bodyFrame.Height - 42) / 2f;
-                CurrentHandOffset += new Vector2(8 * ActionObject.player.direction, 10);
+ItemAssociated.noUseGraphic = false;
+ActionObject.player.itemRotation = MathHelper.ToRadians(-90 * ActionObject.player.direction);
+ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height;
 
-                ActionObject.player.itemLocation = ActionObject.player.position + CurrentHandOffset;
-            }
-            else if (Animation.CheckCurrentKeyFrame(1) && Animation.CheckCurrentKeyFrameProgress(0))
-            {
-                ActionObject.State = Enumerations.PlayerState.ActiveAttack;
-                ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 2;
+var CurrentHandOffset = Main.OffsetsPlayerOnhand[ActionObject.player.bodyFrame.Y / 56];
+if (ActionObject.player.direction != 1)
+{
+CurrentHandOffset.X = ActionObject.player.bodyFrame.Width - CurrentHandOffset.X;
+}
+if (ActionObject.player.gravDir != 1f)
+{
+CurrentHandOffset.Y = ActionObject.player.bodyFrame.Height - CurrentHandOffset.Y;
+}
+CurrentHandOffset -= new Vector2(ActionObject.player.bodyFrame.Width - ActionObject.player.width, ActionObject.player.bodyFrame.Height - 42) / 2f;
+CurrentHandOffset += new Vector2(8 * ActionObject.player.direction, 10);
 
-                ActionObject.ActiveProjectiles = new List<string>() { AttackProjectiles.First().projectile.Name };
-                Projectile.NewProjectileDirect(new Vector2(ActionObject.player.MountedCenter.X - (AttackProjectiles.First().projectile.width / 2) - (6 * ActionObject.player.direction),
-                        ActionObject.player.MountedCenter.Y - (AttackProjectiles.First().projectile.height / 2) - 10),
-                    new Vector2(0, 0),
-                    AttackProjectiles.First().projectile.type,
-                    ItemAssociated.damage,
-                    ItemAssociated.knockBack,
-                    ActionObject.player.whoAmI);
+ActionObject.player.itemLocation = ActionObject.player.position + CurrentHandOffset;
+}
+else if (Animation.CheckCurrentKeyFrame(1) && Animation.CheckCurrentKeyFrameProgress(0))
+{
+ActionObject.State = Enumerations.PlayerState.ActiveAttack;
+ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 2;
 
-                ItemAssociated.noUseGraphic = true;
-            }
-            else if (Animation.CheckCurrentKeyFrame(2))
-            {
-                ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 3;
-            }
-            else if (Animation.CheckCurrentKeyFrame(3))
-            {
-                ActionObject.State = Enumerations.PlayerState.AttackRecovery;
-                ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 4;
-            }
-            /*
-            else if (Animation.CheckCurrentKeyFrame(5))
-            {
-                if (Animation.CheckCurrentKeyFrameProgress(0) && comboable == false && CurrentAttack == LMB1)
-                {
-                    comboable = true;
-                }
-                if (comboable && (PlayerInput.Triggers.JustPressed.MouseLeft || _comboDebug))
-                {
-                    CurrentAttack = LMB2;
-                    comboable = false;
-                    Animation.ResetAnimation(false);
-                }
-            }
-            */
-        }
+ActionObject.ActiveProjectiles = new List<string>() { AttackProjectiles.First().projectile.Name };
+Projectile.NewProjectileDirect(new Vector2(ActionObject.player.MountedCenter.X - (AttackProjectiles.First().projectile.width / 2) - (6 * ActionObject.player.direction),
+ActionObject.player.MountedCenter.Y - (AttackProjectiles.First().projectile.height / 2) - 10),
+new Vector2(0, 0),
+AttackProjectiles.First().projectile.type,
+ItemAssociated.damage,
+ItemAssociated.knockBack,
+ActionObject.player.whoAmI);
+
+ItemAssociated.noUseGraphic = true;
+}
+else if (Animation.CheckCurrentKeyFrame(2))
+{
+ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 3;
+}
+else if (Animation.CheckCurrentKeyFrame(3))
+{
+ActionObject.State = Enumerations.PlayerState.AttackRecovery;
+ActionObject.player.bodyFrame.Y = ActionObject.player.bodyFrame.Height * 4;
+}
+/*
+else if (Animation.CheckCurrentKeyFrame(5))
+{
+if (Animation.CheckCurrentKeyFrameProgress(0) && comboable == false && CurrentAttack == LMB1)
+{
+comboable = true;
+}
+if (comboable && (PlayerInput.Triggers.JustPressed.MouseLeft || _comboDebug))
+{
+CurrentAttack = LMB2;
+comboable = false;
+Animation.ResetAnimation(false);
+}
+}
+*/
+
     }
 }

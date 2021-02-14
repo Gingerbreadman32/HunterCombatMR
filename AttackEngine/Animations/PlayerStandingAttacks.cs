@@ -1,9 +1,8 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using HunterCombatMR.AttackEngine.Constants;
-using HunterCombatMR.Enumerations;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace HunterCombatMR.AttackEngine.Animations
 {

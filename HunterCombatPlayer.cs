@@ -1,5 +1,4 @@
-﻿using AnimationEngine.Services;
-using HunterCombatMR.AnimationEngine.Interfaces;
+﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
@@ -18,11 +17,6 @@ namespace HunterCombatMR
         : ModPlayer,
         IAnimated<PlayerActionAnimation>
     {
-        #region Private Fields
-
-        private const bool _bufferText = false;
-
-        #endregion Private Fields
 
         #region Public Constructors
 

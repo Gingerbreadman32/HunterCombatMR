@@ -1,4 +1,3 @@
-using HunterCombatMR.AttackEngine.Attacks.SwordandShield;
 using HunterCombatMR.AttackEngine.Constants;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
@@ -11,8 +10,6 @@ namespace HunterCombatMR.Items
 {
     public class guineapig : ModItem
     {
-        private AttackSequence Sequence;
-
         public IDictionary<ComboInputs, AttackSequence> Sequences { get; set; }
 
         public guineapig()
@@ -22,16 +19,16 @@ namespace HunterCombatMR.Items
 
         protected void InitilizeAttacks(HunterCombatPlayer player)
         {
-            var StartingAttack = new ComboAction("RunningSlash", 
-                HunterCombatMR.Instance.GetLoadedAttack("RunningSlash"), 
-                new List<ComboRoute>() { new ComboRoute("DoubleSlashFollowup", 
+            var StartingAttack = new ComboAction("RunningSlash",
+                HunterCombatMR.Instance.GetLoadedAttack("RunningSlash"),
+                new List<ComboRoute>() { new ComboRoute("DoubleSlashFollowup",
                     DefaultAttackDetails.DefaultBufferWindow,
                     Enumerations.ComboInputs.StandardAttack,
                     0) });
             var FollowUps = new List<ComboAction>() {
-                new ComboAction("DoubleSlashFollowup", HunterCombatMR.Instance.GetLoadedAttack("DoubleSlash"), null) 
+                new ComboAction("DoubleSlashFollowup", HunterCombatMR.Instance.GetLoadedAttack("DoubleSlash"), null)
             };
-            Sequence = new AttackSequence(StartingAttack, FollowUps, player, item);
+            Sequences.Add(ComboInputs.StandardAttack, new AttackSequence(StartingAttack, FollowUps, player, item));
         }
 
         public override void SetStaticDefaults()

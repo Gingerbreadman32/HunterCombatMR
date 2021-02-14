@@ -70,7 +70,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public void InitializeAttack(Attack attack)
         {
-            attack.SetOwners(PlayerPeforming, ItemUsing);
+            //attack.SetOwners(PlayerPeforming, ItemUsing);
         }
 
         public void Start()
@@ -88,7 +88,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public void Update()
         {
-            CurrentAction.Attack.Update();
+            //CurrentAction.Attack.Update();
         }
 
         #endregion Public Methods

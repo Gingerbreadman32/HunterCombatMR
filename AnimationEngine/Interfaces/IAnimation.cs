@@ -7,7 +7,7 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
     {
         string Name { get; }
 
-        AnimatedData AnimationData { get; }
+        Animator AnimationData { get; }
 
         void Initialize();
 

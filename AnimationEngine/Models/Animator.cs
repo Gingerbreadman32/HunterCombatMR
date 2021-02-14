@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public class AnimatedData
+    public class Animator
     {
         #region Public Constructors
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        public AnimatedData()
+        public Animator()
         {
             IsInitialized = false;
             KeyFrames = new List<KeyFrame>();
@@ -26,7 +26,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// Copy constructor
         /// </summary>
         /// <param name="animation">The previous animation</param>
-        public AnimatedData(AnimatedData animation)
+        public Animator(Animator animation)
         {
             IsInitialized = false;
             CurrentFrame = animation.CurrentFrame;

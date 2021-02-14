@@ -22,7 +22,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         #region Public Properties
 
         [JsonIgnore]
-        public AnimatedData AnimationData { get; protected set; }
+        public Animator AnimationData { get; protected set; }
 
         public abstract AnimationType AnimationType { get; }
 
