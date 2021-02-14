@@ -10,7 +10,7 @@ namespace HunterCombatMR.AnimationEngine.Services
     {
         #region Public Methods
 
-        public void AdjustKeyFrameLength(AnimatedData animation,
+        public void AdjustKeyFrameLength(Animator animation,
                     int keyFrameIndex,
                     int newFrameLength,
                     bool addToLength = false)
@@ -30,7 +30,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             SyncFrames(animation);
         }
 
-        public void AppendKeyFrame(AnimatedData animation,
+        public void AppendKeyFrame(Animator animation,
                     KeyFrame newKeyFrame)
         {
             if (newKeyFrame.FrameLength > 0)
@@ -45,14 +45,14 @@ namespace HunterCombatMR.AnimationEngine.Services
             }
         }
 
-        public void AppendKeyFrame(AnimatedData animation,
+        public void AppendKeyFrame(Animator animation,
                     int keyFrameLength)
         {
             KeyFrame newKeyFrame = new KeyFrame(animation.TotalFrames, keyFrameLength, animation.GetTotalKeyFrames());
             AppendKeyFrame(animation, newKeyFrame);
         }
 
-        public void AppendKeyFrames(AnimatedData animation,
+        public void AppendKeyFrames(Animator animation,
                     IEnumerable<KeyFrame> newKeyFrames)
         {
             foreach (var keyframe in newKeyFrames)
@@ -69,7 +69,7 @@ namespace HunterCombatMR.AnimationEngine.Services
         /// <param name="averageKeyFrameSpeed">The average speed any keyframes not defined will linger for</param>
         /// <param name="keyFrameSpeeds">A dictionary determining how long each keyframe will linger for at which index</param>
         /// <param name="startPlaying">Whether or not to start playing the animation after.</param>
-        public void FillAnimationKeyFrames(ref AnimatedData animation,
+        public void FillAnimationKeyFrames(ref Animator animation,
             int keyFrameAmount,
             int averageKeyFrameSpeed,
             IDictionary<int, int> keyFrameSpeeds = null,
@@ -105,7 +105,7 @@ namespace HunterCombatMR.AnimationEngine.Services
         /// <param name="animation">The animation to fill</param>
         /// <param name="frameProfile">A <seealso cref="KeyFrameProfile"/></param>
         /// <param name="startPlaying">Whether or not to start playing the animation after.</param>
-        public void FillAnimationKeyFrames(AnimatedData animation,
+        public void FillAnimationKeyFrames(Animator animation,
             KeyFrameProfile frameProfile,
             bool startPlaying = true,
             LoopStyle loopStyle = LoopStyle.Once)
@@ -118,7 +118,7 @@ namespace HunterCombatMR.AnimationEngine.Services
         /// </summary>
         /// <param name="keyFrameIndex">The keyframe you want to check</param>
         /// <returns>A list of ints representing the frame indexes the keyframe is active</returns>
-        public IEnumerable<int> GetFramesKeyFrameIsActive(AnimatedData animation,
+        public IEnumerable<int> GetFramesKeyFrameIsActive(Animator animation,
             int keyFrameIndex)
             => GetFramesKeyFrameIsActive(animation.KeyFrames[keyFrameIndex]);
 
@@ -142,7 +142,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             return framesActive;
         }
 
-        public void SyncFrames(AnimatedData animation)
+        public void SyncFrames(Animator animation)
         {
             if (animation.IsInitialized)
                 animation.Uninitialize();

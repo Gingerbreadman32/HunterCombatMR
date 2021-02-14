@@ -18,22 +18,11 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
 
         #region Public Properties
 
-        public override IEnumerable<AttackProjectile> AttackProjectiles => new List<AttackProjectile>();
+        public override SortedList<int, ActionLogicMethod<HunterCombatPlayer, PlayerActionAnimation>> LogicMethods => throw new System.NotImplementedException();
+
+        public override KeyFrameProfile FrameProfile => throw new System.NotImplementedException();
 
         #endregion Public Properties
 
-        #region Protected Properties
-
-        protected override KeyFrameProfile FrameProfile => new KeyFrameProfile(1, 100);
-
-        #endregion Protected Properties
-
-        #region Protected Methods
-
-        protected override void UpdateLogic()
-        {
-        }
-
-        #endregion Protected Methods
     }
 }

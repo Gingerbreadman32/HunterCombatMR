@@ -13,7 +13,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         : ModProjectile,
         IAnimation
     {
-        public AnimatedData AnimationData { get; set; }
+        public Animator AnimationData { get; set; }
 
         public ICollection<Hitbox> Hitboxes { get; set; }
 
@@ -22,7 +22,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public AttackProjectile()
             : base()
         {
-            AnimationData = new AnimatedData();
+            AnimationData = new Animator();
             Hitboxes = new List<Hitbox>();
             SetupKeyFrameProfile();
         }

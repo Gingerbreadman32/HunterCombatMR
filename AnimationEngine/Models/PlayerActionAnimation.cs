@@ -25,7 +25,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             bool isInternal)
         {
             Name = name;
-            AnimationData = new AnimatedData();
+            AnimationData = new Animator();
             LayerData = layerData;
             IsInternal = isInternal;
         }
@@ -34,7 +34,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             bool newFile = false)
         {
             Name = copy.Name;
-            AnimationData = new AnimatedData(copy.AnimationData);
+            AnimationData = new Animator(copy.AnimationData);
             HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(AnimationData);
             LayerData = new LayerData(copy.LayerData);
             _modified = newFile;
