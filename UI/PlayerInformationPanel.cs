@@ -87,7 +87,7 @@ namespace HunterCombatMR.UI
             if (Player == null)
                 return;
 
-            (ParameterList._items[0] as UIText).SetText($"State: {Player.State.ToString()} ({((int)Player.State).ToString()})");
+            (ParameterList._items[0] as UIText).SetText($"State: {Player.StateController.State.ToString()} ({((int)Player.StateController.State).ToString()})");
             (ParameterList._items[1] as UIText).SetText($"Anim: {AnimationText()}");
             (ParameterList._items[2] as UIText).SetText($"Vel: {Player.player.velocity.X}, {Player.player.velocity.Y}");
 
