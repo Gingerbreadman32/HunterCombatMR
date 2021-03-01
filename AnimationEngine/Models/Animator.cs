@@ -46,7 +46,6 @@ namespace HunterCombatMR.AnimationEngine.Models
         public bool IsInitialized { get; set; }
         public bool IsPlaying { get; set; }
         public List<KeyFrame> KeyFrames { get; set; }
-
         public LoopStyle LoopMode { get; set; }
         public int TotalFrames { get; set; }
 
@@ -86,11 +85,17 @@ namespace HunterCombatMR.AnimationEngine.Models
                             ResetAnimation(true);
                             break;
 
+                        case LoopStyle.PingPong:
+                            HunterCombatMR.Instance.StaticLogger.Debug($"Ping Pong loop not implemented.");
+                            throw new Exception("Loop mode failure!");
+
                         default:
                             throw new Exception("Loop mode not set!");
                     }
                 }
             }
+            else if (!IsInitialized)
+                HunterCombatMR.Instance.StaticLogger.Warn($"Animation Not Initialized");
         }
 
         /// <inheritdoc/>
@@ -102,11 +107,6 @@ namespace HunterCombatMR.AnimationEngine.Models
 
                 CurrentFrame = KeyFrames[nextKey].StartingFrameIndex;
             }
-        }
-
-        public void SetKeyFrame(int keyFrameIndex)
-        {
-            CurrentFrame = KeyFrames[keyFrameIndex].StartingFrameIndex;
         }
 
         /// <inheritdoc/>
@@ -209,6 +209,11 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void SetCurrentFrame(int newFrame)
         {
             CurrentFrame = newFrame;
+        }
+
+        public void SetKeyFrame(int keyFrameIndex)
+        {
+            CurrentFrame = KeyFrames[keyFrameIndex].StartingFrameIndex;
         }
 
         /// <inheritdoc/>

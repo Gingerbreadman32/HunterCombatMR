@@ -25,7 +25,7 @@ namespace HunterCombatMR
         {
             ActiveProjectiles = new List<string>();
             InputBufferInfo = new PlayerBufferInformation();
-            State = PlayerState.Neutral;
+            StateController = new PlayerStateController();
             LayerPositions = new Dictionary<string, Vector2>();
             ShowDefaultLayers = true;
         }
@@ -36,12 +36,10 @@ namespace HunterCombatMR
 
         public ICollection<string> ActiveProjectiles { get; set; }
         public PlayerActionAnimation CurrentAnimation { get; private set; }
-
-        public PlayerAttackState AttackState { get; private set; }
+        public PlayerStateController StateController { get; private set; }
         public PlayerBufferInformation InputBufferInfo { get; set; }
         public IDictionary<string, Vector2> LayerPositions { get; set; }
         public bool ShowDefaultLayers { get; private set; }
-        public PlayerState State { get; set; }
 
         #endregion Public Properties
 
@@ -108,7 +106,7 @@ namespace HunterCombatMR
 
         public override void OnEnterWorld(Player player)
         {
-            State = PlayerState.Neutral;
+            StateController.State = PlayerState.Neutral;
             HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
             ShowDefaultLayers = true;
 
@@ -125,7 +123,7 @@ namespace HunterCombatMR
 
         public override void OnRespawn(Player player)
         {
-            State = PlayerState.Neutral;
+            StateController.State = PlayerState.Neutral;
             InputBufferInfo.ResetBuffers();
         }
 
@@ -161,7 +159,7 @@ namespace HunterCombatMR
                 HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(CurrentAnimation, player.direction);
             }
 
-            SetState();
+            StateController.Update(this);
         }
 
         public override bool PreItemCheck()
@@ -202,7 +200,7 @@ namespace HunterCombatMR
 
         public override void UpdateDead()
         {
-            State = PlayerState.Dead;
+            StateController.State = PlayerState.Dead;
             ActiveProjectiles.Clear();
             InputBufferInfo.ResetBuffers();
         }
@@ -217,24 +215,6 @@ namespace HunterCombatMR
             var newColor = original;
             newColor.A = amount;
             return newColor;
-        }
-
-        private void SetState()
-        {
-            if (State == PlayerState.Dead)
-                return;
-
-            State = PlayerState.Neutral;
-
-            if (player.IsPlayerWalking())
-                State = PlayerState.Walking;
-
-            if (player.IsPlayerAerial())
-                State = PlayerState.Aerial;
-
-            if (player.IsPlayerJumping())
-                State = PlayerState.Jumping;
-
         }
 
         #endregion Private Methods
