@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace HunterCombatMR.AttackEngine.Models
 {
     public abstract class Attack
-        : ActionBase<HunterCombatPlayer, PlayerActionAnimation>
+        : CustomAction<HunterCombatPlayer, PlayerActionAnimation>
     {
         #region Public Constructors
 
@@ -12,6 +12,7 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             Name = name;
             AttackProjectiles = new List<AttackProjectile>();
+            Animations = new List<PlayerActionAnimation>();
         }
 
         #endregion Public Constructors
@@ -19,7 +20,6 @@ namespace HunterCombatMR.AttackEngine.Models
         #region Public Properties
 
         public IEnumerable<AttackProjectile> AttackProjectiles { get; set; }
-        public bool IsActive { get; set; } = false;
 
         #endregion Public Properties
 

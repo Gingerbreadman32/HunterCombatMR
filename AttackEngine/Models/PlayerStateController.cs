@@ -1,6 +1,9 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.AttackEngine.Services;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
@@ -15,19 +18,28 @@ namespace HunterCombatMR.AttackEngine.Models
 
         #region Public Constructors
 
-        public PlayerStateController()
+        // @@info Will have to test to see if this works or not (might break multi)
+        public PlayerStateController(HunterCombatPlayer player)
         {
             _actionAnimator = new Animator();
-            ActionReference = null;
             State = PlayerState.Neutral;
             ActionState = AttackState.NotAttacking;
+            Player = player;
+            ActionHistory = new SortedList<int, string>();
+            ComboManager = new ComboSequenceManager();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
+        
+        public SortedList<int, string> ActionHistory { get; set; }
 
-        public Attack ActionReference { get; private set; }
+        public HunterCombatPlayer Player { get; }
+
+        public ComboSequenceManager ComboManager { get; }
+
+        public Attack CurrentAction { get; private set; }
 
         public AttackState ActionState { get; set; }
         public PlayerState State { get; set; }
@@ -39,28 +51,37 @@ namespace HunterCombatMR.AttackEngine.Models
         public void KillAttackSequence()
         {
             _actionAnimator.ResetAnimation(false);
-            ActionReference = null;
+            CurrentAction = null;
         }
 
         public void SetNewAction(Attack action)
         {
-            ActionReference = action;
+            CurrentAction = action;
             AnimatorSetup();
         }
 
-        public void Update(HunterCombatPlayer player)
+        public void Update()
         {
-            if (ActionReference != null)
+
+
+            if (CurrentAction != null)
             {
-                ActionReference.LogicMethods[_actionAnimator.GetCurrentKeyFrameIndex()].ActionLogic(player,
-                    _actionAnimator.CurrentFrame,
-                    _actionAnimator.GetCurrentKeyFrame(),
-                    ActionReference.GetActionParameters(player));
+                var currentKeyFrame = _actionAnimator.GetCurrentKeyFrame();
+                var currentFrame = _actionAnimator.CurrentFrame;
+                foreach(var keyFrameEvent in CurrentAction.KeyFrameEvents.Where(x => x.StartKeyFrame <= currentKeyFrame 
+                        && x.EndKeyFrame >= currentKeyFrame
+                        && x.IsEnabled).OrderBy(x => x.Tag))
+                {
+                    CurrentAction.ActionParameters = keyFrameEvent.ActionLogic.ActionLogic(Player, 
+                        currentFrame, 
+                        (currentFrame - currentKeyFrame.StartingFrameIndex),
+                        CurrentAction.ActionParameters);
+                }
 
                 AdvanceAnimator();
             }
 
-            State = PlayerSetStateLogic(player.player);
+            State = PlayerSetStateLogic(Player.player);
         }
 
         #endregion Public Methods
@@ -78,12 +99,12 @@ namespace HunterCombatMR.AttackEngine.Models
         private void AnimatorSetup()
         {
             HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(_actionAnimator,
-                ActionReference.FrameProfile);
+                CurrentAction.FrameProfile);
         }
 
         private PlayerState PlayerSetStateLogic(Player player)
         {
-            // Switch this up with a dictionary run through.
+            // @@info Switch this up with a dictionary run through so it looks cleaner.
             if (State == PlayerState.Dead)
                 return PlayerState.Dead;
 

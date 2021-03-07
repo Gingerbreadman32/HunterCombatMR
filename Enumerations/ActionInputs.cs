@@ -1,27 +1,31 @@
 ﻿using HunterCombatMR.Attributes;
+using System;
 
 namespace HunterCombatMR.Enumerations
 {
     /// <summary>
-    /// Enumeration for storing the likely commands to use initiate combos
+    /// Enumeration for storing the commands for performing actions
     /// </summary>
-    public enum ComboInputs
+    [Flags]
+    public enum ActionInputs
     {
+        NoInput = 0,
         [GameCommand("MouseLeft")]
-        StandardAttack = 0,
+        PrimaryAction = 1,
         [GameCommand("MouseRight")]
-        SpecialAttack = 1,
+        SecondaryAction = 2,
+        BothActions = 3,
         [GameCommand("Jump")]
-        Jump = 3,
+        Jump = 4,
         [GameCommand("Grapple")]
-        Hook = 4,
+        Hook = 8,
         [GameCommand("Right")]
-        Right = 5,
+        Right = 16,
         [GameCommand("Left")]
-        Left = 6,
+        Left = 32,
         [GameCommand("Up")]
-        Up = 7,
+        Up = 64,
         [GameCommand("Down")]
-        Down = 8
+        Down = 128
     }
 }

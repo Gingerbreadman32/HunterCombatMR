@@ -17,9 +17,6 @@ namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
         {
         }
 
-        public override KeyFrameProfile FrameProfile => throw new System.NotImplementedException();
-
-        public override SortedList<int, ActionLogicMethod<HunterCombatPlayer, PlayerActionAnimation>> LogicMethods => throw new System.NotImplementedException();
         /*
 public override IEnumerable<AttackProjectile> AttackProjectiles
 => new List<AttackProjectile>() { ModContent.GetInstance<SNSSwipe1>() };

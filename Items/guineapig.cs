@@ -8,28 +8,9 @@ using Terraria.ModLoader;
 
 namespace HunterCombatMR.Items
 {
-    public class guineapig : ModItem
+    public class guineapig 
+        : SwordAndShieldBase
     {
-        public IDictionary<ComboInputs, AttackSequence> Sequences { get; set; }
-
-        public guineapig()
-        {
-            Sequences = new Dictionary<ComboInputs, AttackSequence>();
-        }
-
-        protected void InitilizeAttacks(HunterCombatPlayer player)
-        {
-            var StartingAttack = new ComboAction("RunningSlash",
-                HunterCombatMR.Instance.GetLoadedAttack("RunningSlash"),
-                new List<ComboRoute>() { new ComboRoute("DoubleSlashFollowup",
-                    DefaultAttackDetails.DefaultBufferWindow,
-                    Enumerations.ComboInputs.StandardAttack,
-                    0) });
-            var FollowUps = new List<ComboAction>() {
-                new ComboAction("DoubleSlashFollowup", HunterCombatMR.Instance.GetLoadedAttack("DoubleSlash"), null)
-            };
-            Sequences.Add(ComboInputs.StandardAttack, new AttackSequence(StartingAttack, FollowUps, player, item));
-        }
 
         public override void SetStaticDefaults()
         {
