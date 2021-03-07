@@ -9,13 +9,15 @@ using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public abstract class Animation
-        : IAnimation,
+    public abstract class Animation 
+        : HunterCombatContentInstance,
+        IAnimation,
         IModifiable
     {
         #region Protected Fields
 
         protected bool _modified;
+        protected string _internalName;
 
         #endregion Protected Fields
 
@@ -39,6 +41,22 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public LayerData LayerData { get; protected set; }
         public string Name { get; protected set; }
+
+        [JsonIgnore]
+        public override string InternalName { 
+            get 
+            { 
+                if (string.IsNullOrWhiteSpace(_internalName)) 
+                { 
+                    return Name; 
+                }; 
+                return _internalName; 
+            }
+            set
+            {
+                _internalName = value;
+            }
+        }
 
         #endregion Public Properties
 
@@ -104,8 +122,6 @@ namespace HunterCombatMR.AnimationEngine.Models
         public virtual void DrawEffects()
         {
         }
-
-        public abstract Animation Duplicate(string name);
 
         public AnimationLayer GetLayer(string layerName)
                     => LayerData.Layers.FirstOrDefault(x => x.Name.Equals(layerName));

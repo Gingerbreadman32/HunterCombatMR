@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Enumerations;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.AttackEngine.Models

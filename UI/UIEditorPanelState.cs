@@ -395,7 +395,7 @@ namespace HunterCombatMR.UI
             }.WithFadedMouseOver();
             duplicatebutton.OnClick += (evt, list) => ButtonAction((x, y) =>
             {
-                var newAnim = HunterCombatMR.Instance.DuplicateAnimation(_currentPlayer?.CurrentAnimation);
+                var newAnim = HunterCombatMR.Instance.DuplicateContentInstance(_currentPlayer?.CurrentAnimation);
                 HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing =
                     HunterCombatMR.Instance.GetLoadedAnimation(newAnim);
                 _animationname.Text = newAnim;

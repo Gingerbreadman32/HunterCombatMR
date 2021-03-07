@@ -19,7 +19,4 @@
   <ItemGroup>
 	<ProjectReference Include="..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\tModLoader\Source\tModLoader.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="AttackEngine\MoveSets\" />
-  </ItemGroup>
 </Project>

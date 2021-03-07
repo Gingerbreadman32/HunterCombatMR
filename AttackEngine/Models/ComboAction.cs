@@ -10,18 +10,22 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public ComboAction(Attack attack,
             IEnumerable<ComboRoute> routes,
+            PlayerState state = PlayerState.Neutral,
             string name = null)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
             Routes = routes ?? throw new ArgumentNullException(nameof(routes));
             Name = name ?? Attack.Name;
+            PlayerStateRequired = state;
         }
 
-        public ComboAction(Attack attack)
+        public ComboAction(Attack attack,
+            PlayerState state = PlayerState.Neutral)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
             Name = Attack.Name;
             Routes = new List<ComboRoute>();
+            PlayerStateRequired = state;
         }
 
         #endregion Public Constructors
@@ -31,7 +35,13 @@ namespace HunterCombatMR.AttackEngine.Models
         public Attack Attack { get; }
 
         public string Name { get; }
+
         public IEnumerable<ComboRoute> Routes { get; set; }
+
+        /// <summary>
+        /// What state the player needs to be in in order to perform the action.
+        /// </summary>
+        public PlayerState PlayerStateRequired { get; set; }
 
         #endregion Public Properties
 

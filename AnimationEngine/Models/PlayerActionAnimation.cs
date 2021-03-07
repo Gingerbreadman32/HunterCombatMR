@@ -91,7 +91,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             return animLayers;
         }
 
-        public override Animation Duplicate(string name)
+        public override T Duplicate<T>(string name)
             => new PlayerActionAnimation(this) { Name = name, _modified = true };
 
         #endregion Public Methods
