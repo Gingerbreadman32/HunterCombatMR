@@ -12,7 +12,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         #region Public Constructors
 
-        public BufferedInput(ComboInputs input,
+        public BufferedInput(ActionInputs input,
             int framesBuffered = 0,
             int maxBufferFrames = _maxFrameBuffer)
         {
@@ -26,7 +26,7 @@ namespace HunterCombatMR.AttackEngine.Models
         #region Public Properties
 
         public int FramesSinceBuffered { get; set; }
-        public ComboInputs Input { get; set; }
+        public ActionInputs Input { get; set; }
         public int MaximumBufferFrames { get; set; }
 
         #endregion Public Properties

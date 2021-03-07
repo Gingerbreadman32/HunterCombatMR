@@ -506,7 +506,7 @@ namespace HunterCombatMR.UI
 
             // Buffer Window
             var buffers = new List<string>();
-            foreach (var buffer in _currentPlayer.InputBufferInfo.BufferedComboInputs)
+            foreach (var buffer in _currentPlayer.InputBuffers.BufferedComboInputs)
             {
                 buffers.Add($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered}");
             }

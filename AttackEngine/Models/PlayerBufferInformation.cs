@@ -11,6 +11,7 @@ namespace HunterCombatMR.AttackEngine.Models
         #region Private Fields
 
         private const int _maxSameInput = 6;
+        private IEnumerable<ActionInputs> _concreteInputs;
 
         #endregion Private Fields
 
@@ -19,7 +20,9 @@ namespace HunterCombatMR.AttackEngine.Models
         public PlayerBufferInformation()
         {
             BufferedComboInputs = new List<BufferedInput>();
-            HeldComboInputs = new Dictionary<ComboInputs, int>();
+            HeldComboInputs = new Dictionary<ActionInputs, int>();
+            _concreteInputs = new List<ActionInputs>((ActionInputs[])Enum.GetValues(typeof(ActionInputs))).
+                Where(x => !string.IsNullOrEmpty(x.GetGameCommand()));
             PopulateHoldCommands();
         }
 
@@ -30,18 +33,18 @@ namespace HunterCombatMR.AttackEngine.Models
         /// <summary>
         /// A dictionary containing the list of combo inputs that have been recently pressed and how long since they've been buffered.
         /// </summary>
-        public IList<BufferedInput> BufferedComboInputs { get; set; }
+        public List<BufferedInput> BufferedComboInputs { get; set; }
 
         /// <summary>
         /// A dictionary containing a list of the combo inputs that are being held and how long they've been held.
         /// </summary>
-        public IDictionary<ComboInputs, int> HeldComboInputs { get; set; }
+        public IDictionary<ActionInputs, int> HeldComboInputs { get; set; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public void AddToBuffers(ComboInputs input)
+        public void AddToBuffers(ActionInputs input)
         {
             var alreadyBuffered = BufferedComboInputs.Where(x => x.Input.Equals(input));
             if (alreadyBuffered.Count() >= _maxSameInput)
@@ -52,7 +55,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public void PopulateHoldCommands()
         {
-            foreach (ComboInputs input in Enum.GetValues(typeof(ComboInputs)))
+            foreach (ActionInputs input in _concreteInputs)
             {
                 HeldComboInputs.Add(input, 0);
             }
@@ -66,7 +69,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public void ResetHoldTimes()
         {
-            var tempHeldKeys = new Dictionary<ComboInputs, int>(HeldComboInputs);
+            var tempHeldKeys = new Dictionary<ActionInputs, int>(HeldComboInputs);
             foreach (var held in HeldComboInputs.Keys)
             {
                 tempHeldKeys[held] = 0;
@@ -86,14 +89,14 @@ namespace HunterCombatMR.AttackEngine.Models
             }
             BufferedComboInputs = tempBuffKeys;
 
-            var tempHeldKeys = new Dictionary<ComboInputs, int>(HeldComboInputs);
+            var tempHeldKeys = new Dictionary<ActionInputs, int>(HeldComboInputs);
             foreach (var hinput in HeldComboInputs.Where(x => x.Key.IsPressed()))
             {
                 tempHeldKeys[hinput.Key]++;
             }
             HeldComboInputs = tempHeldKeys;
 
-            foreach (ComboInputs input in Enum.GetValues(typeof(ComboInputs)))
+            foreach (ActionInputs input in _concreteInputs)
             {
                 if (input.JustPressed())
                 {

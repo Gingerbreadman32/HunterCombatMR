@@ -130,7 +130,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         public int GetCurrentKeyFrameIndex()
-                    => KeyFrames.IndexOf(GetCurrentKeyFrame());
+                    => GetCurrentKeyFrame().KeyFrameOrder;
 
         /// <inheritdoc/>
         public int GetCurrentKeyFrameProgress()

@@ -2,7 +2,6 @@
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
-using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -17,6 +16,11 @@ namespace HunterCombatMR
         : ModPlayer,
         IAnimated<PlayerActionAnimation>
     {
+        #region Private Fields
+
+        private bool _showDefaultLayers;
+
+        #endregion Private Fields
 
         #region Public Constructors
 
@@ -24,10 +28,9 @@ namespace HunterCombatMR
             : base()
         {
             ActiveProjectiles = new List<string>();
-            InputBufferInfo = new PlayerBufferInformation();
-            StateController = new PlayerStateController();
+            InputBuffers = new PlayerBufferInformation();
             LayerPositions = new Dictionary<string, Vector2>();
-            ShowDefaultLayers = true;
+            _showDefaultLayers = true;
         }
 
         #endregion Public Constructors
@@ -36,33 +39,30 @@ namespace HunterCombatMR
 
         public ICollection<string> ActiveProjectiles { get; set; }
         public PlayerActionAnimation CurrentAnimation { get; private set; }
-        public PlayerStateController StateController { get; private set; }
-        public PlayerBufferInformation InputBufferInfo { get; set; }
+        public PlayerBufferInformation InputBuffers { get; set; }
+
+        // Instead of using this, move the "pop-ups" to their own layer in the normal editor uistate
         public IDictionary<string, Vector2> LayerPositions { get; set; }
-        public bool ShowDefaultLayers { get; private set; }
+
+        public PlayerStateController StateController { get; private set; }
 
         #endregion Public Properties
 
         #region Public Methods
-
-        public override void ModifyDrawHeadLayers(List<PlayerHeadLayer> layers)
-        {
-            base.ModifyDrawHeadLayers(layers);
-        }
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
                 if (CurrentAnimation != null && CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() > 0)
-                    ShowDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
+                    _showDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
                             CurrentAnimation.LayerData,
                             CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() - 1,
                             Color.White);
                 else
-                    ShowDefaultLayers = true;
+                    _showDefaultLayers = true;
 
-                if (ShowDefaultLayers)
+                if (_showDefaultLayers)
                 {
                     string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
                     "faceColor", "bodyColor", "legColor", "shirtColor", "underShirtColor",
@@ -73,6 +73,7 @@ namespace HunterCombatMR
 
                     object temp = drawInfo;
 
+                    // @@warn cache this, probably shouldn't be using reflection like this every frame
                     foreach (var prop in properties.Where(x => propertiesToChange.Contains(x.Name)))
                     {
                         prop.SetValue(temp, MakeTransparent((Color)prop.GetValue(temp), 30));
@@ -87,14 +88,14 @@ namespace HunterCombatMR
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                if (!ShowDefaultLayers)
+                if (!_showDefaultLayers)
                 {
                     foreach (PlayerLayer item in layers)
                     {
                         item.visible = false;
                     }
-                }
-                layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
+                } else
+                    layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
 
                 if (CurrentAnimation != null)
                 {
@@ -108,15 +109,16 @@ namespace HunterCombatMR
         {
             StateController.State = PlayerState.Neutral;
             HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
-            ShowDefaultLayers = true;
+            _showDefaultLayers = true;
+            StateController = new PlayerStateController(this);
 
             if (ActiveProjectiles != null)
                 ActiveProjectiles.Clear();
             else
                 throw new Exception("Player's active projectiles not initialized!");
 
-            if (InputBufferInfo != null)
-                InputBufferInfo.ResetBuffers();
+            if (InputBuffers != null)
+                InputBuffers.ResetBuffers();
             else
                 throw new Exception("Player's input buffer information not initialized!");
         }
@@ -124,7 +126,7 @@ namespace HunterCombatMR
         public override void OnRespawn(Player player)
         {
             StateController.State = PlayerState.Neutral;
-            InputBufferInfo.ResetBuffers();
+            InputBuffers.ResetBuffers();
         }
 
         public override void PostSavePlayer()
@@ -132,7 +134,8 @@ namespace HunterCombatMR
             if (Main.gameMenu)
             {
                 CurrentAnimation = null;
-                ShowDefaultLayers = true;
+                _showDefaultLayers = true;
+                StateController = null;
             }
 
             base.PostSavePlayer();
@@ -159,7 +162,7 @@ namespace HunterCombatMR
                 HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(CurrentAnimation, player.direction);
             }
 
-            StateController.Update(this);
+            StateController.Update();
         }
 
         public override bool PreItemCheck()
@@ -177,7 +180,8 @@ namespace HunterCombatMR
 
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
-            InputBufferInfo.Update();
+            if (!StateController.State.Equals(PlayerState.Dead))
+                InputBuffers.Update();
         }
 
         public bool SetCurrentAnimation(PlayerActionAnimation newAnimation,
@@ -201,8 +205,12 @@ namespace HunterCombatMR
         public override void UpdateDead()
         {
             StateController.State = PlayerState.Dead;
-            ActiveProjectiles.Clear();
-            InputBufferInfo.ResetBuffers();
+
+            if(ActiveProjectiles.Any())
+                ActiveProjectiles.Clear();
+
+            if (InputBuffers.BufferedComboInputs.Any() || InputBuffers.HeldComboInputs.Any(x => x.Value > 0))
+                InputBuffers.ResetBuffers();
         }
 
         #endregion Public Methods

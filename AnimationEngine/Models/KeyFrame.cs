@@ -11,6 +11,9 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <summary>
         /// The order this keyframe will be positioned
         /// </summary>
+        /// <remarks>
+        /// @@warn Eventually use a sorted list instead.
+        /// </remarks>
         public int KeyFrameOrder { get; set; }
 
         /// <summary>
@@ -69,5 +72,11 @@ namespace HunterCombatMR.AnimationEngine.Models
             else
                 throw new ArgumentNullException("Compared keyframe is null!");
         }
+
+        public static bool operator <=(KeyFrame a, KeyFrame b)
+            => a.StartingFrameIndex <= b.StartingFrameIndex;
+
+        public static bool operator >=(KeyFrame a, KeyFrame b)
+            => a.StartingFrameIndex >= b.StartingFrameIndex;
     }
 }

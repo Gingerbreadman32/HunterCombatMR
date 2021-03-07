@@ -8,8 +8,9 @@
         NotAttacking = 0,
         AttackStartup = 1,
         ActiveAttack = 2,
-        AttackRecovery = 3,
-        HitPause = 4,
-        BlockStun = 5
+        AttackCancellable = 3,
+        AttackRecovery = 4,
+        HitPause = 5,
+        BlockStun = 6
     }
 }
