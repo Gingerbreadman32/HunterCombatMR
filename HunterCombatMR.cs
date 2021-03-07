@@ -23,7 +23,6 @@ namespace HunterCombatMR
     {
         #region Public Fields
 
-        public const int AnimationNameMax = 64;
         public const string ModName = "HunterCombat";
         public string DataPath = Path.Combine(Program.SavePath, ModName, "Data");
 
@@ -31,7 +30,6 @@ namespace HunterCombatMR
 
         #region Internal Fields
 
-        internal AnimationLoader AnimLoader;
         internal UserInterface EditorUIPanels;
         internal UserInterface EditorUIPopUp;
         internal UIEditorPanelState PanelState;
@@ -45,6 +43,7 @@ namespace HunterCombatMR
 
         private const string _variableTexturePath = "Textures/SnS/";
         private GameTime _lastUpdateUiGameTime;
+        private HunterCombatContent _content;
 
         #endregion Private Fields
 
@@ -59,34 +58,21 @@ namespace HunterCombatMR
 
         #region Public Properties
 
-        public static HunterCombatMR Instance { get; set; }
+        public static HunterCombatMR Instance { get; private set; }
         public KeyFrameManager AnimationKeyFrameManager { get; private set; }
         public AnimationEditor EditorInstance { get; private set; }
         public AnimationFileManager FileManager { get; private set; }
-        public List<AnimationEngine.Models.Animation> LoadedAnimations { get; private set; }
-        public List<Attack> LoadedAttacks { get; private set; }
 
         #endregion Public Properties
 
         #region Public Methods
-
-        public bool DoesLoadedAnimationExist(string name)
-            => LoadedAnimations.Any(x => x.Name.Equals(name));
-
-        public AnimationEngine.Models.Animation GetLoadedAnimation(string name)
-            => LoadedAnimations.FirstOrDefault(x => x.Name.Equals(name));
-
-        public Attack GetLoadedAttack(string name)
-            => LoadedAttacks.FirstOrDefault(x => x.Name.Equals(name));
 
         public override void Load()
         {
             StaticLogger = Logger;
             AnimationKeyFrameManager = new KeyFrameManager();
             FileManager = new AnimationFileManager();
-            LoadedAttacks = new List<Attack>();
-            LoadedAnimations = new List<AnimationEngine.Models.Animation>();
-            AnimLoader = new AnimationLoader();
+            _content = new HunterCombatContent(FileManager);
 
             if (!Main.dedServ)
             {
@@ -102,33 +88,6 @@ namespace HunterCombatMR
                 PopUpState = new UIEditorPopUpState();
                 PopUpState.Activate();
                 ShowMyUI();
-            }
-        }
-
-        public bool LoadAnimationFile(AnimationType animationType,
-            string fileName,
-            bool overrideInternal = false)
-        {
-            if (LoadedAnimations != null)
-            {
-                var animation = FileManager.LoadAnimation(animationType, fileName, overrideInternal);
-
-                if (animation == null)
-                {
-                    StaticLogger.Error($"Animation {fileName} failed to load!");
-                    return false;
-                }
-
-                if (LoadedAnimations.Any(x => x.Name.Equals(fileName)))
-                    LoadedAnimations.Remove(LoadedAnimations.First(x => x.Name.Equals(fileName)));
-
-                LoadedAnimations.Add(AnimLoader.RegisterAnimation(animation));
-
-                return true;
-            }
-            else
-            {
-                throw new Exception("Animation List Not Loaded!");
             }
         }
 
@@ -167,25 +126,10 @@ namespace HunterCombatMR
 
         public override void PostSetupContent()
         {
-            /* Libvaxy implementation, will use if I need anything else from it
-            foreach (Type type in Reflection.GetNonAbstractSubtypes(typeof(ParentType))
-                YourCacheList.Add(Reflection.CreateInstance(type));
-            */
             Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
-
-            if (!Main.dedServ)
-            {
-                // Load, register, and store all the animations
-                //LoadInternalAnimations(assemblyTypes);
-                var animTypes = new List<AnimationType>() { AnimationType.Player };
-                LoadAnimations(animTypes);
-            }
-
-            // Loads all of the attack information
-            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
-            {
-                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { typeof(string) }).Invoke(new object[] { type.Name }));
-            }
+            // Load, register, and store all the animations
+            //LoadInternalAnimations(assemblyTypes);
+            _content.SetupContent(assemblyTypes);
 
             foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
             {
@@ -207,10 +151,11 @@ namespace HunterCombatMR
 
         public override void Unload()
         {
-            Instance = null;
-
             EditorInstance.Dispose();
             EditorInstance = null;
+
+            Instance.EditorInstance.Dispose();
+            Instance = null;
         }
 
         public override void UpdateUI(GameTime gameTime)
@@ -249,26 +194,13 @@ namespace HunterCombatMR
 
         internal void DeleteAnimation(AnimationEngine.Models.Animation animation)
         {
-            if (DoesLoadedAnimationExist(animation.Name))
-            {
-                LoadedAnimations.Remove(GetLoadedAnimation(animation.Name));
-            }
+            _content.DeleteContentInstance(animation);
 
             FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);
         }
 
-        internal string DuplicateAnimation(AnimationEngine.Models.Animation duplicate)
-        {
-            var newAnim = duplicate.Duplicate(DuplicateName(duplicate.Name, 0));
-            LoadedAnimations.Add(newAnim);
-
-            if (duplicate == null)
-            {
-                throw new ArgumentNullException("No animation to duplicate!");
-            }
-
-            return newAnim.Name;
-        }
+        internal string DuplicateContentInstance(AnimationEngine.Models.Animation duplicate)
+            => _content.DuplicateContentInstance<AnimationEngine.Models.Animation>(duplicate);
 
         internal void HideMyUI()
         {
@@ -280,19 +212,6 @@ namespace HunterCombatMR
         {
             if (ui?.CurrentState != null)
                 ui?.SetState(null);
-        }
-
-        internal void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
-        {
-            if (LoadedAnimations != null)
-            {
-                LoadedAnimations.Clear();
-                LoadedAnimations.AddRange(AnimLoader.RegisterAnimations(FileManager.LoadAnimations(typesToLoad)));
-            }
-            else
-            {
-                LoadedAnimations = new List<AnimationEngine.Models.Animation>();
-            }
         }
 
         internal void SetUIPlayer(HunterCombatPlayer player)
@@ -318,50 +237,7 @@ namespace HunterCombatMR
 
         #region Private Methods
 
-        private string DuplicateName(string name,
-            int counter)
-        {
-            counter++;
-
-            // REMINDER: Put a terminator on these recursive functions to prevent stack overflow issues.
-
-            if (LoadedAnimations.Any(x => x.Name.Equals(DuplicateNameFormat(name, counter))))
-            {
-                return DuplicateName(name, counter);
-            }
-            else
-            {
-                return DuplicateNameFormat(name, counter);
-            }
-        }
-
-        private string DuplicateNameFormat(string name,
-            int suffix)
-        {
-            string newName = string.Format(name + "{0}", suffix);
-
-            if (newName.Count() > AnimationNameMax)
-            {
-                return DuplicateNameFormat(name.Substring(0, name.Count() - 1), suffix);
-            }
-            else
-            {
-                return newName;
-            }
-        }
-
-        private void LoadInternalAnimations(Type[] types)
-        {
-            foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
-            {
-                var container = (ActionContainer)type.GetConstructor(new Type[] { }).Invoke(new object[] { });
-                container.Load();
-                AnimLoader.LoadContainer(container);
-            }
-
-            if (AnimLoader.Containers.Any())
-                LoadedAnimations = new List<AnimationEngine.Models.Animation>(AnimLoader.RegisterAnimations());
-        }
+        
 
         #endregion Private Methods
     }

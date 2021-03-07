@@ -5,7 +5,8 @@ using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public abstract class CustomAction<TObject, TAnimationType> where TObject
+    public abstract class CustomAction<TObject, TAnimationType> : HunterCombatContentInstance
+        where TObject
         : IAnimated<TAnimationType> where TAnimationType
         : Animation
     {
