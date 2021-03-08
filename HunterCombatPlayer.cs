@@ -31,6 +31,7 @@ namespace HunterCombatMR
             InputBuffers = new PlayerBufferInformation();
             LayerPositions = new Dictionary<string, Vector2>();
             _showDefaultLayers = true;
+            StateController = new PlayerStateController(this);
         }
 
         #endregion Public Constructors
@@ -110,7 +111,6 @@ namespace HunterCombatMR
             StateController.State = PlayerState.Neutral;
             HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
             _showDefaultLayers = true;
-            StateController = new PlayerStateController(this);
 
             if (ActiveProjectiles != null)
                 ActiveProjectiles.Clear();
@@ -135,7 +135,6 @@ namespace HunterCombatMR
             {
                 CurrentAnimation = null;
                 _showDefaultLayers = true;
-                StateController = null;
             }
 
             base.PostSavePlayer();

@@ -92,7 +92,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         public override T Duplicate<T>(string name)
-            => new PlayerActionAnimation(this) { Name = name, _modified = true };
+            => (new PlayerActionAnimation(this) { Name = name, _modified = true }) as T;
 
         #endregion Public Methods
     }

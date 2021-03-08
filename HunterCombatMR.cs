@@ -43,7 +43,6 @@ namespace HunterCombatMR
 
         private const string _variableTexturePath = "Textures/SnS/";
         private GameTime _lastUpdateUiGameTime;
-        private HunterCombatContent _content;
 
         #endregion Private Fields
 
@@ -57,6 +56,8 @@ namespace HunterCombatMR
         #endregion Public Constructors
 
         #region Public Properties
+
+        public HunterCombatContent Content { get; private set; }
 
         public static HunterCombatMR Instance { get; private set; }
         public KeyFrameManager AnimationKeyFrameManager { get; private set; }
@@ -72,7 +73,7 @@ namespace HunterCombatMR
             StaticLogger = Logger;
             AnimationKeyFrameManager = new KeyFrameManager();
             FileManager = new AnimationFileManager();
-            _content = new HunterCombatContent(FileManager);
+            Content = new HunterCombatContent(FileManager);
 
             if (!Main.dedServ)
             {
@@ -129,7 +130,7 @@ namespace HunterCombatMR
             Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
             // Load, register, and store all the animations
             //LoadInternalAnimations(assemblyTypes);
-            _content.SetupContent(assemblyTypes);
+            Content.SetupContent(assemblyTypes);
 
             foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
             {
@@ -194,13 +195,10 @@ namespace HunterCombatMR
 
         internal void DeleteAnimation(AnimationEngine.Models.Animation animation)
         {
-            _content.DeleteContentInstance(animation);
+            Content.DeleteContentInstance(animation);
 
             FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);
         }
-
-        internal string DuplicateContentInstance(AnimationEngine.Models.Animation duplicate)
-            => _content.DuplicateContentInstance<AnimationEngine.Models.Animation>(duplicate);
 
         internal void HideMyUI()
         {
@@ -235,10 +233,5 @@ namespace HunterCombatMR
 
         #endregion Internal Methods
 
-        #region Private Methods
-
-        
-
-        #endregion Private Methods
     }
 }
