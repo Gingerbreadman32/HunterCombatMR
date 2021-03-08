@@ -395,9 +395,9 @@ namespace HunterCombatMR.UI
             }.WithFadedMouseOver();
             duplicatebutton.OnClick += (evt, list) => ButtonAction((x, y) =>
             {
-                var newAnim = HunterCombatMR.Instance.DuplicateContentInstance(_currentPlayer?.CurrentAnimation);
+                var newAnim = HunterCombatMR.Instance.Content.DuplicateContentInstance(_currentPlayer?.CurrentAnimation);
                 HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing =
-                    HunterCombatMR.Instance.GetLoadedAnimation(newAnim);
+                    HunterCombatMR.Instance.Content.GetContentInstance<AnimationEngine.Models.Animation>(newAnim);
                 _animationname.Text = newAnim;
             }, evt, list, EditorModePreset.EditOnly, true);
             panelPercent2 += duplicatebutton.Width.Percent;
@@ -435,7 +435,7 @@ namespace HunterCombatMR.UI
             Append(_animationTimeline);
 
             // Renameable Animation Name Text Box
-            _animationname = new PlainTextBox("Animation Name", HunterCombatMR.AnimationNameMax, true, true, characterPerms: InputPermissions.FileSafe)
+            _animationname = new PlainTextBox("Animation Name", 64, true, true, characterPerms: InputPermissions.FileSafe)
             {
                 Top = new StyleDimension(-_layerpanel.GetDimensions().Height, 0.5f),
                 TextColor = Color.White
@@ -567,7 +567,7 @@ namespace HunterCombatMR.UI
                 }
 
                 // Animation List Window
-                foreach (var animation in HunterCombatMR.Instance.LoadedAnimations)
+                foreach (var animation in HunterCombatMR.Instance.Content.GetContentList<AnimationEngine.Models.Animation>())
                 {
                     UIAutoScaleTextTextPanel<string> animationButton = new UIAutoScaleTextTextPanel<string>(animation.Name)
                     {
@@ -716,11 +716,11 @@ namespace HunterCombatMR.UI
             if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsAnimationInitialized() && loadTimer == 0)
             {
                 var currentFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.CurrentFrame;
-                var loaded = HunterCombatMR.Instance.LoadAnimationFile(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationType, HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name, true);
+                var loaded = HunterCombatMR.Instance.Content.LoadAnimationFile(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationType, HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name, true);
                 if (loaded)
                 {
                     HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing =
-                        HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name));
+                        HunterCombatMR.Instance.Content.GetContentInstance<AnimationEngine.Models.Animation>(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.Name);
 
                     if (currentFrame > HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.GetFinalFrame() && currentFrame <= 0)
                         currentFrame = 0;
@@ -755,9 +755,9 @@ namespace HunterCombatMR.UI
                     if (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.IsInternal)
                         HunterCombatMR.Instance.FileManager.SaveInternalAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerActionAnimation, animName, true);
 
-                    if (HunterCombatMR.Instance.LoadedAnimations.Any(x => x.Name.Equals(oldName)))
+                    if (HunterCombatMR.Instance.Content.CheckContentInstanceByName<AnimationEngine.Models.Animation>(oldName))
                     {
-                        HunterCombatMR.Instance.LoadedAnimations.Remove(HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(oldName)));
+                        HunterCombatMR.Instance.Content.DeleteContentInstance<AnimationEngine.Models.Animation>(oldName);
                         _testlist.Clear();
                     }
                 }
@@ -773,9 +773,9 @@ namespace HunterCombatMR.UI
                 if (saveStatus == FileSaveStatus.Saved)
                 {
                     saveTimer++;
-                    HunterCombatMR.Instance.LoadAnimationFile(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationType, animName, true);
+                    HunterCombatMR.Instance.Content.LoadAnimationFile(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationType, animName, true);
                     HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing =
-                        HunterCombatMR.Instance.LoadedAnimations.First(x => x.Name.Equals(animName));
+                        HunterCombatMR.Instance.Content.GetContentInstance<AnimationEngine.Models.Animation>(animName);
 
                     if (currentFrame > HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.GetFinalFrame() && currentFrame <= 0)
                         currentFrame = 0;
@@ -798,7 +798,7 @@ namespace HunterCombatMR.UI
 
         private void SelectAnimation(UIMouseEvent evt, UIElement listeningElement)
         {
-            var newAnim = HunterCombatMR.Instance.LoadedAnimations.FirstOrDefault(x => x.Name.Equals((listeningElement as UIAutoScaleTextTextPanel<string>).Text));
+            var newAnim = HunterCombatMR.Instance.Content.GetContentInstance<AnimationEngine.Models.Animation>((listeningElement as UIAutoScaleTextTextPanel<string>).Text);
             HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = newAnim;
             _animationname.Text = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.Name;
             _animationTimeline.SetAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);

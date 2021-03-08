@@ -18,12 +18,12 @@ namespace HunterCombatMR.AttackEngine.Models
 
         #region Public Properties
 
-        public IEnumerable<ComboAction> Actions { get; }
+        public IEnumerable<ComboAction> Actions { get; private set; }
 
         /// <summary>
         /// The actions that can be used from non-action states.
         /// </summary>
-        public IEnumerable<ComboRoute> StartingRoutes { get; }
+        public IEnumerable<ComboRoute> StartingRoutes { get; private set; }
 
         #endregion Public Properties
 
@@ -36,5 +36,20 @@ namespace HunterCombatMR.AttackEngine.Models
             => new List<ComboRoute>();
 
         #endregion Protected Methods
+
+        #region Public Methods
+
+        public override T Duplicate<T>(string name)
+        {
+            MoveSet clone = (MoveSet)MemberwiseClone();
+
+            clone.InternalName = name;
+            clone.Actions = clone.PopulateActions();
+            clone.StartingRoutes = clone.SetStartingRoutes();
+
+            return clone as T;
+        }
+
+        #endregion Public Methods
     }
 }

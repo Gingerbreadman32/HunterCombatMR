@@ -81,7 +81,9 @@ namespace HunterCombatMR.AttackEngine.Models
                 AdvanceAnimator();
             }
 
-            State = PlayerSetStateLogic(Player.player);
+            // @@warn Not working, might be because of constructor, look into this
+            if (Player.player != null)
+                State = PlayerSetStateLogic(Player.player);
         }
 
         #endregion Public Methods

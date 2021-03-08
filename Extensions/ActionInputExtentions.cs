@@ -13,7 +13,7 @@ namespace HunterCombatMR.Extensions
         {
             // @@warn Cache this reflection somewhere (will probably need a instance cache or something)
             var attribute = Attribute.GetCustomAttribute(input.GetType().GetField(input.ToString()), typeof(GameCommand)) as GameCommand;
-            return attribute.GetName();
+            return attribute?.GetName() ?? "";
         }
 
         public static bool HasGameCommand(this ActionInputs input)
