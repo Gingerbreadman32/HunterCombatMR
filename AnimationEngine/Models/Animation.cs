@@ -9,17 +9,26 @@ using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public abstract class Animation 
+    public abstract class Animation
         : HunterCombatContentInstance,
         IAnimation,
         IModifiable
     {
-        #region Protected Fields
+        #region Private Fields
 
-        protected bool _modified;
-        protected string _internalName;
+        private bool _modified;
 
-        #endregion Protected Fields
+        #endregion Private Fields
+
+        #region Protected Constructors
+
+        protected Animation(string name)
+            : base(name)
+        {
+            Name = name;
+        }
+
+        #endregion Protected Constructors
 
         #region Public Properties
 
@@ -37,26 +46,15 @@ namespace HunterCombatMR.AnimationEngine.Models
             {
                 return _modified;
             }
+
+            protected set
+            {
+                _modified = value;
+            }
         }
 
         public LayerData LayerData { get; protected set; }
         public string Name { get; protected set; }
-
-        [JsonIgnore]
-        public override string InternalName { 
-            get 
-            { 
-                if (string.IsNullOrWhiteSpace(_internalName)) 
-                { 
-                    return Name; 
-                }; 
-                return _internalName; 
-            }
-            set
-            {
-                _internalName = value;
-            }
-        }
 
         #endregion Public Properties
 

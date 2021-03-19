@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
@@ -8,7 +9,7 @@ namespace HunterCombatMR.AttackEngine.Models
     {
         #region Public Constructors
 
-        public ComboAction(Attack attack,
+        public ComboAction(PlayerAction attack,
             IEnumerable<ComboRoute> routes,
             PlayerState state = PlayerState.Neutral,
             string name = null)
@@ -19,7 +20,7 @@ namespace HunterCombatMR.AttackEngine.Models
             PlayerStateRequired = state;
         }
 
-        public ComboAction(Attack attack,
+        public ComboAction(PlayerAction attack,
             PlayerState state = PlayerState.Neutral)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
@@ -32,7 +33,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         #region Public Properties
 
-        public Attack Attack { get; }
+        public PlayerAction Attack { get; }
 
         public string Name { get; }
 
@@ -48,9 +49,10 @@ namespace HunterCombatMR.AttackEngine.Models
         #region Public Methods
 
         public void AddRoute(ComboAction action,
-            ActionInputs input)
+            ActionInputs input,
+            AttackState[] states)
         {
-            AddRouteInternal(new ComboRoute(action, input));
+            AddRouteInternal(new ComboRoute(action, input, states));
         }
 
         public void AddRoute(ComboRoute route)
@@ -58,6 +60,20 @@ namespace HunterCombatMR.AttackEngine.Models
             AddRouteInternal(route);
         }
 
+        public bool RouteExists(string actionName,
+            ActionInputs input)
+            => Routes.Any(y => y.ComboAction.Name.Equals(actionName)
+                && (!input.Equals(ActionInputs.NoInput)) ? y.Input.Equals(input) : true);
+
+        public ComboRoute GetRoute(string actionName,
+            ActionInputs input)
+        {
+            if (RouteExists(actionName, input))
+                return Routes.Single(y => y.ComboAction.Name.Equals(actionName)
+                    && (!input.Equals(ActionInputs.NoInput)) ? y.Input.Equals(input) : true);
+            else
+                throw new Exception($"Combo route for action {actionName} with input {input.ToString()} does not exist in relation to current action: {Name}");
+        }
         #endregion Public Methods
 
         #region Private Methods

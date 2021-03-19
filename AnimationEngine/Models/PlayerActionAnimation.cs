@@ -23,6 +23,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public PlayerActionAnimation(string name,
             LayerData layerData,
             bool isInternal)
+            : base(name)
         {
             Name = name;
             AnimationData = new Animator();
@@ -32,12 +33,13 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public PlayerActionAnimation(PlayerActionAnimation copy,
             bool newFile = false)
+            : base(copy.InternalName)
         {
             Name = copy.Name;
             AnimationData = new Animator(copy.AnimationData);
             HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(AnimationData);
             LayerData = new LayerData(copy.LayerData);
-            _modified = newFile;
+            IsModified = newFile;
             IsInternal = copy.IsInternal;
         }
 
@@ -92,7 +94,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         public override T Duplicate<T>(string name)
-            => (new PlayerActionAnimation(this) { Name = name, _modified = true }) as T;
+            => (new PlayerActionAnimation(this) { Name = name, IsModified = true }) as T;
 
         #endregion Public Methods
     }

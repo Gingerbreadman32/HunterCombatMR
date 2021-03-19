@@ -34,6 +34,13 @@ namespace HunterCombatMR.AnimationEngine.Models
             SpecificKeyFrameSpeeds = keyFrameSpeeds.ToDictionary(x => x, x => keyFrameSpeeds[x]);
         }
 
+        public KeyFrameProfile()
+        {
+            KeyFrameAmount = 0;
+            DefaultKeyFrameSpeed = 1;
+            SpecificKeyFrameSpeeds = new Dictionary<int, int>();
+        }
+
         public KeyFrameProfile(KeyFrameProfile copy)
         {
             KeyFrameAmount = copy.KeyFrameAmount;

@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AttackEngine.Constants;
 using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,19 +12,33 @@ namespace HunterCombatMR.AttackEngine.MoveSets
     public class SwordAndShieldMoveSet
         : MoveSet
     {
+        private const string _doubleSlash = "DoubleSlash";
+        private const string _runningSlash = "RunningSlash";
+
         public SwordAndShieldMoveSet() 
             : base(MoveSetNames.SwordAndShield)
         {
         }
 
-        protected override IEnumerable<ComboAction> PopulateActions()
+        protected override IEnumerable<ComboAction> PopulateDefaultActions()
         {
-            return base.PopulateActions();
+            var actions = new List<ComboAction>();
+
+            actions.Add(new ComboAction(ContentUtils.GetAttack(_doubleSlash)));
+            actions.Add(new ComboAction(ContentUtils.GetAttack(_runningSlash), Enumerations.PlayerState.Walking));
+
+            return actions;
         }
 
-        protected override IEnumerable<ComboRoute> SetStartingRoutes()
+        protected override IEnumerable<ComboRoute> SetNeutralRoutes()
         {
-            return base.SetStartingRoutes();
+            var routes = new List<ComboRoute>();
+            var neutralstate = new Enumerations.AttackState[] { Enumerations.AttackState.NotAttacking };
+
+            routes.Add(new ComboRoute(GetAction(_doubleSlash), Enumerations.ActionInputs.PrimaryAction, neutralstate));
+            routes.Add(new ComboRoute(GetAction(_runningSlash), Enumerations.ActionInputs.PrimaryAction, neutralstate));
+
+            return routes;
         }
     }
 }

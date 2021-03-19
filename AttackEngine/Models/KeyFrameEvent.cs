@@ -14,20 +14,9 @@ namespace HunterCombatMR.AttackEngine.Models
             ActionLogicMethod<TObject, TAnimationType> actionLogic)
         {
             Tag = tag;
-            EndKeyFrame = keyFrame;
-            StartKeyFrame = keyFrame;
+            KeyFrame = keyFrame;
             ActionLogic = actionLogic;
-        }
-
-        public KeyFrameEvent(int tag,
-            KeyFrame startKeyFrame,
-            KeyFrame endKeyFrame,
-            ActionLogicMethod<TObject, TAnimationType> actionLogic)
-        {
-            Tag = tag;
-            EndKeyFrame = endKeyFrame;
-            StartKeyFrame = startKeyFrame;
-            ActionLogic = actionLogic;
+            EndKeyFrame = new KeyFrame(keyFrame.GetFinalFrameIndex() + 1, 1, keyFrame.KeyFrameOrder + 1);
         }
 
         #endregion Public Constructors
@@ -37,7 +26,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public ActionLogicMethod<TObject, TAnimationType> ActionLogic { get; }
         public KeyFrame EndKeyFrame { get; }
         public bool IsEnabled { get; set; } = true;
-        public KeyFrame StartKeyFrame { get; }
+        public KeyFrame KeyFrame { get; }
         public int Tag { get; }
 
         #endregion Public Properties

@@ -10,7 +10,7 @@ using Terraria.ModLoader;
 namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
 {
     public sealed class GroundedNeutralAttack1
-        : Attack
+        : PlayerAction
     {
         public GroundedNeutralAttack1(string name) 
             : base(name)

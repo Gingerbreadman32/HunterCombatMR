@@ -10,31 +10,39 @@ namespace HunterCombatMR.AnimationEngine.Models
         : IAnimated<TAnimationType> where TAnimationType
         : Animation
     {
-        #region Public Properties
+        public CustomAction(string name,
+            string displayName = "")
+            : base(name)
+        {
+            Name = (string.IsNullOrEmpty(displayName)) ? name : displayName;
+            FrameProfile = new KeyFrameProfile();
+            ActionParameters = new Dictionary<string, string>();
+        }
 
         public IEnumerable<TAnimationType> Animations { get; protected set; }
 
         public KeyFrameProfile FrameProfile { get; protected set; }
-        public IEnumerable<KeyFrameEvent<TObject, TAnimationType>> KeyFrameEvents { get; protected set; }
+        public IEnumerable<KeyFrameEvent<TObject, TAnimationType>> KeyFrameEvents 
+        { 
+            get => _internalEvents; 
+            set { _internalEvents = value; SetUpFrameProfile(); }
+        }
+
         public string Name { get; protected set; }
 
         public IDictionary<string, string> ActionParameters { get; set; }
 
-        #endregion Public Propertiesthods
+        private IEnumerable<KeyFrameEvent<TObject, TAnimationType>> _internalEvents;
 
         protected virtual void SetUpFrameProfile()
         {
-            // There will always be at least two keyframes, start and end.
-            int totalKeyFrames = 2;
+            // There will always be at least one keyframe.
+            int totalKeyFrames = 1;
 
-            foreach (var animation in Animations)
-            {
-                totalKeyFrames++;
-            }
+            
         }
 
-        protected void AddKeyFrameEvent(KeyFrame startKeyFrame,
-            KeyFrame endKeyFrame,
+        public void AddKeyFrameEvent(KeyFrame keyFrame,
             ActionLogicMethod<TObject, TAnimationType> actionLogicMethod)
         {
             var tempEvents = new List<KeyFrameEvent<TObject, TAnimationType>>(KeyFrameEvents);
@@ -43,15 +51,9 @@ namespace HunterCombatMR.AnimationEngine.Models
             if (tempEvents.Any())
                 newTag = tempEvents.Select(x => x.Tag).Max() + 1;
 
-            tempEvents.Add(new KeyFrameEvent<TObject, TAnimationType>(newTag, startKeyFrame, endKeyFrame, actionLogicMethod));
+            tempEvents.Add(new KeyFrameEvent<TObject, TAnimationType>(newTag, keyFrame, actionLogicMethod));
 
             KeyFrameEvents = tempEvents;
-        }
-
-        protected void AddKeyFrameEvent(KeyFrame keyframe,
-            ActionLogicMethod<TObject, TAnimationType> actionLogicMethod)
-        {
-            AddKeyFrameEvent(keyframe, keyframe, actionLogicMethod);
         }
     }
 }

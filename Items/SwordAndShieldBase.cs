@@ -1,14 +1,13 @@
 ﻿using HunterCombatMR.AttackEngine.Constants;
-using Terraria.ModLoader;
 
 namespace HunterCombatMR.Items
 {
     public abstract class SwordAndShieldBase
-        : ModItem
+        : WeaponBase
     {
         #region Public Properties
 
-        public string MoveSet { get; set; } = MoveSetNames.SwordAndShield;
+        public override string MoveSet { get; protected set; } = MoveSetNames.SwordAndShield;
 
         #endregion Public Properties
     }

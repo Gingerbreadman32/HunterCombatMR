@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
@@ -11,7 +12,7 @@ namespace HunterCombatMR.UI
     {
         #region Private Fields
 
-        private readonly int _parameterCount = 3;
+        private readonly int _parameterCount = 5;
 
         #endregion Private Fields
 
@@ -87,9 +88,11 @@ namespace HunterCombatMR.UI
             if (Player == null)
                 return;
 
-            (ParameterList._items[0] as UIText).SetText($"State: {Player.StateController.State.ToString()} ({((int)Player.StateController.State).ToString()})");
+            (ParameterList._items[0] as UIText).SetText($"PState: {Player.StateController.State.ToString()} ({((int)Player.StateController.State)})");
             (ParameterList._items[1] as UIText).SetText($"Anim: {AnimationText()}");
-            (ParameterList._items[2] as UIText).SetText($"Vel: {Player.player.velocity.X}, {Player.player.velocity.Y}");
+            (ParameterList._items[2] as UIText).SetText($"Vel: {Math.Round(Player.player.velocity.X, 2)}, {Math.Round(Player.player.velocity.Y, 2)}");
+            (ParameterList._items[3] as UIText).SetText($"Action: {ActionText()}");
+            (ParameterList._items[4] as UIText).SetText($"AState: {Player.StateController.ActionState.ToString()} ({((int)Player.StateController.ActionState)})");
 
             Recalculate();
 
@@ -108,7 +111,14 @@ namespace HunterCombatMR.UI
         #endregion Internal Methods
 
         private string AnimationText()
-            => (Player.CurrentAnimation != null) ? Player.CurrentAnimation.Name : "N/A";
-        
+            => (Player.CurrentAnimation != null) 
+                ? $"{Player.CurrentAnimation.Name} - {Player.CurrentAnimation.AnimationData.CurrentFrame}" 
+                : "N/A";
+
+        private string ActionText()
+            => (Player.StateController.CurrentAction != null) 
+                ? $"{Player.StateController.CurrentAction.Name} - {Player.StateController.GetCurrentActionFrame()}" 
+                : "N/A";
+
     }
 }
