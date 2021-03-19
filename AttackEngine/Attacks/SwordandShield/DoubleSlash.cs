@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace HunterCombatMR.AttackEngine.Attacks.SwordandShield
 {
     public sealed class DoubleSlash
-        : Attack
+        : PlayerAction
     {
         #region Public Constructors
 

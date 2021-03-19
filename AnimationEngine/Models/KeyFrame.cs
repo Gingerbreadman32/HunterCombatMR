@@ -68,7 +68,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public int CompareTo(KeyFrame other)
         {
             if (other != null)
-                return KeyFrameOrder.CompareTo(other.KeyFrameOrder);
+                return KeyFrameOrder.CompareTo(other.StartingFrameIndex);
             else
                 throw new ArgumentNullException("Compared keyframe is null!");
         }

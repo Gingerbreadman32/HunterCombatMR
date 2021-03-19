@@ -1,16 +1,26 @@
-﻿namespace HunterCombatMR
+﻿using Newtonsoft.Json;
+using System;
+
+namespace HunterCombatMR
 {
     public abstract class HunterCombatContentInstance
     {
+        public HunterCombatContentInstance(string name)
+        {
+            InternalName = name;
+        }
+
         #region Public Properties
 
-        public virtual string InternalName { get; set; }
+        [JsonIgnore]
+        public virtual string InternalName { get; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public abstract T Duplicate<T>(string name) where T : HunterCombatContentInstance;
+        public virtual T Duplicate<T>(string name) where T : HunterCombatContentInstance
+            => (T)typeof(T).GetConstructor(new Type[] { typeof(string) }).Invoke(new object[] { name });
 
         #endregion Public Methods
     }

@@ -10,7 +10,7 @@ namespace HunterCombatMR.AttackEngine.Models
     {
         #region Private Fields
 
-        private const int _maxSameInput = 6;
+        private const int _maxSameInput = 3;
         private IEnumerable<ActionInputs> _concreteInputs;
 
         #endregion Private Fields

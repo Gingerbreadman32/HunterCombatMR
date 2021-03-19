@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
-    public abstract class Attack
+    public abstract class PlayerAction
         : CustomAction<HunterCombatPlayer, PlayerActionAnimation>
     {
         #region Public Constructors
 
-        public Attack(string name)
+        public PlayerAction(string name,
+            string displayName = "")
+            : base(name, displayName)
         {
-            InternalName = name;
-            Name = name;
-            AttackProjectiles = new List<AttackProjectile>();
             Animations = new List<PlayerActionAnimation>();
+            AttackProjectiles = new List<AttackProjectile>();
         }
 
         #endregion Public Constructors
@@ -28,9 +28,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public override T Duplicate<T>(string name)
         {
-            Attack clone = (Attack)MemberwiseClone();
-
-            clone.InternalName = name;
+            PlayerAction clone = base.Duplicate<PlayerAction>(name);
             clone.AttackProjectiles = new List<AttackProjectile>(AttackProjectiles);
             clone.Animations = new List<PlayerActionAnimation>(Animations);
             clone.FrameProfile = new KeyFrameProfile(FrameProfile);

@@ -2,6 +2,7 @@
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Items;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace HunterCombatMR
     {
         #region Private Fields
 
-        private bool _showDefaultLayers;
+        private bool _showDefaultLayers = true;
 
         #endregion Private Fields
 
@@ -30,7 +31,6 @@ namespace HunterCombatMR
             ActiveProjectiles = new List<string>();
             InputBuffers = new PlayerBufferInformation();
             LayerPositions = new Dictionary<string, Vector2>();
-            _showDefaultLayers = true;
             StateController = new PlayerStateController(this);
         }
 
@@ -38,14 +38,13 @@ namespace HunterCombatMR
 
         #region Public Properties
 
+        public override bool CloneNewInstances => false;
         public ICollection<string> ActiveProjectiles { get; set; }
         public PlayerActionAnimation CurrentAnimation { get; private set; }
-        public PlayerBufferInformation InputBuffers { get; set; }
-
-        // Instead of using this, move the "pop-ups" to their own layer in the normal editor uistate
+        public PlayerBufferInformation InputBuffers { get; private set; }
         public IDictionary<string, Vector2> LayerPositions { get; set; }
-
         public PlayerStateController StateController { get; private set; }
+        public WeaponBase EquippedWeapon { get; set; }
 
         #endregion Public Properties
 
@@ -118,7 +117,7 @@ namespace HunterCombatMR
                 throw new Exception("Player's active projectiles not initialized!");
 
             if (InputBuffers != null)
-                InputBuffers.ResetBuffers();
+                InputBuffers?.ResetBuffers();
             else
                 throw new Exception("Player's input buffer information not initialized!");
         }
@@ -179,7 +178,7 @@ namespace HunterCombatMR
 
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
-            if (!StateController.State.Equals(PlayerState.Dead))
+            if (!StateController.State.Equals(PlayerState.Dead) && EquippedWeapon != null)
                 InputBuffers.Update();
         }
 
@@ -203,7 +202,8 @@ namespace HunterCombatMR
 
         public override void UpdateDead()
         {
-            StateController.State = PlayerState.Dead;
+            if (StateController.State != PlayerState.Dead)
+                StateController.State = PlayerState.Dead;
 
             if(ActiveProjectiles.Any())
                 ActiveProjectiles.Clear();

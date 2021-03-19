@@ -33,6 +33,7 @@ namespace HunterCombatMR.Items
             //item.UseSound = SoundID.Item1;
             item.noMelee = true;
             item.shootSpeed = 1;
+            item.consumable = false;
         }
 
         public override void AddRecipes()
@@ -42,11 +43,6 @@ namespace HunterCombatMR.Items
             recipe.AddTile(TileID.WorkBenches);
             recipe.SetResult(this);
             recipe.AddRecipe();
-        }
-
-        public override bool CanUseItem(Player player)
-        {
-            return false;
         }
     }
 }

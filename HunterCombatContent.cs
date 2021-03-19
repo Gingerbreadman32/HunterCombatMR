@@ -132,33 +132,12 @@ namespace HunterCombatMR
             }
         }
 
-        internal void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
-        {
-            if (_contentStream.ContainsKey(typeof(Animation)))
-                _contentStream[typeof(Animation)] = _animationLoader.RegisterAnimations(_fileManager.LoadAnimations(typesToLoad));
-            else
-                _contentStream.Add(typeof(Animation), _animationLoader.RegisterAnimations(_fileManager.LoadAnimations(typesToLoad)));
-        }
-
-        internal void LoadAttacks(Type[] assemblyTypes)
-        {
-            var LoadedAttacks = new List<Attack>();
-            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(Attack)) && !x.IsAbstract))
-            {
-                LoadedAttacks.Add((Attack)type.GetConstructor(new Type[] { typeof(string) }).Invoke(new object[] { type.Name }));
-            }
-
-            if (_contentStream.ContainsKey(typeof(Attack)))
-                _contentStream[typeof(Attack)] = LoadedAttacks;
-            else
-                _contentStream.Add(typeof(Attack), LoadedAttacks);
-        }
-
         internal void SetupContent(Type[] assemblyTypes)
         {
             var animTypes = new List<AnimationType>() { AnimationType.Player };
             LoadAnimations(animTypes);
             LoadAttacks(assemblyTypes);
+            LoadMoveSets(assemblyTypes);
         }
 
         #endregion Internal Methods
@@ -180,9 +159,47 @@ namespace HunterCombatMR
             }
         }
 
+        // @@warn Can probably genericize most of these loads as well as split them between internal loads and file loads, will need to figure out a way to keep
+        // The reload file versions seperate from the internal ones as well.
+        private void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
+        {
+            if (_contentStream.ContainsKey(typeof(Animation)))
+                _contentStream[typeof(Animation)] = _animationLoader.RegisterAnimations(_fileManager.LoadAnimations(typesToLoad));
+            else
+                _contentStream.Add(typeof(Animation), _animationLoader.RegisterAnimations(_fileManager.LoadAnimations(typesToLoad)));
+        }
+
+        private void LoadAttacks(Type[] assemblyTypes)
+        {
+            var loadedAttacks = new List<PlayerAction>();
+            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(PlayerAction)) && !x.IsAbstract))
+            {
+                loadedAttacks.Add((PlayerAction)type.GetConstructor(new Type[] { typeof(string) }).Invoke(new object[] { type.Name }));
+            }
+
+            if (_contentStream.ContainsKey(typeof(PlayerAction)))
+                _contentStream[typeof(PlayerAction)] = loadedAttacks;
+            else
+                _contentStream.Add(typeof(PlayerAction), loadedAttacks);
+        }
+
+        private void LoadMoveSets(Type[] assemblyTypes)
+        {
+            var loadedMovesets = new List<MoveSet>();
+            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(MoveSet)) && !x.IsAbstract))
+            {
+                loadedMovesets.Add((MoveSet)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
+            }
+
+            if (_contentStream.ContainsKey(typeof(MoveSet)))
+                _contentStream[typeof(MoveSet)] = loadedMovesets;
+            else
+                _contentStream.Add(typeof(MoveSet), loadedMovesets);
+        }
+
         #endregion Private Methods
 
-        /*
+        /* // Only needed this for seeding the first animation, might not need this anymore but keeping it just in case for now.
             private void LoadInternalAnimations(Type[] types)
             {
                 foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
