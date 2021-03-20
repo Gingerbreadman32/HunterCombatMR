@@ -16,7 +16,7 @@ namespace HunterCombatMR.AnimationEngine.Interfaces
         KeyFrameProfile KeyFrameProfile { get; }
         string Name { get; }
 
-        void AddKeyFrameEvent(KeyFrame keyFrame, ActionLogicMethod<TEntity, TAnimationType> actionLogicMethod);
+        void AddKeyFrameEvent(ActionLogicMethod<TEntity, TAnimationType> actionLogicMethod);
 
         void Initialize();
 
