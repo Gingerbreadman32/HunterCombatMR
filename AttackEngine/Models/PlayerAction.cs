@@ -13,14 +13,14 @@ namespace HunterCombatMR.AttackEngine.Models
             : base(name, displayName)
         {
             Animations = new List<PlayerActionAnimation>();
-            AttackProjectiles = new List<AttackProjectile>();
+            Projectiles = new List<AttackProjectile>();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public IEnumerable<AttackProjectile> AttackProjectiles { get; set; }
+        public IEnumerable<AttackProjectile> Projectiles { get; set; }
 
         #endregion Public Properties
 
@@ -30,7 +30,7 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             T clone = base.Duplicate<T>(name);
             var playerAction = clone as PlayerAction;
-            playerAction.AttackProjectiles = new List<AttackProjectile>(AttackProjectiles);
+            playerAction.Projectiles = new List<AttackProjectile>(Projectiles);
             playerAction.Animations = new List<PlayerActionAnimation>(Animations);
             playerAction.KeyFrameProfile = new KeyFrameProfile(KeyFrameProfile);
             playerAction.KeyFrameEvents = new List<KeyFrameEvent<HunterCombatPlayer, PlayerActionAnimation>>(KeyFrameEvents);
