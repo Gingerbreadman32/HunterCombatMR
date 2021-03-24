@@ -51,8 +51,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
        
 
-        public void AddKeyFrameEvent(KeyFrame keyFrame,
-            ActionLogicMethod<TEntity, TActionType> actionLogicMethod)
+        public void AddKeyFrameEvent(ActionLogicMethod<TEntity, TActionType> actionLogicMethod)
         {
             var tempEvents = new List<KeyFrameEvent<TEntity, TActionType>>(KeyFrameEvents);
             int newTag = 0;
