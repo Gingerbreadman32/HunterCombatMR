@@ -15,7 +15,7 @@ namespace HunterCombatMR
 {
     public class HunterCombatPlayer
         : ModPlayer,
-        IAnimated<PlayerActionAnimation>
+        IAnimatedEntity<PlayerActionAnimation>
     {
         #region Private Fields
 
@@ -54,10 +54,10 @@ namespace HunterCombatMR
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                if (CurrentAnimation != null && CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() > 0)
+                if (CurrentAnimation != null && CurrentAnimation.AnimationData.CurrentKeyFrameIndex > 0)
                     _showDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
                             CurrentAnimation.LayerData,
-                            CurrentAnimation.AnimationData.GetCurrentKeyFrameIndex() - 1,
+                            CurrentAnimation.AnimationData.CurrentKeyFrameIndex - 1,
                             Color.White);
                 else
                     _showDefaultLayers = true;
@@ -100,7 +100,7 @@ namespace HunterCombatMR
                 if (CurrentAnimation != null)
                 {
                     layers = CurrentAnimation.DrawPlayerLayers(layers);
-                    CurrentAnimation.Update();
+                    CurrentAnimation.Update(CurrentAnimation.AnimationData);
                 }
             }
         }

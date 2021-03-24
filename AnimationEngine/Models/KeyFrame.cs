@@ -3,58 +3,68 @@
 namespace HunterCombatMR.AnimationEngine.Models
 {
     /// <summary>
-    /// Class for storing keyframe info
+    /// Object for storing keyframe info
     /// </summary>
-    public class KeyFrame
+    public struct KeyFrame
         : IComparable<KeyFrame>
     {
-        /// <summary>
-        /// The order this keyframe will be positioned
-        /// </summary>
-        /// <remarks>
-        /// @@warn Eventually use a sorted list instead.
-        /// </remarks>
-        public int KeyFrameOrder { get; set; }
+        #region Public Constructors
 
-        /// <summary>
-        /// The first frame in the context of the animation that this keyframe will start at
-        /// </summary>
-        public int StartingFrameIndex { get; set; }
-
-        /// <summary>
-        /// The amount of frames/ticks the game will display the given keyframe
-        /// </summary>
-        public int FrameLength { get; set; }
-
-        public KeyFrame (int length)
+        public KeyFrame(FrameLength length)
         {
             FrameLength = length;
-            StartingFrameIndex = 0;
-            KeyFrameOrder = 0;
+            StartingFrameIndex = (FrameIndex)0;
         }
 
-        public KeyFrame (int startingFrame, 
-            int length,
-            int order)
+        public KeyFrame(FrameIndex startingFrame,
+                    FrameLength length)
         {
             StartingFrameIndex = startingFrame;
             FrameLength = length;
-            KeyFrameOrder = order;
         }
 
         public KeyFrame(KeyFrame copy)
         {
             StartingFrameIndex = copy.StartingFrameIndex;
             FrameLength = copy.FrameLength;
-            KeyFrameOrder = copy.KeyFrameOrder;
         }
+
+        #endregion Public Constructors
+
+        #region Public Properties
 
         /// <summary>
         /// Gets the last frame that this keyframe is active
         /// </summary>
-        /// <returns></returns>
-        public int GetFinalFrameIndex()
-            => StartingFrameIndex + FrameLength;
+        /// <returns>The final frame active</returns>
+        public FrameIndex FinalFrameIndex
+        {
+            get => (FrameIndex)(StartingFrameIndex + (FrameLength - 1));
+        }
+
+        /// <summary>
+        /// The amount of frames/ticks the game will display the given keyframe
+        /// </summary>
+        public FrameLength FrameLength { get; set; }
+
+        /// <summary>
+        /// The first frame in the context of the animation that this keyframe will start at
+        /// </summary>
+        public FrameIndex StartingFrameIndex { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public static bool operator <=(KeyFrame a, KeyFrame b)
+            => a.StartingFrameIndex <= b.StartingFrameIndex;
+
+        public static bool operator >=(KeyFrame a, KeyFrame b)
+            => a.StartingFrameIndex >= b.StartingFrameIndex;
+
+        /// <inheritdoc/>
+        public int CompareTo(KeyFrame other)
+            => other.StartingFrameIndex.CompareTo(other.StartingFrameIndex);
 
         /// <summary>
         /// Gets whether the keyframe is currently active in the given animation
@@ -62,21 +72,8 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <param name="currentFrame">The current frame index of the animation</param>
         /// <returns>Yes if the keyframe is active</returns>
         public bool IsKeyFrameActive(int currentFrame)
-            => currentFrame >= StartingFrameIndex && currentFrame < GetFinalFrameIndex();
+            => currentFrame >= StartingFrameIndex && currentFrame <= FinalFrameIndex;
 
-        /// <inheritdoc/>
-        public int CompareTo(KeyFrame other)
-        {
-            if (other != null)
-                return KeyFrameOrder.CompareTo(other.StartingFrameIndex);
-            else
-                throw new ArgumentNullException("Compared keyframe is null!");
-        }
-
-        public static bool operator <=(KeyFrame a, KeyFrame b)
-            => a.StartingFrameIndex <= b.StartingFrameIndex;
-
-        public static bool operator >=(KeyFrame a, KeyFrame b)
-            => a.StartingFrameIndex >= b.StartingFrameIndex;
+        #endregion Public Methods
     }
 }

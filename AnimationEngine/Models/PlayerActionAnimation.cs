@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
@@ -14,8 +15,9 @@ using Terraria.ModLoader;
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public class PlayerActionAnimation
-        : Animation,
-        IPlayerAnimation
+        : Animation<HunterCombatPlayer, PlayerActionAnimation>,
+        IPlayerAnimation,
+        IHunterCombatContentInstance
     {
         #region Public Constructors
 
@@ -26,7 +28,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             : base(name)
         {
             Name = name;
-            AnimationData = new Animator();
+            AnimationData = new Animator<PlayerActionAnimation, HunterCombatPlayer, PlayerActionAnimation>();
             LayerData = layerData;
             IsInternal = isInternal;
         }
@@ -36,8 +38,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             : base(copy.InternalName)
         {
             Name = copy.Name;
-            AnimationData = new Animator(copy.AnimationData);
-            HunterCombatMR.Instance.AnimationKeyFrameManager.SyncFrames(AnimationData);
+            AnimationData = new Animator<PlayerActionAnimation, HunterCombatPlayer, PlayerActionAnimation>(copy.AnimationData);
             LayerData = new LayerData(copy.LayerData);
             IsModified = newFile;
             IsInternal = copy.IsInternal;
@@ -78,7 +79,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             List<PlayerLayer> animLayers = layers;
             if (IsAnimationInitialized())
             {
-                var currentFrame = AnimationData.GetCurrentKeyFrameIndex();
+                var currentFrame = AnimationData.CurrentKeyFrameIndex;
 
                 foreach (var layer in LayerData.Layers.Where(f => f.KeyFrames.ContainsKey(currentFrame) && f.KeyFrames[currentFrame].IsEnabled).OrderByDescending(x => x.KeyFrames[currentFrame].LayerDepth))
                 {
@@ -94,7 +95,15 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         public override T Duplicate<T>(string name)
-            => (new PlayerActionAnimation(this) { Name = name, IsModified = true }) as T;
+        {
+            var copy = base.Duplicate<T>(name);
+            copy = (T)MemberwiseClone();
+            var playerAnim = copy as PlayerActionAnimation;
+            playerAnim.IsModified = true;
+            playerAnim.Initialize();
+
+            return copy;
+        }
 
         #endregion Public Methods
     }

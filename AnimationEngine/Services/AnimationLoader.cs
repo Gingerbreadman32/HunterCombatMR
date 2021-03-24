@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Interfaces;
+using HunterCombatMR.AnimationEngine.Models;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,16 +7,32 @@ namespace HunterCombatMR.AnimationEngine.Services
 {
     public class AnimationLoader
     {
-        public List<ActionContainer> Containers { get; }
+        #region Public Constructors
 
         public AnimationLoader()
         {
             Containers = new List<ActionContainer>();
         }
 
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public List<ActionContainer> Containers { get; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
         public void LoadContainer(ActionContainer container)
         {
             Containers.Add(container);
+        }
+
+        public IAnimation RegisterAnimation(IAnimation action)
+        {
+            action.Initialize();
+            return action;
         }
 
         public IEnumerable<PlayerActionAnimation> RegisterAnimations()
@@ -33,9 +50,9 @@ namespace HunterCombatMR.AnimationEngine.Services
             return actions;
         }
 
-        public IEnumerable<PlayerActionAnimation> RegisterAnimations(IEnumerable<PlayerActionAnimation> loadedActions)
+        public IEnumerable<IAnimation> RegisterAnimations(IEnumerable<IAnimation> loadedActions)
         {
-            var actions = new List<PlayerActionAnimation>();
+            var actions = new List<IAnimation>();
             foreach (var animation in loadedActions)
             {
                 actions.Add(RegisterAnimation(animation));
@@ -43,10 +60,6 @@ namespace HunterCombatMR.AnimationEngine.Services
             return actions;
         }
 
-        public PlayerActionAnimation RegisterAnimation(PlayerActionAnimation action)
-        {
-            action.Initialize();
-            return action;
-        }
+        #endregion Public Methods
     }
 }

@@ -1,6 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -11,25 +10,47 @@ namespace HunterCombatMR.AnimationEngine.Models
 {
     public abstract class AttackProjectile
         : ModProjectile,
-        IAnimation
+        IAnimatedEntity<ProjectileAnimation>
     {
-        public Animator AnimationData { get; set; }
+        #region Private Fields
 
-        public ICollection<Hitbox> Hitboxes { get; set; }
+        private ProjectileAnimation _animation;
 
-        public KeyFrameProfile FrameProfile { get; set; }
+        #endregion Private Fields
 
-        public AttackProjectile()
+        #region Public Constructors
+
+        public AttackProjectile(ProjectileAnimation animation)
             : base()
         {
-            AnimationData = new Animator();
             Hitboxes = new List<Hitbox>();
-            SetupKeyFrameProfile();
+            _animation = animation;
         }
 
-        public override void SetDefaults()
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public ProjectileAnimation CurrentAnimation { get => _animation; }
+        public ICollection<Hitbox> Hitboxes { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public override ModProjectile NewInstance(Projectile projectileClone)
         {
-            projectile.timeLeft = AnimationData.TotalFrames;
+            AttackProjectile obj = (AttackProjectile)base.NewInstance(projectileClone);
+            obj._animation = _animation;
+            obj.Hitboxes = Hitboxes;
+            obj.SetDefaults();
+            return obj;
+        }
+
+        public override void PostDraw(SpriteBatch spriteBatch, Color lightColor)
+        {
+            base.PostDraw(spriteBatch, lightColor);
+            Update();
         }
 
         public override bool PreAI()
@@ -40,17 +61,12 @@ namespace HunterCombatMR.AnimationEngine.Models
             return base.PreAI();
         }
 
-        public abstract void SetupKeyFrameProfile();
-
         public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor)
         {
             var projectiles = Main.player[projectile.owner].GetModPlayer<HunterCombatPlayer>().ActiveProjectiles;
             var active = projectiles.Contains(projectile.Name);
 
-            if (!AnimationData.InProgress && active)
-                Play();
-
-            projectile.frame = AnimationData.KeyFrames.IndexOf(AnimationData.GetCurrentKeyFrame());
+            projectile.frame = _animation.AnimationData.CurrentKeyFrameIndex;
 
             if (active)
                 return base.PreDraw(spriteBatch, lightColor);
@@ -58,15 +74,9 @@ namespace HunterCombatMR.AnimationEngine.Models
                 return active;
         }
 
-        public override void PostDraw(SpriteBatch spriteBatch, Color lightColor)
-        {
-            base.PostDraw(spriteBatch, lightColor);
-            Update();
-        }
-
         public override bool PreKill(int timeLeft)
         {
-            Stop();
+            _animation.Stop();
             var projectiles = Main.player[projectile.owner].GetModPlayer<HunterCombatPlayer>().ActiveProjectiles;
 
             if (projectiles.Contains(projectile.Name))
@@ -75,58 +85,32 @@ namespace HunterCombatMR.AnimationEngine.Models
             return true;
         }
 
-        public virtual void Initialize()
+        public bool SetCurrentAnimation(ProjectileAnimation newAnimation, bool newFile = false)
         {
-            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(AnimationData, FrameProfile, false);
+            if (newAnimation == null)
+            {
+                _animation = null;
+                return true;
+            }
+
+            if (newAnimation == CurrentAnimation)
+                return true;
+
+            _animation = newAnimation;
+
+            return CurrentAnimation != null;
         }
 
-        public override ModProjectile NewInstance(Projectile projectileClone)
+        public override void SetDefaults()
         {
-            AttackProjectile obj = (AttackProjectile)base.NewInstance(projectileClone);
-            obj.AnimationData = AnimationData;
-            obj.Hitboxes = Hitboxes;
-            obj.projectile.timeLeft = AnimationData.TotalFrames;
-            return obj;
-        }
-
-        public void Pause()
-        {
-            if (AnimationData.IsPlaying)
-                AnimationData.PauseAnimation();
-        }
-
-        public void Play()
-        {
-            if (!AnimationData.IsPlaying)
-                AnimationData.StartAnimation();
-        }
-
-        public void Stop()
-        {
-            AnimationData.StopAnimation();
-        }
-
-        public void Restart()
-        {
-            AnimationData.ResetAnimation(true);
+            projectile.timeLeft = CurrentAnimation.AnimationData.TotalFrames;
         }
 
         public virtual void Update()
         {
-            if (AnimationData.IsPlaying && AnimationData.CurrentFrame < AnimationData.GetFinalFrame())
-            {
-                AnimationData.AdvanceFrame();
-            }
+            _animation.Update(_animation.AnimationData);
         }
 
-        public void UpdateKeyFrameLength(int keyFrameIndex, int frameAmount, bool setAmount = false, bool setDefault = false)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void UpdateLoopType(LoopStyle newLoopType)
-        {
-            throw new System.NotImplementedException();
-        }
+        #endregion Public Methods
     }
 }

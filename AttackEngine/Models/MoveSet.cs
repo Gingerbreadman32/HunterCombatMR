@@ -1,11 +1,13 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.AttackEngine.Interfaces;
+using HunterCombatMR.Enumerations;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
     public abstract class MoveSet
-        : HunterCombatContentInstance
+        : HunterCombatContentInstance, 
+        IMoveSet
     {
         #region Public Constructors
 

@@ -1,12 +1,26 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
+using System.Collections.Generic;
 
 namespace HunterCombatMR.AnimationEngine.Interfaces
 {
-    public interface IAnimated<T> where T : Animation
+    public interface IAnimated
     {
-        T CurrentAnimation { get; }
+        #region Public Properties
 
-        bool SetCurrentAnimation(T newAnimation,
-            bool newFile = false);
+        string Name { get; }
+
+        KeyFrameProfile KeyFrameProfile { get; }
+
+        IDictionary<string, string> DefaultParameters { get; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        void Initialize();
+
+        void Update(IAnimator animator);
+
+        #endregion Public Methods
     }
 }

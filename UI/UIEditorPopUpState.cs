@@ -105,7 +105,7 @@ namespace HunterCombatMR.UI
             if (highlighted.Count() == 1 && layers.Any(x => x.Layer.Name.Equals(highlighted.FirstOrDefault())))
             {
                 var selected = layers.FirstOrDefault(y => y.Layer.Name.Equals(highlighted.FirstOrDefault()));
-                var currentKeyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.GetCurrentKeyFrameIndex();
+                var currentKeyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.CurrentKeyFrameIndex;
                 if (!_popUps.Any(x => x.AttachedElement == selected))
                 {
                     ClearPopUps();

@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Interfaces;
+using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
@@ -21,7 +22,7 @@ namespace HunterCombatMR.UI
 
         #region Public Constructors
 
-        public LayerText(AnimationEngine.Models.Animation animation,
+        public LayerText(IAnimation animation,
             string layerName,
             int currentKeyFrame,
             LayerTextInfo infoArgs = LayerTextInfo.None)
@@ -46,7 +47,7 @@ namespace HunterCombatMR.UI
 
         #region Public Properties
 
-        public AnimationEngine.Models.Animation AnimationReference { get; protected set; }
+        public IAnimation AnimationReference { get; protected set; }
         public int CurrentKeyFrame { get; }
         public LayerTextInfo DisplayInfo { get; protected set; }
         public AnimationLayer Layer { get; protected set; }
@@ -79,7 +80,7 @@ namespace HunterCombatMR.UI
             GenerateText();
         }
 
-        public void SetLayer(AnimationEngine.Models.Animation animation,
+        public void SetLayer(IAnimation animation,
             string layerName)
         {
             AnimationReference = animation;

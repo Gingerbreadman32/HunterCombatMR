@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Terraria;
@@ -10,10 +11,22 @@ namespace HunterCombatMR.Projectiles.SwordandShield
     {
         private const int _sprites = 7;
 
+        public SNSSwipe2(ProjectileAnimation animation) 
+            : base(animation)
+        {
+        }
+
+        /*
         public override void SetupKeyFrameProfile()
         {
-            FrameProfile = new KeyFrameProfile(_sprites, 2, new Dictionary<int, int>() { { 3, 1 }, { 4, 1 }, { 5, 1 }, { 6, 10 } });
-        }
+            KeyFrameProfile = new KeyFrameProfile(_sprites, 2, new SortedList<int, FrameLength>() 
+            { 
+                { 3, 1.ToFLength() }, 
+                { 4, 1.ToFLength() }, 
+                { 5, 1.ToFLength() }, 
+                { 6, 10.ToFLength() } 
+            });
+        }*/
 
         public override void SetStaticDefaults()
         {
@@ -34,7 +47,7 @@ namespace HunterCombatMR.Projectiles.SwordandShield
             projectile.ownerHitCheck = true;
             projectile.aiStyle = -1;
             projectile.usesLocalNPCImmunity = true;
-            projectile.localNPCHitCooldown = AnimationData.TotalFrames;
+            projectile.localNPCHitCooldown = CurrentAnimation.AnimationData.TotalFrames;
         }
 
         public override void AI()

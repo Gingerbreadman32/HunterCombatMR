@@ -3,16 +3,18 @@ using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public abstract class Animation
+    public abstract class Animation<TEntity, TAnimationType>
         : HunterCombatContentInstance,
-        IAnimation,
-        IModifiable
+        IAnimated,
+        IModifiable, 
+        IAnimation 
+        where TEntity : IAnimatedEntity<TAnimationType>
+        where TAnimationType : IAnimated
     {
         #region Private Fields
 
@@ -20,24 +22,27 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         #endregion Private Fields
 
-        #region Protected Constructors
+        #region Public Constructors
 
-        protected Animation(string name)
+        public Animation(string name)
             : base(name)
         {
             Name = name;
         }
 
-        #endregion Protected Constructors
+        #endregion Public Constructors
 
         #region Public Properties
 
         [JsonIgnore]
-        public Animator AnimationData { get; protected set; }
+        public IAnimator AnimationData { get; protected set; }
 
-        public abstract AnimationType AnimationType { get; }
+        public virtual AnimationType AnimationType { get; }
 
         public bool IsInternal { get; internal set; }
+
+        [JsonIgnore]
+        public KeyFrameProfile KeyFrameProfile { get => LayerData.KeyFrameProfile; }
 
         [JsonIgnore]
         public bool IsModified
@@ -56,6 +61,8 @@ namespace HunterCombatMR.AnimationEngine.Models
         public LayerData LayerData { get; protected set; }
         public string Name { get; protected set; }
 
+        public virtual IDictionary<string, string> DefaultParameters { get; } = new Dictionary<string, string>();
+
         #endregion Public Properties
 
         #region Public Methods
@@ -66,7 +73,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <param name="duplicate">Keyframe duplicating</param>
         public void AddKeyFrame(KeyFrame duplicate)
         {
-            AddKeyFrame(duplicate.FrameLength, LayerData.GetFrameInfoForLayers(duplicate.KeyFrameOrder));
+            AddKeyFrame(duplicate.FrameLength, LayerData.GetFrameInfoForLayers(AnimationData.KeyFrames.IndexOfValue(duplicate)));
         }
 
         /// <summary>
@@ -74,20 +81,19 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         /// <param name="frameLength">Amount of frames this keyframe is active, set to -1 for default.</param>
         /// <param name="layerInfo">Layer and keyframe information if being duplicated from another keyframe.</param>
-        public void AddKeyFrame(int frameLength = -1,
+        public void AddKeyFrame(FrameLength frameLength,
             IDictionary<AnimationLayer, LayerFrameInfo> layerInfo = null)
         {
             _modified = true;
-            bool defaultSpeed = frameLength == -1;
             Uninitialize();
-            HunterCombatMR.Instance.AnimationKeyFrameManager.AppendKeyFrame(AnimationData, (defaultSpeed) ? LayerData.KeyFrameProfile.DefaultKeyFrameSpeed : frameLength);
+            AnimationData.AppendKeyFrame(frameLength);
 
-            int newIndex = AnimationData.KeyFrames.Last().KeyFrameOrder;
+            int newIndex = AnimationData.KeyFrames.Last().Key;
 
-            if (!defaultSpeed)
-                LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Add(newIndex, frameLength);
+            if (!frameLength.Equals(KeyFrameProfile.DefaultKeyFrameSpeed))
+                KeyFrameProfile.SpecificKeyFrameSpeeds.Add(newIndex, frameLength);
 
-            LayerData.KeyFrameProfile.KeyFrameAmount++;
+            KeyFrameProfile.KeyFrameAmount++;
 
             if (layerInfo != null)
             {
@@ -129,7 +135,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public virtual void Initialize()
         {
-            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(AnimationData, LayerData.KeyFrameProfile, false, LayerData.Loop);
+            AnimationData.Initialize(KeyFrameProfile, LayerData.Loop);
         }
 
         public bool IsAnimationInitialized()
@@ -138,18 +144,10 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void MoveKeyFrame(int keyFrameIndex,
             int newFrameIndex)
         {
+            Uninitialize();
             _modified = true;
-            KeyFrame keyFrameMoving = AnimationData.KeyFrames.FirstOrDefault(x => x.KeyFrameOrder.Equals(keyFrameIndex));
 
-            if (keyFrameMoving == null)
-                throw new IndexOutOfRangeException($"Requested keyframe to move index {keyFrameIndex} does not exist!");
-
-            KeyFrame keyFrameReplacing = AnimationData.KeyFrames.FirstOrDefault(x => x.KeyFrameOrder.Equals(newFrameIndex));
-
-            if (keyFrameReplacing == null)
-                throw new IndexOutOfRangeException($"Requested keyframe to replace index {newFrameIndex} does not exist!");
-
-            LayerData.KeyFrameProfile.SwitchKeyFrames(keyFrameMoving.KeyFrameOrder, keyFrameReplacing.KeyFrameOrder);
+            LayerData.KeyFrameProfile.SwitchKeyFrames(keyFrameIndex, newFrameIndex);
 
             foreach (var layer in LayerData.Layers.Where(x => x.KeyFrames.ContainsKey(keyFrameIndex)))
             {
@@ -209,39 +207,30 @@ namespace HunterCombatMR.AnimationEngine.Models
             AnimationData.Uninitialize();
         }
 
-        public virtual void Update()
+        public virtual void Update(IAnimator animator)
         {
-            AnimationData.AdvanceFrame();
+            animator.AdvanceFrame();
         }
 
-        public void UpdateKeyFrameLength(int keyFrameIndex, int frameAmount, bool setAmount = false, bool setDefault = false)
+        public void UpdateKeyFrameLength(FrameIndex keyFrameIndex, FrameLength frameAmount)
         {
             _modified = true;
-            var profileModified = LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex);
+            var profileModified = KeyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex);
 
-            if (setDefault)
-            {
-                setAmount = true;
-                frameAmount = LayerData.KeyFrameProfile.DefaultKeyFrameSpeed;
-            }
-
-            HunterCombatMR.Instance.AnimationKeyFrameManager.AdjustKeyFrameLength(AnimationData,
-                        keyFrameIndex,
-                        frameAmount,
-                        !setAmount);
+            AnimationData.AdjustKeyFrameLength(keyFrameIndex, frameAmount, (FrameLength)KeyFrameProfile.DefaultKeyFrameSpeed);
 
             if (profileModified)
             {
-                LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Remove(keyFrameIndex);
+                KeyFrameProfile.SpecificKeyFrameSpeeds.Remove(keyFrameIndex);
 
-                if (!setDefault && AnimationData.KeyFrames[keyFrameIndex].FrameLength != LayerData.KeyFrameProfile.DefaultKeyFrameSpeed)
+                if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != KeyFrameProfile.DefaultKeyFrameSpeed)
                 {
-                    LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
+                    KeyFrameProfile.SpecificKeyFrameSpeeds.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
                 }
             }
-            else if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != LayerData.KeyFrameProfile.DefaultKeyFrameSpeed)
+            else if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != KeyFrameProfile.DefaultKeyFrameSpeed)
             {
-                LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
+                KeyFrameProfile.SpecificKeyFrameSpeeds.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
             }
         }
 
@@ -252,7 +241,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             if (amount == 0)
                 return;
 
-            int currentKeyFrame = AnimationData.GetCurrentKeyFrameIndex();
+            int currentKeyFrame = AnimationData.CurrentKeyFrameIndex;
 
             int newDepthInt = layerToMove.GetDepthAtKeyFrame(currentKeyFrame) + amount;
             byte newDepthByte = (newDepthInt > byte.MaxValue) ? byte.MaxValue : (newDepthInt < byte.MinValue) ? byte.MinValue : (byte)newDepthInt;
@@ -270,7 +259,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void UpdateLayerPosition(AnimationLayer layer,
             Vector2 newPosition)
         {
-            var currentKeyFrame = AnimationData.GetCurrentKeyFrameIndex();
+            var currentKeyFrame = AnimationData.CurrentKeyFrameIndex;
 
             var oldPos = layer.GetPositionAtKeyFrame(currentKeyFrame);
             layer.SetPositionAtKeyFrame(currentKeyFrame, newPosition);
@@ -289,7 +278,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void UpdateLayerTextureFrame(AnimationLayer layer,
             int textureFrame)
         {
-            layer.SetTextureFrameAtKeyFrame(AnimationData.GetCurrentKeyFrameIndex(), textureFrame);
+            layer.SetTextureFrameAtKeyFrame(AnimationData.CurrentKeyFrameIndex, textureFrame);
             _modified = true;
         }
 
@@ -297,7 +286,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             _modified = true;
 
-            layer.ToggleVisibilityAtKeyFrame(AnimationData.GetCurrentKeyFrameIndex());
+            layer.ToggleVisibilityAtKeyFrame(AnimationData.CurrentKeyFrameIndex);
         }
 
         public void UpdateLoopType(LoopStyle newLoopType)
@@ -305,7 +294,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             if (IsAnimationInitialized())
             {
                 _modified = true;
-                AnimationData.SetLoopMode(newLoopType);
+                AnimationData.CurrentLoopStyle = newLoopType;
                 LayerData.Loop = newLoopType;
             }
         }

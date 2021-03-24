@@ -12,17 +12,16 @@ namespace HunterCombatMR.AttackEngine.Models
     {
         #region Private Fields
 
-        private Animator _actionAnimator;
+        private Animator<PlayerAction, HunterCombatPlayer, PlayerActionAnimation> _actionAnimator;
         private MoveSet _currentMoveSet;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        // @@info Will have to test to see if this works or not (might break multi)
         public PlayerStateController(HunterCombatPlayer player)
         {
-            _actionAnimator = new Animator();
+            _actionAnimator = new Animator<PlayerAction, HunterCombatPlayer, PlayerActionAnimation>();
             State = PlayerState.Neutral;
             ActionState = AttackState.NotAttacking;
             Player = player;
@@ -46,10 +45,9 @@ namespace HunterCombatMR.AttackEngine.Models
         public int GetCurrentActionFrame()
             => _actionAnimator.CurrentFrame;
 
-        public void KillAttackSequence()
+        public void SetToNeutral()
         {
-            _actionAnimator.ResetAnimation(false);
-            CurrentAction = null;
+            SetNewAction(null);
         }
 
         public void SetNewAction(ComboAction action)
@@ -71,18 +69,12 @@ namespace HunterCombatMR.AttackEngine.Models
 
                 if (CurrentAction != null)
                 {
-                    var currentKeyFrame = _actionAnimator.GetCurrentKeyFrame();
-                    var currentFrame = _actionAnimator.CurrentFrame;
-                    foreach (var keyFrameEvent in CurrentAction.Attack.KeyFrameEvents.Where(x => (x.KeyFrame.IsKeyFrameActive(currentFrame)
-                             || x.EndKeyFrame.IsKeyFrameActive(currentFrame))
-                             && x.IsEnabled).OrderBy(x => x.Tag))
+                    if (!_actionAnimator.InProgress)
                     {
-                        CurrentAction.Attack.ActionParameters = keyFrameEvent.ActionLogic.ActionLogic(Player,
-                            currentFrame,
-                            (currentFrame - currentKeyFrame.StartingFrameIndex),
-                            CurrentAction.Attack.ActionParameters);
+                        SetToNeutral();
                     }
 
+                    CurrentAction.Attack.Update(_actionAnimator);
                     AdvanceAnimator();
                 }
             } else
@@ -101,13 +93,12 @@ namespace HunterCombatMR.AttackEngine.Models
             _actionAnimator.AdvanceFrame();
 
             if (!_actionAnimator.InProgress)
-                KillAttackSequence();
+                SetToNeutral();
         }
 
         private void SetupAnimator()
         {
-            HunterCombatMR.Instance.AnimationKeyFrameManager.FillAnimationKeyFrames(_actionAnimator,
-                CurrentAction.Attack.FrameProfile);
+            _actionAnimator.Initialize(CurrentAction.Attack.KeyFrameProfile);
         }
 
         private PlayerState SetStateLogic(Player player)
