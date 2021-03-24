@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using HunterCombatMR.Extensions;
 
 namespace HunterCombatMR.Converters
 {
@@ -58,7 +59,7 @@ namespace HunterCombatMR.Converters
                 throw new InvalidDataException("Animation file must contain a keyframe profile with more than 0 total keyframes and keyframe speed.");
             }
 
-            return new KeyFrameProfile(KeyFrameAmount, DefaultKeyFrameSpeed, SpecificKeyFrameSpeeds);
+            return new KeyFrameProfile(KeyFrameAmount, DefaultKeyFrameSpeed, SpecificKeyFrameSpeeds?.ConvertToLengthList() ?? new SortedList<int, FrameLength>());
         }
     }
 }

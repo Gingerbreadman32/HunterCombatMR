@@ -86,7 +86,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
             base.OnInitialize();
             OnClick += (evt, list) =>
             {
-                ParentTimeline.Animation.AnimationData.SetKeyFrame(KeyFrame);
+                var animator = ParentTimeline.Animation.AnimationData;
+                animator.CurrentFrame = animator.KeyFrames[KeyFrame].StartingFrameIndex;
                 ParentTimeline.ResetFrames();
                 HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
             };
@@ -108,7 +109,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         {
             base.Update(gameTime);
 
-            if (ParentTimeline.Animation.AnimationData.GetCurrentKeyFrameIndex() == KeyFrame)
+            if (ParentTimeline.Animation.AnimationData.CurrentKeyFrameIndex == KeyFrame)
                 ActivateKeyFrame();
             else
                 DeactivateKeyFrame();

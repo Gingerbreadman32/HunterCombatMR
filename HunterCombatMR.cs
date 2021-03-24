@@ -1,4 +1,5 @@
 using AnimationEngine.Services;
+using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
@@ -60,7 +61,6 @@ namespace HunterCombatMR
         public HunterCombatContent Content { get; private set; }
 
         public static HunterCombatMR Instance { get; private set; }
-        public KeyFrameManager AnimationKeyFrameManager { get; private set; }
         public AnimationEditor EditorInstance { get; private set; }
         public AnimationFileManager FileManager { get; private set; }
 
@@ -71,7 +71,6 @@ namespace HunterCombatMR
         public override void Load()
         {
             StaticLogger = Logger;
-            AnimationKeyFrameManager = new KeyFrameManager();
             FileManager = new AnimationFileManager();
             Content = new HunterCombatContent(FileManager);
 
@@ -132,11 +131,6 @@ namespace HunterCombatMR
             //LoadInternalAnimations(assemblyTypes);
             Content.SetupContent(assemblyTypes);
 
-            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(AttackProjectile)) && !x.IsAbstract))
-            {
-                type.GetMethod("Initialize").Invoke(GetProjectile(type.Name), null);
-            }
-
             var modTextures = (IDictionary<string, Texture2D>)typeof(HunterCombatMR).GetField("textures", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Instance);
             VariableTextures = modTextures.Where(x => x.Key.StartsWith(_variableTexturePath)).ToDictionary(x => x.Key, y => y.Value);
             modTextures = null;
@@ -193,8 +187,9 @@ namespace HunterCombatMR
             return Texture2D.FromStream(Main.instance.GraphicsDevice, stream);
         }
 
-        internal void DeleteAnimation(AnimationEngine.Models.Animation animation)
+        internal void DeleteAnimation(IAnimation animation)
         {
+            // @@warn This method shouldn't be in here tbh.
             Content.DeleteContentInstance(animation);
 
             FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);

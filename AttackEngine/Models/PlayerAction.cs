@@ -28,14 +28,15 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public override T Duplicate<T>(string name)
         {
-            PlayerAction clone = base.Duplicate<PlayerAction>(name);
-            clone.AttackProjectiles = new List<AttackProjectile>(AttackProjectiles);
-            clone.Animations = new List<PlayerActionAnimation>(Animations);
-            clone.FrameProfile = new KeyFrameProfile(FrameProfile);
-            clone.KeyFrameEvents = new List<KeyFrameEvent<HunterCombatPlayer, PlayerActionAnimation>>(KeyFrameEvents);
-            clone.ActionParameters = new Dictionary<string, string>(ActionParameters);
+            T clone = base.Duplicate<T>(name);
+            var playerAction = clone as PlayerAction;
+            playerAction.AttackProjectiles = new List<AttackProjectile>(AttackProjectiles);
+            playerAction.Animations = new List<PlayerActionAnimation>(Animations);
+            playerAction.KeyFrameProfile = new KeyFrameProfile(KeyFrameProfile);
+            playerAction.KeyFrameEvents = new List<KeyFrameEvent<HunterCombatPlayer, PlayerActionAnimation>>(KeyFrameEvents);
+            playerAction.DefaultParameters = new Dictionary<string, string>(DefaultParameters);
 
-            return clone as T;
+            return clone;
         }
 
         #endregion Public Methods

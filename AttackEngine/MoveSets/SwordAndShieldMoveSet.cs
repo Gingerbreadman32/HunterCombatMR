@@ -24,8 +24,8 @@ namespace HunterCombatMR.AttackEngine.MoveSets
         {
             var actions = new List<ComboAction>();
 
-            actions.Add(new ComboAction(ContentUtils.GetAttack(_doubleSlash)));
-            actions.Add(new ComboAction(ContentUtils.GetAttack(_runningSlash), Enumerations.PlayerState.Walking));
+            actions.Add(new ComboAction(ContentUtils.GetPlayerAction(_doubleSlash)));
+            actions.Add(new ComboAction(ContentUtils.GetPlayerAction(_runningSlash), Enumerations.PlayerState.Walking));
 
             return actions;
         }

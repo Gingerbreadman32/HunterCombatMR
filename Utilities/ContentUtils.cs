@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Interfaces;
 
 namespace HunterCombatMR.Utilities
 {
@@ -7,13 +8,13 @@ namespace HunterCombatMR.Utilities
     {
         #region Internal Methods
 
-        internal static Animation GetAnim(string name)
-            => HunterCombatMR.Instance.Content.GetContentInstance<Animation>(name);
+        internal static PlayerActionAnimation GetPlayerAnim(string name)
+            => HunterCombatMR.Instance.Content.GetContentInstance<PlayerActionAnimation>(name);
 
-        internal static T Get<T>(T content) where T : HunterCombatContentInstance
+        internal static T Get<T>(T content) where T : IHunterCombatContentInstance
             => HunterCombatMR.Instance.Content.GetContentInstance<T>(content);
 
-        internal static PlayerAction GetAttack(string name)
+        internal static PlayerAction GetPlayerAction(string name)
             => HunterCombatMR.Instance.Content.GetContentInstance<PlayerAction>(name);
 
         internal static MoveSet GetMoveSet(string name)

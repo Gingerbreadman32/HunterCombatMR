@@ -31,7 +31,7 @@ namespace AnimationEngine.Services
 
         public EditorMode CurrentEditMode { get; set; }
 
-        public HunterCombatMR.AnimationEngine.Models.Animation CurrentAnimationEditing { get; set; }
+        public PlayerActionAnimation CurrentAnimationEditing { get; set; }
 
         public bool AnimationEdited { get; set; }
 
@@ -87,7 +87,7 @@ namespace AnimationEngine.Services
             List<string> framelessNames = new List<string>(HighlightedLayers);
             framelessNames.ForEach(layerName => layerName = layerName.Split('-')[0].Trim());
             Vector2 mousePosition = new Vector2(Main.mouseX, Main.mouseY);
-            int currentFrame = animation.AnimationData.GetCurrentKeyFrameIndex();
+            int currentFrame = animation.AnimationData.CurrentKeyFrameIndex;
 
             var nudgeAmount = NudgeLogic();
 

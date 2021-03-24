@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Interfaces;
+using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -50,7 +51,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Public Properties
 
-        public AnimationEngine.Models.Animation Animation { get; protected set; }
+        public IAnimation Animation { get; protected set; }
 
         public int Scale { get; }
 
@@ -80,11 +81,11 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public void InitializeAnimation()
         {
-            foreach (var keyFrame in Animation.AnimationData.KeyFrames.OrderBy(x => x.KeyFrameOrder))
+            foreach (var keyFrame in Animation.AnimationData.KeyFrames)
             {
-                bool HasLayers = Animation.LayerData.Layers.Any(x => x.GetActiveAtKeyFrame(keyFrame.KeyFrameOrder));
+                bool HasLayers = Animation.LayerData.Layers.Any(x => x.GetActiveAtKeyFrame(keyFrame.Key));
 
-                var element = new TimelineKeyFrameGroup(this, (HasLayers) ? FrameType.Keyframe : FrameType.Empty, keyFrame.KeyFrameOrder, Scale, keyFrame.FrameLength);
+                var element = new TimelineKeyFrameGroup(this, (HasLayers) ? FrameType.Keyframe : FrameType.Empty, keyFrame.Key, Scale, keyFrame.Value.FrameLength);
 
                 element.Initialize();
                 FrameList.Add(element);
@@ -112,7 +113,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public void ResetFrames()
         {
-            TimelineKeyFrameGroup keyFrame = (TimelineKeyFrameGroup)FrameList._items[Animation.AnimationData.GetCurrentKeyFrameIndex()];
+            TimelineKeyFrameGroup keyFrame = (TimelineKeyFrameGroup)FrameList._items[Animation.AnimationData.CurrentKeyFrameIndex];
 
             foreach (TimelineKeyFrameGroup offFrame in FrameList._items.Where(x => x != keyFrame))
             {
@@ -121,7 +122,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             }
         }
 
-        public void SetAnimation(AnimationEngine.Models.Animation animation)
+        public void SetAnimation(IAnimation animation)
         {
             FrameList.Clear();
             Animation = animation;
