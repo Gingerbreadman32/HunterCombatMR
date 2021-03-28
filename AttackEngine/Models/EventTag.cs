@@ -7,7 +7,6 @@ namespace HunterCombatMR.AttackEngine.Models
         #region Private Fields
 
         private KeyValuePair<int, int> _frameRange;
-        private int _tagRef;
 
         #endregion Private Fields
 
@@ -17,7 +16,7 @@ namespace HunterCombatMR.AttackEngine.Models
             int startFrame,
             int endFrame)
         {
-            _tagRef = tag;
+            TagReference = tag;
             _frameRange = new KeyValuePair<int, int>(startFrame, endFrame);
         }
 
@@ -25,20 +24,24 @@ namespace HunterCombatMR.AttackEngine.Models
 
         #region Public Properties
 
-        public int TagReference { get => _tagRef; }
+        public int TagReference { get; }
+
+        public int EndFrame
+        {
+            get => _frameRange.Value;
+        }
+
+        public int StartFrame
+        {
+            get => _frameRange.Key;
+        }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public int GetEndFrame()
-            => _frameRange.Value;
-
-        public int GetStartFrame()
-            => _frameRange.Key;
-
-        public bool CheckFrameBetween(int frame)
-            => (frame <= GetEndFrame()) && (frame >= GetStartFrame());
+        public bool CheckIfActive(int frame)
+            => (frame <= EndFrame) && (frame >= StartFrame);
 
         #endregion Public Methods
     }

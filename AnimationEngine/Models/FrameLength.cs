@@ -9,15 +9,13 @@ namespace HunterCombatMR.AnimationEngine.Models
         #region Public Constructors
 
         public FrameLength()
-            : base(1)
+            : base(1, 1)
         {
         }
 
         public FrameLength(int length)
-            : base(length)
+            : base(length, 1)
         {
-            if (length == 0)
-                throw new ArgumentOutOfRangeException("Frame length must be more than 0!");
         }
 
         #endregion Public Constructors

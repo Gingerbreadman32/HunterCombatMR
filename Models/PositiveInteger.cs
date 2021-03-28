@@ -11,6 +11,7 @@ namespace HunterCombatMR.Models
         #region Private Fields
 
         private int _value;
+        private int _minimumValue;
 
         #endregion Private Fields
 
@@ -19,14 +20,20 @@ namespace HunterCombatMR.Models
         public PositiveInteger()
         {
             _value = 0;
+            _minimumValue = 0;
         }
 
-        public PositiveInteger(int val)
+        public PositiveInteger(int val,
+            int min = 0)
         {
-            if (val <= 0)
+            if (min < 0)
+                throw new ArgumentOutOfRangeException("Minimum value must be above 0!");
+
+            if (val <= min)
                 throw new ArgumentOutOfRangeException("Value must be above 0!");
 
             _value = val;
+            _minimumValue = min;
         }
 
         #endregion Public Constructors

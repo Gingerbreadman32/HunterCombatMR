@@ -49,15 +49,13 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public IDictionary<string, string> DefaultParameters { get; set; }
 
-       
-
         public void AddKeyFrameEvent(ActionLogicMethod<TEntity, TActionType> actionLogicMethod)
         {
             var tempEvents = new List<KeyFrameEvent<TEntity, TActionType>>(KeyFrameEvents);
             int newTag = 0;
 
             if (tempEvents.Any())
-                newTag = tempEvents.Select(x => x.Tag).Max() + 1;
+                newTag = GetLowestFreeTag(tempEvents.Select(x => x.Tag));
 
             tempEvents.Add(new KeyFrameEvent<TEntity, TActionType>(newTag, actionLogicMethod));
 
@@ -67,7 +65,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public IEnumerable<KeyFrameEvent<TEntity, TActionType>> GetCurrentFrameEvents(int currentFrame)
         {
             var currentEvents = KeyFrameEvents.Where(x => _tagReferences.Any(y => y.TagReference.Equals(x.Tag)
-                && y.CheckFrameBetween(currentFrame)));
+                && y.CheckIfActive(currentFrame)));
 
             if (currentEvents.Any())
                 return new List<KeyFrameEvent<TEntity, TActionType>>(currentEvents.OrderBy(x => x.Tag));
@@ -93,14 +91,25 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public virtual void Update(IAnimator animator)
         {
-            /* foreach (var keyFrameEvent in KeyFrameEvents.Where(x => (x.KeyFrame.IsKeyFrameActive(currentFrame)
-         || x.EndKeyFrame.IsKeyFrameActive(currentFrame))
-         && x.IsEnabled).OrderBy(x => x.Tag))
+            foreach (var keyFrameEvent in GetCurrentFrameEvents(animator.CurrentFrame))
             {
-                animator.Parameters = keyFrameEvent.ActionLogic.ActionLogic(Player,
-                    ,
-                    (currentFrame - currentKeyFrame.StartingFrameIndex),
-                    animator.Parameters); */
+                //animator.Parameters = keyFrameEvent.ActionLogic.ActionLogic(Player
+            }
+        }
+
+        private int GetLowestFreeTag(IEnumerable<int> tags)
+        {
+            bool[] checkedTags = new bool[tags.Count() + 1];
+
+            foreach (int tag in tags)
+                if (tag <= tags.Count())
+                    checkedTags[tag] = true;
+
+            for (int t = 0; t < tags.Count(); t++)
+                if (!checkedTags[t])
+                    return t;
+
+            return tags.Count();
         }
     }
 }

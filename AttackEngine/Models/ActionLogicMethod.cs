@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Extensions;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.AttackEngine.Models
@@ -8,6 +9,8 @@ namespace HunterCombatMR.AttackEngine.Models
         : IAnimatedEntity<TAnimationType> where TAnimationType
         : Animation<TEntity, TAnimationType>
     {
+        public virtual FrameLength DefaultLength => new FrameLength();
+
         #region Public Methods
 
         public abstract IDictionary<string, string> ActionLogic(TEntity @object,
