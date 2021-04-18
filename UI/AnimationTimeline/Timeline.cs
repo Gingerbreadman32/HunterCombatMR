@@ -83,7 +83,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         {
             foreach (var keyFrame in Animation.AnimationData.KeyFrames)
             {
-                bool HasLayers = Animation.LayerData.Layers.Any(x => x.GetActiveAtKeyFrame(keyFrame.Key));
+                bool HasLayers = Animation.LayerData.Layers.Any(x => x.IsActive(keyFrame.Key));
 
                 var element = new TimelineKeyFrameGroup(this, (HasLayers) ? FrameType.Keyframe : FrameType.Empty, keyFrame.Key, Scale, keyFrame.Value.FrameLength);
 

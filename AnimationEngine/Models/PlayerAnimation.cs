@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
+﻿using HunterCombatMR.AnimationEngine.Extensions;
+using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces;
@@ -14,41 +15,41 @@ using Terraria.ModLoader;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public class PlayerActionAnimation
-        : Animation<HunterCombatPlayer, PlayerActionAnimation>,
+    public class PlayerAnimation
+        : Animation,
         IPlayerAnimation,
         IHunterCombatContentInstance
     {
         #region Public Constructors
 
         [JsonConstructor]
-        public PlayerActionAnimation(string name,
+        public PlayerAnimation(string name,
             LayerData layerData,
             bool isInternal)
             : base(name)
         {
             Name = name;
-            AnimationData = new Animator<PlayerActionAnimation, HunterCombatPlayer, PlayerActionAnimation>();
+            AnimationData = new Animator<PlayerAnimation, HunterCombatPlayer, PlayerAnimation>();
             LayerData = layerData;
-            IsInternal = isInternal;
+            IsStoredInternally = isInternal;
         }
 
-        public PlayerActionAnimation(PlayerActionAnimation copy,
+        public PlayerAnimation(PlayerAnimation copy,
             bool newFile = false)
             : base(copy.InternalName)
         {
             Name = copy.Name;
-            AnimationData = new Animator<PlayerActionAnimation, HunterCombatPlayer, PlayerActionAnimation>(copy.AnimationData);
+            AnimationData = new Animator<PlayerAnimation, HunterCombatPlayer, PlayerAnimation>(copy.AnimationData);
             LayerData = new LayerData(copy.LayerData);
             IsModified = newFile;
-            IsInternal = copy.IsInternal;
+            IsStoredInternally = copy.IsStoredInternally;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public override AnimationType AnimationType => AnimationType.Player;
+        public override AnimationType AnimationType { get; } = AnimationType.Player;
 
         #endregion Public Properties
 
@@ -77,7 +78,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public List<PlayerLayer> DrawPlayerLayers(List<PlayerLayer> layers)
         {
             List<PlayerLayer> animLayers = layers;
-            if (IsAnimationInitialized())
+            if (IsInitialized)
             {
                 var currentFrame = AnimationData.CurrentKeyFrameIndex;
 
@@ -85,7 +86,7 @@ namespace HunterCombatMR.AnimationEngine.Models
                 {
                     var newLayer = new PlayerLayer(HunterCombatMR.ModName, layer.Name, delegate (PlayerDrawInfo drawInfo)
                     {
-                        Main.playerDrawData.Add(CombatLimbDraw(drawInfo, layer.Texture, layer.GetCurrentFrameRectangle(currentFrame), layer.KeyFrames[currentFrame], Color.White));
+                        Main.playerDrawData.Add(CombatLimbDraw(drawInfo, layer.Texture, layer.GetFrameRectangle(currentFrame), layer.KeyFrames[currentFrame], Color.White));
                     });
                     animLayers.Add(newLayer);
                 }
@@ -98,7 +99,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         {
             var copy = base.Duplicate<T>(name);
             copy = (T)MemberwiseClone();
-            var playerAnim = copy as PlayerActionAnimation;
+            var playerAnim = copy as PlayerAnimation;
             playerAnim.IsModified = true;
             playerAnim.Initialize();
 

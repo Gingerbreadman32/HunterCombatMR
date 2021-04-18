@@ -1,26 +1,19 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AttackEngine.Models;
-using System;
+using HunterCombatMR.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using Terraria;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public abstract class CustomAction<TEntity, TActionType> : HunterCombatContentInstance,
-        IAnimated, 
-        ICustomAction<TEntity, TActionType> 
-        where TEntity : IAnimatedEntity<TActionType> 
-        where TActionType
-        : Animation<TEntity, TActionType>
+    public abstract class CustomAction<THolder, TEntity> : HunterCombatContentInstance,
+        ICustomAction<THolder, TEntity> where THolder
+        : IEntityHolder<TEntity> where TEntity
+        : Entity
     {
-        #region Private Fields
-
-        private IEnumerable<KeyFrameEvent<TEntity, TActionType>> _internalEvents;
-        private IEnumerable<EventTag> _tagReferences;
-
-        #endregion Private Fields
-
-        #region Public Constructors
+        private IEnumerable<KeyFrameEvent<THolder, TEntity>> _internalEvents;
+        private IEnumerable<EventTagInfo> _tagReferences;
 
         public CustomAction(string name,
                     string displayName = "")
@@ -31,51 +24,43 @@ namespace HunterCombatMR.AnimationEngine.Models
             DefaultParameters = new Dictionary<string, string>();
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         public IDictionary<string, string> ActionParameters { get; set; }
-        public IEnumerable<TActionType> Animations { get; protected set; }
+        public SortedList<int, IAnimation> Animations { get; protected set; }
 
-        public KeyFrameProfile KeyFrameProfile { get; protected set; }
-        public IEnumerable<KeyFrameEvent<TEntity, TActionType>> KeyFrameEvents
+        public IDictionary<string, string> DefaultParameters { get; set; }
+
+        public IEnumerable<KeyFrameEvent<THolder, TEntity>> KeyFrameEvents
         {
             get => _internalEvents;
             set { _internalEvents = value; SetUpFrameProfile(); }
         }
 
+        public KeyFrameProfile KeyFrameProfile { get; protected set; }
         public string Name { get; protected set; }
 
-        public IDictionary<string, string> DefaultParameters { get; set; }
-
-        public void AddKeyFrameEvent(ActionLogicMethod<TEntity, TActionType> actionLogicMethod)
+        public void AddKeyFrameEvent(ActionLogicMethod<THolder, TEntity> actionLogicMethod)
         {
-            var tempEvents = new List<KeyFrameEvent<TEntity, TActionType>>(KeyFrameEvents);
+            var tempEvents = new List<KeyFrameEvent<THolder, TEntity>>(KeyFrameEvents);
             int newTag = 0;
 
             if (tempEvents.Any())
                 newTag = GetLowestFreeTag(tempEvents.Select(x => x.Tag));
 
-            tempEvents.Add(new KeyFrameEvent<TEntity, TActionType>(newTag, actionLogicMethod));
+            tempEvents.Add(new KeyFrameEvent<THolder, TEntity>(newTag, actionLogicMethod));
 
             KeyFrameEvents = tempEvents;
         }
 
-        public IEnumerable<KeyFrameEvent<TEntity, TActionType>> GetCurrentFrameEvents(int currentFrame)
+        public IEnumerable<KeyFrameEvent<THolder, TEntity>> GetCurrentFrameEvents(int currentFrame)
         {
             var currentEvents = KeyFrameEvents.Where(x => _tagReferences.Any(y => y.TagReference.Equals(x.Tag)
-                && y.CheckIfActive(currentFrame)));
+                && y.IsActive(currentFrame)));
 
             if (currentEvents.Any())
-                return new List<KeyFrameEvent<TEntity, TActionType>>(currentEvents.OrderBy(x => x.Tag));
+                return new List<KeyFrameEvent<THolder, TEntity>>(currentEvents.OrderBy(x => x.Tag));
 
             return currentEvents;
         }
-        
-        #endregion Public Methods
-
-        #region Protected Methods
 
         protected virtual void SetUpFrameProfile()
         {
@@ -83,7 +68,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             int totalKeyFrames = 1;
         }
 
-        #endregion Protected Methods
         public void Initialize()
         {
             SetUpFrameProfile();

@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR;
+using HunterCombatMR.AnimationEngine.Extensions;
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
@@ -31,7 +32,7 @@ namespace AnimationEngine.Services
 
         public EditorMode CurrentEditMode { get; set; }
 
-        public PlayerActionAnimation CurrentAnimationEditing { get; set; }
+        public PlayerAnimation CurrentAnimationEditing { get; set; }
 
         public bool AnimationEdited { get; set; }
 
@@ -68,11 +69,11 @@ namespace AnimationEngine.Services
 
             color.A = 30;
 
-            foreach (var layer in layerData.Layers.Where(f => f.KeyFrames.ContainsKey(keyFrameToDraw) && f.GetActiveAtKeyFrame(keyFrameToDraw)).OrderByDescending(x => x.KeyFrames[keyFrameToDraw].LayerDepth))
+            foreach (var layer in layerData.Layers.Where(f => f.KeyFrames.ContainsKey(keyFrameToDraw) && f.IsActive(keyFrameToDraw)).OrderByDescending(x => x.KeyFrames[keyFrameToDraw].LayerDepth))
             {
-                PlayerActionAnimation.CombatLimbDraw(drawInfo,
+                PlayerAnimation.CombatLimbDraw(drawInfo,
                     layer.Texture, 
-                    layer.GetCurrentFrameRectangle(keyFrameToDraw), 
+                    layer.GetFrameRectangle(keyFrameToDraw), 
                     layer.KeyFrames[keyFrameToDraw],
                     color)
                     .Draw(Main.spriteBatch);
@@ -81,7 +82,7 @@ namespace AnimationEngine.Services
             return true;
         }
 
-        public void AdjustPositionLogic(PlayerActionAnimation animation,
+        public void AdjustPositionLogic(PlayerAnimation animation,
             int direction = 1)
         {
             List<string> framelessNames = new List<string>(HighlightedLayers);
@@ -104,7 +105,7 @@ namespace AnimationEngine.Services
                 var layerNudgeAmount = nudgeAmount;
                 layerNudgeAmount.X *= direction;
 
-                animation.UpdateLayerPosition(layer, layer.KeyFrames[currentFrame].Position + layerNudgeAmount);
+                layer.SetPosition(currentFrame, layer.KeyFrames[currentFrame].Position + layerNudgeAmount);
             }
             /*
             if (SelectedLayer == layerName)

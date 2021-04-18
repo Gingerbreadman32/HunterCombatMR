@@ -15,8 +15,6 @@ namespace HunterCombatMR.AnimationEngine.Services
 {
     public sealed class AnimationFileManager
     {
-        #region Private Fields
-
         private const string _fileType = ".json";
 
         private readonly string _customFilePath = Path.Combine(HunterCombatMR.Instance.DataPath, "Animations");
@@ -30,19 +28,11 @@ namespace HunterCombatMR.AnimationEngine.Services
             Formatting = Formatting.Indented
         };
 
-        #endregion Private Fields
-
-        #region Public Constructors
-
         public AnimationFileManager()
         {
             _serializerSettings.Converters.Add(new KeyFrameProfileConverter());
             _serializerSettings.Converters.Add(new RectangleConverter());
         }
-
-        #endregion Public Constructors
-
-        #region Private Methods
 
         private string CustomAnimationPath(string name,
             AnimationType type)
@@ -87,14 +77,14 @@ namespace HunterCombatMR.AnimationEngine.Services
             }
         }
 
-        private FileSaveStatus SaveAnimation(PlayerActionAnimation anim,
+        private FileSaveStatus SaveAnimation(PlayerAnimation anim,
                             string newName,
             bool overwrite,
             bool internalSave)
         {
             bool rename = !string.IsNullOrEmpty(newName);
             FileSaveStatus status;
-            PlayerActionAnimation action = (rename) ? new PlayerActionAnimation(newName, anim.LayerData, anim.IsInternal) : anim;
+            PlayerAnimation action = (rename) ? new PlayerAnimation(newName, anim.LayerData, anim.IsStoredInternally) : anim;
             var animPath = (internalSave) ? InternalAnimationPath(action.Name, action.AnimationType) : CustomAnimationPath(action.Name, action.AnimationType);
             var oldPath = (internalSave) ? InternalAnimationPath(anim.Name, anim.AnimationType) : CustomAnimationPath(anim.Name, anim.AnimationType);
 
@@ -122,10 +112,6 @@ namespace HunterCombatMR.AnimationEngine.Services
             return status;
         }
 
-        #endregion Private Methods
-
-        #region Public Methods
-
         public CustomAnimationFileExistStatus CustomAnimationFileExists(string name,
             AnimationType type)
         {
@@ -151,12 +137,10 @@ namespace HunterCombatMR.AnimationEngine.Services
             }
         }
 
-        public CustomAnimationFileExistStatus CustomAnimationFileExists<TEntity, TAnimationType>(Animation<TEntity, TAnimationType> animation)
-            where TEntity : IAnimatedEntity<TAnimationType>
-            where TAnimationType : IAnimated
+        public CustomAnimationFileExistStatus CustomAnimationFileExists(IAnimation animation)
             => CustomAnimationFileExists(animation.Name, animation.AnimationType);
 
-        public PlayerActionAnimation LoadAnimation(AnimationType type,
+        public PlayerAnimation LoadAnimation(AnimationType type,
             string fileName,
             bool overrideInternal = false)
         {
@@ -194,10 +178,10 @@ namespace HunterCombatMR.AnimationEngine.Services
                     return null;
             }
 
-            PlayerActionAnimation action = null;
+            PlayerAnimation action = null;
 
             if (!string.IsNullOrEmpty(json))
-                action = JsonConvert.DeserializeObject<PlayerActionAnimation>(json, _serializerSettings);
+                action = JsonConvert.DeserializeObject<PlayerAnimation>(json, _serializerSettings);
 
             if (action == null)
             {
@@ -244,7 +228,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             return actions;
         }
 
-        public FileSaveStatus SaveCustomAnimation(PlayerActionAnimation anim,
+        public FileSaveStatus SaveCustomAnimation(PlayerAnimation anim,
                     string newName = null,
                     bool overwrite = false)
                     => SaveAnimation(anim, newName, overwrite, false);
@@ -276,14 +260,10 @@ namespace HunterCombatMR.AnimationEngine.Services
         /// Temporary method to save internal animations, remove/obfuscate on release.
         /// </summary>
         /// <returns>The save status</returns>
-        internal FileSaveStatus SaveInternalAnimation(PlayerActionAnimation anim,
+        internal FileSaveStatus SaveInternalAnimation(PlayerAnimation anim,
             string newName = null,
             bool overwrite = false)
             => SaveAnimation(anim, newName, overwrite, true);
-
-        #endregion Public Methods
-
-        #region Internal Methods
 
         internal void DeleteCustomAnimation(AnimationType type,
             string fileName)
@@ -291,7 +271,5 @@ namespace HunterCombatMR.AnimationEngine.Services
             if (CustomAnimationFileExists(fileName, type).Equals(CustomAnimationFileExistStatus.FileExists))
                 File.Delete(CustomAnimationPath(fileName, type));
         }
-
-        #endregion Internal Methods
     }
 }

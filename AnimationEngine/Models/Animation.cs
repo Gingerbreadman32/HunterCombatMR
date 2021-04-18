@@ -1,71 +1,43 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Interfaces;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public abstract class Animation<TEntity, TAnimationType>
+    public abstract class Animation
         : HunterCombatContentInstance,
-        IAnimated,
-        IModifiable, 
-        IAnimation 
-        where TEntity : IAnimatedEntity<TAnimationType>
-        where TAnimationType : IAnimated
+        INamed,
+        IModifiable,
+        IAnimation
     {
-        #region Private Fields
-
-        private bool _modified;
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
         public Animation(string name)
             : base(name)
         {
             Name = name;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         [JsonIgnore]
         public IAnimator AnimationData { get; protected set; }
 
-        public virtual AnimationType AnimationType { get; }
+        public abstract AnimationType AnimationType { get; }
 
-        public bool IsInternal { get; internal set; }
+        public bool IsInitialized => AnimationData.IsInitialized;
+
+        [JsonIgnore]
+        public bool IsModified { get; set; }
+
+        public bool IsStoredInternally { get; internal set; }
 
         [JsonIgnore]
         public KeyFrameProfile KeyFrameProfile { get => LayerData.KeyFrameProfile; }
 
-        [JsonIgnore]
-        public bool IsModified
-        {
-            get
-            {
-                return _modified;
-            }
-
-            protected set
-            {
-                _modified = value;
-            }
-        }
-
         public LayerData LayerData { get; protected set; }
         public string Name { get; protected set; }
-
-        public virtual IDictionary<string, string> DefaultParameters { get; } = new Dictionary<string, string>();
-
-        #endregion Public Properties
-
-        #region Public Methods
 
         /// <summary>
         /// Duplicate an existing keyframe.
@@ -84,7 +56,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void AddKeyFrame(FrameLength frameLength,
             IDictionary<AnimationLayer, LayerFrameInfo> layerInfo = null)
         {
-            _modified = true;
+            IsModified = true;
             Uninitialize();
             AnimationData.AppendKeyFrame(frameLength);
 
@@ -113,23 +85,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             Initialize();
         }
 
-        public void AddNewLayer(AnimationLayer layerInfo)
-        {
-            _modified = true;
-            LayerData.Layers.Add(layerInfo);
-        }
-
-        public virtual void Draw()
-        {
-        }
-
-        public virtual void DrawEffects()
-        {
-        }
-
-        public AnimationLayer GetLayer(string layerName)
-                    => LayerData.Layers.FirstOrDefault(x => x.Name.Equals(layerName));
-
         /// <summary>
         /// Run this to allow this animation to run. Is run when first established and after any changes.
         /// </summary>
@@ -138,14 +93,24 @@ namespace HunterCombatMR.AnimationEngine.Models
             AnimationData.Initialize(KeyFrameProfile, LayerData.Loop);
         }
 
-        public bool IsAnimationInitialized()
-                    => AnimationData.IsInitialized;
+        public void ModifyAnimation(Action action,
+                    bool reinitialize = false)
+        {
+            IsModified = true;
+            if (reinitialize)
+                Uninitialize();
+
+            action.Invoke();
+
+            if (reinitialize)
+                Initialize();
+        }
 
         public void MoveKeyFrame(int keyFrameIndex,
             int newFrameIndex)
         {
             Uninitialize();
-            _modified = true;
+            IsModified = true;
 
             LayerData.KeyFrameProfile.SwitchKeyFrames(keyFrameIndex, newFrameIndex);
 
@@ -165,13 +130,13 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public void Play()
         {
-            if (!AnimationData.IsPlaying && IsAnimationInitialized())
+            if (!AnimationData.IsPlaying && IsInitialized)
                 AnimationData.StartAnimation();
         }
 
         public void RemoveKeyFrame(int keyFrameIndex)
         {
-            _modified = true;
+            IsModified = true;
             Uninitialize();
 
             AnimationData.KeyFrames.RemoveAt(keyFrameIndex);
@@ -188,11 +153,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             Initialize();
         }
 
-        public void Restart()
-        {
-            AnimationData.ResetAnimation(true);
-        }
-
         public void Stop()
         {
             Pause();
@@ -200,21 +160,21 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         /// <summary>
-        /// Run this if you need to make changes to an animation and want to prevent anything from affecting it.
+        /// Run this before making changes to an animation.
         /// </summary>
         public virtual void Uninitialize()
         {
             AnimationData.Uninitialize();
         }
 
-        public virtual void Update(IAnimator animator)
+        public virtual void Update()
         {
-            animator.AdvanceFrame();
+            AnimationData.AdvanceFrame();
         }
 
         public void UpdateKeyFrameLength(FrameIndex keyFrameIndex, FrameLength frameAmount)
         {
-            _modified = true;
+            IsModified = true;
             var profileModified = KeyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex);
 
             AnimationData.AdjustKeyFrameLength(keyFrameIndex, frameAmount, (FrameLength)KeyFrameProfile.DefaultKeyFrameSpeed);
@@ -234,71 +194,14 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
         }
 
-        public void UpdateLayerDepth(int amount,
-            AnimationLayer layerToMove,
-            IEnumerable<AnimationLayer> layers)
-        {
-            if (amount == 0)
-                return;
-
-            int currentKeyFrame = AnimationData.CurrentKeyFrameIndex;
-
-            int newDepthInt = layerToMove.GetDepthAtKeyFrame(currentKeyFrame) + amount;
-            byte newDepthByte = (newDepthInt > byte.MaxValue) ? byte.MaxValue : (newDepthInt < byte.MinValue) ? byte.MinValue : (byte)newDepthInt;
-            var layerInNewPlace = layers.FirstOrDefault(x => x.KeyFrames[currentKeyFrame].LayerDepth.Equals(newDepthByte));
-            if (layerInNewPlace != null)
-            {
-                layerInNewPlace.SetDepthAtKeyFrame(currentKeyFrame, layerToMove.GetDepthAtKeyFrame(currentKeyFrame));
-            }
-            layerToMove.SetDepthAtKeyFrame(currentKeyFrame, newDepthByte);
-            _modified = true;
-            // @@num:1
-            HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
-        }
-
-        public void UpdateLayerPosition(AnimationLayer layer,
-            Vector2 newPosition)
-        {
-            var currentKeyFrame = AnimationData.CurrentKeyFrameIndex;
-
-            var oldPos = layer.GetPositionAtKeyFrame(currentKeyFrame);
-            layer.SetPositionAtKeyFrame(currentKeyFrame, newPosition);
-
-            if (oldPos != newPosition)
-                _modified = true;
-        }
-
-        public void UpdateLayerTexture(AnimationLayer layer,
-            Texture2D texture)
-        {
-            layer.SetTexture(texture);
-            _modified = true;
-        }
-
-        public void UpdateLayerTextureFrame(AnimationLayer layer,
-            int textureFrame)
-        {
-            layer.SetTextureFrameAtKeyFrame(AnimationData.CurrentKeyFrameIndex, textureFrame);
-            _modified = true;
-        }
-
-        public void UpdateLayerVisibility(AnimationLayer layer)
-        {
-            _modified = true;
-
-            layer.ToggleVisibilityAtKeyFrame(AnimationData.CurrentKeyFrameIndex);
-        }
-
         public void UpdateLoopType(LoopStyle newLoopType)
         {
-            if (IsAnimationInitialized())
+            if (IsInitialized)
             {
-                _modified = true;
+                IsModified = true;
                 AnimationData.CurrentLoopStyle = newLoopType;
                 LayerData.Loop = newLoopType;
             }
         }
-
-        #endregion Public Methods
     }
 }

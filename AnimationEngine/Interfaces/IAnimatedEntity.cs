@@ -1,6 +1,4 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-
-namespace HunterCombatMR.AnimationEngine.Interfaces
+﻿namespace HunterCombatMR.AnimationEngine.Interfaces
 {
     public interface IAnimatedEntity<T> where T : IAnimated
     {

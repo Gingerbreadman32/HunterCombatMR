@@ -1,23 +1,20 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Extensions;
+﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Interfaces;
 using System.Collections.Generic;
+using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
-    public abstract class ActionLogicMethod<TEntity, TAnimationType> where TEntity
-        : IAnimatedEntity<TAnimationType> where TAnimationType
-        : Animation<TEntity, TAnimationType>
+    public abstract class ActionLogicMethod<THolder, TEntity> where THolder
+        : IEntityHolder<TEntity> where TEntity
+        : Entity
+
     {
-        public virtual FrameLength DefaultLength => new FrameLength();
+        public virtual FrameLength DefaultLength { get; } = new FrameLength();
 
-        #region Public Methods
-
-        public abstract IDictionary<string, string> ActionLogic(TEntity @object,
+        public abstract IDictionary<string, string> ActionLogic(THolder @object,
             int currentFrame,
             int currentKeyFrameTime,
             IDictionary<string, string> @params);
-
-        #endregion Public Methods
     }
 }

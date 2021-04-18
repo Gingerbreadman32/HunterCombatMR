@@ -1,25 +1,22 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Interfaces;
 using System.Collections.Generic;
+using Terraria;
 
 namespace HunterCombatMR.AnimationEngine.Interfaces
 {
-    public interface ICustomAction<TEntity, TAnimationType>
-        : IHunterCombatContentInstance
-        where TEntity : IAnimatedEntity<TAnimationType>
-        where TAnimationType : Animation<TEntity, TAnimationType>
+    public interface ICustomAction<THolder, TEntity>
+        : IAnimated,
+        INamed where THolder
+        : IEntityHolder<TEntity> where TEntity
+        : Entity
     {
-        IEnumerable<TAnimationType> Animations { get; }
+        SortedList<int, IAnimation> Animations { get; }
         IDictionary<string, string> DefaultParameters { get; set; }
-        IEnumerable<KeyFrameEvent<TEntity, TAnimationType>> KeyFrameEvents { get; set; }
-        KeyFrameProfile KeyFrameProfile { get; }
-        string Name { get; }
+        IEnumerable<KeyFrameEvent<THolder, TEntity>> KeyFrameEvents { get; set; }
 
-        void AddKeyFrameEvent(ActionLogicMethod<TEntity, TAnimationType> actionLogicMethod);
+        void AddKeyFrameEvent(ActionLogicMethod<THolder, TEntity> actionLogicMethod);
 
         void Initialize();
-
-        void Update(IAnimator animator);
     }
 }

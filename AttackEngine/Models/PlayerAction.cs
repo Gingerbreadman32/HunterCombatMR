@@ -1,10 +1,12 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Interfaces;
+using HunterCombatMR.AnimationEngine.Models;
 using System.Collections.Generic;
+using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
     public abstract class PlayerAction
-        : CustomAction<HunterCombatPlayer, PlayerActionAnimation>
+        : CustomAction<HunterCombatPlayer, Player>
     {
         #region Public Constructors
 
@@ -12,7 +14,7 @@ namespace HunterCombatMR.AttackEngine.Models
             string displayName = "")
             : base(name, displayName)
         {
-            Animations = new List<PlayerActionAnimation>();
+            Animations = new SortedList<int, IAnimation>();
             Projectiles = new List<AttackProjectile>();
         }
 
@@ -31,9 +33,9 @@ namespace HunterCombatMR.AttackEngine.Models
             T clone = base.Duplicate<T>(name);
             var playerAction = clone as PlayerAction;
             playerAction.Projectiles = new List<AttackProjectile>(Projectiles);
-            playerAction.Animations = new List<PlayerActionAnimation>(Animations);
+            playerAction.Animations = new SortedList<int, IAnimation>(Animations);
             playerAction.KeyFrameProfile = new KeyFrameProfile(KeyFrameProfile);
-            playerAction.KeyFrameEvents = new List<KeyFrameEvent<HunterCombatPlayer, PlayerActionAnimation>>(KeyFrameEvents);
+            playerAction.KeyFrameEvents = new List<KeyFrameEvent<HunterCombatPlayer, Player>>(KeyFrameEvents);
             playerAction.DefaultParameters = new Dictionary<string, string>(DefaultParameters);
 
             return clone;

@@ -108,7 +108,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public virtual void Update()
         {
-            _animation.Update(_animation.AnimationData);
+            _animation.Update();
         }
 
         #endregion Public Methods

@@ -8,8 +8,8 @@ namespace HunterCombatMR.Utilities
     {
         #region Internal Methods
 
-        internal static PlayerActionAnimation GetPlayerAnim(string name)
-            => HunterCombatMR.Instance.Content.GetContentInstance<PlayerActionAnimation>(name);
+        internal static PlayerAnimation GetPlayerAnim(string name)
+            => HunterCombatMR.Instance.Content.GetContentInstance<PlayerAnimation>(name);
 
         internal static T Get<T>(T content) where T : IHunterCombatContentInstance
             => HunterCombatMR.Instance.Content.GetContentInstance<T>(content);
