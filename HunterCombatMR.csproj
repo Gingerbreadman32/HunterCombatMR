@@ -24,8 +24,5 @@
   <ItemGroup>
     <ProjectReference Include="D:\Steam Games\steamapps\common\tModLoader\Source\tModLoader.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="AttackEngine\MoveSets\" />
-  </ItemGroup>
   <Import Project="HunterCombat.targets" />
 </Project>

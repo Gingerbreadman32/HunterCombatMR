@@ -4,3 +4,4 @@ obj
 .vs/HunterCombatMR/DesignTimeBuild/.dtbcache.v2
 .vs
 .cr
+*.user
