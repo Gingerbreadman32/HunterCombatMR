@@ -8,14 +8,8 @@ namespace HunterCombatMR.Models
         IFormattable
         where T : PositiveInteger<T>, new()
     {
-        #region Private Fields
-
         private int _value;
         private int _minimumValue;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public PositiveInteger()
         {
@@ -35,10 +29,6 @@ namespace HunterCombatMR.Models
             _value = val;
             _minimumValue = min;
         }
-
-        #endregion Public Constructors
-
-        #region Public Methods
 
         public int CompareTo(int other)
         {
@@ -73,10 +63,6 @@ namespace HunterCombatMR.Models
             return _value.ToString();
         }
 
-        #endregion Public Methods
-
-        #region Operator Overrides
-
         public static int operator -(PositiveInteger<T> a, int b)
             => a._value - b;
 
@@ -101,12 +87,10 @@ namespace HunterCombatMR.Models
         public static bool operator >=(PositiveInteger<T> a, int b)
             => a._value >= b;
 
-        public static implicit operator int(PositiveInteger<T> d) 
+        public static implicit operator int(PositiveInteger<T> d)
             => d._value;
 
-        public static explicit operator PositiveInteger<T>(int b) 
+        public static explicit operator PositiveInteger<T>(int b)
             => new T() { _value = b };
-
-        #endregion Operator Overrides
     }
 }

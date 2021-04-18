@@ -3,7 +3,7 @@
 namespace HunterCombatMR.AnimationEngine.Models
 {
     public class ProjectileAnimation
-        : Animation<AttackProjectile, ProjectileAnimation>
+        : Animation
     {
         #region Public Constructors
 

@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
+﻿using HunterCombatMR.AnimationEngine.Extensions;
+using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
@@ -84,7 +85,7 @@ namespace HunterCombatMR.UI
             string layerName)
         {
             AnimationReference = animation;
-            Layer = animation.GetLayer(layerName);
+            Layer = animation.LayerData.GetLayer(layerName);
             GenerateText();
         }
 
@@ -125,7 +126,7 @@ namespace HunterCombatMR.UI
 
         protected void GenerateText()
         {
-            if (Layer != null && (Layer.GetActiveAtKeyFrame(CurrentKeyFrame) || DisplayInfo == LayerTextInfo.None))
+            if (Layer != null && (Layer.IsActive(CurrentKeyFrame) || DisplayInfo == LayerTextInfo.None))
             {
                 foreach (LayerTextInfo info in DisplayInfo.GetFlags())
                 {
@@ -146,7 +147,7 @@ namespace HunterCombatMR.UI
             => $"Coords: X- {Layer.KeyFrames[CurrentKeyFrame].Position.X} Y- {Layer.KeyFrames[CurrentKeyFrame].Position.Y} ";
 
         private string DepthInfoText()
-            => $"Default Depth: {Layer.GetDepthAtKeyFrame(CurrentKeyFrame)} ";
+            => $"Default Depth: {Layer.GetDepth(CurrentKeyFrame)} ";
 
         private void DeselectAllFrames(UIMouseEvent evt, UIElement listeningElement)
         {
@@ -180,7 +181,7 @@ namespace HunterCombatMR.UI
         private string OrientationInfoText()
         {
             string text = "Orientation: ";
-            SpriteEffects orientation = Layer.GetOrientationAtKeyFrame(CurrentKeyFrame);
+            SpriteEffects orientation = Layer.GetOrientation(CurrentKeyFrame);
 
             switch (orientation)
             {
@@ -234,13 +235,13 @@ namespace HunterCombatMR.UI
         }
 
         private string RotationInfoText()
-            => $"Rotation: {MathHelper.ToDegrees(Layer.GetRotationAtKeyFrame(CurrentKeyFrame))}° ";
+            => $"Rotation: {MathHelper.ToDegrees(Layer.GetRotation(CurrentKeyFrame))}° ";
 
         private string TextureBoundsInfoText()
             => $"Bounds: W- {Layer.SpriteFrameRectangle.Width} H- {Layer.SpriteFrameRectangle.Height}";
 
         private string TextureFrameInfoText()
-                    => $"Frame: {Layer.GetTextureFrameAtKeyFrame(CurrentKeyFrame)} / {Layer.GetSpriteTextureFrameTotal()} ";
+                    => $"Frame: {Layer.GetTextureFrame(CurrentKeyFrame)} / {Layer.GetTotalTextureFrames()} ";
 
         private string TextureNameInfoText()
             => $"Texture: {Layer.Texture.Name.Split('/')[Layer.Texture.Name.Split('/').Length - 1]}";

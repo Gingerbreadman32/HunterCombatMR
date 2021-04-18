@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Extensions;
+using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using System;
@@ -27,7 +28,7 @@ namespace HunterCombatMR.UI
             int infoMod,
             bool interacting)
         {
-            Vector2 currentCoords = layer.GetPositionAtKeyFrame(keyframe);
+            Vector2 currentCoords = layer.GetPosition(keyframe);
             var coordList = new string[2];
             coordList[0] = currentCoords.X.ToString();
             coordList[1] = currentCoords.Y.ToString();
@@ -38,9 +39,9 @@ namespace HunterCombatMR.UI
             if (interacting)
             {
                 if (infoMod == 1)
-                    layer.SetPositionAtKeyFrame(keyframe, new Vector2(currentCoords.X, float.Parse(newText)));
+                    layer.SetPosition(keyframe, new Vector2(currentCoords.X, float.Parse(newText)));
                 else
-                    layer.SetPositionAtKeyFrame(keyframe, new Vector2(float.Parse(newText), currentCoords.Y));
+                    layer.SetPosition(keyframe, new Vector2(float.Parse(newText), currentCoords.Y));
             } else
             {
                 newText = coordList[infoMod];
@@ -136,7 +137,7 @@ namespace HunterCombatMR.UI
 
         public override void Update(GameTime gameTime)
         {
-            if (Layer != null && Layer.GetActiveAtKeyFrame(KeyFrame))
+            if (Layer != null && Layer.IsActive(KeyFrame))
                 Text = UpdateLogic(Layer, KeyFrame, Text, InfoModifier, Interacting);
             else
                 Text = "";
@@ -151,7 +152,7 @@ namespace HunterCombatMR.UI
         internal void SetLayerAndKeyFrame(AnimationLayer layer,
                     int keyFrame)
         {
-            if (layer != null && layer.GetActiveAtKeyFrame(keyFrame))
+            if (layer != null && layer.IsActive(keyFrame))
             {
                 Layer = layer;
                 KeyFrame = keyFrame;

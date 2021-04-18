@@ -35,14 +35,14 @@ namespace HunterCombatMR.AnimationEngine.Services
             return action;
         }
 
-        public IEnumerable<PlayerActionAnimation> RegisterAnimations()
+        public IEnumerable<PlayerAnimation> RegisterAnimations()
         {
-            var actions = new List<PlayerActionAnimation>();
+            var actions = new List<PlayerAnimation>();
             foreach (var animation in Containers.SelectMany(x => x.AnimatedActions))
             {
                 if (!actions.Any(x => x.Name.Equals(animation.Key)))
                 {
-                    var action = new PlayerActionAnimation(animation.Key, animation.Value, true);
+                    var action = new PlayerAnimation(animation.Key, animation.Value, true);
                     action.Initialize();
                     actions.Add(action);
                 }

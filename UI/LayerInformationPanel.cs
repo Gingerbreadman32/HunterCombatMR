@@ -97,7 +97,7 @@ namespace HunterCombatMR.UI
         {
             InformationList.Clear();
 
-            if (Layer == null || !Layer.GetActiveAtKeyFrame(KeyFrame))
+            if (Layer == null || !Layer.IsActive(KeyFrame))
                 return; 
 
             var boxes = new List<LayerInfoTextBox>();
@@ -125,7 +125,7 @@ namespace HunterCombatMR.UI
         public void SetLayerAndKeyFrame(AnimationLayer layer,
             int keyFrame)
         {
-            if (layer != null && layer.GetActiveAtKeyFrame(keyFrame))
+            if (layer != null && layer.IsActive(keyFrame))
             {
                 Layer = layer;
                 KeyFrame = keyFrame;

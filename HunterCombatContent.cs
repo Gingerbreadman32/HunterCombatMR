@@ -18,7 +18,7 @@ namespace HunterCombatMR
         private AnimationLoader _animationLoader;
         private IDictionary<Type, IEnumerable<IHunterCombatContentInstance>> _contentStream;
         private AnimationFileManager _fileManager;
-        private readonly Type[] _animationMap = new Type[] { typeof(PlayerActionAnimation),
+        private readonly Type[] _animationMap = new Type[] { typeof(PlayerAnimation),
             typeof(ProjectileAnimation) };
 
         #endregion Private Fields

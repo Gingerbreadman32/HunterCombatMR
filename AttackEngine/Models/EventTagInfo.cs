@@ -2,7 +2,7 @@
 
 namespace HunterCombatMR.AttackEngine.Models
 {
-    public struct EventTag
+    public struct EventTagInfo
     {
         #region Private Fields
 
@@ -12,7 +12,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         #region Public Constructors
 
-        public EventTag(int tag,
+        public EventTagInfo(int tag,
             int startFrame,
             int endFrame)
         {
@@ -40,7 +40,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         #region Public Methods
 
-        public bool CheckIfActive(int frame)
+        public bool IsActive(int frame)
             => (frame <= EndFrame) && (frame >= StartFrame);
 
         #endregion Public Methods

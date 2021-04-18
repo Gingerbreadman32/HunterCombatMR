@@ -1,29 +1,21 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.Interfaces;
+using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
-    public class KeyFrameEvent<TEntity, TActionType> where TEntity
-        : IAnimatedEntity<TActionType> where TActionType
-        : Animation<TEntity, TActionType>
+    public class KeyFrameEvent<THolder, TEntity> where THolder
+        : IEntityHolder<TEntity> where TEntity
+        : Entity
     {
-        #region Public Constructors
-
         public KeyFrameEvent(int tag,
-            ActionLogicMethod<TEntity, TActionType> actionLogic)
+            ActionLogicMethod<THolder, TEntity> actionLogic)
         {
             Tag = tag;
             ActionLogic = actionLogic;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public ActionLogicMethod<TEntity, TActionType> ActionLogic { get; }
+        public ActionLogicMethod<THolder, TEntity> ActionLogic { get; }
         public bool IsEnabled { get; set; } = true;
         public int Tag { get; }
-
-        #endregion Public Properties
     }
 }

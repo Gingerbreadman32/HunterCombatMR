@@ -12,7 +12,7 @@ namespace HunterCombatMR.AttackEngine.Models
     {
         #region Private Fields
 
-        private Animator<PlayerAction, HunterCombatPlayer, PlayerActionAnimation> _actionAnimator;
+        private Animator<PlayerAction, HunterCombatPlayer, PlayerAnimation> _actionAnimator;
         private MoveSet _currentMoveSet;
 
         #endregion Private Fields
@@ -21,7 +21,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public PlayerStateController(HunterCombatPlayer player)
         {
-            _actionAnimator = new Animator<PlayerAction, HunterCombatPlayer, PlayerActionAnimation>();
+            _actionAnimator = new Animator<PlayerAction, HunterCombatPlayer, PlayerAnimation>();
             State = PlayerState.Neutral;
             ActionState = AttackState.NotAttacking;
             Player = player;

@@ -6,7 +6,7 @@ namespace HunterCombatMR.Utilities
     {
         #region Public Methods
 
-        public static PlayerActionAnimation EditingAnimation
+        public static PlayerAnimation EditingAnimation
         {
             get => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing;
             set => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = value;

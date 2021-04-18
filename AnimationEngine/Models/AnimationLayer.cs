@@ -1,10 +1,11 @@
-﻿using HunterCombatMR.Comparers;
-using HunterCombatMR.Extensions;
+﻿using HunterCombatMR.AnimationEngine.Extensions;
+using HunterCombatMR.Comparers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria.ModLoader;
 
 namespace HunterCombatMR.AnimationEngine.Models
@@ -12,8 +13,6 @@ namespace HunterCombatMR.AnimationEngine.Models
     public class AnimationLayer
         : IEquatable<AnimationLayer>
     {
-        #region Public Constructors
-
         [JsonConstructor]
         public AnimationLayer(string name,
             Rectangle spriteframeRectangle,
@@ -44,10 +43,6 @@ namespace HunterCombatMR.AnimationEngine.Models
 
             Initialize();
         }
-
-        #endregion Public Constructors
-
-        #region Public Properties
 
         /// <summary>
         /// The layer depth that should be set by default
@@ -81,10 +76,6 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public string TexturePath { get; protected set; }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
         public bool Equals(AnimationLayer other)
         {
             FrameEqualityComparer comparer = new FrameEqualityComparer();
@@ -96,30 +87,6 @@ namespace HunterCombatMR.AnimationEngine.Models
                 && DefaultDepth.Equals(other.DefaultDepth)
                 && TexturePath.Equals(other.TexturePath);
         }
-
-        public bool GetActiveAtKeyFrame(int keyFrame)
-                    => KeyFrames.ContainsKey(keyFrame) && KeyFrames[keyFrame].IsEnabled;
-
-        public Rectangle GetCurrentFrameRectangle(int currentKeyFrame)
-                    => SpriteFrameRectangle.SetSheetPositionFromFrame(KeyFrames[currentKeyFrame].SpriteFrame);
-
-        public byte GetDepthAtKeyFrame(int keyFrame)
-                    => KeyFrames[keyFrame].LayerDepth;
-
-        public SpriteEffects GetOrientationAtKeyFrame(int keyFrame)
-            => KeyFrames[keyFrame].SpriteOrientation;
-
-        public Vector2 GetPositionAtKeyFrame(int keyFrame)
-                    => KeyFrames[keyFrame].Position;
-
-        public float GetRotationAtKeyFrame(int keyFrame)
-            => KeyFrames[keyFrame].Rotation;
-
-        public int GetSpriteTextureFrameTotal()
-            => Texture.Height / SpriteFrameRectangle.Height;
-
-        public int GetTextureFrameAtKeyFrame(int keyFrame)
-                => KeyFrames[keyFrame].SpriteFrame;
 
         /// <summary>
         /// This applies the layer depth to all of the frames and loads the texture, must be called before adding to an animation.
@@ -139,9 +106,31 @@ namespace HunterCombatMR.AnimationEngine.Models
             Texture = ModContent.GetTexture(TexturePath);
         }
 
-        #endregion Public Methods
+        public bool IsActive(int keyFrame)
+                            => KeyFrames.ContainsKey(keyFrame) && KeyFrames[keyFrame].IsEnabled;
 
-        #region Internal Methods
+        public void SetTexture(Texture2D texture)
+        {
+            Texture = texture;
+            TexturePath = texture.Name;
+        }
+
+        public void UpdateLayerDepth(int amount,
+                    int currentKeyFrame,
+            IEnumerable<AnimationLayer> layers)
+        {
+            if (amount == 0)
+                return;
+
+            int newDepthInt = this.GetDepth(currentKeyFrame) + amount;
+            byte newDepthByte = (newDepthInt > byte.MaxValue) ? byte.MaxValue : (newDepthInt < byte.MinValue) ? byte.MinValue : (byte)newDepthInt;
+            var layerInNewPlace = layers.FirstOrDefault(x => x.KeyFrames[currentKeyFrame].LayerDepth.Equals(newDepthByte));
+            if (layerInNewPlace != null)
+            {
+                layerInNewPlace.SetDepth(currentKeyFrame, this.GetDepth(currentKeyFrame));
+            }
+            this.SetDepth(currentKeyFrame, newDepthByte);
+        }
 
         internal void AddKeyFrame(int keyFrameIndex,
             LayerFrameInfo frameInfo)
@@ -165,50 +154,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             InheritPreviousKeyFrameProperties(keyFrameIndex);
         }
 
-        internal void SetDepthAtKeyFrame(int keyFrameIndex,
-            byte depth)
-        {
-            byte? newDepth = depth;
-            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], newDepth.Value) { LayerDepthOverride = (newDepth == DefaultDepth) ? null : newDepth };
-        }
-
-        internal void SetPositionAtKeyFrame(int keyFrameIndex,
-                            Vector2 newPosition)
-        {
-            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { Position = newPosition };
-        }
-
-        internal void SetTextureFrameAtKeyFrame(int keyFrameIndex,
-            int textureFrame)
-        {
-            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { SpriteFrame = textureFrame };
-        }
-
-        internal void SetTexture(string texturePath)
-        {
-            TexturePath = texturePath;
-            Texture = ModContent.GetTexture(texturePath);
-        }
-
-        internal void SetTexture(Texture2D texture)
-        {
-            Texture = texture;
-            TexturePath = texture.Name;
-        }
-
-        internal void ToggleVisibilityAtKeyFrame(int keyFrameIndex)
-        {
-            bool visible = KeyFrames[keyFrameIndex].IsEnabled;
-
-            visible ^= true;
-
-            KeyFrames[keyFrameIndex] = new LayerFrameInfo(KeyFrames[keyFrameIndex], KeyFrames[keyFrameIndex].LayerDepth) { IsEnabled = visible };
-        }
-
-        #endregion Internal Methods
-
-        #region Private Methods
-
         private void InheritPreviousKeyFrameProperties(int keyFrameIndex)
         {
             int nextFrameIndex = keyFrameIndex + 1;
@@ -219,7 +164,5 @@ namespace HunterCombatMR.AnimationEngine.Models
                 InheritPreviousKeyFrameProperties(nextFrameIndex);
             }
         }
-
-        #endregion Private Methods
     }
 }

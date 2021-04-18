@@ -2,6 +2,7 @@
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Interfaces;
 using HunterCombatMR.Items;
 using Microsoft.Xna.Framework;
 using System;
@@ -15,7 +16,8 @@ namespace HunterCombatMR
 {
     public class HunterCombatPlayer
         : ModPlayer,
-        IAnimatedEntity<PlayerActionAnimation>
+        IAnimatedEntity<PlayerAnimation>,
+        IEntityHolder<Player>
     {
         #region Private Fields
 
@@ -40,11 +42,13 @@ namespace HunterCombatMR
 
         public override bool CloneNewInstances => false;
         public ICollection<string> ActiveProjectiles { get; set; }
-        public PlayerActionAnimation CurrentAnimation { get; private set; }
+        public PlayerAnimation CurrentAnimation { get; private set; }
         public PlayerBufferInformation InputBuffers { get; private set; }
         public IDictionary<string, Vector2> LayerPositions { get; set; }
         public PlayerStateController StateController { get; private set; }
         public WeaponBase EquippedWeapon { get; set; }
+
+        public Player EntityContainer => player;
 
         #endregion Public Properties
 
@@ -100,7 +104,7 @@ namespace HunterCombatMR
                 if (CurrentAnimation != null)
                 {
                     layers = CurrentAnimation.DrawPlayerLayers(layers);
-                    CurrentAnimation.Update(CurrentAnimation.AnimationData);
+                    CurrentAnimation.Update();
                 }
             }
         }
@@ -152,7 +156,7 @@ namespace HunterCombatMR
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode)
                     && (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationType.Equals(AnimationType.Player) ?? false))
             {
-                SetCurrentAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerActionAnimation);
+                SetCurrentAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerAnimation);
             }
 
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode) && CurrentAnimation != null)
@@ -182,7 +186,7 @@ namespace HunterCombatMR
                 InputBuffers.Update();
         }
 
-        public bool SetCurrentAnimation(PlayerActionAnimation newAnimation,
+        public bool SetCurrentAnimation(PlayerAnimation newAnimation,
             bool newFile = false)
         {
             if (newAnimation == null)
