@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TerrariaSteamPath>C:\Program Files (x86)\Steam\steamapps\common\tModLoader</TerrariaSteamPath>
-    <tMLPath>C:\Program Files (x86)\Steam\steamapps\common\tModLoader\tModLoader.exe</tMLPath>
-    <tMLServerPath>C:\Program Files (x86)\Steam\steamapps\common\tModLoader\tModLoaderServer.exe</tMLServerPath>
-    <tMLBuildServerPath>C:\Program Files (x86)\Steam\steamapps\common\tModLoader\tModLoaderServer.exe</tMLBuildServerPath>
-	<ReferencesPath>C:\Users\pooko\Documents\My Games\Terraria\ModLoader\references\</ReferencesPath>
+    <TerrariaSteamPath>D:\Steam Games\steamapps\common\tModLoader</TerrariaSteamPath>
+    <tMLPath>D:\Steam Games\steamapps\common\tModLoader\tModLoader.exe</tMLPath>
+    <tMLServerPath>D:\Steam Games\steamapps\common\tModLoader\tModLoaderServer.exe</tMLServerPath>
+    <tMLBuildServerPath>D:\Steam Games\steamapps\common\tModLoader\tModLoaderServer.exe</tMLBuildServerPath>
+	<ReferencesPath>C:\Users\warde\Documents\My Games\Terraria\ModLoader\references\</ReferencesPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework">

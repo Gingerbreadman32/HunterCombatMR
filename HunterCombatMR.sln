@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HunterCombatMR", "HunterCombatMR.csproj", "{F73560AC-EA22-4496-9915-211BC39BB9AB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tModLoader", "..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\tModLoader\Source\tModLoader.csproj", "{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tModLoader", "D:\Steam Games\steamapps\common\tModLoader\Source\tModLoader.csproj", "{BA070FCA-D2B8-437F-94F4-44065A9ED4AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{F73560AC-EA22-4496-9915-211BC39BB9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F73560AC-EA22-4496-9915-211BC39BB9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F73560AC-EA22-4496-9915-211BC39BB9AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A02BFE2A-AA5C-4328-9C1C-F4D490C26A6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA070FCA-D2B8-437F-94F4-44065A9ED4AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA070FCA-D2B8-437F-94F4-44065A9ED4AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA070FCA-D2B8-437F-94F4-44065A9ED4AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA070FCA-D2B8-437F-94F4-44065A9ED4AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
