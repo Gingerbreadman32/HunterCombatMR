@@ -5,6 +5,6 @@ obj
 .vs
 .cr
 *.user
-HunterCombatMR.sln
-HunterCombat.targets
-properties
+*.sln
+*.targets
+Properties
