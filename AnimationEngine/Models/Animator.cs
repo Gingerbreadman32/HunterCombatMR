@@ -1,31 +1,26 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
+﻿using HunterCombatMR.AnimationEngine.Enumerations;
 using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public partial class Animator<TAnimated, TObject, TObjectAnimated> 
-        : IAnimator 
-        where TAnimated : IAnimated
-        where TObject : IAnimatedEntity<TObjectAnimated>
-        where TObjectAnimated : IAnimated
+    /// <summary>
+    /// Main Animator project, used to animate through a <see cref="Animation"/>
+    /// </summary>
+    /// <seealso cref="Animator.Frames"/>
+    public partial class Animator
     {
-        private SortedList<int, KeyFrame> _keyFrames;
-
-        #region Public Constructors
+        private AnimatorFlags _flags;
 
         /// <summary>
         /// Default constructor
         /// </summary>
         public Animator()
         {
-            IsInitialized = false;
-            _keyFrames = new SortedList<int, KeyFrame>();
-            CurrentFrame = 0;
-            IsPlaying = false;
-            InProgress = false;
+            Initialized = false;
+            KeyFrames = new SortedList<int, KeyFrame>();
+            CurrentFrame = FrameIndex.Zero;
             Parameters = new Dictionary<string, string>();
         }
 
@@ -33,209 +28,120 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// Copy constructor
         /// </summary>
         /// <param name="copy">The previous animation</param>
-        public Animator(IAnimator copy)
+        public Animator(Animator copy)
         {
-            IsInitialized = false;
+            Flags = copy.Flags;
             CurrentFrame = copy.CurrentFrame;
-            IsPlaying = copy.IsPlaying;
-            InProgress = copy.InProgress;
-            _keyFrames = copy.KeyFrames;
-            Parameters = new Dictionary<string, string>();
+            Parameters = copy.Parameters;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public int CurrentFrame { get; set; }
-        public bool InProgress { get; set; }
-        public bool IsInitialized { get; set; }
-        public bool IsPlaying { get; set; }
         public LoopStyle CurrentLoopStyle { get; set; }
-        public SortedList<int, KeyFrame> KeyFrames { get => _keyFrames; }
+
+        public AnimatorFlags Flags
+        {
+            get => _flags;
+            set
+            {
+                if (!Initialized)
+                {
+                    HunterCombatMR.Instance?.StaticLogger.Warn($"Animator must be initialized to set flags.");
+                    _flags = AnimatorFlags.Locked;
+                    return;
+                }
+                _flags = value;
+            }
+        }
+
+        public bool Initialized { get; set; }
         public IDictionary<string, string> Parameters { get; set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public void CreateKeyFrames(KeyFrameProfile keyFrameProfile,
-            LoopStyle loopStyle = LoopStyle.Once)
-        {
-            CurrentFrame = 0;
-            _keyFrames.Clear();
-
-            for (var k = 0; k < keyFrameProfile.KeyFrameAmount; k++)
-            {
-                FrameLength frameSpeed;
-                if (keyFrameProfile.SpecificKeyFrameSpeeds != null && keyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(k))
-                    frameSpeed = keyFrameProfile.SpecificKeyFrameSpeeds[k];
-                else
-                    frameSpeed = (FrameLength)keyFrameProfile.DefaultKeyFrameSpeed;
-
-                AppendKeyFrame(frameSpeed);
-            }
-
-            CurrentLoopStyle = loopStyle;
-        }
-
-        public void AppendKeyFrame(FrameLength keyFrameLength)
-        {
-            KeyFrame newKeyFrame = new KeyFrame((FrameIndex)TotalFrames, keyFrameLength);
-
-            if (newKeyFrame.FrameLength > 0)
-            {
-                newKeyFrame.StartingFrameIndex = (FrameIndex)TotalFrames;
-                KeyFrames.Add(KeyFrames.Count, newKeyFrame);
-            }
-            else
-            {
-                throw new Exception("Keyframe must be longer than 0 frames!");
-            }
-        }
-
-        /// <inheritdoc/>
-        public void AdvanceFrame(int framesAdvancing = 1, bool bypassPause = false)
-        {
-            if ((IsPlaying || bypassPause) && IsInitialized)
-            {
-                if (CurrentFrame + framesAdvancing < TotalFrames)
-                {
-                    CurrentFrame += framesAdvancing;
-                }
-                else
-                {
-                    switch (CurrentLoopStyle)
-                    {
-                        case LoopStyle.PlayPause:
-                            CurrentFrame = (TotalFrames - 1);
-                            PauseAnimation();
-                            break;
-
-                        case LoopStyle.Once:
-                            StopAnimation();
-                            break;
-
-                        case LoopStyle.Loop:
-                            ResetAnimation(true);
-                            break;
-
-                        case LoopStyle.PingPong:
-                            HunterCombatMR.Instance.StaticLogger.Debug($"Ping Pong loop not implemented.");
-                            throw new Exception("Loop mode failure!");
-
-                        default:
-                            throw new Exception("Loop mode not set!");
-                    }
-                }
-            }
-            else if (!IsInitialized)
-                HunterCombatMR.Instance.StaticLogger.Warn($"Animation Not Initialized");
-        }
-
-        /// <inheritdoc/>
-        public void AdvanceToNextKeyFrame()
-        {
-            if (IsInitialized)
-            {
-                var nextKey = (CurrentKeyFrameIndex < KeyFrames.Count - 1) ? CurrentKeyFrameIndex + 1 : CurrentKeyFrameIndex;
-
-                CurrentFrame = KeyFrames[nextKey].StartingFrameIndex;
-            }
-        }
-
-        /// <inheritdoc/>
-        public bool CheckCurrentKeyFrame(int keyFrameIndex)
-            => KeyFrames[keyFrameIndex].StartingFrameIndex.Equals(GetCurrentKeyFrame().StartingFrameIndex);
-
-        /// <inheritdoc/>
-        public KeyFrame GetCurrentKeyFrame()
-        {
-            try
-            {
-                return KeyFrames.First(x => x.Value.IsKeyFrameActive(CurrentFrame)).Value;
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new InvalidOperationException($"Error, no keyframes reflect the current frame index {CurrentFrame}!", ex);
-            }
-        }
 
         public void Initialize(KeyFrameProfile keyFrameProfile,
             LoopStyle loopStyle = LoopStyle.Once)
         {
+            Stop(false);
             if (keyFrameProfile.KeyFrameAmount > 0)
             {
                 CreateKeyFrames(keyFrameProfile, loopStyle);
-                IsInitialized = true;
+                Initialized = true;
                 return;
             }
 
             throw new Exception($"No Keyframes to initialize in animation!");
         }
 
-        public void PauseAnimation()
+        /// <summary>
+        /// Pauses playback. Returns true if state was changed.
+        /// </summary>
+        public bool Pause()
         {
-            IsPlaying = false;
-            if (CurrentKeyFrameIndex > 0)
-                InProgress = true;
-        }
-
-        /// <inheritdoc/>
-        public void ResetAnimation(bool startPlaying = true)
-        {
-            CurrentFrame = 0;
-            InProgress = false;
-
-            if (startPlaying)
-                StartAnimation();
-        }
-
-        /// <inheritdoc/>
-        public void ReverseFrame(int framesReversing = 1)
-        {
-            if (IsInitialized)
+            if (!Flags.HasFlag(AnimatorFlags.Locked))
             {
-                if (CurrentFrame - framesReversing >= 0)
-                    CurrentFrame -= framesReversing;
-                else
-                    CurrentFrame = 0;
+                Flags |= AnimatorFlags.Locked;
+                return true;
             }
+
+            return false;
         }
 
-        /// <inheritdoc/>
-        public void ReverseToPreviousKeyFrame()
+        /// <summary>
+        /// Starts or resumes playback. Returns true if the state was changed.
+        /// </summary>
+        public bool Play()
         {
-            if (IsInitialized)
+            if (Flags.HasFlag(AnimatorFlags.Locked))
             {
-                var lastKey = (CurrentKeyFrameIndex > 0) ? CurrentKeyFrameIndex - 1 : CurrentKeyFrameIndex;
-
-                CurrentFrame = KeyFrames[lastKey].StartingFrameIndex;
+                Flags &= ~AnimatorFlags.Locked;
+                return true;
             }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Resumes playback if paused, pauses playback if playing
+        /// </summary>
+        public void PlayPause()
+        {
+            if (!Play())
+                Pause();
+        }
+
+        public void Reinitialize(FrameLength defaultLength)
+        {
+            Uninitialize();
+
+            Initialize(new KeyFrameProfile(KeyFrames, defaultLength), CurrentLoopStyle);
         }
 
         /// <inheritdoc/>
-        public void StartAnimation()
+        public void Stop(bool replay)
         {
-            IsPlaying = true;
-            InProgress = true;
-        }
+            Flags = AnimatorFlags.Locked;
+            CurrentFrame = FrameIndex.Zero;
 
-        /// <inheritdoc/>
-        public void StopAnimation()
-        {
-            IsPlaying = false;
-            InProgress = false;
-            ResetAnimation(false);
+            if (replay)
+                Play();
         }
 
         /// <inheritdoc/>
         public void Uninitialize()
         {
-            StopAnimation();
-            IsInitialized = false;
+            Stop(false);
+            Initialized = false;
         }
 
-        #endregion Public Methods
+        public void Update(bool bypassLock = false)
+        {
+            if (!Initialized)
+                return;
+
+            if (!Flags.HasFlag(AnimatorFlags.Locked) || bypassLock)
+            {
+                MoveFrame(FrameSkip + 1);
+            }
+
+            if (!Flags.HasFlag(AnimatorFlags.Started) && CurrentFrame > 0)
+                Flags |= AnimatorFlags.Started;
+        }
     }
 }

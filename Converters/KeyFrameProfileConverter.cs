@@ -1,9 +1,8 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using HunterCombatMR.Extensions;
 
 namespace HunterCombatMR.Converters
 {
@@ -12,22 +11,6 @@ namespace HunterCombatMR.Converters
     {
         public override bool CanConvert(Type objectType)
             => objectType == typeof(KeyFrameProfile);
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            var profile = (KeyFrameProfile)value;
-
-            writer.WriteStartObject();
-
-            writer.WritePropertyName("KeyFrameAmount");
-            serializer.Serialize(writer, profile.KeyFrameAmount);
-            writer.WritePropertyName("DefaultKeyFrameSpeed");
-            serializer.Serialize(writer, profile.DefaultKeyFrameSpeed);
-            writer.WritePropertyName("SpecificKeyFrameSpeeds");
-            serializer.Serialize(writer, profile.SpecificKeyFrameSpeeds);
-
-            writer.WriteEndObject();
-        }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
@@ -54,12 +37,23 @@ namespace HunterCombatMR.Converters
                     SpecificKeyFrameSpeeds = serializer.Deserialize<Dictionary<int, int>>(reader);
             }
 
-            if (!(KeyFrameAmount > 0 && DefaultKeyFrameSpeed > 0))
-            {
-                throw new InvalidDataException("Animation file must contain a keyframe profile with more than 0 total keyframes and keyframe speed.");
-            }
+            return new KeyFrameProfile(KeyFrameAmount.ToFLength(), DefaultKeyFrameSpeed.ToFLength(), SpecificKeyFrameSpeeds?.ConvertToLengthList() ?? new SortedList<int, FrameLength>());
+        }
 
-            return new KeyFrameProfile(KeyFrameAmount, DefaultKeyFrameSpeed, SpecificKeyFrameSpeeds?.ConvertToLengthList() ?? new SortedList<int, FrameLength>());
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var profile = (KeyFrameProfile)value;
+
+            writer.WriteStartObject();
+
+            writer.WritePropertyName("KeyFrameAmount");
+            serializer.Serialize(writer, (int)profile.KeyFrameAmount);
+            writer.WritePropertyName("DefaultKeyFrameSpeed");
+            serializer.Serialize(writer, (int)profile.DefaultKeyFrameLength);
+            writer.WritePropertyName("SpecificKeyFrameSpeeds");
+            serializer.Serialize(writer, profile.KeyFrameLengths);
+
+            writer.WriteEndObject();
         }
     }
 }

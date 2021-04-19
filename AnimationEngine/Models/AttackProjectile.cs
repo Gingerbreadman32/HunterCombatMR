@@ -76,7 +76,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public override bool PreKill(int timeLeft)
         {
-            _animation.Stop();
+            _animation.AnimationData.Stop(false);
             var projectiles = Main.player[projectile.owner].GetModPlayer<HunterCombatPlayer>().ActiveProjectiles;
 
             if (projectiles.Contains(projectile.Name))

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HunterCombatMR.Extensions;
+using System;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -8,8 +9,6 @@ namespace HunterCombatMR.AnimationEngine.Models
     public struct KeyFrame
         : IComparable<KeyFrame>
     {
-        #region Public Constructors
-
         public KeyFrame(FrameLength length)
         {
             FrameLength = length;
@@ -29,17 +28,13 @@ namespace HunterCombatMR.AnimationEngine.Models
             FrameLength = copy.FrameLength;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         /// <summary>
         /// Gets the last frame that this keyframe is active
         /// </summary>
         /// <returns>The final frame active</returns>
         public FrameIndex FinalFrameIndex
         {
-            get => (FrameIndex)(StartingFrameIndex + (FrameLength - 1));
+            get => StartingFrameIndex + (FrameLength - 1);
         }
 
         /// <summary>
@@ -52,10 +47,6 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public FrameIndex StartingFrameIndex { get; set; }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
         public static bool operator <=(KeyFrame a, KeyFrame b)
             => a.StartingFrameIndex <= b.StartingFrameIndex;
 
@@ -66,14 +57,26 @@ namespace HunterCombatMR.AnimationEngine.Models
         public int CompareTo(KeyFrame other)
             => other.StartingFrameIndex.CompareTo(other.StartingFrameIndex);
 
+        public FrameIndex GetFrameProgress(FrameIndex currentFrame)
+        {
+            if (!IsKeyFrameActive(currentFrame))
+            {
+                HunterCombatMR
+                    .Instance
+                    .StaticLogger
+                    .Error($"Current animation frame {currentFrame} does not include keyframe that starts at {StartingFrameIndex}.");
+                return FrameIndex.Zero;
+            }
+
+            return currentFrame - StartingFrameIndex;
+        }
+
         /// <summary>
         /// Gets whether the keyframe is currently active in the given animation
         /// </summary>
         /// <param name="currentFrame">The current frame index of the animation</param>
         /// <returns>Yes if the keyframe is active</returns>
-        public bool IsKeyFrameActive(int currentFrame)
+        public bool IsKeyFrameActive(FrameIndex currentFrame)
             => currentFrame >= StartingFrameIndex && currentFrame <= FinalFrameIndex;
-
-        #endregion Public Methods
     }
 }

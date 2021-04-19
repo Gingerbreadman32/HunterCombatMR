@@ -4,13 +4,7 @@ namespace HunterCombatMR.AttackEngine.Models
 {
     public struct EventTagInfo
     {
-        #region Private Fields
-
         private KeyValuePair<int, int> _frameRange;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public EventTagInfo(int tag,
             int startFrame,
@@ -19,12 +13,6 @@ namespace HunterCombatMR.AttackEngine.Models
             TagReference = tag;
             _frameRange = new KeyValuePair<int, int>(startFrame, endFrame);
         }
-
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public int TagReference { get; }
 
         public int EndFrame
         {
@@ -36,13 +24,9 @@ namespace HunterCombatMR.AttackEngine.Models
             get => _frameRange.Key;
         }
 
-        #endregion Public Properties
-
-        #region Public Methods
+        public int TagReference { get; }
 
         public bool IsActive(int frame)
             => (frame <= EndFrame) && (frame >= StartFrame);
-
-        #endregion Public Methods
     }
 }

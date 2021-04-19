@@ -203,7 +203,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         internal static bool DefaultCondition(IAnimation animation,
             TimelineButton button)
-            => (animation != null && animation.AnimationData.IsInitialized);
+            => (animation != null && animation.AnimationData.Initialized);
 
         #endregion Internal Methods
     }
