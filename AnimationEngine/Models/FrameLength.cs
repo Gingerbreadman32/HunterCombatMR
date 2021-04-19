@@ -1,18 +1,79 @@
-﻿using HunterCombatMR.Models;
+﻿using HunterCombatMR.Extensions;
+using System;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public sealed class FrameLength
-        : PositiveInteger<FrameLength>
+    public struct FrameLength
+        : IEquatable<int>,
+        IComparable<int>,
+        IFormattable
     {
-        public FrameLength()
-            : base(1, 1)
+        private int _value;
+
+        public FrameLength(int val)
         {
+            if (val < Minimum)
+                throw new ArgumentOutOfRangeException($"Length must be above {Minimum}!");
+            _value = val;
         }
 
-        public FrameLength(int length)
-            : base(length, 1)
-        {
-        }
+        public static int Minimum { get => 1; }
+        public static FrameLength One { get => new FrameLength(1); }
+
+        public int Value { get => _value; }
+
+        public static explicit operator FrameLength(int b)
+                    => new FrameLength(b);
+
+        public static explicit operator FrameLength(FrameIndex d)
+            => new FrameLength(d);
+
+        public static implicit operator FrameIndex(FrameLength b)
+                    => new FrameIndex(b);
+
+        public static implicit operator int(FrameLength d)
+                            => d._value;
+
+        public static FrameLength operator -(FrameLength a, int b)
+            => (a._value - b).ToFLength();
+
+        public static bool operator !=(FrameLength a, int b)
+            => !a._value.Equals(b);
+
+        public static int operator *(FrameLength a, int b)
+            => a._value * b;
+
+        public static int operator /(FrameLength a, int b)
+            => a._value / b;
+
+        public static FrameLength operator +(FrameLength a, int b)
+            => (a._value + b).ToFLength();
+
+        public static bool operator <=(FrameLength a, int b)
+            => a._value <= b;
+
+        public static bool operator ==(FrameLength a, int b)
+            => a._value.Equals(b);
+
+        public static bool operator >=(FrameLength a, int b)
+            => a._value >= b;
+
+        public int CompareTo(int other)
+            => _value.CompareTo(other);
+
+        public bool Equals(int other)
+            => _value.Equals(other);
+
+        public override bool Equals(object obj)
+            => base.Equals(obj);
+
+        public override int GetHashCode()
+            => _value.GetHashCode();
+
+        public string ToString(string format, IFormatProvider formatProvider)
+            => _value.ToString(format, formatProvider);
+
+        public override string ToString()
+            => _value.ToString();
     }
 }

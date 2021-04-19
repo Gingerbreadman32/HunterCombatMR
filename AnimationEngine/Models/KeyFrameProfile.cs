@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.Comparers;
+using HunterCombatMR.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,68 +10,48 @@ namespace HunterCombatMR.AnimationEngine.Models
     public class KeyFrameProfile
         : IEquatable<KeyFrameProfile>
     {
-        #region Private Fields
-
-        [JsonIgnore]
-        private FrameLength _defaultFrameLength;
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
         public KeyFrameProfile()
         {
-            KeyFrameAmount = 0;
-            DefaultKeyFrameSpeed = 1;
-            SpecificKeyFrameSpeeds = new SortedList<int, FrameLength>();
+            KeyFrameAmount = FrameLength.One;
+            KeyFrameLengths = new SortedList<int, FrameLength>();
         }
 
         [JsonConstructor]
-        public KeyFrameProfile(int keyFrameAmount,
-            int defaultKeyFrameSpeed,
+        public KeyFrameProfile(FrameLength keyFrameAmount,
+            FrameLength defaultKeyFrameSpeed,
             SortedList<int, FrameLength> keyFrameSpeeds = null)
         {
             KeyFrameAmount = keyFrameAmount;
-            DefaultKeyFrameSpeed = defaultKeyFrameSpeed;
+            DefaultKeyFrameLength = defaultKeyFrameSpeed;
 
             if (keyFrameSpeeds != null)
-                SpecificKeyFrameSpeeds = new SortedList<int, FrameLength>(keyFrameSpeeds);
+                KeyFrameLengths = new SortedList<int, FrameLength>(keyFrameSpeeds);
             else
-                SpecificKeyFrameSpeeds = new SortedList<int, FrameLength>();
+                KeyFrameLengths = new SortedList<int, FrameLength>();
         }
 
         public KeyFrameProfile(SortedList<int, KeyFrame> keyFrames,
-            int defaultKeyFrameSpeed)
+            FrameLength defaultKeyFrameSpeed)
         {
-            KeyFrameAmount = keyFrames.Count();
-            DefaultKeyFrameSpeed = defaultKeyFrameSpeed;
-            SpecificKeyFrameSpeeds = CreateTimingsFromKeyFrames(keyFrames);
+            KeyFrameAmount = keyFrames.Count().ToFLength();
+            DefaultKeyFrameLength = defaultKeyFrameSpeed;
+            KeyFrameLengths = CreateTimingsFromKeyFrames(keyFrames);
         }
 
         public KeyFrameProfile(KeyFrameProfile copy)
         {
             KeyFrameAmount = copy.KeyFrameAmount;
-            DefaultKeyFrameSpeed = copy.DefaultKeyFrameSpeed;
+            DefaultKeyFrameLength = copy.DefaultKeyFrameLength;
 
-            if (copy.SpecificKeyFrameSpeeds != null && copy.SpecificKeyFrameSpeeds.Any())
-                SpecificKeyFrameSpeeds = new SortedList<int, FrameLength>(copy.SpecificKeyFrameSpeeds);
+            if (copy.KeyFrameLengths != null && copy.KeyFrameLengths.Any())
+                KeyFrameLengths = new SortedList<int, FrameLength>(copy.KeyFrameLengths);
             else
-                SpecificKeyFrameSpeeds = new SortedList<int, FrameLength>();
+                KeyFrameLengths = new SortedList<int, FrameLength>();
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public int DefaultKeyFrameSpeed { get => _defaultFrameLength; set => _defaultFrameLength = (FrameLength)value; }
-        [JsonIgnore]
-        public FrameLength DefaultKeyFrameLength { get => _defaultFrameLength; }
-        public int KeyFrameAmount { get; set; }
-        public SortedList<int, FrameLength> SpecificKeyFrameSpeeds { get; set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
+        public FrameLength DefaultKeyFrameLength { get; private set; } = FrameLength.One;
+        public FrameLength KeyFrameAmount { get; set; }
+        public SortedList<int, FrameLength> KeyFrameLengths { get; set; }
 
         public bool Equals(KeyFrameProfile other)
         {
@@ -81,8 +62,8 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public void RemoveKeyFrame(int keyFrameIndex)
         {
-            if (SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex))
-                SpecificKeyFrameSpeeds.Remove(keyFrameIndex);
+            if (KeyFrameLengths.ContainsKey(keyFrameIndex))
+                KeyFrameLengths.Remove(keyFrameIndex);
 
             InheritPreviousKeyFrameProperties(keyFrameIndex);
         }
@@ -90,23 +71,19 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void SwitchKeyFrames(int keyFrameIndex,
                     int newFrameIndex)
         {
-            int? curSpeed = SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex) ? SpecificKeyFrameSpeeds[keyFrameIndex] : new int?();
-            int? newSpeed = SpecificKeyFrameSpeeds.ContainsKey(newFrameIndex) ? SpecificKeyFrameSpeeds[newFrameIndex] : new int?();
+            int? curSpeed = KeyFrameLengths.ContainsKey(keyFrameIndex) ? KeyFrameLengths[keyFrameIndex] : new int?();
+            int? newSpeed = KeyFrameLengths.ContainsKey(newFrameIndex) ? KeyFrameLengths[newFrameIndex] : new int?();
 
             SwitchIndex(keyFrameIndex, newSpeed);
             SwitchIndex(newFrameIndex, curSpeed);
         }
-
-        #endregion Public Methods
-
-        #region Private Methods
 
         private SortedList<int, FrameLength> CreateTimingsFromKeyFrames(SortedList<int, KeyFrame> keyFrames)
         {
             var timings = new SortedList<int, FrameLength>();
             foreach (var keyFrame in keyFrames)
             {
-                if (!keyFrame.Value.FrameLength.Equals(DefaultKeyFrameSpeed))
+                if (!keyFrame.Value.FrameLength.Equals(DefaultKeyFrameLength))
                     timings.Add(keyFrame.Key, keyFrame.Value.FrameLength);
             }
             return timings;
@@ -115,13 +92,13 @@ namespace HunterCombatMR.AnimationEngine.Models
         private void InheritPreviousKeyFrameProperties(int keyFrameIndex)
         {
             int nextFrameIndex = keyFrameIndex + 1;
-            if (SpecificKeyFrameSpeeds.ContainsKey(nextFrameIndex))
+            if (KeyFrameLengths.ContainsKey(nextFrameIndex))
             {
-                SpecificKeyFrameSpeeds.Add(keyFrameIndex, SpecificKeyFrameSpeeds[nextFrameIndex]);
-                SpecificKeyFrameSpeeds.Remove(nextFrameIndex);
+                KeyFrameLengths.Add(keyFrameIndex, KeyFrameLengths[nextFrameIndex]);
+                KeyFrameLengths.Remove(nextFrameIndex);
             }
 
-            if (SpecificKeyFrameSpeeds.Any() && nextFrameIndex <= SpecificKeyFrameSpeeds.OrderBy(x => x.Key).Last().Key)
+            if (KeyFrameLengths.Any() && nextFrameIndex <= KeyFrameLengths.OrderBy(x => x.Key).Last().Key)
                 InheritPreviousKeyFrameProperties(nextFrameIndex);
         }
 
@@ -129,11 +106,9 @@ namespace HunterCombatMR.AnimationEngine.Models
             int? newFrameTime)
         {
             if (!newFrameTime.HasValue)
-                SpecificKeyFrameSpeeds[keyFrameIndex] = (FrameLength)newFrameTime;
-            else if (SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex))
-                SpecificKeyFrameSpeeds.Remove(keyFrameIndex);
+                KeyFrameLengths[keyFrameIndex] = (FrameLength)newFrameTime;
+            else if (KeyFrameLengths.ContainsKey(keyFrameIndex))
+                KeyFrameLengths.Remove(keyFrameIndex);
         }
-
-        #endregion Private Methods
     }
 }

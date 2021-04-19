@@ -3,108 +3,72 @@ using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Utilities;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
     public sealed class PlayerStateController
     {
-        #region Private Fields
-
-        private Animator<PlayerAction, HunterCombatPlayer, PlayerAnimation> _actionAnimator;
+        private Animator _actionAnimator;
+        private ComboAction _currentAction;
         private MoveSet _currentMoveSet;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public PlayerStateController(HunterCombatPlayer player)
         {
-            _actionAnimator = new Animator<PlayerAction, HunterCombatPlayer, PlayerAnimation>();
+            _actionAnimator = new Animator();
             State = PlayerState.Neutral;
             ActionState = AttackState.NotAttacking;
             Player = player;
             ActionHistory = new SortedList<int, string>();
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         public SortedList<int, string> ActionHistory { get; private set; }
-        public HunterCombatPlayer Player { get; }
-        public ComboAction CurrentAction { get; private set; }
         public AttackState ActionState { get; set; }
+
+        public ComboAction CurrentAction
+        {
+            get => _currentAction;
+            private set
+            {
+                if (value != _currentAction)
+                {
+                    _currentAction = value;
+                    SetupAnimator();
+                };
+            }
+        }
+
+        public int CurrentActionFrame { get => _actionAnimator.CurrentFrame; }
+        public HunterCombatPlayer Player { get; }
         public PlayerState State { get; set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public int GetCurrentActionFrame()
-            => _actionAnimator.CurrentFrame;
-
-        public void SetToNeutral()
-        {
-            SetNewAction(null);
-        }
-
-        public void SetNewAction(ComboAction action)
-        {
-            CurrentAction = action;
-            SetupAnimator();
-        }
 
         public void Update()
         {
-            if (Player.EquippedWeapon != null)
+            State = SetStateLogic(Player.player);
+
+            if (Player.EquippedWeapon == null)
             {
-                var nextAction = PlayerActionComboUtils.GetNextAvailableAction(this,
-                    GetOrReturnCurrentMoveSet(Player.EquippedWeapon.MoveSet),
-                    Player.InputBuffers);
-
-                if (nextAction != CurrentAction)
-                    SetNewAction(nextAction);
-
-                if (CurrentAction != null)
-                {
-                    if (!_actionAnimator.InProgress)
-                    {
-                        SetToNeutral();
-                    }
-
-                    CurrentAction.Attack.Update(_actionAnimator);
-                    AdvanceAnimator();
-                }
-            } else
                 _currentMoveSet = null;
+                return;
+            }
 
-            if (Player.player != null)
-                State = SetStateLogic(Player.player);
-        }
+            _currentMoveSet = ContentUtils.GetMoveSet(Player.EquippedWeapon.MoveSet);
 
-        #endregion Public Methods
+            CurrentAction = PlayerActionComboUtils.GetNextAvailableAction(this,
+                _currentMoveSet,
+                Player.InputBuffers);
 
-        #region Private Methods
-
-        private void AdvanceAnimator()
-        {
-            _actionAnimator.AdvanceFrame();
-
-            if (!_actionAnimator.InProgress)
-                SetToNeutral();
-        }
-
-        private void SetupAnimator()
-        {
-            _actionAnimator.Initialize(CurrentAction.Attack.KeyFrameProfile);
+            if (CurrentAction != null)
+            {
+                CurrentAction.Attack.InvokeEvents(_actionAnimator);
+                _actionAnimator.Update();
+            }
         }
 
         private PlayerState SetStateLogic(Player player)
         {
             // @@info Switch this up with a dictionary run through so it looks cleaner.
-            if (State == PlayerState.Dead)
+            if (State == PlayerState.Dead || Player.player == null)
                 return PlayerState.Dead;
 
             if (player.IsPlayerJumping())
@@ -119,14 +83,15 @@ namespace HunterCombatMR.AttackEngine.Models
             return PlayerState.Neutral;
         }
 
-        private MoveSet GetOrReturnCurrentMoveSet(string name)
+        private void SetupAnimator()
         {
-            if (_currentMoveSet != null && name.Equals(_currentMoveSet.InternalName))
-                return _currentMoveSet;
-            else
-                return ContentUtils.GetMoveSet(name);
-        }
+            if (CurrentAction == null)
+            {
+                _actionAnimator.Uninitialize();
+                return;
+            }
 
-        #endregion Private Methods
+            _actionAnimator.Initialize(CurrentAction.Attack.KeyFrameProfile);
+        }
     }
 }

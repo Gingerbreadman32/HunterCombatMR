@@ -13,19 +13,19 @@ namespace HunterCombatMR.Comparers
                 return null == x;
             if (null == x)
                 return false;
-            if (x.DefaultKeyFrameSpeed != y.DefaultKeyFrameSpeed)
+            if (x.DefaultKeyFrameLength != y.DefaultKeyFrameLength)
                 return false;
             if (x.KeyFrameAmount != y.KeyFrameAmount)
                 return false;
-            if (x.SpecificKeyFrameSpeeds.Count != y.SpecificKeyFrameSpeeds.Count)
+            if (x.KeyFrameLengths.Count != y.KeyFrameLengths.Count)
                 return false;
 
-            foreach (int k in x.SpecificKeyFrameSpeeds.Keys)
+            foreach (int k in x.KeyFrameLengths.Keys)
             {
-                if (!y.SpecificKeyFrameSpeeds.ContainsKey(k))
+                if (!y.KeyFrameLengths.ContainsKey(k))
                     return false;
 
-                if (!x.SpecificKeyFrameSpeeds[k].Equals(y.SpecificKeyFrameSpeeds[k]))
+                if (!x.KeyFrameLengths[k].Equals(y.KeyFrameLengths[k]))
                     return false;
             }
 

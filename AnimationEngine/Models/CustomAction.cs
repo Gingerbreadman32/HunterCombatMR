@@ -12,8 +12,9 @@ namespace HunterCombatMR.AnimationEngine.Models
         : IEntityHolder<TEntity> where TEntity
         : Entity
     {
-        private IEnumerable<KeyFrameEvent<THolder, TEntity>> _internalEvents;
+        private IEnumerable<KeyFrameEvent<THolder, TEntity>> _events;
         private IEnumerable<EventTagInfo> _tagReferences;
+        private SortedList<int, IAnimation> _animations;
 
         public CustomAction(string name,
                     string displayName = "")
@@ -25,14 +26,18 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         public IDictionary<string, string> ActionParameters { get; set; }
-        public SortedList<int, IAnimation> Animations { get; protected set; }
+        public SortedList<int, IAnimation> Animations 
+        { 
+            get => _animations;
+            protected set { _animations = value; SetUpFrameProfile(); } 
+        }
 
         public IDictionary<string, string> DefaultParameters { get; set; }
 
         public IEnumerable<KeyFrameEvent<THolder, TEntity>> KeyFrameEvents
         {
-            get => _internalEvents;
-            set { _internalEvents = value; SetUpFrameProfile(); }
+            get => _events;
+            set { _events = value; }
         }
 
         public KeyFrameProfile KeyFrameProfile { get; protected set; }
@@ -73,7 +78,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             SetUpFrameProfile();
         }
 
-        public virtual void Update(IAnimator animator)
+        public virtual void InvokeEvents(Animator animator)
         {
             foreach (var keyFrameEvent in GetCurrentFrameEvents(animator.CurrentFrame))
             {

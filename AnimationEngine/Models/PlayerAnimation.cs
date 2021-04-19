@@ -29,7 +29,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             : base(name)
         {
             Name = name;
-            AnimationData = new Animator<PlayerAnimation, HunterCombatPlayer, PlayerAnimation>();
+            AnimationData = new Animator();
             LayerData = layerData;
             IsStoredInternally = isInternal;
         }
@@ -39,10 +39,11 @@ namespace HunterCombatMR.AnimationEngine.Models
             : base(copy.InternalName)
         {
             Name = copy.Name;
-            AnimationData = new Animator<PlayerAnimation, HunterCombatPlayer, PlayerAnimation>(copy.AnimationData);
             LayerData = new LayerData(copy.LayerData);
             IsModified = newFile;
             IsStoredInternally = copy.IsStoredInternally;
+            AnimationData = new Animator();
+            Initialize();
         }
 
         #endregion Public Constructors

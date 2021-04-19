@@ -10,34 +10,17 @@ namespace HunterCombatMR.UI
     internal class PlayerInformationPanel
         : UIPanel
     {
-        #region Private Fields
-
-        private readonly int _parameterCount = 5;
-
-        #endregion Private Fields
-
-        #region Public Constructors
+        private const string _noneText = "N/A";
+        private string[] _parameters = new string[6];
 
         public PlayerInformationPanel()
         {
             ParameterList = new UIList();
         }
 
-        #endregion Public Constructors
-
-        #region Internal Properties
-
         internal UIList ParameterList { get; }
 
-        #endregion Internal Properties
-
-        #region Protected Properties
-
         protected HunterCombatPlayer Player { get; set; }
-
-        #endregion Protected Properties
-
-        #region Public Methods
 
         public override void Draw(SpriteBatch spriteBatch)
         {
@@ -57,7 +40,7 @@ namespace HunterCombatMR.UI
             ParameterList.Width.Set(0f, 1f);
             ParameterList.Height.Set(0f, 1f);
 
-            for (int p = 0; p < _parameterCount; p++)
+            for (int p = 0; p < _parameters.Count(); p++)
             {
                 UIText parameter = new UIText("");
                 ParameterList.Add(parameter);
@@ -77,7 +60,7 @@ namespace HunterCombatMR.UI
                 MinHeight.Set(PaddingTop + PaddingBottom + ParameterList._items.Count() * 32f, 0f);
             }
 
-            Left.Set(Player.player.BottomLeft.X - (MinWidth.Pixels/2) - Main.screenPosition.X, 0f);
+            Left.Set(Player.player.BottomLeft.X - (MinWidth.Pixels / 2) - Main.screenPosition.X, 0f);
             Top.Set(Player.player.BottomLeft.Y + 25f - Main.screenPosition.Y, 0f);
 
             base.Recalculate();
@@ -88,37 +71,44 @@ namespace HunterCombatMR.UI
             if (Player == null)
                 return;
 
-            (ParameterList._items[0] as UIText).SetText($"PState: {Player.StateController.State.ToString()} ({((int)Player.StateController.State)})");
-            (ParameterList._items[1] as UIText).SetText($"Anim: {AnimationText()}");
-            (ParameterList._items[2] as UIText).SetText($"Vel: {Math.Round(Player.player.velocity.X, 2)}, {Math.Round(Player.player.velocity.Y, 2)}");
-            (ParameterList._items[3] as UIText).SetText($"Action: {ActionText()}");
-            (ParameterList._items[4] as UIText).SetText($"AState: {Player.StateController.ActionState.ToString()} ({((int)Player.StateController.ActionState)})");
+            _parameters = new string[6]
+            {
+                $"PState: {Player.StateController.State.ToString()} ({((int)Player.StateController.State)})",
+                $"Anim: {AnimationText()}",
+                $"Vel: {Math.Round(Player.player.velocity.X, 2)}, {Math.Round(Player.player.velocity.Y, 2)}",
+                $"Action: {ActionText()}",
+                $"AState: {Player.StateController.ActionState.ToString()} ({((int)Player.StateController.ActionState)})",
+                $"Equip: {EquipText()}"
+            };
+
+            for (var i = 0; i < ParameterList._items.Count(); i++)
+            {
+                (ParameterList._items[i] as UIText).SetText(_parameters[i]);
+            }
 
             Recalculate();
 
             base.Update(gameTime);
         }
 
-        #endregion Public Methods
-
-        #region Internal Methods
-
         internal void SetPlayer(HunterCombatPlayer player)
         {
             Player = player;
         }
 
-        #endregion Internal Methods
+        private string ActionText()
+            => (Player.StateController.CurrentAction != null)
+                ? $"{Player.StateController.CurrentAction.Name} - {Player.StateController.CurrentActionFrame}"
+                : _noneText;
 
         private string AnimationText()
-            => (Player.CurrentAnimation != null) 
-                ? $"{Player.CurrentAnimation.Name} - {Player.CurrentAnimation.AnimationData.CurrentFrame}" 
-                : "N/A";
+            => (Player.CurrentAnimation != null)
+                ? $"{Player.CurrentAnimation.Name} - {Player.CurrentAnimation.AnimationData.CurrentFrame}"
+                : _noneText;
 
-        private string ActionText()
-            => (Player.StateController.CurrentAction != null) 
-                ? $"{Player.StateController.CurrentAction.Name} - {Player.StateController.GetCurrentActionFrame()}" 
-                : "N/A";
-
+        private string EquipText()
+            => Player.EquippedWeapon != null
+                ? $"{Player.EquippedWeapon.Name}"
+                : _noneText;
     }
 }

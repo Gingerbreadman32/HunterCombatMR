@@ -22,11 +22,11 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         [JsonIgnore]
-        public IAnimator AnimationData { get; protected set; }
+        public Animator AnimationData { get; protected set; }
 
         public abstract AnimationType AnimationType { get; }
 
-        public bool IsInitialized => AnimationData.IsInitialized;
+        public bool IsInitialized => AnimationData.Initialized;
 
         [JsonIgnore]
         public bool IsModified { get; set; }
@@ -52,20 +52,21 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// Add a new keyframe.
         /// </summary>
         /// <param name="frameLength">Amount of frames this keyframe is active, set to -1 for default.</param>
-        /// <param name="layerInfo">Layer and keyframe information if being duplicated from another keyframe.</param>
+        /// <param name="layerInfo">
+        /// Layer and keyframe information if being duplicated from another keyframe.
+        /// </param>
         public void AddKeyFrame(FrameLength frameLength,
             IDictionary<AnimationLayer, LayerFrameInfo> layerInfo = null)
         {
             IsModified = true;
             Uninitialize();
-            AnimationData.AppendKeyFrame(frameLength);
 
-            int newIndex = AnimationData.KeyFrames.Last().Key;
+            int newIndex = AnimationData.KeyFrames.Last().Key + 1;
 
-            if (!frameLength.Equals(KeyFrameProfile.DefaultKeyFrameSpeed))
-                KeyFrameProfile.SpecificKeyFrameSpeeds.Add(newIndex, frameLength);
+            if (!frameLength.Equals(KeyFrameProfile.DefaultKeyFrameLength))
+                KeyFrameProfile.KeyFrameLengths.Add(newIndex, frameLength);
 
-            KeyFrameProfile.KeyFrameAmount++;
+            KeyFrameProfile.KeyFrameAmount += 1;
 
             if (layerInfo != null)
             {
@@ -122,26 +123,14 @@ namespace HunterCombatMR.AnimationEngine.Models
             Initialize();
         }
 
-        public void Pause()
-        {
-            if (AnimationData.IsPlaying)
-                AnimationData.PauseAnimation();
-        }
-
-        public void Play()
-        {
-            if (!AnimationData.IsPlaying && IsInitialized)
-                AnimationData.StartAnimation();
-        }
-
         public void RemoveKeyFrame(int keyFrameIndex)
         {
             IsModified = true;
             Uninitialize();
 
             AnimationData.KeyFrames.RemoveAt(keyFrameIndex);
-            LayerData.KeyFrameProfile.KeyFrameAmount--;
-            var speeds = LayerData.KeyFrameProfile.SpecificKeyFrameSpeeds;
+            LayerData.KeyFrameProfile.KeyFrameAmount -= 1;
+            var speeds = LayerData.KeyFrameProfile.KeyFrameLengths;
 
             LayerData.KeyFrameProfile.RemoveKeyFrame(keyFrameIndex);
 
@@ -151,12 +140,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             }
 
             Initialize();
-        }
-
-        public void Stop()
-        {
-            Pause();
-            AnimationData.ResetAnimation(false);
         }
 
         /// <summary>
@@ -169,28 +152,28 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public virtual void Update()
         {
-            AnimationData.AdvanceFrame();
+            AnimationData.Update();
         }
 
         public void UpdateKeyFrameLength(FrameIndex keyFrameIndex, FrameLength frameAmount)
         {
             IsModified = true;
-            var profileModified = KeyFrameProfile.SpecificKeyFrameSpeeds.ContainsKey(keyFrameIndex);
+            var profileModified = KeyFrameProfile.KeyFrameLengths.ContainsKey(keyFrameIndex);
 
-            AnimationData.AdjustKeyFrameLength(keyFrameIndex, frameAmount, (FrameLength)KeyFrameProfile.DefaultKeyFrameSpeed);
+            AnimationData.AdjustKeyFrameLength(keyFrameIndex, frameAmount, KeyFrameProfile.DefaultKeyFrameLength);
 
             if (profileModified)
             {
-                KeyFrameProfile.SpecificKeyFrameSpeeds.Remove(keyFrameIndex);
+                KeyFrameProfile.KeyFrameLengths.Remove(keyFrameIndex);
 
-                if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != KeyFrameProfile.DefaultKeyFrameSpeed)
+                if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != KeyFrameProfile.DefaultKeyFrameLength)
                 {
-                    KeyFrameProfile.SpecificKeyFrameSpeeds.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
+                    KeyFrameProfile.KeyFrameLengths.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
                 }
             }
-            else if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != KeyFrameProfile.DefaultKeyFrameSpeed)
+            else if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != KeyFrameProfile.DefaultKeyFrameLength)
             {
-                KeyFrameProfile.SpecificKeyFrameSpeeds.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
+                KeyFrameProfile.KeyFrameLengths.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
             }
         }
 
