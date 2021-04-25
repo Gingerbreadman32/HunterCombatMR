@@ -12,13 +12,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         : ModProjectile,
         IAnimatedEntity<ProjectileAnimation>
     {
-        #region Private Fields
-
         private ProjectileAnimation _animation;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public AttackProjectile(ProjectileAnimation animation)
             : base()
@@ -27,16 +21,10 @@ namespace HunterCombatMR.AnimationEngine.Models
             _animation = animation;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         public ProjectileAnimation CurrentAnimation { get => _animation; }
         public ICollection<Hitbox> Hitboxes { get; set; }
 
-        #endregion Public Properties
-
-        #region Public Methods
+        public bool IsPlayerActive { get => Main.player[projectile.owner]?.GetModPlayer<HunterCombatPlayer>().ActiveProjectiles?.Contains(projectile.Name) ?? false; }
 
         public override ModProjectile NewInstance(Projectile projectileClone)
         {
@@ -49,8 +37,8 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public override void PostDraw(SpriteBatch spriteBatch, Color lightColor)
         {
-            base.PostDraw(spriteBatch, lightColor);
-            Update();
+            if (IsPlayerActive)
+                _animation.Update();
         }
 
         public override bool PreAI()
@@ -63,15 +51,9 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor)
         {
-            var projectiles = Main.player[projectile.owner].GetModPlayer<HunterCombatPlayer>().ActiveProjectiles;
-            var active = projectiles.Contains(projectile.Name);
-
             projectile.frame = _animation.AnimationData.CurrentKeyFrameIndex;
 
-            if (active)
-                return base.PreDraw(spriteBatch, lightColor);
-            else
-                return active;
+            return IsPlayerActive;
         }
 
         public override bool PreKill(int timeLeft)
@@ -85,7 +67,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             return true;
         }
 
-        public bool SetCurrentAnimation(ProjectileAnimation newAnimation, bool newFile = false)
+        public bool SetCurrentAnimation(IAnimation newAnimation, bool newFile = false)
         {
             if (newAnimation == null)
             {
@@ -96,7 +78,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             if (newAnimation == CurrentAnimation)
                 return true;
 
-            _animation = newAnimation;
+            _animation = (ProjectileAnimation)newAnimation;
 
             return CurrentAnimation != null;
         }
@@ -104,13 +86,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public override void SetDefaults()
         {
             projectile.timeLeft = CurrentAnimation.AnimationData.TotalFrames;
+            _animation.AnimationData.Play();
         }
-
-        public virtual void Update()
-        {
-            _animation.Update();
-        }
-
-        #endregion Public Methods
     }
 }

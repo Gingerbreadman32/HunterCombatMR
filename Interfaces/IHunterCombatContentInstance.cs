@@ -4,6 +4,6 @@
     {
         string InternalName { get; }
 
-        T Duplicate<T>(string name) where T : IHunterCombatContentInstance;
+        IHunterCombatContentInstance CloneFrom(string internalName);
     }
 }

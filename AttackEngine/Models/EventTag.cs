@@ -1,48 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using HunterCombatMR.AnimationEngine.Models;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
     public struct EventTag
     {
-        #region Private Fields
+        private KeyValuePair<FrameIndex, FrameIndex> _frameRange;
 
-        private KeyValuePair<int, int> _frameRange;
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
+        [JsonConstructor]
         public EventTag(int tag,
-            int startFrame,
-            int endFrame)
+            FrameIndex startFrame,
+            FrameIndex endFrame)
         {
-            TagReference = tag;
-            _frameRange = new KeyValuePair<int, int>(startFrame, endFrame);
+            Id = tag;
+            _frameRange = new KeyValuePair<FrameIndex, FrameIndex>(startFrame, endFrame);
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public int TagReference { get; }
-
-        public int EndFrame
+        public FrameIndex EndKeyFrame
         {
             get => _frameRange.Value;
+            set => _frameRange = new KeyValuePair<FrameIndex, FrameIndex>(StartKeyFrame, value);
         }
 
-        public int StartFrame
+        public int Id { get; }
+
+        public FrameIndex StartKeyFrame
         {
             get => _frameRange.Key;
+            set => _frameRange = new KeyValuePair<FrameIndex, FrameIndex>(value, EndKeyFrame);
         }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public bool CheckIfActive(int frame)
-            => (frame <= EndFrame) && (frame >= StartFrame);
-
-        #endregion Public Methods
+        public bool IsActive(int frame)
+            => (frame <= EndKeyFrame) && (frame >= StartKeyFrame);
     }
 }

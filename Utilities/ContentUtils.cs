@@ -1,25 +1,30 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Interfaces;
+using System;
 
 namespace HunterCombatMR.Utilities
 {
-    internal static class ContentUtils
+    public static class ContentUtils
     {
-        #region Internal Methods
+        public static T Get<T>(string name) where T : IHunterCombatContentInstance
+                    => (T)GetInstance<T>(name).CloneFrom(name);
 
-        internal static PlayerAnimation GetPlayerAnim(string name)
-            => HunterCombatMR.Instance.Content.GetContentInstance<PlayerAnimation>(name);
+        public static T Get<T>(T instance) where T : IHunterCombatContentInstance
+                    => (T)instance.CloneFrom(instance.InternalName);
 
-        internal static T Get<T>(T content) where T : IHunterCombatContentInstance
-            => HunterCombatMR.Instance.Content.GetContentInstance<T>(content);
-
-        internal static PlayerAction GetPlayerAction(string name)
-            => HunterCombatMR.Instance.Content.GetContentInstance<PlayerAction>(name);
-
-        internal static MoveSet GetMoveSet(string name)
-            => HunterCombatMR.Instance.Content.GetContentInstance<MoveSet>(name);
-
-        #endregion Internal Methods
+        /// <summary>
+        /// Gets the original instance of a specified content type.
+        /// </summary>
+        /// <typeparam name="T">The content type</typeparam>
+        /// <param name="name">Internal name of the instance requested</param>
+        /// <returns>
+        /// The original reference instance of the specified named content type,
+        /// returns null if a content instance with that name does not exist.
+        /// </returns>
+        /// <remarks>
+        /// ONLY use this for modification, otherwise use GetNew.
+        /// </remarks>
+        internal static T GetInstance<T>(string name) where T : IHunterCombatContentInstance
+            => HunterCombatMR.Instance.Content.GetContentInstance<T>(name);
     }
 }

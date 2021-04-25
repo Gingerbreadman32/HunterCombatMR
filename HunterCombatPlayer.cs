@@ -2,7 +2,6 @@
 using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
-using HunterCombatMR.Interfaces;
 using HunterCombatMR.Items;
 using Microsoft.Xna.Framework;
 using System;
@@ -16,16 +15,9 @@ namespace HunterCombatMR
 {
     public class HunterCombatPlayer
         : ModPlayer,
-        IAnimatedEntity<PlayerAnimation>,
-        IEntityHolder<Player>
+        IAnimatedEntity<PlayerAnimation>
     {
-        #region Private Fields
-
         private bool _showDefaultLayers = true;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public HunterCombatPlayer()
             : base()
@@ -36,23 +28,13 @@ namespace HunterCombatMR
             StateController = new PlayerStateController(this);
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public override bool CloneNewInstances => false;
         public ICollection<string> ActiveProjectiles { get; set; }
+        public override bool CloneNewInstances => false;
         public PlayerAnimation CurrentAnimation { get; private set; }
+        public WeaponBase EquippedWeapon { get; set; }
         public PlayerBufferInformation InputBuffers { get; private set; }
         public IDictionary<string, Vector2> LayerPositions { get; set; }
         public PlayerStateController StateController { get; private set; }
-        public WeaponBase EquippedWeapon { get; set; }
-
-        public Player EntityContainer => player;
-
-        #endregion Public Properties
-
-        #region Public Methods
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
@@ -98,7 +80,8 @@ namespace HunterCombatMR
                     {
                         item.visible = false;
                     }
-                } else
+                }
+                else
                     layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
 
                 if (CurrentAnimation != null)
@@ -186,20 +169,25 @@ namespace HunterCombatMR
                 InputBuffers.Update();
         }
 
-        public bool SetCurrentAnimation(PlayerAnimation newAnimation,
+        public bool SetCurrentAnimation(IAnimation newAnimation,
             bool newFile = false)
         {
+            if (!(newAnimation is PlayerAnimation))
+                return false;
+
             if (newAnimation == null)
             {
                 CurrentAnimation = null;
                 return true;
             }
 
-            if (newAnimation == CurrentAnimation)
+            PlayerAnimation newPlayerAnimation = newAnimation as PlayerAnimation;
+
+            if (newPlayerAnimation == CurrentAnimation)
                 return true;
 
             //PlayerActionAnimation newAnim = new PlayerActionAnimation(newAnimation, newFile);
-            CurrentAnimation = newAnimation;
+            CurrentAnimation = newPlayerAnimation;
 
             return CurrentAnimation != null;
         }
@@ -209,16 +197,12 @@ namespace HunterCombatMR
             if (StateController.State != PlayerState.Dead)
                 StateController.State = PlayerState.Dead;
 
-            if(ActiveProjectiles.Any())
+            if (ActiveProjectiles.Any())
                 ActiveProjectiles.Clear();
 
             if (InputBuffers.BufferedComboInputs.Any() || InputBuffers.HeldComboInputs.Any(x => x.Value > 0))
                 InputBuffers.ResetBuffers();
         }
-
-        #endregion Public Methods
-
-        #region Private Methods
 
         private Color MakeTransparent(Color original,
                                     byte amount)
@@ -227,7 +211,5 @@ namespace HunterCombatMR
             newColor.A = amount;
             return newColor;
         }
-
-        #endregion Private Methods
     }
 }

@@ -1,10 +1,8 @@
 ﻿using HunterCombatMR.Interfaces;
-using Newtonsoft.Json;
-using System;
 
 namespace HunterCombatMR
 {
-    public abstract class HunterCombatContentInstance 
+    public abstract class HunterCombatContentInstance
         : IHunterCombatContentInstance
     {
         public HunterCombatContentInstance(string name)
@@ -12,18 +10,10 @@ namespace HunterCombatMR
             InternalName = name;
         }
 
-        #region Public Properties
+        public string InternalName { get; private set; }
 
-        [JsonIgnore]
-        public virtual string InternalName { get; }
+        public bool IsStoredInternally { get; internal set; }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public virtual T Duplicate<T>(string name) where T : IHunterCombatContentInstance
-            => (T)typeof(T).GetConstructor(new Type[] { typeof(string) }).Invoke(new object[] { name });
-
-        #endregion Public Methods
+        public abstract IHunterCombatContentInstance CloneFrom(string internalName);
     }
 }

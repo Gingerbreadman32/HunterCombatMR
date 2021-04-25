@@ -52,7 +52,7 @@ namespace HunterCombatMR.AttackEngine.Models
                 return;
             }
 
-            _currentMoveSet = ContentUtils.GetMoveSet(Player.EquippedWeapon.MoveSet);
+            _currentMoveSet = ContentUtils.Get<MoveSet>(Player.EquippedWeapon.MoveSet);
 
             CurrentAction = PlayerActionComboUtils.GetNextAvailableAction(this,
                 _currentMoveSet,
@@ -60,7 +60,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
             if (CurrentAction != null)
             {
-                CurrentAction.Attack.InvokeEvents(_actionAnimator);
+                CurrentAction.Attack.ActionLogic(Player, _actionAnimator);
                 _actionAnimator.Update();
             }
         }

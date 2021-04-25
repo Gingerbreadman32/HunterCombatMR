@@ -1,6 +1,5 @@
 using AnimationEngine.Services;
 using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
@@ -22,14 +21,8 @@ namespace HunterCombatMR
     public class HunterCombatMR
         : Mod
     {
-        #region Public Fields
-
         public const string ModName = "HunterCombat";
         public string DataPath = Path.Combine(Program.SavePath, ModName, "Data");
-
-        #endregion Public Fields
-
-        #region Internal Fields
 
         internal UserInterface EditorUIPanels;
         internal UserInterface EditorUIPopUp;
@@ -38,35 +31,23 @@ namespace HunterCombatMR
         internal ILog StaticLogger;
         internal IDictionary<string, Texture2D> VariableTextures;
 
-        #endregion Internal Fields
-
-        #region Private Fields
-
         private const string _variableTexturePath = "Textures/SnS/";
         private GameTime _lastUpdateUiGameTime;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public HunterCombatMR()
         {
             Instance = this;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public HunterCombatContent Content { get; private set; }
-
         public static HunterCombatMR Instance { get; private set; }
+        public HunterCombatContent Content { get; private set; }
         public AnimationEditor EditorInstance { get; private set; }
         public AnimationFileManager FileManager { get; private set; }
 
-        #endregion Public Properties
+        public IEnumerable<Event<HunterCombatPlayer>> PlayerActionEvents { get; private set; }
 
-        #region Public Methods
+        public Event<HunterCombatPlayer> GetPlayerActionEvent(string name)
+            => PlayerActionEvents.FirstOrDefault(x => x.Name.Equals(name));
 
         public override void Load()
         {
@@ -127,13 +108,16 @@ namespace HunterCombatMR
         public override void PostSetupContent()
         {
             Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
-            // Load, register, and store all the animations
-            //LoadInternalAnimations(assemblyTypes);
-            Content.SetupContent(assemblyTypes);
+            Content.SetupContent();
 
             var modTextures = (IDictionary<string, Texture2D>)typeof(HunterCombatMR).GetField("textures", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Instance);
             VariableTextures = modTextures.Where(x => x.Key.StartsWith(_variableTexturePath)).ToDictionary(x => x.Key, y => y.Value);
             modTextures = null;
+
+            PlayerActionEvents = assemblyTypes
+                .Where(x => x.IsSubclassOf(typeof(Event<HunterCombatPlayer>)) && !x.IsAbstract)
+                .Select(x => (Event<HunterCombatPlayer>)Activator.CreateInstance(x));
+
             PanelState.PostSetupContent();
         }
 
@@ -172,10 +156,6 @@ namespace HunterCombatMR
                 EditorUIPopUp.Update(gameTime);
             }
         }
-
-        #endregion Public Methods
-
-        #region Internal Methods
 
         internal static Texture2D ReadTexture(string file)
         {
@@ -225,8 +205,5 @@ namespace HunterCombatMR
             if (ui?.CurrentState != state)
                 ui?.SetState(state);
         }
-
-        #endregion Internal Methods
-
     }
 }

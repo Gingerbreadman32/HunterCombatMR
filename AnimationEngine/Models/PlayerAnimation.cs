@@ -6,7 +6,6 @@ using HunterCombatMR.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -20,8 +19,6 @@ namespace HunterCombatMR.AnimationEngine.Models
         IPlayerAnimation,
         IHunterCombatContentInstance
     {
-        #region Public Constructors
-
         [JsonConstructor]
         public PlayerAnimation(string name,
             LayerData layerData,
@@ -35,26 +32,17 @@ namespace HunterCombatMR.AnimationEngine.Models
         }
 
         public PlayerAnimation(PlayerAnimation copy,
-            bool newFile = false)
-            : base(copy.InternalName)
+            string name)
+            : base(name)
         {
             Name = copy.Name;
             LayerData = new LayerData(copy.LayerData);
-            IsModified = newFile;
             IsStoredInternally = copy.IsStoredInternally;
             AnimationData = new Animator();
             Initialize();
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public override AnimationType AnimationType { get; } = AnimationType.Player;
-
-        #endregion Public Properties
-
-        #region Public Methods
+        public override AnimationType AnimationType { get => AnimationType.Player; }
 
         public static DrawData CombatLimbDraw(PlayerDrawInfo drawInfo,
             Texture2D texture,
@@ -76,6 +64,9 @@ namespace HunterCombatMR.AnimationEngine.Models
             return value;
         }
 
+        public override IHunterCombatContentInstance CloneFrom(string internalName)
+            => new PlayerAnimation(this, internalName);
+
         public List<PlayerLayer> DrawPlayerLayers(List<PlayerLayer> layers)
         {
             List<PlayerLayer> animLayers = layers;
@@ -95,18 +86,5 @@ namespace HunterCombatMR.AnimationEngine.Models
 
             return animLayers;
         }
-
-        public override T Duplicate<T>(string name)
-        {
-            var copy = base.Duplicate<T>(name);
-            copy = (T)MemberwiseClone();
-            var playerAnim = copy as PlayerAnimation;
-            playerAnim.IsModified = true;
-            playerAnim.Initialize();
-
-            return copy;
-        }
-
-        #endregion Public Methods
     }
 }

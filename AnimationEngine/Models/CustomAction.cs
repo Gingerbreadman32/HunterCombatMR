@@ -1,89 +1,99 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Terraria;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
-    public abstract class CustomAction<THolder, TEntity> : HunterCombatContentInstance,
-        ICustomAction<THolder, TEntity> where THolder
-        : IEntityHolder<TEntity> where TEntity
-        : Entity
+    public abstract class CustomAction<T> : HunterCombatContentInstance,
+        IAnimated,
+        INamed
     {
-        private IEnumerable<KeyFrameEvent<THolder, TEntity>> _events;
-        private IEnumerable<EventTagInfo> _tagReferences;
-        private SortedList<int, IAnimation> _animations;
+        private IEnumerable<TaggedEvent<T>> _events;
 
         public CustomAction(string name,
                     string displayName = "")
             : base(name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Action name must not be blank!");
+
             Name = (string.IsNullOrEmpty(displayName)) ? name : displayName;
             KeyFrameProfile = new KeyFrameProfile();
-            DefaultParameters = new Dictionary<string, string>();
+            Animations = new ActionAnimationReference();
         }
 
-        public IDictionary<string, string> ActionParameters { get; set; }
-        public SortedList<int, IAnimation> Animations 
-        { 
-            get => _animations;
-            protected set { _animations = value; SetUpFrameProfile(); } 
-        }
+        public ActionAnimationReference Animations { get; set; }
 
-        public IDictionary<string, string> DefaultParameters { get; set; }
-
-        public IEnumerable<KeyFrameEvent<THolder, TEntity>> KeyFrameEvents
+        public IEnumerable<TaggedEvent<T>> KeyFrameEvents
         {
             get => _events;
             set { _events = value; }
         }
 
-        public KeyFrameProfile KeyFrameProfile { get; protected set; }
+        public KeyFrameProfile KeyFrameProfile { get; protected set; } // += operator
         public string Name { get; protected set; }
 
-        public void AddKeyFrameEvent(ActionLogicMethod<THolder, TEntity> actionLogicMethod)
+        public void AddKeyFrameEvent(Event<T> actionLogicMethod,
+            FrameIndex startFrame)
         {
-            var tempEvents = new List<KeyFrameEvent<THolder, TEntity>>(KeyFrameEvents);
+            var tempEvents = new List<TaggedEvent<T>>(KeyFrameEvents);
             int newTag = 0;
 
             if (tempEvents.Any())
-                newTag = GetLowestFreeTag(tempEvents.Select(x => x.Tag));
+                newTag = GetLowestFreeTag(tempEvents.Select(x => x.Tag.Id));
 
-            tempEvents.Add(new KeyFrameEvent<THolder, TEntity>(newTag, actionLogicMethod));
+            tempEvents.Add(new TaggedEvent<T>(new EventTag(newTag, startFrame, startFrame + actionLogicMethod.LengthActive), actionLogicMethod));
 
             KeyFrameEvents = tempEvents;
         }
 
-        public IEnumerable<KeyFrameEvent<THolder, TEntity>> GetCurrentFrameEvents(int currentFrame)
+        public IEnumerable<TaggedEvent<T>> GetCurrentKeyFrameEvents(int currentKeyFrame)
         {
-            var currentEvents = KeyFrameEvents.Where(x => _tagReferences.Any(y => y.TagReference.Equals(x.Tag)
-                && y.IsActive(currentFrame)));
+            var currentEvents = KeyFrameEvents.Where(x => x.IsEnabled && x.Tag.IsActive(currentKeyFrame));
 
-            if (currentEvents.Any())
-                return new List<KeyFrameEvent<THolder, TEntity>>(currentEvents.OrderBy(x => x.Tag));
-
-            return currentEvents;
+            return currentEvents.OrderBy(x => x.Tag.Id).ToList();
         }
 
-        protected virtual void SetUpFrameProfile()
+        public void Initialize<A>() where A : IAnimation
         {
-            // There will always be at least one keyframe.
-            int totalKeyFrames = 1;
+            CreateKeyFrameProfile();
+            Animations.LoadAnimations<A>();
         }
 
-        public void Initialize()
+        public void ActionLogic(T entity,
+            Animator animator)
         {
-            SetUpFrameProfile();
-        }
-
-        public virtual void InvokeEvents(Animator animator)
-        {
-            foreach (var keyFrameEvent in GetCurrentFrameEvents(animator.CurrentFrame))
+            foreach (var keyFrameEvent in GetCurrentKeyFrameEvents(animator.CurrentFrame))
             {
-                //animator.Parameters = keyFrameEvent.ActionLogic.ActionLogic(Player
+                keyFrameEvent.Event.InvokeLogic(entity, animator);
             }
+        }
+
+        private void CreateKeyFrameProfile()
+        {
+            int totalKeyFrames = 0;
+
+            for (var i = 0; i < Animations.Count; i++)
+            {
+                if (!Animations.ContainsKey(i))
+                    continue;
+
+                var anim = Animations.GetAnimationReference(i).Item1;
+
+                if (!anim.IsInitialized)
+                    anim.Initialize();
+
+                totalKeyFrames += anim.KeyFrameProfile.KeyFrameAmount; // Add all the keyframes using a += operator or something
+                KeyFrameProfile.KeyFrameLengths.Add(KeyFrameProfile.KeyFrameLengths.Count(), anim.AnimationData.TotalFrames.ToFLength());
+            }
+
+            KeyFrameProfile.KeyFrameAmount = totalKeyFrames.ToFLength();
+
+            
         }
 
         private int GetLowestFreeTag(IEnumerable<int> tags)

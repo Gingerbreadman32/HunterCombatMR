@@ -1,9 +1,10 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.AttackEngine.MoveSets;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Seeds.Attacks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,18 +13,14 @@ namespace HunterCombatMR
 {
     public sealed class HunterCombatContent
     {
-        #region Private Fields
-
         private const int _animationNameMax = 64;
-        private AnimationLoader _animationLoader;
-        private IDictionary<Type, IEnumerable<IHunterCombatContentInstance>> _contentStream;
-        private AnimationFileManager _fileManager;
+
         private readonly Type[] _animationMap = new Type[] { typeof(PlayerAnimation),
             typeof(ProjectileAnimation) };
 
-        #endregion Private Fields
-
-        #region Public Constructors
+        private AnimationLoader _animationLoader;
+        private IDictionary<Type, IEnumerable<IHunterCombatContentInstance>> _contentStream;
+        private AnimationFileManager _fileManager;
 
         public HunterCombatContent(AnimationFileManager fileManager)
         {
@@ -32,15 +29,14 @@ namespace HunterCombatMR
             _fileManager = fileManager;
         }
 
-        #endregion Public Constructors
-
-        #region Public Methods
-
         public bool CheckContentInstanceByName<T>(string name) where T : IHunterCombatContentInstance
                     => _contentStream[typeof(T)].Any(x => x.InternalName.Equals(name));
 
         public T GetContentInstance<T>(string name) where T : IHunterCombatContentInstance
             => (T)_contentStream[typeof(T)].FirstOrDefault(x => x.InternalName.Equals(name));
+
+        public IHunterCombatContentInstance GetContentInstance(string name, Type type)
+            => _contentStream[type].FirstOrDefault(x => x.InternalName.Equals(name));
 
         public T GetContentInstance<T>(T instance) where T : IHunterCombatContentInstance
             => (T)_contentStream[typeof(T)].FirstOrDefault(x => x.Equals(instance));
@@ -78,10 +74,6 @@ namespace HunterCombatMR
             }
         }
 
-        #endregion Public Methods
-
-        #region Internal Methods
-
         internal void DeleteContentInstance<T>(T instance) where T : IHunterCombatContentInstance
         {
             DeleteContentInstance<T>(instance.InternalName);
@@ -108,7 +100,7 @@ namespace HunterCombatMR
             if (duplicate == null)
                 throw new ArgumentNullException("No animation to duplicate!");
 
-            var newInstance = duplicate.Duplicate<T>(DuplicateName<T>(duplicate.InternalName, 0));
+            var newInstance = GetContentInstance(duplicate).CloneFrom(DuplicateName<T>(duplicate.InternalName, 0));
             var stream = new List<IHunterCombatContentInstance>(_contentStream[typeof(T)]);
             stream.Add(newInstance);
             _contentStream[typeof(T)] = stream;
@@ -124,7 +116,7 @@ namespace HunterCombatMR
             counter++;
 
             if (counter >= 200)
-                throw new StackOverflowException("Over the max amount of duplicate iterations!");
+                throw new StackOverflowException("Over the max amount of duplicate name iterations!");
 
             if (_contentStream[typeof(T)].Any(x => x.InternalName.Equals(DuplicateNameFormat(name, counter))))
             {
@@ -136,17 +128,13 @@ namespace HunterCombatMR
             }
         }
 
-        internal void SetupContent(Type[] assemblyTypes)
+        internal void SetupContent()
         {
-            var animTypes = new List<AnimationType>() { AnimationType.Player };
+            var animTypes = new List<AnimationType>() { AnimationType.Player, AnimationType.Projectile };
             LoadAnimations(animTypes);
-            LoadAttacks(assemblyTypes);
-            LoadMoveSets(assemblyTypes);
+            LoadAttacks();
+            LoadMoveSets();
         }
-
-        #endregion Internal Methods
-
-        #region Private Methods
 
         private string DuplicateNameFormat(string name,
                 int suffix)
@@ -177,49 +165,28 @@ namespace HunterCombatMR
             }
         }
 
-        private void LoadAttacks(Type[] assemblyTypes)
+        private void LoadAttacks()
         {
             var loadedAttacks = new List<PlayerAction>();
-            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(PlayerAction)) && !x.IsAbstract))
+
+            // Seeding, remove this later
+            loadedAttacks.Add(AttackSeed.CreateDefault("DoubleSlash", "Double Slash"));
+            loadedAttacks.Add(AttackSeed.CreateDefault("RunningSlash", "Running Slash"));
+
+            foreach (var attack in loadedAttacks)
             {
-                loadedAttacks.Add((PlayerAction)type.GetConstructor(new Type[] { typeof(string) }).Invoke(new object[] { type.Name }));
+                attack.Initialize<PlayerAnimation>();
             }
 
-            if (_contentStream.ContainsKey(typeof(PlayerAction)))
-                _contentStream[typeof(PlayerAction)] = loadedAttacks;
-            else
-                _contentStream.Add(typeof(PlayerAction), loadedAttacks);
+            _contentStream.Add(typeof(PlayerAction), loadedAttacks);
         }
 
-        private void LoadMoveSets(Type[] assemblyTypes)
+        private void LoadMoveSets()
         {
             var loadedMovesets = new List<MoveSet>();
-            foreach (Type type in assemblyTypes.Where(x => x.IsSubclassOf(typeof(MoveSet)) && !x.IsAbstract))
-            {
-                loadedMovesets.Add((MoveSet)type.GetConstructor(new Type[] { }).Invoke(new object[] { }));
-            }
 
-            if (_contentStream.ContainsKey(typeof(MoveSet)))
-                _contentStream[typeof(MoveSet)] = loadedMovesets;
-            else
-                _contentStream.Add(typeof(MoveSet), loadedMovesets);
+            loadedMovesets.Add(new SwordAndShieldMoveSet());
+            _contentStream.Add(typeof(MoveSet), loadedMovesets);
         }
-
-        #endregion Private Methods
-
-        /* // Only needed this for seeding the first animation, might not need this anymore but keeping it just in case for now.
-            private void LoadInternalAnimations(Type[] types)
-            {
-                foreach (Type type in types.Where(x => x.IsSubclassOf(typeof(ActionContainer)) && !x.IsAbstract))
-                {
-                    var container = (ActionContainer)type.GetConstructor(new Type[] { }).Invoke(new object[] { });
-                    container.Load();
-                    _animationLoader.LoadContainer(container);
-                }
-
-                if (_animationLoader.Containers.Any())
-                    LoadedAnimations = new List<AnimationEngine.Models.Animation>(_animationLoader.RegisterAnimations());
-            }
-        */
     }
 }

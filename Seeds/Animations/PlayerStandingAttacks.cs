@@ -5,18 +5,15 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
-namespace HunterCombatMR.AttackEngine.Animations
+namespace HunterCombatMR.Seeds.Animations
 {
-    public sealed class PlayerStandingAttacks
-        : ActionContainer
+    internal sealed class PlayerStandingAttacks
+        : AnimationSeed
     {
         private const string _texturePath = "HunterCombatMR/Textures/SnS/Limbs/";
         private const string _textureSuffix = "Frames";
 
-        private string CreateTextureString(string layerName)
-            => $"{_texturePath}{layerName.Split('_')[1]}{_textureSuffix}";
-
-        public override void Load()
+        internal override void Load()
         {
             // - Sword and Shield Attacks
 
@@ -134,5 +131,8 @@ namespace HunterCombatMR.AttackEngine.Animations
                 new LayerData(new KeyFrameProfile(keyframes.ToFLength(), holdframes.ToFLength(), timings),
                     layers));
         }
+
+        private string CreateTextureString(string layerName)
+                            => $"{_texturePath}{layerName.Split('_')[1]}{_textureSuffix}";
     }
 }

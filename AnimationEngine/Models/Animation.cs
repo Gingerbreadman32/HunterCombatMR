@@ -26,12 +26,10 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public abstract AnimationType AnimationType { get; }
 
-        public bool IsInitialized => AnimationData.Initialized;
+        public bool IsInitialized { get => AnimationData.Initialized; }
 
         [JsonIgnore]
         public bool IsModified { get; set; }
-
-        public bool IsStoredInternally { get; internal set; }
 
         [JsonIgnore]
         public KeyFrameProfile KeyFrameProfile { get => LayerData.KeyFrameProfile; }
@@ -94,19 +92,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             AnimationData.Initialize(KeyFrameProfile, LayerData.Loop);
         }
 
-        public void ModifyAnimation(Action action,
-                    bool reinitialize = false)
-        {
-            IsModified = true;
-            if (reinitialize)
-                Uninitialize();
-
-            action.Invoke();
-
-            if (reinitialize)
-                Initialize();
-        }
-
         public void MoveKeyFrame(int keyFrameIndex,
             int newFrameIndex)
         {
@@ -150,7 +135,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             AnimationData.Uninitialize();
         }
 
-        public virtual void Update()
+        public void Update()
         {
             AnimationData.Update();
         }

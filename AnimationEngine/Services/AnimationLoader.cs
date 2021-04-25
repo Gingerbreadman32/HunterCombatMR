@@ -1,41 +1,32 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Seeds.Animations;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace HunterCombatMR.AnimationEngine.Services
 {
-    public class AnimationLoader
+    internal sealed class AnimationLoader
     {
-        #region Public Constructors
-
-        public AnimationLoader()
+        internal AnimationLoader()
         {
-            Containers = new List<ActionContainer>();
+            Containers = new List<AnimationSeed>();
         }
 
-        #endregion Public Constructors
+        internal List<AnimationSeed> Containers { get; }
 
-        #region Public Properties
-
-        public List<ActionContainer> Containers { get; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public void LoadContainer(ActionContainer container)
+        internal void LoadContainer(AnimationSeed container)
         {
             Containers.Add(container);
         }
 
-        public IAnimation RegisterAnimation(IAnimation action)
+        internal IAnimation RegisterAnimation(IAnimation action)
         {
             action.Initialize();
             return action;
         }
 
-        public IEnumerable<PlayerAnimation> RegisterAnimations()
+        internal IEnumerable<PlayerAnimation> RegisterAnimations()
         {
             var actions = new List<PlayerAnimation>();
             foreach (var animation in Containers.SelectMany(x => x.AnimatedActions))
@@ -50,7 +41,7 @@ namespace HunterCombatMR.AnimationEngine.Services
             return actions;
         }
 
-        public IEnumerable<IAnimation> RegisterAnimations(IEnumerable<IAnimation> loadedActions)
+        internal IEnumerable<IAnimation> RegisterAnimations(IEnumerable<IAnimation> loadedActions)
         {
             var actions = new List<IAnimation>();
             foreach (var animation in loadedActions)
@@ -59,7 +50,5 @@ namespace HunterCombatMR.AnimationEngine.Services
             }
             return actions;
         }
-
-        #endregion Public Methods
     }
 }

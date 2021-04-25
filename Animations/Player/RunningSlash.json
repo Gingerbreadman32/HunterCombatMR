@@ -1,6 +1,6 @@
 {
   "AnimationType": 0,
-  "IsInternal": true,
+  "IsStoredInternally": true,
   "LayerData": {
     "KeyFrameProfile": {
       "KeyFrameAmount": 8,

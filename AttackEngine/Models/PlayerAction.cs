@@ -1,46 +1,53 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Interfaces;
+using System;
 using System.Collections.Generic;
-using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
-    public abstract class PlayerAction
-        : CustomAction<HunterCombatPlayer, Player>
+    public class PlayerAction
+        : CustomAction<HunterCombatPlayer>
     {
-        #region Public Constructors
-
         public PlayerAction(string name,
             string displayName = "")
             : base(name, displayName)
         {
-            Animations = new SortedList<int, IAnimation>();
-            Projectiles = new List<AttackProjectile>();
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public IEnumerable<AttackProjectile> Projectiles { get; set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public override T Duplicate<T>(string name)
+        public PlayerAction(string name,
+            string displayName,
+            IDictionary<int, string> animations,
+            IEnumerable<Tuple<EventTag, bool, string>> events)
+            : base(name, displayName)
         {
-            T clone = base.Duplicate<T>(name);
-            var playerAction = clone as PlayerAction;
-            playerAction.Projectiles = new List<AttackProjectile>(Projectiles);
-            playerAction.Animations = new SortedList<int, IAnimation>(Animations);
-            playerAction.KeyFrameProfile = new KeyFrameProfile(KeyFrameProfile);
-            playerAction.KeyFrameEvents = new List<KeyFrameEvent<HunterCombatPlayer, Player>>(KeyFrameEvents);
-            playerAction.DefaultParameters = new Dictionary<string, string>(DefaultParameters);
+            Animations.AnimationReferences = animations;
 
-            return clone;
+            var setEvents = new List<TaggedEvent<HunterCombatPlayer>>();
+
+            foreach (var taggedEvent in events)
+            {
+                setEvents.Add(new TaggedEvent<HunterCombatPlayer>(taggedEvent.Item1,
+                    HunterCombatMR.Instance.GetPlayerActionEvent(taggedEvent.Item3),
+                    taggedEvent.Item2));
+            }
+
+            KeyFrameEvents = setEvents;
+            Initialize<PlayerAnimation>();
         }
 
-        #endregion Public Methods
+        public PlayerAction(PlayerAction copy,
+            string name)
+            : base(name, copy.Name)
+        {
+            Animations.AnimationReferences = copy.Animations.AnimationReferences;
+            KeyFrameProfile = new KeyFrameProfile(copy.KeyFrameProfile);
+            KeyFrameEvents = new List<TaggedEvent<HunterCombatPlayer>>(copy.KeyFrameEvents);
+            IsStoredInternally = copy.IsStoredInternally;
+
+            Initialize<PlayerAnimation>();
+        }
+
+        public override IHunterCombatContentInstance CloneFrom(string internalName)
+            => new PlayerAction(this, internalName);
     }
 }
