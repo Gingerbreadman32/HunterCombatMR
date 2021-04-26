@@ -10,18 +10,12 @@ using System.Linq;
 using Terraria;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     internal class LayerText
         : UIElement
     {
-        #region Private Fields
-
         private string _displayText;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public LayerText(IAnimation animation,
             string layerName,
@@ -44,10 +38,6 @@ namespace HunterCombatMR.UI
             SetDisplayInformation(infoArgs);
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         public IAnimation AnimationReference { get; protected set; }
         public int CurrentKeyFrame { get; }
         public LayerTextInfo DisplayInfo { get; protected set; }
@@ -62,10 +52,6 @@ namespace HunterCombatMR.UI
         }
 
         public Color TextColor { get; set; } = Color.White;
-
-        #endregion Public Properties
-
-        #region Public Methods
 
         public override void Recalculate()
         {
@@ -101,14 +87,10 @@ namespace HunterCombatMR.UI
             base.Update(gameTime);
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
             Color displayColor = TextColor;
-            
+
             var MousePosition = new Vector2(Main.mouseX, Main.mouseY);
             if (Parent.GetElementAt(MousePosition) == this)
                 displayColor = Color.LightBlue;
@@ -138,10 +120,6 @@ namespace HunterCombatMR.UI
                 _displayText = "";
             }
         }
-
-        #endregion Protected Methods
-
-        #region Private Methods
 
         private string CoordinateInfoText()
             => $"Coords: X- {Layer.KeyFrames[CurrentKeyFrame].Position.X} Y- {Layer.KeyFrames[CurrentKeyFrame].Position.Y} ";
@@ -178,32 +156,6 @@ namespace HunterCombatMR.UI
             }
         }
 
-        private string OrientationInfoText()
-        {
-            string text = "Orientation: ";
-            SpriteEffects orientation = Layer.GetOrientation(CurrentKeyFrame);
-
-            switch (orientation)
-            {
-                case SpriteEffects.None:
-                    text += "None ";
-                    break;
-
-                case SpriteEffects.FlipHorizontally:
-                    text += "Horizontal ";
-                    break;
-
-                case SpriteEffects.FlipVertically:
-                    text += "Vertical ";
-                    break;
-
-                case SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically:
-                    text += "Both ";
-                    break;
-            }
-            return text;
-        }
-
         private string InfoText(LayerTextInfo flag)
         {
             switch (flag)
@@ -234,6 +186,32 @@ namespace HunterCombatMR.UI
             }
         }
 
+        private string OrientationInfoText()
+        {
+            string text = "Orientation: ";
+            SpriteEffects orientation = Layer.GetOrientation(CurrentKeyFrame);
+
+            switch (orientation)
+            {
+                case SpriteEffects.None:
+                    text += "None ";
+                    break;
+
+                case SpriteEffects.FlipHorizontally:
+                    text += "Horizontal ";
+                    break;
+
+                case SpriteEffects.FlipVertically:
+                    text += "Vertical ";
+                    break;
+
+                case SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically:
+                    text += "Both ";
+                    break;
+            }
+            return text;
+        }
+
         private string RotationInfoText()
             => $"Rotation: {MathHelper.ToDegrees(Layer.GetRotation(CurrentKeyFrame))}° ";
 
@@ -245,7 +223,5 @@ namespace HunterCombatMR.UI
 
         private string TextureNameInfoText()
             => $"Texture: {Layer.Texture.Name.Split('/')[Layer.Texture.Name.Split('/').Length - 1]}";
-
-        #endregion Private Methods
     }
 }

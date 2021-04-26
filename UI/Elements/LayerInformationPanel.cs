@@ -7,19 +7,13 @@ using System.Linq;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     public class LayerInformationPanel
         : CollapsingUIPanel
     {
-        #region Private Fields
-
         private LayerTextInfo _infoFlags;
         private IEnumerable<LayerInfoTextBox> _textBoxes;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public LayerInformationPanel(bool startCollapsed)
             : base(startCollapsed)
@@ -42,17 +36,9 @@ namespace HunterCombatMR.UI
             InformationList.SetScrollbar(scrollbar);
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         public UIList InformationList { get; }
         public int KeyFrame { get; private set; }
         public AnimationLayer Layer { get; private set; }
-
-        #endregion Public Properties
-
-        #region Internal Properties
 
         internal LayerTextInfo VisableInformation
         {
@@ -66,10 +52,6 @@ namespace HunterCombatMR.UI
                 ResetInformationDisplay();
             }
         }
-
-        #endregion Internal Properties
-
-        #region Public Methods
 
         public static LayerInformationPanel Default(StyleDimension left,
             StyleDimension top)
@@ -98,7 +80,7 @@ namespace HunterCombatMR.UI
             InformationList.Clear();
 
             if (Layer == null || !Layer.IsActive(KeyFrame))
-                return; 
+                return;
 
             var boxes = new List<LayerInfoTextBox>();
 
@@ -109,12 +91,12 @@ namespace HunterCombatMR.UI
                 InformationList.Add(new LayerText(layer: Layer, KeyFrame, block));
                 if (block == LayerTextInfo.Coordinates || block == LayerTextInfo.TextureFrameRectangle)
                 {
-                    var box1 = new LayerInfoTextBox("0", block, 4, false, false, null) 
-                        { TextColor = Color.White, PositiveIntegersOnly = (block == LayerTextInfo.TextureFrameRectangle), ZeroNotAllowed = (block == LayerTextInfo.TextureFrameRectangle) };
+                    var box1 = new LayerInfoTextBox("0", block, 4, false, false, null)
+                    { TextColor = Color.White, PositiveIntegersOnly = block == LayerTextInfo.TextureFrameRectangle, ZeroNotAllowed = block == LayerTextInfo.TextureFrameRectangle };
                     boxes.Add(box1);
                     InformationList.Add(box1);
-                    var box2 = new LayerInfoTextBox("0", block, 4, false, false, null, 1) 
-                        { TextColor = Color.White, PositiveIntegersOnly = (block == LayerTextInfo.TextureFrameRectangle), ZeroNotAllowed = (block == LayerTextInfo.TextureFrameRectangle) };
+                    var box2 = new LayerInfoTextBox("0", block, 4, false, false, null, 1)
+                    { TextColor = Color.White, PositiveIntegersOnly = block == LayerTextInfo.TextureFrameRectangle, ZeroNotAllowed = block == LayerTextInfo.TextureFrameRectangle };
                     boxes.Add(box2);
                     InformationList.Add(box2);
                 }
@@ -145,7 +127,5 @@ namespace HunterCombatMR.UI
 
             base.Update(gameTime);
         }
-
-        #endregion Public Methods
     }
 }

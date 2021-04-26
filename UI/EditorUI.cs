@@ -5,6 +5,7 @@ using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.UI.AnimationTimeline;
+using HunterCombatMR.UI.Elements;
 using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,7 +21,7 @@ using Terraria.UI;
 
 namespace HunterCombatMR.UI
 {
-    public class UIEditorPanelState
+    public class EditorUI
         : UIState
     {
         private const int SAVETIMERMAX = 120;

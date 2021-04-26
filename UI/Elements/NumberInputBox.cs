@@ -1,7 +1,6 @@
-﻿using HunterCombatMR.Enumerations;
-using System.Linq;
+﻿using System.Linq;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     public class NumberInputBox
         : TextBoxBase
@@ -9,10 +8,6 @@ namespace HunterCombatMR.UI
         private static char[] _mathNumbers = "1234567890-".ToCharArray();
 
         private char[] _availableCharacters;
-
-        public bool PositiveIntegersOnly { get; set; }
-
-        public bool ZeroNotAllowed { get; set; }
 
         public NumberInputBox(string hintText,
             int maxLength = 0,
@@ -27,9 +22,13 @@ namespace HunterCombatMR.UI
                 _availableCharacters[_availableCharacters.Length] = '.';
         }
 
+        public bool PositiveIntegersOnly { get; set; }
+
+        public bool ZeroNotAllowed { get; set; }
+
         protected override void DrawDetails(string newString)
         {
-            float textValue = (ZeroNotAllowed) ? 1 : 0;
+            float textValue = ZeroNotAllowed ? 1 : 0;
 
             if (newString == _currentString)
                 return;
@@ -41,7 +40,7 @@ namespace HunterCombatMR.UI
                 return;
             }
 
-            if (newString.Contains("+")) 
+            if (newString.Contains("+"))
             {
                 newString = newString.Replace("+", "");
                 if (float.TryParse(newString, out textValue))
@@ -58,7 +57,7 @@ namespace HunterCombatMR.UI
 
             int wrongNegative = newString.LastIndexOf("-");
 
-           if (wrongNegative > 0)
+            if (wrongNegative > 0)
             {
                 newString = newString.Remove(wrongNegative);
                 if (!PositiveIntegersOnly && float.TryParse(newString, out textValue))
@@ -76,7 +75,7 @@ namespace HunterCombatMR.UI
             }
             else
             {
-                newString = (ZeroNotAllowed) ? "1" : "0";
+                newString = ZeroNotAllowed ? "1" : "0";
             }
 
             UpdateString(string.Concat(newString.Where(x => _availableCharacters.Contains(x))));

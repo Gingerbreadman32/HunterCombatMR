@@ -3,19 +3,27 @@ using System.Linq;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     internal class HorizontalUIList<T>
         : UIList
         where T : UIElement
     {
-        #region Protected Fields
-
         protected float _innerListWidth;
 
-        #endregion Protected Fields
-
-        #region Public Methods
+        /// <summary>
+        /// Sorts everything in the list if it's of one derived type.
+        /// </summary>
+        /// <typeparam name="T">Derived type</typeparam>
+        /// <remarks>
+        /// Do not use if the list is multi-type!
+        /// </remarks>
+        public void AllTypeSort()
+        {
+            List<T> sorted = _items.Select(x => (T)x).ToList();
+            sorted.Sort();
+            _items = new List<UIElement>(sorted);
+        }
 
         public float GetTotalWidth()
         {
@@ -38,21 +46,5 @@ namespace HunterCombatMR.UI
             }
             _innerListWidth = num;
         }
-
-        /// <summary>
-        /// Sorts everything in the list if it's of one derived type.
-        /// </summary>
-        /// <typeparam name="T">Derived type</typeparam>
-        /// <remarks>
-        /// Do not use if the list is multi-type!
-        /// </remarks>
-        public void AllTypeSort()
-        {
-            List<T> sorted = _items.Select(x => (T)x).ToList();
-            sorted.Sort();
-            _items = new List<UIElement>(sorted);
-        }
-
-        #endregion Public Methods
     }
 }

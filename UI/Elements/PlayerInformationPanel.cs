@@ -5,7 +5,7 @@ using System.Linq;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     internal class PlayerInformationPanel
         : UIPanel
@@ -60,7 +60,7 @@ namespace HunterCombatMR.UI
                 MinHeight.Set(PaddingTop + PaddingBottom + ParameterList._items.Count() * 32f, 0f);
             }
 
-            Left.Set(Player.player.BottomLeft.X - (MinWidth.Pixels / 2) - Main.screenPosition.X, 0f);
+            Left.Set(Player.player.BottomLeft.X - MinWidth.Pixels / 2 - Main.screenPosition.X, 0f);
             Top.Set(Player.player.BottomLeft.Y + 25f - Main.screenPosition.Y, 0f);
 
             base.Recalculate();
@@ -73,11 +73,11 @@ namespace HunterCombatMR.UI
 
             _parameters = new string[6]
             {
-                $"PState: {Player.StateController.State.ToString()} ({((int)Player.StateController.State)})",
+                $"PState: {Player.StateController.State.ToString()} ({(int)Player.StateController.State})",
                 $"Anim: {AnimationText()}",
                 $"Vel: {Math.Round(Player.player.velocity.X, 2)}, {Math.Round(Player.player.velocity.Y, 2)}",
                 $"Action: {ActionText()}",
-                $"AState: {Player.StateController.ActionState.ToString()} ({((int)Player.StateController.ActionState)})",
+                $"AState: {Player.StateController.ActionState.ToString()} ({(int)Player.StateController.ActionState})",
                 $"Equip: {EquipText()}"
             };
 
@@ -97,12 +97,12 @@ namespace HunterCombatMR.UI
         }
 
         private string ActionText()
-            => (Player.StateController.CurrentAction != null)
+            => Player.StateController.CurrentAction != null
                 ? $"{Player.StateController.CurrentAction.Name} - {Player.StateController.CurrentActionKeyFrame}"
                 : _noneText;
 
         private string AnimationText()
-            => (Player.CurrentAnimation != null)
+            => Player.CurrentAnimation != null
                 ? $"{Player.CurrentAnimation.Name} - {Player.CurrentAnimation.AnimationData.CurrentFrame}"
                 : _noneText;
 

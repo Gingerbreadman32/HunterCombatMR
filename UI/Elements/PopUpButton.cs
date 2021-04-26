@@ -5,23 +5,17 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     internal class PopUpButton
         : UIPanel,
         IUIAttachable
     {
-        #region Protected Fields
-
         protected char _charicon;
         protected Vector2 _distance;
         protected bool _freefloat;
         protected Texture2D _texicon;
 
-        #endregion Protected Fields
-
-        #region Public Constructors
-
         public PopUpButton(char icon,
             float width,
             float height,
@@ -79,10 +73,6 @@ namespace HunterCombatMR.UI
             Attatch(attachedTo, distanceFromAttach);
             IconColor = Color.White;
         }
-
-        #endregion Public Constructors
-
-        #region Public Properties
 
         /// <inheritdoc/>
         public Vector2 AttachDistance
@@ -118,16 +108,12 @@ namespace HunterCombatMR.UI
             }
         }
 
+        public Color IconColor { get; set; }
+
         /// <summary>
         /// Whether or not to use a texture for the icon instead of a character
         /// </summary>
         public bool UseTextureIcon { get; set; }
-
-        public Color IconColor { get; set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
 
         /// <inheritdoc/>
         public void Attatch(UIElement element,
@@ -160,10 +146,6 @@ namespace HunterCombatMR.UI
             // Possible way to detect element recalculation is to constantly plant a seed element that sends a message when it's recalculated.
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
             if (!_freefloat)
@@ -172,7 +154,5 @@ namespace HunterCombatMR.UI
             if (!UseTextureIcon)
                 Utils.DrawBorderString(spriteBatch, _charicon.ToString(), GetInnerDimensions().Position(), IconColor);
         }
-
-        #endregion Protected Methods
     }
 }

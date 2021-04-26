@@ -6,7 +6,7 @@ using Terraria.GameInput;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     /// <summary>
     /// Shamelessly ripped from UIInputTextField, defines a UI text box that can be manipulated onscreen without triggering the chat.
@@ -14,17 +14,11 @@ namespace HunterCombatMR.UI
     public abstract class TextBoxBase
         : UIElement
     {
-        #region Protected Fields
-
         protected readonly string _hintText;
         protected string _currentString = string.Empty;
         protected Color _currentTextColor;
         protected int _textBlinkerCount;
         protected Color _textColor;
-
-        #endregion Protected Fields
-
-        #region Public Constructors
 
         public TextBoxBase(string hintText,
             int maxLength = 0,
@@ -38,26 +32,14 @@ namespace HunterCombatMR.UI
             Hidden = startHidden;
             DefaultText = defaultText;
             HintTextColor = new Color(200f, 200f, 200f, 50f);
-            OnMouseOver += ((x, y) => { (y as TextBoxBase)._currentTextColor = HoverColor; });
-            OnMouseOut += ((x, y) => { (y as TextBoxBase)._currentTextColor = _textColor; });
+            OnMouseOver += (x, y) => { (y as TextBoxBase)._currentTextColor = HoverColor; };
+            OnMouseOut += (x, y) => { (y as TextBoxBase)._currentTextColor = _textColor; };
             OnClick += delegate { StartInteracting(); };
         }
 
-        #endregion Public Constructors
-
-        #region Public Delegates
-
         public delegate void EventHandler(object sender, EventArgs e);
 
-        #endregion Public Delegates
-
-        #region Public Events
-
         public event EventHandler OnTextChange;
-
-        #endregion Public Events
-
-        #region Public Properties
 
         public string DefaultText { get; set; }
 
@@ -98,10 +80,6 @@ namespace HunterCombatMR.UI
             }
         }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
         public virtual void StartInteracting()
         {
             Interacting = true;
@@ -111,10 +89,6 @@ namespace HunterCombatMR.UI
         {
             Interacting = false;
         }
-
-        #endregion Public Methods
-
-        #region Protected Methods
 
         protected abstract void DrawDetails(string newString);
 
@@ -189,7 +163,5 @@ namespace HunterCombatMR.UI
             MinWidth.Set(textSize.X + PaddingLeft + PaddingRight, 0f);
             MinHeight.Set(textSize.Y + PaddingTop + PaddingBottom, 0f);
         }
-
-        #endregion Protected Methods
     }
 }

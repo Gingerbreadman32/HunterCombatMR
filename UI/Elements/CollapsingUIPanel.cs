@@ -2,27 +2,16 @@
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     public class CollapsingUIPanel
         : UIPanel
     {
-        #region Public Properties
-
         public bool IsCollapsed { get; private set; }
-
-        #endregion Public Properties
 
         public CollapsingUIPanel(bool startCollapsed)
         {
             IsCollapsed = startCollapsed;
-        }
-
-        #region Public Methods
-
-        public void Reveal()
-        {
-            IsCollapsed = false;
         }
 
         public void Collapse()
@@ -30,15 +19,16 @@ namespace HunterCombatMR.UI
             IsCollapsed = true;
         }
 
+        public void Reveal()
+        {
+            IsCollapsed = false;
+        }
+
         public override void Update(GameTime gameTime)
         {
             if (!IsCollapsed)
                 base.Update(gameTime);
         }
-
-        #endregion Public Methods
-
-        #region Protected Methods
 
         protected override void DrawChildren(SpriteBatch spriteBatch)
         {
@@ -51,7 +41,5 @@ namespace HunterCombatMR.UI
             if (!IsCollapsed)
                 base.DrawSelf(spriteBatch);
         }
-
-        #endregion Protected Methods
     }
 }

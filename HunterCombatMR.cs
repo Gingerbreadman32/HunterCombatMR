@@ -4,6 +4,7 @@ using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.UI;
+using HunterCombatMR.UI.Elements;
 using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -26,8 +27,8 @@ namespace HunterCombatMR
 
         internal UserInterface EditorUIPanels;
         internal UserInterface EditorUIPopUp;
-        internal UIEditorPanelState PanelState;
-        internal UIEditorPopUpState PopUpState;
+        internal EditorUI PanelState;
+        internal DebugUI PopUpState;
         internal ILog StaticLogger;
         internal IDictionary<string, Texture2D> VariableTextures;
 
@@ -63,10 +64,10 @@ namespace HunterCombatMR
                 EditorInstance = new AnimationEditor();
 
                 EditorUIPanels = new UserInterface();
-                PanelState = new UIEditorPanelState();
+                PanelState = new EditorUI();
                 PanelState.Activate();
                 EditorUIPopUp = new UserInterface();
-                PopUpState = new UIEditorPopUpState();
+                PopUpState = new DebugUI();
                 PopUpState.Activate();
                 ShowMyUI();
             }

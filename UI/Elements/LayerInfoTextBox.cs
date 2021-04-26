@@ -5,22 +5,16 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     internal static class LayerInfoTextBoxLogic
     {
-        #region Internal Fields
-
         internal static IDictionary<LayerTextInfo, Func<AnimationLayer, int, string, int, bool, string>> InfoToLogicMap
             = new Dictionary<LayerTextInfo, Func<AnimationLayer, int, string, int, bool, string>>
             {
                 { LayerTextInfo.Coordinates, CoordinateLogic },
                 { LayerTextInfo.TextureFrameRectangle, TextureFrameBoundsLogic }
             };
-
-        #endregion Internal Fields
-
-        #region Internal Methods
 
         internal static string CoordinateLogic(AnimationLayer layer,
             int keyframe,
@@ -42,7 +36,8 @@ namespace HunterCombatMR.UI
                     layer.SetPosition(keyframe, new Vector2(currentCoords.X, float.Parse(newText)));
                 else
                     layer.SetPosition(keyframe, new Vector2(float.Parse(newText), currentCoords.Y));
-            } else
+            }
+            else
             {
                 newText = coordList[infoMod];
             }
@@ -72,21 +67,12 @@ namespace HunterCombatMR.UI
             layer.SpriteFrameRectangle = currentBounds;
             return newText;
         }
-
-        #endregion Internal Methods
-
     }
 
     internal class LayerInfoTextBox
             : NumberInputBox
     {
-        #region Private Fields
-
         private LayerTextInfo _infoType;
-
-        #endregion Private Fields
-
-        #region Internal Constructors
 
         internal LayerInfoTextBox(string hintText,
             LayerTextInfo infoType,
@@ -101,15 +87,7 @@ namespace HunterCombatMR.UI
             InfoModifier = infoMod;
         }
 
-        #endregion Internal Constructors
-
-        #region Internal Events
-
         internal event Func<AnimationLayer, int, string, int, bool, string> UpdateLogic;
-
-        #endregion Internal Events
-
-        #region Internal Properties
 
         internal int InfoModifier { get; set; }
 
@@ -131,10 +109,6 @@ namespace HunterCombatMR.UI
             }
         }
 
-        #endregion Internal Properties
-
-        #region Public Methods
-
         public override void Update(GameTime gameTime)
         {
             if (Layer != null && Layer.IsActive(KeyFrame))
@@ -145,10 +119,6 @@ namespace HunterCombatMR.UI
             base.Update(gameTime);
         }
 
-        #endregion Public Methods
-
-        #region Internal Methods
-
         internal void SetLayerAndKeyFrame(AnimationLayer layer,
                     int keyFrame)
         {
@@ -158,7 +128,5 @@ namespace HunterCombatMR.UI
                 KeyFrame = keyFrame;
             }
         }
-
-        #endregion Internal Methods
     }
 }

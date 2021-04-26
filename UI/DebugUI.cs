@@ -1,46 +1,32 @@
 ﻿using HunterCombatMR.AnimationEngine.Extensions;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 
 namespace HunterCombatMR.UI
 {
-    internal class UIEditorPopUpState
+    internal class DebugUI
         : UIState
     {
-        #region Private Fields
-
         private UIAutoScaleTextTextPanel<string> _modeSwitch;
-        private List<PopUpButton> _popUps;
         private PlayerInformationPanel _playerInfoPanel;
-
-        #endregion Private Fields
+        private List<PopUpButton> _popUps;
 
         public HunterCombatPlayer Player { get; set; }
 
-        #region Internal Constructors
-
-        internal UIEditorPopUpState()
+        internal DebugUI()
         {
             _popUps = new List<PopUpButton>();
         }
 
-        #endregion Internal Constructors
-
-        #region Internal Properties
-
         internal IEnumerable<LayerText> Layers { get; private set; }
-
-        #endregion Internal Properties
-
-        #region Public Methods
 
         public override void OnInitialize()
         {
@@ -94,10 +80,6 @@ namespace HunterCombatMR.UI
             base.Update(gameTime);
         }
 
-        #endregion Public Methods
-
-        #region Internal Methods
-
         internal void UpdateActiveLayers(IEnumerable<LayerText> layers)
         {
             Layers = layers;
@@ -112,18 +94,18 @@ namespace HunterCombatMR.UI
                     ClearPopUps();
 
                     var upButton = new PopUpButton('\u25B2', 40f, 40f, selected, new Vector2(120f, -50f)).WithFadedMouseOver();
-                    upButton.OnClick += (evt, list) => 
-                        { 
+                    upButton.OnClick += (evt, list) =>
+                        {
                             selected.Layer.UpdateLayerDepth(-1, currentKeyFrame, layers.Select(x => x.Layer));
-                            HunterCombatMR.Instance.EditorInstance.AnimationEdited = true; 
+                            HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
                         };
                     _popUps.Add(upButton);
 
                     var enableButton = new PopUpButton((selected.Layer.KeyFrames[currentKeyFrame].IsEnabled) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
-                    enableButton.OnClick += (evt, list) => 
+                    enableButton.OnClick += (evt, list) =>
                     {
                         selected.Layer.ToggleVisibility(currentKeyFrame);
-                        HunterCombatMR.Instance.EditorInstance.AnimationEdited = true; 
+                        HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
                     };
                     _popUps.Add(enableButton);
 
@@ -143,10 +125,6 @@ namespace HunterCombatMR.UI
                 ClearPopUps();
             }
         }
-
-        #endregion Internal Methods
-
-        #region Private Methods
 
         private void ClearPopUps()
         {
@@ -168,7 +146,5 @@ namespace HunterCombatMR.UI
 
             Main.PlaySound(SoundID.MenuTick);
         }
-
-        #endregion Private Methods
     }
 }

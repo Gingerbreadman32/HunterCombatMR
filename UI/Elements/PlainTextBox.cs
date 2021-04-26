@@ -3,18 +3,12 @@ using HunterCombatMR.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.UI.Elements
 {
     public class PlainTextBox
         : TextBoxBase
     {
-        #region Private Fields
-
         private char[] _availableCharacters;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public PlainTextBox(string hintText,
                     int maxLength = 0,
@@ -27,18 +21,10 @@ namespace HunterCombatMR.UI
             SetInputPermissions(characterPerms);
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         /// <summary>
         /// Limiting the types of characters this textbox can use
         /// </summary>
         public InputPermissions CharacterPermissions { get; protected set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
 
         public void SetInputPermissions(InputPermissions inputPermissions)
         {
@@ -51,10 +37,6 @@ namespace HunterCombatMR.UI
             _availableCharacters = characterList.ToArray();
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
         protected override void DrawDetails(string newString)
         {
             if (newString != _currentString)
@@ -62,7 +44,5 @@ namespace HunterCombatMR.UI
                 UpdateString(string.Concat(newString.Where(x => _availableCharacters.Contains(x))));
             }
         }
-
-        #endregion Protected Methods
     }
 }
