@@ -4,13 +4,7 @@ namespace HunterCombatMR.AttackEngine.Models
 {
     public struct BufferedInput
     {
-        #region Private Fields
-
-        private const int _maxFrameBuffer = 60;
-
-        #endregion Private Fields
-
-        #region Public Constructors
+        private const int _maxFrameBuffer = 5;
 
         public BufferedInput(ActionInputs input,
             int framesBuffered = 0,
@@ -21,23 +15,13 @@ namespace HunterCombatMR.AttackEngine.Models
             MaximumBufferFrames = maxBufferFrames;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         public int FramesSinceBuffered { get; set; }
         public ActionInputs Input { get; set; }
         public int MaximumBufferFrames { get; set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
 
         public void AddFramestoBuffer(int amount)
         {
             FramesSinceBuffered += amount;
         }
-
-        #endregion Public Methods
     }
 }

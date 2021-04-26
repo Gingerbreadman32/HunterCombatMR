@@ -53,6 +53,33 @@ namespace HunterCombatMR.AnimationEngine.Models
         public FrameLength KeyFrameAmount { get; set; }
         public SortedList<int, FrameLength> KeyFrameLengths { get; set; }
 
+        public static KeyFrameProfile operator +(KeyFrameProfile left, KeyFrameProfile right)
+        {
+            var newProfile = new KeyFrameProfile(left);
+
+            newProfile.KeyFrameAmount = left.KeyFrameAmount + right.KeyFrameAmount;
+
+            for (var f = 0; f < right.KeyFrameAmount; f++)
+            {
+                if (right.KeyFrameLengths.ContainsKey(f))
+                {
+                    newProfile.KeyFrameLengths.Add(f + left.KeyFrameAmount, right.KeyFrameLengths[f]);
+                    continue;
+                }
+
+                newProfile.KeyFrameLengths.Add(f + left.KeyFrameAmount, right.DefaultKeyFrameLength);
+            }
+
+            return newProfile;
+        }
+
+        public void Clear()
+        {
+            KeyFrameAmount = FrameLength.One;
+            KeyFrameLengths.Clear();
+            DefaultKeyFrameLength = FrameLength.One;
+        }
+
         public bool Equals(KeyFrameProfile other)
         {
             KeyFrameProfileEqualityComparer comparer = new KeyFrameProfileEqualityComparer();

@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
+using HunterCombatMR.Events;
 using HunterCombatMR.Interfaces;
 using System;
 using System.Collections.Generic;

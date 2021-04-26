@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace HunterCombatMR.AttackEngine.MoveSets
 {
+    /// <summary>
+    /// Temporary
+    /// </summary>
     public class SwordAndShieldMoveSet
         : MoveSet
     {
@@ -41,8 +44,8 @@ namespace HunterCombatMR.AttackEngine.MoveSets
             var routes = new List<ComboRoute>();
             var neutralstate = new Enumerations.AttackState[] { Enumerations.AttackState.NotAttacking };
 
-            routes.Add(new ComboRoute(GetAction(_doubleSlash), Enumerations.ActionInputs.PrimaryAction, neutralstate));
-            routes.Add(new ComboRoute(GetAction(_runningSlash), Enumerations.ActionInputs.PrimaryAction, neutralstate));
+            routes.Add(new ComboRoute(GetAction("Double Slash"), Enumerations.ActionInputs.PrimaryAction, neutralstate));
+            routes.Add(new ComboRoute(GetAction("Running Slash"), Enumerations.ActionInputs.PrimaryAction, neutralstate));
 
             return routes;
         }

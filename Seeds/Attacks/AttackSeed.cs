@@ -1,6 +1,6 @@
 ﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Utilities;
+using HunterCombatMR.Events;
 
 namespace HunterCombatMR.Seeds.Attacks
 {
@@ -12,6 +12,8 @@ namespace HunterCombatMR.Seeds.Attacks
             var action = new PlayerAction(internalName, displayName);
 
             action.Animations.AnimationReferences.Add(0, internalName);
+
+            action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.AttackStartup), FrameIndex.Zero);
 
             return action;
         }

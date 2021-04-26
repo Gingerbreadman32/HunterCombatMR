@@ -63,6 +63,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             {
                 CreateKeyFrames(keyFrameProfile, loopStyle);
                 Initialized = true;
+                Play();
                 return;
             }
 

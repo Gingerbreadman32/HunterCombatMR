@@ -45,6 +45,9 @@ namespace HunterCombatMR.AnimationEngine.Models
         public static FrameIndex operator -(FrameIndex a, FrameIndex b)
             => (a._value - b.Value).ToFIndex();
 
+        public static FrameIndex operator +(FrameIndex a, FrameIndex b)
+            => (a._value + b.Value).ToFIndex();
+
         public static bool operator !=(FrameIndex a, int b)
             => !a._value.Equals(b);
 

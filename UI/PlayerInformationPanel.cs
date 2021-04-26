@@ -98,7 +98,7 @@ namespace HunterCombatMR.UI
 
         private string ActionText()
             => (Player.StateController.CurrentAction != null)
-                ? $"{Player.StateController.CurrentAction.Name} - {Player.StateController.CurrentActionFrame}"
+                ? $"{Player.StateController.CurrentAction.Name} - {Player.StateController.CurrentActionKeyFrame}"
                 : _noneText;
 
         private string AnimationText()

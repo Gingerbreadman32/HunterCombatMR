@@ -1,6 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Extensions;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -17,16 +16,28 @@ namespace HunterCombatMR.AttackEngine.Models
             _animations = new SortedList<int, Tuple<IAnimation, FrameIndex>>();
             AnimationReferences = new Dictionary<int, string>();
         }
-
-        public Type AnimationType { get; }
-        public int Count { get => _animations.Count(); }
+        public int Count => _animations.Count();
         internal IDictionary<int, string> AnimationReferences { get; set; }
 
         public void AddAnimation(IAnimation animation,
-                    FrameIndex startKeyFrame)
+            FrameIndex keyFrameIndex)
         {
-            _animations.Add(_animations.Count(), new Tuple<IAnimation, FrameIndex>(animation, startKeyFrame));
+            _animations.Add(_animations.Count(), new Tuple<IAnimation, FrameIndex>(animation, keyFrameIndex));
         }
+
+        public bool ContainsKey(int index)
+            => _animations.ContainsKey(index);
+
+        public IAnimation GetAnimationByKeyFrame(FrameIndex keyFrame)
+        {
+            var firstAnim = _animations.First(x => x.Value.Item2 <= keyFrame
+                && x.Value.Item2 + x.Value.Item1.KeyFrameProfile.KeyFrameAmount >= keyFrame);
+
+            return firstAnim.Value.Item1;
+        }
+
+        public Tuple<IAnimation, FrameIndex> GetAnimationReference(int index)
+            => _animations[index];
 
         public void RemoveAnimation(int index)
         {
@@ -36,24 +47,21 @@ namespace HunterCombatMR.AttackEngine.Models
             DropDownAnimation(index);
         }
 
-        public Tuple<IAnimation, FrameIndex> GetAnimationReference(int index)
-            => _animations[index];
-
-        public bool ContainsKey(int index)
-            => _animations.ContainsKey(index);
-
         internal void LoadAnimations<T>() where T : IAnimation
         {
             _animations.Clear();
-            foreach (var reference in AnimationReferences)
+            FrameIndex totalKeyFrames = FrameIndex.Zero;
+            foreach (var reference in AnimationReferences.OrderBy(x => x.Key))
             {
-                AddAnimation(ContentUtils.Get<T>(reference.Value), reference.Key.ToFIndex());
+                var animation = ContentUtils.Get<T>(reference.Value);
+                AddAnimation(animation, totalKeyFrames);
+                totalKeyFrames += animation.KeyFrameProfile.KeyFrameAmount;
             }
         }
 
         internal IDictionary<int, string> SaveAnimations()
                     => _animations
-                .Select(x => new KeyValuePair<int, string>(x.Value.Item2, x.Value.Item1.InternalName))
+                .Select(x => new KeyValuePair<int, string>(x.Key, x.Value.Item1.InternalName))
                 .ToDictionary(x => x.Key, x => x.Value);
 
         private void DropDownAnimation(int index)

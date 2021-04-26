@@ -187,7 +187,9 @@ namespace HunterCombatMR
                 return true;
 
             //PlayerActionAnimation newAnim = new PlayerActionAnimation(newAnimation, newFile);
+            CurrentAnimation?.Uninitialize();
             CurrentAnimation = newPlayerAnimation;
+            CurrentAnimation?.Initialize();
 
             return CurrentAnimation != null;
         }

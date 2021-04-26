@@ -1,7 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,8 +7,6 @@ namespace HunterCombatMR.Utilities
 {
     public static class PlayerActionComboUtils
     {
-        #region Public Methods
-
         public static ComboAction GetNextAvailableAction(PlayerStateController playerInfo,
             MoveSet weaponMoveset,
             PlayerBufferInformation bufferInformation)
@@ -20,7 +16,7 @@ namespace HunterCombatMR.Utilities
 
             if (playerInfo.CurrentAction == null)
             {
-                if ((!weaponMoveset.NeutralRoutes.Any(x => x.ComboAction.PlayerStateRequired.Equals(playerInfo.State) 
+                if ((!weaponMoveset.NeutralRoutes.Any(x => x.ComboAction.PlayerStateRequired.Equals(playerInfo.State)
                         && x.StatesCancellableFrom.Contains(playerInfo.ActionState))))
                     return playerInfo.CurrentAction;
 
@@ -33,7 +29,8 @@ namespace HunterCombatMR.Utilities
                     {
                         movesAvailable.Add(route,
                             bufferInformation.BufferedComboInputs.OrderBy(x => x.FramesSinceBuffered).First(x => x.Input.Equals(route.Input)).FramesSinceBuffered);
-                    } else if (bufferInformation.HeldComboInputs[route.Input] > route.InputHoldFrames && route.InputHold)
+                    }
+                    else if (bufferInformation.HeldComboInputs[route.Input] > route.InputHoldFrames && route.InputHold)
                     {
                         movesAvailable.Add(route,
                             bufferInformation.BufferedComboInputs.OrderBy(x => x.FramesSinceBuffered).First(x => x.Input.Equals(route.Input)).FramesSinceBuffered);
@@ -43,14 +40,17 @@ namespace HunterCombatMR.Utilities
                 var orderedMoves = movesAvailable.OrderBy(x => x.Value);
 
                 if (movesAvailable.Any(x => x.Key.InputHold))
+                {
                     return orderedMoves.First(x => x.Key.InputHold).Key.ComboAction;
-                else if (movesAvailable.Any())
+                }
+
+                if (movesAvailable.Any())
+                {
                     return orderedMoves.First().Key.ComboAction;
+                }
             }
 
             return playerInfo.CurrentAction;
         }
-
-        #endregion Public Methods
     }
 }

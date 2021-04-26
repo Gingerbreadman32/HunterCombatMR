@@ -1,6 +1,5 @@
 ﻿using HunterCombatMR.AnimationEngine.Interfaces;
 using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -24,6 +23,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             Name = (string.IsNullOrEmpty(displayName)) ? name : displayName;
             KeyFrameProfile = new KeyFrameProfile();
             Animations = new ActionAnimationReference();
+            _events = new List<TaggedEvent<T>>();
         }
 
         public ActionAnimationReference Animations { get; set; }
@@ -34,8 +34,18 @@ namespace HunterCombatMR.AnimationEngine.Models
             set { _events = value; }
         }
 
-        public KeyFrameProfile KeyFrameProfile { get; protected set; } // += operator
+        public KeyFrameProfile KeyFrameProfile { get; protected set; }
+
         public string Name { get; protected set; }
+
+        public void ActionLogic(T entity,
+            Animator animator)
+        {
+            foreach (var keyFrameEvent in GetCurrentKeyFrameEvents(animator.CurrentFrame))
+            {
+                keyFrameEvent.Event.InvokeLogic(entity, animator);
+            }
+        }
 
         public void AddKeyFrameEvent(Event<T> actionLogicMethod,
             FrameIndex startFrame)
@@ -46,7 +56,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             if (tempEvents.Any())
                 newTag = GetLowestFreeTag(tempEvents.Select(x => x.Tag.Id));
 
-            tempEvents.Add(new TaggedEvent<T>(new EventTag(newTag, startFrame, startFrame + actionLogicMethod.LengthActive), actionLogicMethod));
+            tempEvents.Add(new TaggedEvent<T>(new EventTag(newTag, startFrame, startFrame + ((int)actionLogicMethod.LengthActive - 1)), actionLogicMethod));
 
             KeyFrameEvents = tempEvents;
         }
@@ -60,23 +70,13 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public void Initialize<A>() where A : IAnimation
         {
-            CreateKeyFrameProfile();
             Animations.LoadAnimations<A>();
-        }
-
-        public void ActionLogic(T entity,
-            Animator animator)
-        {
-            foreach (var keyFrameEvent in GetCurrentKeyFrameEvents(animator.CurrentFrame))
-            {
-                keyFrameEvent.Event.InvokeLogic(entity, animator);
-            }
+            CreateKeyFrameProfile();
         }
 
         private void CreateKeyFrameProfile()
         {
-            int totalKeyFrames = 0;
-
+            KeyFrameProfile.Clear();
             for (var i = 0; i < Animations.Count; i++)
             {
                 if (!Animations.ContainsKey(i))
@@ -87,13 +87,14 @@ namespace HunterCombatMR.AnimationEngine.Models
                 if (!anim.IsInitialized)
                     anim.Initialize();
 
-                totalKeyFrames += anim.KeyFrameProfile.KeyFrameAmount; // Add all the keyframes using a += operator or something
-                KeyFrameProfile.KeyFrameLengths.Add(KeyFrameProfile.KeyFrameLengths.Count(), anim.AnimationData.TotalFrames.ToFLength());
+                if (i == 0)
+                {
+                    KeyFrameProfile = new KeyFrameProfile(anim.KeyFrameProfile);
+                    continue;
+                }
+
+                KeyFrameProfile += anim.KeyFrameProfile;
             }
-
-            KeyFrameProfile.KeyFrameAmount = totalKeyFrames.ToFLength();
-
-            
         }
 
         private int GetLowestFreeTag(IEnumerable<int> tags)

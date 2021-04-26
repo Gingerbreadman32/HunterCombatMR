@@ -1,8 +1,10 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Enumerations;
+using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Utilities;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 
 namespace HunterCombatMR.AttackEngine.Models
@@ -38,31 +40,77 @@ namespace HunterCombatMR.AttackEngine.Models
             }
         }
 
-        public int CurrentActionFrame { get => _actionAnimator.CurrentFrame; }
+        public MoveSet CurrentMoveSet
+        {
+            get => _currentMoveSet;
+            private set
+            {
+                if (value != _currentMoveSet)
+                {
+                    _currentMoveSet = value;
+                };
+            }
+        }
+
+        public FrameIndex CurrentActionKeyFrame { get => _actionAnimator.CurrentKeyFrameIndex.ToFIndex(); }
         public HunterCombatPlayer Player { get; }
         public PlayerState State { get; set; }
 
         public void Update()
         {
+            // Set Player State
             State = SetStateLogic(Player.player);
 
+            // Equipped Weapon/Moveset Checks
             if (Player.EquippedWeapon == null)
             {
-                _currentMoveSet = null;
+                FullStateReset();
+                return;
+            }
+            CurrentMoveSet = ContentUtils.GetInstance<MoveSet>(Player.EquippedWeapon.MoveSet);
+
+            // Get the next action if available
+            CurrentAction = PlayerActionComboUtils.GetNextAvailableAction(this,
+                CurrentMoveSet,
+                Player.InputBuffers);
+
+            // If no actions, stop animations and return
+            if (CurrentAction == null)
+            {
+                ActionReset();
                 return;
             }
 
-            _currentMoveSet = ContentUtils.Get<MoveSet>(Player.EquippedWeapon.MoveSet);
+            ActionLogic();
+        }
 
-            CurrentAction = PlayerActionComboUtils.GetNextAvailableAction(this,
-                _currentMoveSet,
-                Player.InputBuffers);
+        private void ActionLogic()
+        {
+            CurrentAction.Attack.ActionLogic(Player, _actionAnimator);
 
-            if (CurrentAction != null)
-            {
-                CurrentAction.Attack.ActionLogic(Player, _actionAnimator);
-                _actionAnimator.Update();
-            }
+            var currentAnimation = CurrentAction.Attack.Animations.GetAnimationByKeyFrame(CurrentActionKeyFrame);
+            Player.SetCurrentAnimation(currentAnimation);
+
+            _actionAnimator.Update();
+
+            if (_actionAnimator.Flags.Equals(AnimatorFlags.Locked))
+                CurrentAction = null;
+        }
+
+        private void FullStateReset()
+        {
+            CurrentMoveSet = null;
+            _currentAction = null;
+            ActionReset();
+
+            if (ActionHistory.Any())
+                ActionHistory.Clear();
+        }
+
+        private void ActionReset()
+        {
+            Player.SetCurrentAnimation(null);
+            ActionState = AttackState.NotAttacking;
         }
 
         private PlayerState SetStateLogic(Player player)

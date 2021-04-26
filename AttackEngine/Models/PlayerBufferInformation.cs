@@ -8,14 +8,8 @@ namespace HunterCombatMR.AttackEngine.Models
 {
     public sealed class PlayerBufferInformation
     {
-        #region Private Fields
-
         private const int _maxSameInput = 3;
         private IEnumerable<ActionInputs> _concreteInputs;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public PlayerBufferInformation()
         {
@@ -26,23 +20,17 @@ namespace HunterCombatMR.AttackEngine.Models
             PopulateHoldCommands();
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         /// <summary>
-        /// A dictionary containing the list of combo inputs that have been recently pressed and how long since they've been buffered.
+        /// A dictionary containing the list of combo inputs that have been recently pressed and how
+        /// long since they've been buffered.
         /// </summary>
         public List<BufferedInput> BufferedComboInputs { get; set; }
 
         /// <summary>
-        /// A dictionary containing a list of the combo inputs that are being held and how long they've been held.
+        /// A dictionary containing a list of the combo inputs that are being held and how long
+        /// they've been held.
         /// </summary>
         public IDictionary<ActionInputs, int> HeldComboInputs { get; set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
 
         public void AddToBuffers(ActionInputs input)
         {
@@ -108,7 +96,5 @@ namespace HunterCombatMR.AttackEngine.Models
                 }
             }
         }
-
-        #endregion Public Methods
     }
 }
