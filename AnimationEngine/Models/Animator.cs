@@ -89,6 +89,9 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// </summary>
         public bool Play()
         {
+            if (!Flags.HasFlag(AnimatorFlags.Started))
+                Flags |= AnimatorFlags.Started;
+
             if (Flags.HasFlag(AnimatorFlags.Locked))
             {
                 Flags &= ~AnimatorFlags.Locked;
@@ -140,9 +143,6 @@ namespace HunterCombatMR.AnimationEngine.Models
             {
                 MoveFrame(FrameSkip + 1);
             }
-
-            if (!Flags.HasFlag(AnimatorFlags.Started) && CurrentFrame > 0)
-                Flags |= AnimatorFlags.Started;
         }
     }
 }

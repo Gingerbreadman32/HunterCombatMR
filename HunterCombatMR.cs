@@ -131,10 +131,10 @@ namespace HunterCombatMR
 
         public override void Unload()
         {
-            EditorInstance.Dispose();
+            EditorInstance?.Dispose();
             EditorInstance = null;
 
-            Instance.EditorInstance.Dispose();
+            Instance.EditorInstance?.Dispose();
             Instance = null;
         }
 

@@ -66,7 +66,7 @@ namespace HunterCombatMR.UI
             _bufferpanel.HAlign = 0.65f;
             _bufferpanel.VAlign = 0.05f;
             _bufferpanel.OverflowHidden = true;
-            _bufferList = new UIList();
+            _bufferList = new UIList() { Width = StyleDimension.Fill, Height = StyleDimension.Fill };
             _bufferpanel.Append(_bufferList);
             Append(_bufferpanel);
         }

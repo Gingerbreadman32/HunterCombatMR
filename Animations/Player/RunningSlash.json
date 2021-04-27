@@ -108,7 +108,7 @@
         "TexturePath": "HunterCombatMR/Textures/SnS/Limbs/runningslashtest"
       }
     ],
-    "Loop": 1
+    "Loop": 0
   },
   "Name": "RunningSlash"
 }

@@ -94,13 +94,12 @@ namespace HunterCombatMR.AttackEngine.Models
             _actionAnimator.Update();
 
             if (_actionAnimator.Flags.Equals(AnimatorFlags.Locked))
-                CurrentAction = null;
+                ActionReset();
         }
 
         private void FullStateReset()
         {
             CurrentMoveSet = null;
-            _currentAction = null;
             ActionReset();
 
             if (ActionHistory.Any())
@@ -109,6 +108,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         private void ActionReset()
         {
+            CurrentAction = null;
             Player.SetCurrentAnimation(null);
             ActionState = AttackState.NotAttacking;
         }

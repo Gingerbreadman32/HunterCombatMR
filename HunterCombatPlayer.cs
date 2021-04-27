@@ -80,7 +80,7 @@ namespace HunterCombatMR
                 return;
             }
 
-            if (!_showDefaultLayers || !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (!_showDefaultLayers || HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
                 foreach (PlayerLayer item in layers)
                 {
@@ -91,7 +91,6 @@ namespace HunterCombatMR
             layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
 
             layers = CurrentAnimation.DrawPlayerLayers(layers);
-            CurrentAnimation.Update();
         }
 
         public override void OnEnterWorld(Player player)
@@ -152,6 +151,7 @@ namespace HunterCombatMR
             }
 
             StateController.Update();
+            CurrentAnimation?.Update();
         }
 
         public override bool PreItemCheck()
@@ -170,14 +170,15 @@ namespace HunterCombatMR
         public bool SetCurrentAnimation(IAnimation newAnimation,
             bool newFile = false)
         {
-            if (!(newAnimation is PlayerAnimation))
-                return false;
-
             if (newAnimation == null)
             {
+                CurrentAnimation?.Uninitialize();
                 CurrentAnimation = null;
                 return true;
             }
+
+            if (!(newAnimation is PlayerAnimation))
+                return false;
 
             PlayerAnimation newPlayerAnimation = newAnimation as PlayerAnimation;
 
