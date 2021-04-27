@@ -36,8 +36,6 @@ namespace HunterCombatMR.UI
 
         private UIPanel _animationtoolpanel;
 
-        private UIPanel _bufferpanel;
-
         private UIText _currentframetime;
 
         private UIText _currentlayertextureframe;
@@ -113,16 +111,6 @@ namespace HunterCombatMR.UI
         public override void OnInitialize()
         {
             base.OnInitialize();
-
-            _bufferpanel = new UIPanel();
-            _bufferpanel.Width.Set(0f, 0.18f);
-            _bufferpanel.Height.Set(0f, 0.1f);
-            _bufferpanel.BackgroundColor = Microsoft.Xna.Framework.Color.Red;
-            _bufferpanel.BackgroundColor.A = 50;
-            _bufferpanel.HAlign = 0.65f;
-            _bufferpanel.VAlign = 0.05f;
-            _bufferpanel.OverflowHidden = true;
-            Append(_bufferpanel);
 
             _layerpanel = new UIPanel();
             _layerpanel.Width.Set(0, 0.15f);
@@ -518,13 +506,6 @@ namespace HunterCombatMR.UI
             }
             if (Main.mouseLeft && !_animationname.IsMouseHovering)
                 _animationname.StopInteracting();
-
-            // Buffer Window
-            var buffers = new List<string>();
-            foreach (var buffer in _currentPlayer.InputBuffers.BufferedComboInputs)
-            {
-                buffers.Add($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered}");
-            }
 
             // Layer Window
             var layers = PlayerHooks.GetDrawLayers(_currentPlayer.player);

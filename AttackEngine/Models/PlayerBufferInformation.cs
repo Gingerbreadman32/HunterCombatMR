@@ -14,7 +14,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public PlayerBufferInformation()
         {
             BufferedComboInputs = new List<BufferedInput>();
-            HeldComboInputs = new Dictionary<ActionInputs, int>();
+            HeldComboInputs = new List<HeldInput>();
             _concreteInputs = new List<ActionInputs>((ActionInputs[])Enum.GetValues(typeof(ActionInputs))).
                 Where(x => !string.IsNullOrEmpty(x.GetGameCommand()));
             PopulateHoldCommands();
@@ -30,7 +30,7 @@ namespace HunterCombatMR.AttackEngine.Models
         /// A dictionary containing a list of the combo inputs that are being held and how long
         /// they've been held.
         /// </summary>
-        public IDictionary<ActionInputs, int> HeldComboInputs { get; set; }
+        public List<HeldInput> HeldComboInputs { get; set; }
 
         public void AddToBuffers(ActionInputs input)
         {
@@ -45,54 +45,51 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             foreach (ActionInputs input in _concreteInputs)
             {
-                HeldComboInputs.Add(input, 0);
+                HeldComboInputs.Add(new HeldInput(input));
             }
         }
 
         public void ResetBuffers()
         {
-            BufferedComboInputs.Clear();
-            ResetHoldTimes();
+            if (BufferedComboInputs.Any())
+                BufferedComboInputs.Clear();
+
+
+            if (HeldComboInputs.Any(x => x.FramesHeld != 0))
+                ResetHoldTimes();
         }
 
         public void ResetHoldTimes()
         {
-            var tempHeldKeys = new Dictionary<ActionInputs, int>(HeldComboInputs);
-            foreach (var held in HeldComboInputs.Keys)
-            {
-                tempHeldKeys[held] = 0;
-            }
-            HeldComboInputs = tempHeldKeys;
+            HeldComboInputs = HeldComboInputs.Select(x => new HeldInput(x.Input, 0)).ToList();
         }
 
-        public void Update()
+        public void Update(PlayerState state)
         {
-            var tempBuffKeys = new List<BufferedInput>(BufferedComboInputs);
-            foreach (var binput in BufferedComboInputs)
-            {
-                if (binput.FramesSinceBuffered < binput.MaximumBufferFrames - 1)
-                    binput.AddFramestoBuffer(1);
-                else
-                    tempBuffKeys.Remove(binput);
-            }
-            BufferedComboInputs = tempBuffKeys;
+            BufferedComboInputs = BufferedComboInputs
+                .Select(x => { x.AddFramestoBuffer(1); return x; })
+                .ToList();
+            BufferedComboInputs.RemoveAll(x => x.FramesSinceBuffered >= x.MaximumBufferFrames);
 
-            var tempHeldKeys = new Dictionary<ActionInputs, int>(HeldComboInputs);
-            foreach (var hinput in HeldComboInputs.Where(x => x.Key.IsPressed()))
-            {
-                tempHeldKeys[hinput.Key]++;
-            }
-            HeldComboInputs = tempHeldKeys;
+            HeldComboInputs = HeldComboInputs
+                .Select(x => { if (x.Input.IsPressed()) { x.FramesHeld++; }; return x; })
+                .ToList();
 
+            CheckInputs(state);
+        }
+
+        private void CheckInputs(PlayerState state)
+        {
             foreach (ActionInputs input in _concreteInputs)
             {
-                if (input.JustPressed())
+                if (input.JustPressed() && !state.Equals(PlayerState.Dead))
                 {
                     AddToBuffers(input);
                 }
-                else if (!input.IsPressed() || input.JustReleased())
+
+                if ((!input.IsPressed() || input.JustReleased()) && HeldComboInputs.First(x => x.Input.Equals(input)).FramesHeld != 0)
                 {
-                    HeldComboInputs[input] = 0;
+                    HeldComboInputs.First(x => x.Input.Equals(input)).FramesHeld = 0;
                 }
             }
         }

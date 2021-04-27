@@ -4,11 +4,11 @@ namespace HunterCombatMR.AttackEngine.Models
 {
     public struct BufferedInput
     {
-        private const int _maxFrameBuffer = 5;
+        private const int _defaultMaxFrameBuffer = 5;
 
         public BufferedInput(ActionInputs input,
             int framesBuffered = 0,
-            int maxBufferFrames = _maxFrameBuffer)
+            int maxBufferFrames = _defaultMaxFrameBuffer)
         {
             Input = input;
             FramesSinceBuffered = framesBuffered;

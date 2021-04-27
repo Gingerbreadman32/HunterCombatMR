@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
@@ -18,6 +19,8 @@ namespace HunterCombatMR.UI
         private UIAutoScaleTextTextPanel<string> _modeSwitch;
         private PlayerInformationPanel _playerInfoPanel;
         private List<PopUpButton> _popUps;
+        private UIPanel _bufferpanel;
+        private UIList _bufferList;
 
         public HunterCombatPlayer Player { get; set; }
 
@@ -54,17 +57,23 @@ namespace HunterCombatMR.UI
 
             Append(_modeSwitch);
             Append(_playerInfoPanel);
+
+            _bufferpanel = new UIPanel();
+            _bufferpanel.Width.Set(0f, 0.18f);
+            _bufferpanel.Height.Set(0f, 0.1f);
+            _bufferpanel.BackgroundColor = Microsoft.Xna.Framework.Color.Red;
+            _bufferpanel.BackgroundColor.A = 50;
+            _bufferpanel.HAlign = 0.65f;
+            _bufferpanel.VAlign = 0.05f;
+            _bufferpanel.OverflowHidden = true;
+            _bufferList = new UIList();
+            _bufferpanel.Append(_bufferList);
+            Append(_bufferpanel);
         }
 
         public void RemoveAllChildrenOfType<T>() where T : UIElement
         {
-            var tempElements = new List<UIElement>(Elements);
-            foreach (T element in Elements.Where(x => x.GetType().IsAssignableFrom(typeof(T))))
-            {
-                element.Parent = null;
-                tempElements.Remove(element);
-            }
-            Elements = tempElements;
+            Elements.RemoveAll(x => x.GetType().IsInstanceOfType(typeof(T)));
         }
 
         public override void Update(GameTime gameTime)
@@ -73,6 +82,13 @@ namespace HunterCombatMR.UI
             {
                 Player = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
                 _playerInfoPanel.SetPlayer(Player);
+            }
+
+            // Buffer Window
+            _bufferList.Clear();
+            foreach (var buffer in Player.InputBuffers.BufferedComboInputs)
+            {
+                _bufferList.Add(new UIText($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered}"));
             }
 
             _modeSwitch.SetText(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription());

@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.GameInput;
 using Terraria.ModLoader;
 
 namespace HunterCombatMR
@@ -18,7 +17,7 @@ namespace HunterCombatMR
         IAnimatedEntity<PlayerAnimation>
     {
         private bool _showDefaultLayers = true;
-
+        private WeaponBase _equippedWeapon;
         public HunterCombatPlayer()
             : base()
         {
@@ -31,8 +30,12 @@ namespace HunterCombatMR
         public ICollection<string> ActiveProjectiles { get; set; }
         public override bool CloneNewInstances => false;
         public PlayerAnimation CurrentAnimation { get; private set; }
-        public WeaponBase EquippedWeapon { get; set; }
-        public PlayerBufferInformation InputBuffers { get; private set; }
+        public WeaponBase EquippedWeapon 
+        {
+            get => _equippedWeapon;
+            set { _equippedWeapon = value; InputBuffers?.ResetBuffers();  }
+        }
+        public PlayerBufferInformation InputBuffers { get; }
         public IDictionary<string, Vector2> LayerPositions { get; set; }
         public PlayerStateController StateController { get; private set; }
 
@@ -72,24 +75,23 @@ namespace HunterCombatMR
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
-            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (CurrentAnimation == null)
             {
-                if (!_showDefaultLayers)
-                {
-                    foreach (PlayerLayer item in layers)
-                    {
-                        item.visible = false;
-                    }
-                }
-                else
-                    layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
+                return;
+            }
 
-                if (CurrentAnimation != null)
+            if (!_showDefaultLayers || !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            {
+                foreach (PlayerLayer item in layers)
                 {
-                    layers = CurrentAnimation.DrawPlayerLayers(layers);
-                    CurrentAnimation.Update();
+                    item.visible = false;
                 }
             }
+
+            layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
+
+            layers = CurrentAnimation.DrawPlayerLayers(layers);
+            CurrentAnimation.Update();
         }
 
         public override void OnEnterWorld(Player player)
@@ -128,6 +130,8 @@ namespace HunterCombatMR
 
         public override void PostUpdate()
         {
+            InputBuffers.Update(StateController.State);
+
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
                 player.frozen = true;
@@ -163,12 +167,6 @@ namespace HunterCombatMR
             return base.PreItemCheck();
         }
 
-        public override void ProcessTriggers(TriggersSet triggersSet)
-        {
-            if (!StateController.State.Equals(PlayerState.Dead) && EquippedWeapon != null)
-                InputBuffers.Update();
-        }
-
         public bool SetCurrentAnimation(IAnimation newAnimation,
             bool newFile = false)
         {
@@ -202,8 +200,7 @@ namespace HunterCombatMR
             if (ActiveProjectiles.Any())
                 ActiveProjectiles.Clear();
 
-            if (InputBuffers.BufferedComboInputs.Any() || InputBuffers.HeldComboInputs.Any(x => x.Value > 0))
-                InputBuffers.ResetBuffers();
+            InputBuffers.ResetBuffers();
         }
 
         private Color MakeTransparent(Color original,

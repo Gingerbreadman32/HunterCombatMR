@@ -29,8 +29,10 @@ namespace HunterCombatMR.Utilities
                     {
                         movesAvailable.Add(route,
                             bufferInformation.BufferedComboInputs.OrderBy(x => x.FramesSinceBuffered).First(x => x.Input.Equals(route.Input)).FramesSinceBuffered);
+                        continue;
                     }
-                    else if (bufferInformation.HeldComboInputs[route.Input] > route.InputHoldFrames && route.InputHold)
+                    
+                    if (bufferInformation.HeldComboInputs.Single(x => x.Input.Equals(route.Input)).FramesHeld > route.InputHoldFrames && route.InputHold)
                     {
                         movesAvailable.Add(route,
                             bufferInformation.BufferedComboInputs.OrderBy(x => x.FramesSinceBuffered).First(x => x.Input.Equals(route.Input)).FramesSinceBuffered);
