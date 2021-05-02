@@ -154,6 +154,11 @@ namespace HunterCombatMR
             CurrentAnimation?.Update();
         }
 
+        public override void PreUpdateMovement()
+        {
+            base.PreUpdateMovement();
+        }
+
         public override bool PreItemCheck()
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
