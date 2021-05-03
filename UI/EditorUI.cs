@@ -232,7 +232,7 @@ namespace HunterCombatMR.UI
                 Width = new StyleDimension(0, 1f),
                 Height = new StyleDimension(0, 1f)
             }.WithFadedMouseOver();
-            _layertexturebutton.OnClick += (evt, list) => ButtonAction(CycleTexture, evt, list, EditorModePreset.EditOnly, true);
+            _layertexturebutton.OnClick += (evt, list) => ButtonAction(CycleTexture, evt, list, EditorModePreset.InEditor, true);
 
             _animationgroup.Append(_layertexturebutton);
             _animationtoolpanel.Append(_animationgroup);
@@ -254,7 +254,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0f
             }.WithFadedMouseOver();
-            _subtimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(-1), evt, listen, EditorModePreset.EditOnly, true));
+            _subtimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(-1), evt, listen, EditorModePreset.InEditor, true));
 
             _currentframetime = new UIText("0")
             {
@@ -271,7 +271,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0.20f
             }.WithFadedMouseOver();
-            _addtimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(1), evt, listen, EditorModePreset.EditOnly, true));
+            _addtimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(1), evt, listen, EditorModePreset.InEditor, true));
 
             _defaulttimebutton = new UIAutoScaleTextTextPanel<string>("Default")
             {
@@ -283,7 +283,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0.5f
             }.WithFadedMouseOver();
-            _defaulttimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(0, true), evt, listen, EditorModePreset.EditOnly, true));
+            _defaulttimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(0, true), evt, listen, EditorModePreset.InEditor, true));
 
             _frametotal = new UIText("0")
             {
@@ -402,7 +402,7 @@ namespace HunterCombatMR.UI
                 var newAnim = HunterCombatMR.Instance.Content.DuplicateContentInstance(_currentPlayer?.CurrentAnimation);
                 EditorInstanceUtils.EditingAnimation = ContentUtils.GetInstance<PlayerAnimation>(newAnim);
                 _animationname.Text = newAnim;
-            }, evt, list, EditorModePreset.EditOnly, true);
+            }, evt, list, EditorModePreset.InEditor, true);
             panelPercent2 += duplicatebutton.Width.Percent;
             othertoolpanel.Append(duplicatebutton);
 
@@ -423,7 +423,7 @@ namespace HunterCombatMR.UI
                 HunterCombatMR.Instance.DeleteAnimation(animToDelete);
                 _animationname.Text = string.Empty;
                 _testlist.Clear();
-            }, evt, list, EditorModePreset.EditOnly, true);
+            }, evt, list, EditorModePreset.InEditor, true);
             panelPercent2 += deletebutton.Width.Percent;
             othertoolpanel.Append(deletebutton);
 

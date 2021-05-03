@@ -22,6 +22,7 @@ namespace HunterCombatMR.AttackEngine.Models
             ActionState = AttackState.NotAttacking;
             Player = player;
             ActionHistory = new SortedList<int, string>();
+            MovementInformation = new MovementInfo();
         }
 
         public SortedList<int, string> ActionHistory { get; private set; }
@@ -40,6 +41,8 @@ namespace HunterCombatMR.AttackEngine.Models
             }
         }
 
+        public FrameIndex CurrentActionKeyFrame { get => _actionAnimator.CurrentKeyFrameIndex.ToFIndex(); }
+
         public MoveSet CurrentMoveSet
         {
             get => _currentMoveSet;
@@ -52,11 +55,11 @@ namespace HunterCombatMR.AttackEngine.Models
             }
         }
 
-        public FrameIndex CurrentActionKeyFrame { get => _actionAnimator.CurrentKeyFrameIndex.ToFIndex(); }
+        public MovementInfo MovementInformation { get; }
         public HunterCombatPlayer Player { get; }
         public PlayerState State { get; set; }
 
-        public void Update()
+        public void StateUpdate()
         {
             // Set Player State
             State = SetStateLogic(Player.player);
@@ -84,6 +87,55 @@ namespace HunterCombatMR.AttackEngine.Models
             ActionLogic();
         }
 
+        public void MountUpdate()
+        {
+            if (CurrentAction == null)
+                return;
+
+            if (Player.player.mount.Active)
+                Player.player.mount.Dismount(Player.player);
+        }
+
+        public void EditorUpdate()
+        {
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            {
+                if (Main.blockInput)
+                    Main.blockInput = false;
+                return;
+            }
+                Main.blockInput = true;
+                Player.player.immune = true;
+                Player.player.immuneNoBlink = true;
+                Player.player.immuneTime = 2;
+
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit)
+                    && (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationType.Equals(AnimationType.Player) ?? false))
+            {
+                Player.SetCurrentAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
+            }
+
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit) 
+                && Player.CurrentAnimation != null)
+            {
+                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(Player.CurrentAnimation, Player.player.direction);
+            }
+        }
+
+        public void PreUpdate()
+        {
+            if (CurrentAction == null)
+                return;
+
+            Main.blockInput = true;
+        }
+
+        public void MovementUpdate()
+        {
+            if (CurrentAction != null)
+                Player.player.velocity = MovementInformation.CalculateVelocity(Player.player.velocity);
+        }
+
         private void ActionLogic()
         {
             CurrentAction.Attack.ActionLogic(Player, _actionAnimator);
@@ -97,6 +149,14 @@ namespace HunterCombatMR.AttackEngine.Models
                 ActionReset();
         }
 
+        private void ActionReset()
+        {
+            CurrentAction = null;
+            Player.SetCurrentAnimation(null);
+            ActionState = AttackState.NotAttacking;
+            Main.blockInput = false;
+        }
+
         private void FullStateReset()
         {
             CurrentMoveSet = null;
@@ -104,13 +164,6 @@ namespace HunterCombatMR.AttackEngine.Models
 
             if (ActionHistory.Any())
                 ActionHistory.Clear();
-        }
-
-        private void ActionReset()
-        {
-            CurrentAction = null;
-            Player.SetCurrentAnimation(null);
-            ActionState = AttackState.NotAttacking;
         }
 
         private PlayerState SetStateLogic(Player player)

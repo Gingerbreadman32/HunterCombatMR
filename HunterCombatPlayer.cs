@@ -130,33 +130,24 @@ namespace HunterCombatMR
         public override void PostUpdate()
         {
             InputBuffers.Update(StateController.State);
-
-            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
-            {
-                player.frozen = true;
-                player.immune = true;
-                player.immuneNoBlink = true;
-                player.immuneTime = 2;
-            }
-
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode)
-                    && (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationType.Equals(AnimationType.Player) ?? false))
-            {
-                SetCurrentAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing as PlayerAnimation);
-            }
-
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode) && CurrentAnimation != null)
-            {
-                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(CurrentAnimation, player.direction);
-            }
-
-            StateController.Update();
+            StateController.StateUpdate();
+            StateController.EditorUpdate();
             CurrentAnimation?.Update();
+        }
+
+        public override void PreUpdate()
+        {
+            StateController.PreUpdate();
         }
 
         public override void PreUpdateMovement()
         {
-            base.PreUpdateMovement();
+            StateController.MovementUpdate();
+        }
+
+        public override void PostUpdateRunSpeeds()
+        {
+            StateController.MountUpdate();
         }
 
         public override bool PreItemCheck()

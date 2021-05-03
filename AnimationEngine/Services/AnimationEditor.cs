@@ -64,7 +64,7 @@ namespace AnimationEngine.Services
             int keyFrameToDraw,
             Color color)
         {
-            if (!_onionSkin || !CurrentEditMode.Equals(EditorMode.EditMode))
+            if (!_onionSkin || !CurrentEditMode.Equals(EditorMode.AnimationEdit))
                 return false;
 
             color.A = 30;

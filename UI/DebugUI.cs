@@ -150,14 +150,14 @@ namespace HunterCombatMR.UI
 
         private void ModeSwitch(UIMouseEvent evt, UIElement listeningElement)
         {
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.EditMode))
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit))
             {
                 Player.SetCurrentAnimation(null);
                 HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.None;
             }
             else
             {
-                HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.EditMode;
+                HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.AnimationEdit;
             }
 
             Main.PlaySound(SoundID.MenuTick);
