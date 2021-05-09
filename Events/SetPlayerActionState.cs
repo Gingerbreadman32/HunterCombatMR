@@ -22,7 +22,7 @@ namespace HunterCombatMR.Events
         public override void InvokeLogic(HunterCombatPlayer entity,
             Animator animator)
         {
-            int parameterValue = (int)GetParameter("ActionState").Value;
+            int parameterValue = (int)GetParameterValue ("ActionState");
             entity.StateController.ActionState = (AttackState)parameterValue;
         }
     }

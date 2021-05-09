@@ -19,7 +19,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public static int Minimum { get => 0; }
 
-        public static FrameIndex Zero { get => new FrameIndex(0); }
+        public static FrameIndex Zero { get => (FrameIndex)0; }
 
         public int Value { get => _value; }
 

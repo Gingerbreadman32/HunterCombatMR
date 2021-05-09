@@ -26,12 +26,14 @@ namespace HunterCombatMR.AnimationEngine.Models
             _events = new List<TaggedEvent<T>>();
         }
 
-        public ActionAnimationReference Animations { get; set; }
+        public ActionAnimationReference Animations { get; protected set; }
+
+        public 
 
         public IEnumerable<TaggedEvent<T>> KeyFrameEvents
         {
             get => _events;
-            set { _events = value; }
+            protected set { _events = value; }
         }
 
         public KeyFrameProfile KeyFrameProfile { get; protected set; }
@@ -41,7 +43,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public void ActionLogic(T entity,
             Animator animator)
         {
-            foreach (var keyFrameEvent in GetCurrentKeyFrameEvents(animator.CurrentFrame))
+            foreach (var keyFrameEvent in GetCurrentKeyFrameEvents(animator.CurrentKeyFrameIndex))
             {
                 keyFrameEvent.Event.InvokeLogic(entity, animator);
             }

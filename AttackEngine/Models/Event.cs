@@ -40,8 +40,8 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public string Name { get; }
 
-        public EventParameter GetParameter(string name)
-            => CurrentParameters.SingleOrDefault(x => x.Name.Equals(name));
+        public float GetParameterValue(string name)
+            => GetParameter(name).Value;
 
         public abstract void InvokeLogic(T entity,
                     Animator animator);
@@ -54,8 +54,14 @@ namespace HunterCombatMR.AttackEngine.Models
             return false;
         }
 
+        public void MakeParameterDefault(string name)
+            => ModifyParameter(name, GetParameter(name).DefaultValue);
+
         public void ModifyParameter(string name,
             float newValue)
             => GetParameter(name).Value = newValue;
+
+        private EventParameter GetParameter(string name)
+                                                    => CurrentParameters.SingleOrDefault(x => x.Name.Equals(name));
     }
 }

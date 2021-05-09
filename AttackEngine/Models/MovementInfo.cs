@@ -5,11 +5,11 @@ namespace HunterCombatMR.AttackEngine.Models
 {
     public class MovementInfo
     {
-        private Queue<KeyValuePair<string, Vector2>> _moveRequests;
+        private Queue<MovementRequest> _moveRequests;
 
         public MovementInfo()
         {
-            _moveRequests = new Queue<KeyValuePair<string, Vector2>>();
+            _moveRequests = new Queue<MovementRequest>();
         }
 
         public int FinalDirection { get; private set; }
@@ -31,12 +31,33 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public Vector2 CalculateVelocity(Vector2 vanillaVelocity)
         {
-            Vector2 baseVelocity = Vector2.Zero;
+            Vector2 baseVelocity = FinalVelocity;
             VanillaVelocity = vanillaVelocity;
+
+            while(_moveRequests.Count > 0)
+            {
+                var request = _moveRequests.Dequeue();
+
+                if (request.SetVelocity)
+                {
+                    baseVelocity = request.Velocity;
+                    continue;
+                }
+
+                baseVelocity += request.Velocity;
+            }
 
             FinalVelocity = baseVelocity;
 
             return FinalVelocity;
         }
+
+        public void CreateMovementRequest(MovementRequest request)
+        {
+            _moveRequests.Enqueue(request);
+        }
+
+        public MovementRequest SendLastMovementRequest()
+            => _moveRequests.Peek();
     }
 }
