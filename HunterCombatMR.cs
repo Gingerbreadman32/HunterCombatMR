@@ -5,6 +5,7 @@ using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.UI;
 using HunterCombatMR.UI.Elements;
+using HunterCombatMR.Utilities;
 using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -44,8 +45,8 @@ namespace HunterCombatMR
         public HunterCombatContent Content { get; private set; }
         public AnimationEditor EditorInstance { get; private set; }
         public AnimationFileManager FileManager { get; private set; }
-
         public IEnumerable<Event<HunterCombatPlayer>> PlayerActionEvents { get; private set; }
+        public bool VanillaBlockInput { get; set; }
 
         public Event<HunterCombatPlayer> GetPlayerActionEvent(string name)
             => PlayerActionEvents.FirstOrDefault(x => x.Name.Equals(name));
@@ -55,6 +56,7 @@ namespace HunterCombatMR
             StaticLogger = Logger;
             FileManager = new AnimationFileManager();
             Content = new HunterCombatContent(FileManager);
+            CachingUtils.Initialize();
 
             if (!Main.dedServ)
             {
@@ -69,7 +71,8 @@ namespace HunterCombatMR
                 EditorUIPopUp = new UserInterface();
                 PopUpState = new DebugUI();
                 PopUpState.Activate();
-                ShowMyUI();
+                EditorUIPanels.SetState(PanelState);
+                EditorUIPopUp.SetState(PopUpState);
             }
         }
 
@@ -131,6 +134,7 @@ namespace HunterCombatMR
 
         public override void Unload()
         {
+            CachingUtils.Uninitialize();
             EditorInstance?.Dispose();
             EditorInstance = null;
 
@@ -142,30 +146,24 @@ namespace HunterCombatMR
         {
             _lastUpdateUiGameTime = gameTime;
 
-            if (EditorInstance.CurrentEditMode.Equals(EditorMode.None))
-                HideMyUI(EditorUIPanels);
-            else
-                ShowMyUI(EditorUIPanels, PanelState);
-
-            if (EditorUIPanels?.CurrentState != null)
-            {
-                EditorUIPanels.Update(gameTime);
-            }
             if (EditorUIPopUp?.CurrentState != null)
             {
                 PopUpState.UpdateActiveLayers(PanelState?.CurrentAnimationLayers ?? new List<LayerText>());
                 EditorUIPopUp.Update(gameTime);
             }
-        }
 
-        internal static Texture2D ReadTexture(string file)
-        {
-            Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(file + ".png");
-            if (stream == null)
+            if (EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                throw new ArgumentException("Failed creating IO stream for grabbing new textures.");
+                EditorUIPanels?.SetState(null);
+                return;
             }
-            return Texture2D.FromStream(Main.instance.GraphicsDevice, stream);
+
+            if (EditorUIPanels?.CurrentState == null)
+            {
+                EditorUIPanels?.SetState(PanelState);
+            }
+
+            EditorUIPanels.Update(gameTime);
         }
 
         internal void DeleteAnimation(IAnimation animation)
@@ -176,35 +174,10 @@ namespace HunterCombatMR
             FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);
         }
 
-        internal void HideMyUI()
-        {
-            EditorUIPanels?.SetState(null);
-            EditorUIPopUp?.SetState(null);
-        }
-
-        internal void HideMyUI(UserInterface ui)
-        {
-            if (ui?.CurrentState != null)
-                ui?.SetState(null);
-        }
-
         internal void SetUIPlayer(HunterCombatPlayer player)
         {
             if (PanelState != null)
                 PanelState.Player = player;
-        }
-
-        internal void ShowMyUI()
-        {
-            EditorUIPanels?.SetState(PanelState);
-            EditorUIPopUp?.SetState(PopUpState);
-        }
-
-        internal void ShowMyUI(UserInterface ui,
-            UIState state)
-        {
-            if (ui?.CurrentState != state)
-                ui?.SetState(state);
         }
     }
 }

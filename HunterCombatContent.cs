@@ -171,7 +171,8 @@ namespace HunterCombatMR
             var loadedAttacks = new List<PlayerAction>();
 
             // Seeding, add a dedicated method for this later
-            loadedAttacks.Add(PlayerAttackSeed.CreateDefault("DoubleSlash", "Double Slash", 2, 6));
+            loadedAttacks.Add(PlayerAttackSeed
+                .CreateDefault("DoubleSlash", "Double Slash", 2, 6));
             loadedAttacks.Add(PlayerAttackSeed
                 .CreateDefault("RunningSlash", "Running Slash", 3, 5)
                 .WithEvent(new SetPlayerVelocityDirect(3, 0, true, 1), 0)

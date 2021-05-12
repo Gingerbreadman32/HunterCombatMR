@@ -1,8 +1,8 @@
-﻿using HunterCombatMR.AnimationEngine.Enumerations;
-using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.AnimationEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -11,6 +11,15 @@ namespace HunterCombatMR.AttackEngine.Models
 {
     public sealed class PlayerStateController
     {
+        private readonly Func<Player, bool>[] _vanillaStateEvaluations = new Func<Player, bool>[] 
+            { 
+                (p) => { return true; },  
+                (p) => p.IsPlayerWalking(),
+                (p) => p.IsPlayerAerial(),
+                (p) => p.IsPlayerJumping(),
+                (p) => p.dead
+            };
+
         private Animator _actionAnimator;
         private ComboAction _currentAction;
         private MoveSet _currentMoveSet;
@@ -46,7 +55,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public MoveSet CurrentMoveSet
         {
             get => _currentMoveSet;
-            private set
+            set
             {
                 if (value != _currentMoveSet)
                 {
@@ -58,11 +67,13 @@ namespace HunterCombatMR.AttackEngine.Models
         public MovementInfo MovementInformation { get; }
         public HunterCombatPlayer Player { get; }
         public PlayerState State { get; set; }
+        public bool StateOverride { get; set; }
 
         public void StateUpdate()
         {
             // Set Player State
-            State = SetStateLogic(Player.player);
+            if (!StateOverride)
+                State = SetStateLogic(Player.player);
 
             // Equipped Weapon/Moveset Checks
             if (Player.EquippedWeapon == null)
@@ -70,7 +81,6 @@ namespace HunterCombatMR.AttackEngine.Models
                 FullStateReset();
                 return;
             }
-            CurrentMoveSet = ContentUtils.GetInstance<MoveSet>(Player.EquippedWeapon.MoveSet);
 
             // Get the next action if available
             CurrentAction = PlayerActionComboUtils.GetNextAvailableAction(this,
@@ -85,6 +95,11 @@ namespace HunterCombatMR.AttackEngine.Models
             }
 
             ActionLogic();
+        }
+
+        public void PostUpdate()
+        {
+            Main.blockInput = HunterCombatMR.Instance.VanillaBlockInput;
         }
 
         public void MountUpdate()
@@ -124,6 +139,8 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public void PreUpdate()
         {
+            HunterCombatMR.Instance.VanillaBlockInput = Main.blockInput;
+
             if (CurrentAction == null)
                 return;
 
@@ -168,20 +185,15 @@ namespace HunterCombatMR.AttackEngine.Models
 
         private PlayerState SetStateLogic(Player player)
         {
-            // @@info Switch this up with a dictionary run through so it looks cleaner.
-            if (State == PlayerState.Dead || Player.player == null)
-                return PlayerState.Dead;
+            PlayerState currentState = PlayerState.Dead;
 
-            if (player.IsPlayerJumping())
-                return PlayerState.Jumping;
+            for (var s = 0; s < _vanillaStateEvaluations.Length; s++)
+            {
+                if (_vanillaStateEvaluations[s].Invoke(player))
+                    currentState = (PlayerState)s;
+            }
 
-            if (player.IsPlayerAerial())
-                return PlayerState.Aerial;
-
-            if (player.IsPlayerWalking())
-                return PlayerState.Walking;
-
-            return PlayerState.Neutral;
+            return currentState;
         }
 
         private void SetupAnimator()

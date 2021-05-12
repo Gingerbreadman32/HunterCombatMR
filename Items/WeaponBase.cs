@@ -1,4 +1,6 @@
-﻿using Terraria;
+﻿using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Utilities;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace HunterCombatMR.Items
@@ -28,6 +30,7 @@ namespace HunterCombatMR.Items
             Main.NewText($"{item.Name} Equipped");
 
             player.EquippedWeapon = this;
+            player.StateController.CurrentMoveSet = ContentUtils.GetInstance<MoveSet>(MoveSet);
         }
 
         public override void RightClick(Player player)
@@ -37,16 +40,17 @@ namespace HunterCombatMR.Items
             if (modPlayer.EquippedWeapon != this)
                 Equip(modPlayer);
             else
-                UnEquip(modPlayer);
+                Unequip(modPlayer);
 
             modPlayer.InputBuffers.ResetBuffers();
         }
 
-        public virtual void UnEquip(HunterCombatPlayer player)
+        public virtual void Unequip(HunterCombatPlayer player)
         {
             Main.NewText($"{item.Name} Unequipped");
 
             player.EquippedWeapon = null;
+            player.StateController.CurrentMoveSet = null;
         }
 
         #endregion Public Methods

@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,6 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             BufferedComboInputs = new List<BufferedInput>();
             HeldComboInputs = new List<HeldInput>();
-            _concreteInputs = new List<ActionInputs>((ActionInputs[])Enum.GetValues(typeof(ActionInputs))).
-                Where(x => !string.IsNullOrEmpty(x.GetGameCommand()));
-            PopulateHoldCommands();
         }
 
         /// <summary>
@@ -35,10 +33,19 @@ namespace HunterCombatMR.AttackEngine.Models
         public void AddToBuffers(ActionInputs input)
         {
             var alreadyBuffered = BufferedComboInputs.Where(x => x.Input.Equals(input));
+
             if (alreadyBuffered.Count() >= _maxSameInput)
                 BufferedComboInputs.Remove(alreadyBuffered.OrderByDescending(x => x.FramesSinceBuffered).First());
 
-            BufferedComboInputs.Add(new BufferedInput(input));
+            if (!HunterCombatMR.Instance.VanillaBlockInput && !TerrariaMainUtils.GameInputNotAccepted())
+                BufferedComboInputs.Add(new BufferedInput(input));
+        }
+
+        public void Initialize()
+        {
+            _concreteInputs = new List<ActionInputs>((ActionInputs[])Enum.GetValues(typeof(ActionInputs))).
+                Where(x => !string.IsNullOrEmpty(x.GetGameCommand()));
+            PopulateHoldCommands();
         }
 
         public void PopulateHoldCommands()
@@ -54,7 +61,6 @@ namespace HunterCombatMR.AttackEngine.Models
             if (BufferedComboInputs.Any())
                 BufferedComboInputs.Clear();
 
-
             if (HeldComboInputs.Any(x => x.FramesHeld != 0))
                 ResetHoldTimes();
         }
@@ -64,7 +70,8 @@ namespace HunterCombatMR.AttackEngine.Models
             HeldComboInputs = HeldComboInputs.Select(x => new HeldInput(x.Input, 0)).ToList();
         }
 
-        public void Update(PlayerState state)
+        public void Update(PlayerState state,
+            bool inInterface)
         {
             BufferedComboInputs = BufferedComboInputs
                 .Select(x => { x.AddFramestoBuffer(1); return x; })
@@ -75,14 +82,16 @@ namespace HunterCombatMR.AttackEngine.Models
                 .Select(x => { if (x.Input.IsPressed()) { x.FramesHeld++; }; return x; })
                 .ToList();
 
-            CheckInputs(state);
+            CheckInputs(state, inInterface);
         }
 
-        private void CheckInputs(PlayerState state)
+        private void CheckInputs(PlayerState state,
+            bool inInterface)
         {
             foreach (ActionInputs input in _concreteInputs)
             {
-                if (input.JustPressed() && !state.Equals(PlayerState.Dead))
+                if ((input.JustPressed() && !state.Equals(PlayerState.Dead))
+                        && (!input.IsMouse() || !inInterface))
                 {
                     AddToBuffers(input);
                 }

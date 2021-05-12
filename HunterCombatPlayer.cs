@@ -16,8 +16,9 @@ namespace HunterCombatMR
         : ModPlayer,
         IAnimatedEntity<PlayerAnimation>
     {
-        private bool _showDefaultLayers = true;
         private WeaponBase _equippedWeapon;
+        private bool _showDefaultLayers = true;
+
         public HunterCombatPlayer()
             : base()
         {
@@ -28,49 +29,55 @@ namespace HunterCombatMR
         }
 
         public ICollection<string> ActiveProjectiles { get; set; }
+        public bool ActuallyInWorld { get; private set; }
         public override bool CloneNewInstances => false;
         public PlayerAnimation CurrentAnimation { get; private set; }
-        public WeaponBase EquippedWeapon 
+
+        public WeaponBase EquippedWeapon
         {
             get => _equippedWeapon;
-            set { _equippedWeapon = value; InputBuffers?.ResetBuffers();  }
+            set { _equippedWeapon = value; InputBuffers?.ResetBuffers(); }
         }
+
         public PlayerBufferInformation InputBuffers { get; }
         public IDictionary<string, Vector2> LayerPositions { get; set; }
         public PlayerStateController StateController { get; private set; }
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
-            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                if (CurrentAnimation != null && CurrentAnimation.AnimationData.CurrentKeyFrameIndex > 0)
-                    _showDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
-                            CurrentAnimation.LayerData,
-                            CurrentAnimation.AnimationData.CurrentKeyFrameIndex - 1,
-                            Color.White);
-                else
-                    _showDefaultLayers = true;
+                return;
+            }
+            if (CurrentAnimation != null && CurrentAnimation.AnimationData.CurrentKeyFrameIndex > 0)
+            {
+                _showDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
+                        CurrentAnimation.LayerData,
+                        CurrentAnimation.AnimationData.CurrentKeyFrameIndex - 1,
+                        Color.White);
+            }
 
-                if (_showDefaultLayers)
-                {
-                    string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
+            if (!_showDefaultLayers)
+            {
+                return;
+            }
+
+            string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
                     "faceColor", "bodyColor", "legColor", "shirtColor", "underShirtColor",
                     "pantsColor", "shoeColor", "upperArmorColor", "middleArmorColor",
                     "lowerArmorColor" };
 
-                    var properties = drawInfo.GetType().GetFields();
+            var properties = drawInfo.GetType().GetFields();
 
-                    object temp = drawInfo;
+            object temp = drawInfo;
 
-                    // @@warn cache this, probably shouldn't be using reflection like this every frame
-                    foreach (var prop in properties.Where(x => propertiesToChange.Contains(x.Name)))
-                    {
-                        prop.SetValue(temp, MakeTransparent((Color)prop.GetValue(temp), 30));
-                    }
-
-                    drawInfo = (PlayerDrawInfo)temp;
-                }
+            // @@warn cache this, probably shouldn't be using reflection like this every frame
+            foreach (var prop in properties.Where(x => propertiesToChange.Contains(x.Name)))
+            {
+                prop.SetValue(temp, MakeTransparent((Color)prop.GetValue(temp), 30));
             }
+
+            drawInfo = (PlayerDrawInfo)temp;
         }
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
@@ -95,19 +102,24 @@ namespace HunterCombatMR
 
         public override void OnEnterWorld(Player player)
         {
+            ActuallyInWorld = true;
+            InputBuffers.Initialize();
             StateController.State = PlayerState.Neutral;
-            HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
+
+            if (player.whoAmI == Main.myPlayer)
+                HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
+
             _showDefaultLayers = true;
 
-            if (ActiveProjectiles != null)
-                ActiveProjectiles.Clear();
-            else
+            if (ActiveProjectiles == null)
                 throw new Exception("Player's active projectiles not initialized!");
 
-            if (InputBuffers != null)
-                InputBuffers?.ResetBuffers();
-            else
+            if (InputBuffers == null)
                 throw new Exception("Player's input buffer information not initialized!");
+
+            ActiveProjectiles.Clear();
+
+            InputBuffers.ResetBuffers();
         }
 
         public override void OnRespawn(Player player)
@@ -120,6 +132,7 @@ namespace HunterCombatMR
         {
             if (Main.gameMenu)
             {
+                ActuallyInWorld = false;
                 CurrentAnimation = null;
                 _showDefaultLayers = true;
             }
@@ -129,20 +142,14 @@ namespace HunterCombatMR
 
         public override void PostUpdate()
         {
-            InputBuffers.Update(StateController.State);
+            if (Main.gameMenu || !ActuallyInWorld)
+                return;
+
+            InputBuffers.Update(StateController.State, player.mouseInterface);
             StateController.StateUpdate();
             StateController.EditorUpdate();
             CurrentAnimation?.Update();
-        }
-
-        public override void PreUpdate()
-        {
-            StateController.PreUpdate();
-        }
-
-        public override void PreUpdateMovement()
-        {
-            StateController.MovementUpdate();
+            StateController.PostUpdate();
         }
 
         public override void PostUpdateRunSpeeds()
@@ -161,6 +168,16 @@ namespace HunterCombatMR
             }
 
             return base.PreItemCheck();
+        }
+
+        public override void PreUpdate()
+        {
+            StateController.PreUpdate();
+        }
+
+        public override void PreUpdateMovement()
+        {
+            StateController.MovementUpdate();
         }
 
         public bool SetCurrentAnimation(IAnimation newAnimation,
