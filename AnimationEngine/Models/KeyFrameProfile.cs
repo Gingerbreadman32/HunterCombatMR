@@ -33,7 +33,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         public KeyFrameProfile(SortedList<int, KeyFrame> keyFrames,
             FrameLength defaultKeyFrameSpeed)
         {
-            KeyFrameAmount = keyFrames.Count().ToFLength();
+            KeyFrameAmount = keyFrames.Count();
             DefaultKeyFrameLength = defaultKeyFrameSpeed;
             KeyFrameLengths = CreateTimingsFromKeyFrames(keyFrames);
         }

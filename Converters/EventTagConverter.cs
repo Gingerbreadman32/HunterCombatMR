@@ -36,7 +36,7 @@ namespace HunterCombatMR.Converters
                     tag = serializer.Deserialize<int>(reader);
             }
 
-            return new EventTag(tag, start.ToFIndex(), end.ToFIndex());
+            return new EventTag(tag, start, end);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

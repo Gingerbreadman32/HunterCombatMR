@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.Extensions;
-using System;
+﻿using System;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -22,20 +21,17 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public int Value { get => _value; }
 
-        public static explicit operator FrameLength(int b)
-                    => new FrameLength(b);
-
         public static explicit operator FrameLength(FrameIndex d)
-            => new FrameLength(d);
+            => new FrameLength(d.Value);
 
-        public static implicit operator FrameIndex(FrameLength b)
-                    => new FrameIndex(b);
+        public static implicit operator FrameLength(int b)
+            => new FrameLength(b);
 
         public static implicit operator int(FrameLength d)
-                            => d._value;
+                                    => d._value;
 
         public static FrameLength operator -(FrameLength a, int b)
-            => (a._value - b).ToFLength();
+            => a._value - b;
 
         public static bool operator !=(FrameLength a, int b)
             => !a._value.Equals(b);
@@ -47,7 +43,7 @@ namespace HunterCombatMR.AnimationEngine.Models
             => a._value / b;
 
         public static FrameLength operator +(FrameLength a, int b)
-            => (a._value + b).ToFLength();
+            => a._value + b;
 
         public static bool operator <=(FrameLength a, int b)
             => a._value <= b;

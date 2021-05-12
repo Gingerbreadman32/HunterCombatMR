@@ -669,7 +669,7 @@ namespace HunterCombatMR.UI
             if (EditorInstanceUtils.EditingAnimation.IsInitialized
                 && EditorInstanceUtils.EditingAnimation.AnimationData.Flags.HasFlag(AnimatorFlags.Locked))
             {
-                FrameIndex currentKeyframeIndex = (FrameIndex)EditorInstanceUtils.EditingAnimation.AnimationData.CurrentKeyFrameIndex;
+                FrameIndex currentKeyframeIndex = EditorInstanceUtils.EditingAnimation.AnimationData.CurrentKeyFrameIndex;
                 KeyFrame keyFrame = EditorInstanceUtils.EditingAnimation.AnimationData.KeyFrames[currentKeyframeIndex];
 
                 if (amount == 0 && setFrame)
@@ -677,7 +677,7 @@ namespace HunterCombatMR.UI
                 else if (amount + EditorInstanceUtils.EditingAnimation.AnimationData.CurrentKeyFrame.FrameLength <= 0)
                     return;
 
-                FrameLength newLength = (FrameLength)((setFrame) ? amount : keyFrame.FrameLength + amount);
+                FrameLength newLength = (setFrame) ? amount : (int)(amount + keyFrame.FrameLength);
 
                 EditorInstanceUtils.EditingAnimation.UpdateKeyFrameLength(currentKeyframeIndex, newLength);
                 EditorInstanceUtils.EditingAnimation.AnimationData.CurrentFrame = keyFrame.StartingFrameIndex;

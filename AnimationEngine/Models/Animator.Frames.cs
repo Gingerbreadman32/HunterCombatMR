@@ -46,7 +46,7 @@ namespace HunterCombatMR.AnimationEngine.Models
         /// <summary>
         /// The last frame of the animation loaded
         /// </summary>
-        public FrameIndex FinalFrame { get => (TotalFrames - 1).ToFIndex(); }
+        public FrameIndex FinalFrame { get => TotalFrames - 1; }
 
         /// <summary>
         /// The amount of frames to skip per update
@@ -136,7 +136,7 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         private void AppendKeyFrame(FrameLength keyFrameLength)
         {
-            FrameIndex lastFrameIndex = TotalFrames.ToFIndex();
+            FrameIndex lastFrameIndex = TotalFrames;
             KeyFrame newKeyFrame = new KeyFrame(lastFrameIndex, keyFrameLength);
 
             newKeyFrame.StartingFrameIndex = lastFrameIndex;

@@ -37,7 +37,7 @@ namespace HunterCombatMR.Converters
                     SpecificKeyFrameSpeeds = serializer.Deserialize<Dictionary<int, int>>(reader);
             }
 
-            return new KeyFrameProfile(KeyFrameAmount.ToFLength(), DefaultKeyFrameSpeed.ToFLength(), SpecificKeyFrameSpeeds?.ConvertToLengthList() ?? new SortedList<int, FrameLength>());
+            return new KeyFrameProfile(KeyFrameAmount, DefaultKeyFrameSpeed, SpecificKeyFrameSpeeds?.ConvertToLengthList() ?? new SortedList<int, FrameLength>());
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

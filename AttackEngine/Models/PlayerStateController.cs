@@ -41,7 +41,7 @@ namespace HunterCombatMR.AttackEngine.Models
             }
         }
 
-        public FrameIndex CurrentActionKeyFrame { get => _actionAnimator.CurrentKeyFrameIndex.ToFIndex(); }
+        public FrameIndex CurrentActionKeyFrame { get => _actionAnimator.CurrentKeyFrameIndex; }
 
         public MoveSet CurrentMoveSet
         {

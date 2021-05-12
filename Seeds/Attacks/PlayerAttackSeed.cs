@@ -17,8 +17,8 @@ namespace HunterCombatMR.Seeds.Attacks
             action.Animations.AnimationReferences.Add(0, internalName);
 
             action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.AttackStartup), FrameIndex.Zero);
-            action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.ActiveAttack), activeFrame.ToFIndex());
-            action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.AttackRecovery), recoveryFrame.ToFIndex());
+            action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.ActiveAttack), activeFrame);
+            action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.AttackRecovery), recoveryFrame);
 
             return action;
         }
@@ -27,7 +27,7 @@ namespace HunterCombatMR.Seeds.Attacks
             Event<HunterCombatPlayer> @event,
             int frameNumber)
         {
-            action.AddKeyFrameEvent(@event, frameNumber.ToFIndex());
+            action.AddKeyFrameEvent(@event, frameNumber);
 
             return action;
         }

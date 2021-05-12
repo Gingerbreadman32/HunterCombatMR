@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.Extensions;
-using System;
+﻿using System;
 
 namespace HunterCombatMR.AnimationEngine.Models
 {
@@ -23,30 +22,24 @@ namespace HunterCombatMR.AnimationEngine.Models
 
         public int Value { get => _value; }
 
-        // @@warn Move this somewhere, way too messy.
-        public static explicit operator FrameIndex(int b)
-                    => new FrameIndex(b);
-
         public static explicit operator FrameIndex(FrameLength b)
-                    => new FrameIndex(b);
+                            => new FrameIndex(b);
 
-        public static implicit operator FrameLength(FrameIndex d)
-            => new FrameLength(d);
+        // @@warn Move this somewhere, way too messy.
+        public static implicit operator FrameIndex(int b)
+                    => new FrameIndex(b);
 
         public static implicit operator int(FrameIndex d)
                             => d._value;
 
         public static FrameIndex operator -(FrameIndex a, int b)
-            => (a._value - b).ToFIndex();
+            => a._value - b;
 
         public static int operator -(int a, FrameIndex b)
             => a - b._value;
 
         public static FrameIndex operator -(FrameIndex a, FrameIndex b)
-            => (a._value - b.Value).ToFIndex();
-
-        public static FrameIndex operator +(FrameIndex a, FrameIndex b)
-            => (a._value + b.Value).ToFIndex();
+            => a._value - b.Value;
 
         public static bool operator !=(FrameIndex a, int b)
             => !a._value.Equals(b);
@@ -57,14 +50,17 @@ namespace HunterCombatMR.AnimationEngine.Models
         public static int operator /(FrameIndex a, int b)
             => a._value / b;
 
+        public static FrameIndex operator +(FrameIndex a, FrameIndex b)
+                                    => a._value + b.Value;
+
         public static int operator +(int a, FrameIndex b)
             => a + b._value;
 
         public static FrameIndex operator +(FrameIndex a, int b)
-            => (a._value + b).ToFIndex();
+            => a._value + b;
 
         public static FrameIndex operator +(FrameIndex a, FrameLength b)
-            => (a._value + b.Value).ToFIndex();
+            => a._value + b.Value;
 
         public static bool operator <=(FrameIndex a, int b)
             => a._value <= b;

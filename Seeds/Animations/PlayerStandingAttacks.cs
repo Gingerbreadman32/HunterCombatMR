@@ -125,10 +125,10 @@ namespace HunterCombatMR.Seeds.Animations
             layers.Add(fleginfo);
             layers.Add(bleginfo);
 
-            var timings = new SortedList<int, FrameLength>() { { 2, 4.ToFLength() }, { 3, 8.ToFLength() }, { 4, 14.ToFLength() }, { 5, 4.ToFLength() }, { 7, 52.ToFLength() } };
+            var timings = new SortedList<int, FrameLength>() { { 2, 4 }, { 3, 8 }, { 4, 14 }, { 5, 4 }, { 7, 52 } };
 
             AnimatedActions.Add("SNS-StandingLL",
-                new LayerData(new KeyFrameProfile(keyframes.ToFLength(), holdframes.ToFLength(), timings),
+                new LayerData(new KeyFrameProfile(keyframes, holdframes, timings),
                     layers));
         }
 
