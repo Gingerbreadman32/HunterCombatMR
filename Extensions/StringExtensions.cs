@@ -5,6 +5,9 @@ namespace HunterCombatMR.Extensions
 {
     public static class StringExtensions
     {
+        public static bool ContainsIgnoreCase(this string input, string contained)
+            => input.ToLower().Contains(contained.ToLower());
+
         public static string RemoveCharacters(this string input, IEnumerable<char> characters)
             => new string(input.Where(x => !characters.Contains(x)).ToArray());
     }
