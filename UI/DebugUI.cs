@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.AnimationEngine.Extensions;
-using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;

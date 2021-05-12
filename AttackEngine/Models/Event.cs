@@ -1,5 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Interfaces;
+﻿using HunterCombatMR.Interfaces;
+using HunterCombatMR.Models;
 using System.Collections.Generic;
 using System.Linq;
 

@@ -1,8 +1,8 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Interfaces;
 using HunterCombatMR.Items;
+using HunterCombatMR.Models;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -180,7 +180,7 @@ namespace HunterCombatMR
             StateController.MovementUpdate();
         }
 
-        public bool SetCurrentAnimation(IAnimation newAnimation,
+        public bool SetCurrentAnimation(ICustomAnimation newAnimation,
             bool newFile = false)
         {
             if (newAnimation == null)

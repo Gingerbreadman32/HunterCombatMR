@@ -1,6 +1,6 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Events;
+﻿using HunterCombatMR.Events;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Models;
 using System;
 using System.Collections.Generic;
 

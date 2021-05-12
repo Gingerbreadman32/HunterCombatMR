@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Drawing.Drawing2D;

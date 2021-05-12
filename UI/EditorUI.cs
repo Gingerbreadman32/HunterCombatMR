@@ -1,9 +1,8 @@
-﻿using HunterCombatMR.AnimationEngine.Enumerations;
-using HunterCombatMR.AnimationEngine.Extensions;
-using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AnimationEngine.Services;
-using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Enumerations;
+using HunterCombatMR.Extensions;
+using HunterCombatMR.Interfaces;
+using HunterCombatMR.Models;
+using HunterCombatMR.Services;
 using HunterCombatMR.UI.AnimationTimeline;
 using HunterCombatMR.UI.Elements;
 using HunterCombatMR.Utilities;
@@ -418,7 +417,7 @@ namespace HunterCombatMR.UI
             }.WithFadedMouseOver();
             deletebutton.OnClick += (evt, list) => ButtonAction((x, y) =>
             {
-                IAnimation animToDelete = _currentPlayer?.CurrentAnimation;
+                ICustomAnimation animToDelete = _currentPlayer?.CurrentAnimation;
                 _currentPlayer.SetCurrentAnimation(null);
                 HunterCombatMR.Instance.DeleteAnimation(animToDelete);
                 _animationname.Text = string.Empty;
@@ -451,7 +450,7 @@ namespace HunterCombatMR.UI
 
         public void PostSetupContent()
         {
-            _textures = ModContentLoadingService.GetTexturesFromPath("Textures/SnS/Limbs/").Select(x => x.Value).ToList();
+            _textures = ContentUtils.GetTexturesFromPath("Textures/SnS/Limbs/").Select(x => x.Value).ToList();
         }
 
         public override void Update(GameTime gameTime)
@@ -633,7 +632,7 @@ namespace HunterCombatMR.UI
                 var layers = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
                 if (layers.Count() == 1)
                 {
-                    IAnimation anim = EditorInstanceUtils.EditingAnimation;
+                    ICustomAnimation anim = EditorInstanceUtils.EditingAnimation;
                     var layer = anim.LayerData.GetLayer(layers.Single());
                     int textureIndex = _textures.IndexOf(layer.Texture);
 
@@ -645,7 +644,7 @@ namespace HunterCombatMR.UI
             }
         }
 
-        private void DisplayLayers(IAnimation animation)
+        private void DisplayLayers(ICustomAnimation animation)
         {
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = false;
             _layerlist.Clear();
@@ -691,7 +690,7 @@ namespace HunterCombatMR.UI
                 var layers = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
                 if (layers.Count() == 1)
                 {
-                    IAnimation anim = EditorInstanceUtils.EditingAnimation;
+                    ICustomAnimation anim = EditorInstanceUtils.EditingAnimation;
                     var layer = anim.LayerData.Layers.Single(x => x.Name.Equals(layers.Single()));
                     var key = anim.AnimationData.CurrentKeyFrameIndex;
                     if (layer.GetTotalTextureFrames() - 1 > layer.KeyFrames[key].SpriteFrame)
@@ -709,7 +708,7 @@ namespace HunterCombatMR.UI
                 var layers = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
                 if (layers.Count() == 1)
                 {
-                    IAnimation anim = EditorInstanceUtils.EditingAnimation;
+                    ICustomAnimation anim = EditorInstanceUtils.EditingAnimation;
                     var layer = anim.LayerData.Layers.Single(x => x.Name.Equals(layers.Single()));
                     var key = anim.AnimationData.CurrentKeyFrameIndex;
                     if (layer.KeyFrames[key].SpriteFrame > 0)

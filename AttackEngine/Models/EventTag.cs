@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.Models;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 

@@ -1,6 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Enumerations;
+using HunterCombatMR.Interfaces;
 using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -52,7 +51,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Public Properties
 
-        public IAnimation Animation { get; protected set; }
+        public ICustomAnimation Animation { get; protected set; }
 
         public int Scale { get; }
 
@@ -123,7 +122,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             }
         }
 
-        public void SetAnimation(IAnimation animation)
+        public void SetAnimation(ICustomAnimation animation)
         {
             FrameList.Clear();
             Animation = animation;

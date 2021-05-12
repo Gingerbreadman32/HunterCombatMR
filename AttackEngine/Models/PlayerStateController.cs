@@ -1,6 +1,6 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Models;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;

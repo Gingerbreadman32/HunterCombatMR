@@ -1,11 +1,11 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AnimationEngine.Services;
-using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.AttackEngine.MoveSets;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Events;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Models;
 using HunterCombatMR.Seeds.Attacks;
+using HunterCombatMR.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;

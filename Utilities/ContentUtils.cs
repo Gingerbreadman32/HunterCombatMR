@@ -1,6 +1,9 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Interfaces;
+using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.Utilities
 {
@@ -26,5 +29,8 @@ namespace HunterCombatMR.Utilities
         /// </remarks>
         internal static T GetInstance<T>(string name) where T : IHunterCombatContentInstance
             => HunterCombatMR.Instance.Content.GetContentInstance<T>(name);
+
+        public static IDictionary<string, Texture2D> GetTexturesFromPath(string path)
+            => HunterCombatMR.Instance.VariableTextures.Where(x => x.Key.StartsWith(path)).ToDictionary(x => x.Key, y => y.Value);
     }
 }

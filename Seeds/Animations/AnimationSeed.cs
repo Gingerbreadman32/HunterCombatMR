@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.Models;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.Seeds.Animations

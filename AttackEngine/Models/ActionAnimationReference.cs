@@ -1,5 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
+﻿using HunterCombatMR.Interfaces;
+using HunterCombatMR.Models;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -9,26 +9,26 @@ namespace HunterCombatMR.AttackEngine.Models
 {
     public sealed class ActionAnimationReference
     {
-        private SortedList<int, Tuple<IAnimation, FrameIndex>> _animations;
+        private SortedList<int, Tuple<ICustomAnimation, FrameIndex>> _animations;
 
         internal ActionAnimationReference()
         {
-            _animations = new SortedList<int, Tuple<IAnimation, FrameIndex>>();
+            _animations = new SortedList<int, Tuple<ICustomAnimation, FrameIndex>>();
             AnimationReferences = new Dictionary<int, string>();
         }
         public int Count => _animations.Count();
         internal IDictionary<int, string> AnimationReferences { get; set; }
 
-        public void AddAnimation(IAnimation animation,
+        public void AddAnimation(ICustomAnimation animation,
             FrameIndex keyFrameIndex)
         {
-            _animations.Add(_animations.Count(), new Tuple<IAnimation, FrameIndex>(animation, keyFrameIndex));
+            _animations.Add(_animations.Count(), new Tuple<ICustomAnimation, FrameIndex>(animation, keyFrameIndex));
         }
 
         public bool ContainsKey(int index)
             => _animations.ContainsKey(index);
 
-        public IAnimation GetAnimationByKeyFrame(FrameIndex keyFrame)
+        public ICustomAnimation GetAnimationByKeyFrame(FrameIndex keyFrame)
         {
             var firstAnim = _animations.First(x => x.Value.Item2 <= keyFrame
                 && x.Value.Item2 + x.Value.Item1.KeyFrameProfile.KeyFrameAmount >= keyFrame);
@@ -36,7 +36,7 @@ namespace HunterCombatMR.AttackEngine.Models
             return firstAnim.Value.Item1;
         }
 
-        public Tuple<IAnimation, FrameIndex> GetAnimationReference(int index)
+        public Tuple<ICustomAnimation, FrameIndex> GetAnimationReference(int index)
             => _animations[index];
 
         public void RemoveAnimation(int index)
@@ -47,7 +47,7 @@ namespace HunterCombatMR.AttackEngine.Models
             DropDownAnimation(index);
         }
 
-        internal void LoadAnimations<T>() where T : IAnimation
+        internal void LoadAnimations<T>() where T : ICustomAnimation
         {
             _animations.Clear();
             FrameIndex totalKeyFrames = FrameIndex.Zero;

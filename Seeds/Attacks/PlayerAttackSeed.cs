@@ -1,7 +1,7 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Events;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Models;
 
 namespace HunterCombatMR.Seeds.Attacks
 {

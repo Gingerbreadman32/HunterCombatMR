@@ -1,8 +1,7 @@
-using AnimationEngine.Services;
-using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Services;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Interfaces;
+using HunterCombatMR.Services;
 using HunterCombatMR.UI;
 using HunterCombatMR.UI.Elements;
 using HunterCombatMR.Utilities;
@@ -166,7 +165,7 @@ namespace HunterCombatMR
             EditorUIPanels.Update(gameTime);
         }
 
-        internal void DeleteAnimation(IAnimation animation)
+        internal void DeleteAnimation(ICustomAnimation animation)
         {
             // @@warn This method shouldn't be in here tbh.
             Content.DeleteContentInstance(animation);

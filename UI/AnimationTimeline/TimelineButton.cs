@@ -1,7 +1,6 @@
-﻿using HunterCombatMR.AnimationEngine.Interfaces;
-using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -40,7 +39,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             TimelineButtonIcon icon,
             int scale,
             Texture2D buttonTexture = null,
-            Func<IAnimation, TimelineButton, bool> activeCondition = null)
+            Func<ICustomAnimation, TimelineButton, bool> activeCondition = null)
         {
             Name = name;
             Icon = icon;
@@ -59,7 +58,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Public Properties
 
-        public event Func<IAnimation, TimelineButton, bool> ActiveConditionEvent;
+        public event Func<ICustomAnimation, TimelineButton, bool> ActiveConditionEvent;
 
         public event Action ClickActionEvent;
 
@@ -113,7 +112,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Public Methods
 
-        public bool CheckCondition(IAnimation animation)
+        public bool CheckCondition(ICustomAnimation animation)
             => ActiveConditionEvent.Invoke(animation, this);
 
         public override void OnInitialize()
@@ -201,7 +200,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         #region Internal Methods
 
-        internal static bool DefaultCondition(IAnimation animation,
+        internal static bool DefaultCondition(ICustomAnimation animation,
             TimelineButton button)
             => (animation != null && animation.AnimationData.Initialized);
 

@@ -1,6 +1,6 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Models;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.Events

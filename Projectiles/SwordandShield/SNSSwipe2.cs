@@ -1,5 +1,5 @@
-﻿using HunterCombatMR.AnimationEngine.Models;
-using HunterCombatMR.Extensions;
+﻿using HunterCombatMR.Extensions;
+using HunterCombatMR.Models;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Terraria;
