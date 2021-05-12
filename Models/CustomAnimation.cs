@@ -24,6 +24,7 @@ namespace HunterCombatMR.Models
 
         public abstract AnimationType AnimationType { get; }
 
+        [JsonIgnore]
         public bool IsInitialized { get => AnimationData.Initialized; }
 
         [JsonIgnore]

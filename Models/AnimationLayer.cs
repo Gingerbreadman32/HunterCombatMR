@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Comparers;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
@@ -11,7 +12,8 @@ using Terraria.ModLoader;
 namespace HunterCombatMR.Models
 {
     public class AnimationLayer
-        : IEquatable<AnimationLayer>
+        : IEquatable<AnimationLayer>,
+        INamed
     {
         [JsonConstructor]
         public AnimationLayer(string name,

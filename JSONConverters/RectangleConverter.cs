@@ -48,10 +48,18 @@ namespace HunterCombatMR.JSONConverters
 
             writer.WriteStartObject();
 
-            writer.WritePropertyName("X");
-            serializer.Serialize(writer, rect.X);
-            writer.WritePropertyName("Y");
-            serializer.Serialize(writer, rect.Y);
+            if (rect.X != 0)
+            {
+                writer.WritePropertyName("X");
+                serializer.Serialize(writer, rect.X);
+            }
+
+            if (rect.Y != 0)
+            {
+                writer.WritePropertyName("Y");
+                serializer.Serialize(writer, rect.Y);
+            }
+
             writer.WritePropertyName("Width");
             serializer.Serialize(writer, rect.Width);
             writer.WritePropertyName("Height");
