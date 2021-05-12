@@ -1,9 +1,8 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Extensions;
 using Newtonsoft.Json;
 using System;
 
-namespace HunterCombatMR.Converters
+namespace HunterCombatMR.JSONConverters
 {
     public class EventTagConverter
         : JsonConverter

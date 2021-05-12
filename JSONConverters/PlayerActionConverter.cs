@@ -1,11 +1,10 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HunterCombatMR.Converters
+namespace HunterCombatMR.JSONConverters
 {
     public class PlayerActionConverter
         : JsonConverter
@@ -18,7 +17,8 @@ namespace HunterCombatMR.Converters
             var internalname = "";
             var name = "";
             var animations = new Dictionary<int, string>();
-            var events = new List<Tuple<EventTag, bool, string>>();
+            var keyevents = new List<Tuple<EventTag, bool, string>>();
+            var lifeevents = new Dictionary<string, bool>();
 
             while (reader.Read())
             {
@@ -39,16 +39,18 @@ namespace HunterCombatMR.Converters
                     animations = serializer.Deserialize<Dictionary<int, string>>(reader);
 
                 if (property.Equals("KeyFrameEvents"))
-                    events = serializer.Deserialize<List<Tuple<EventTag, bool, string>>>(reader);
+                    keyevents = serializer.Deserialize<List<Tuple<EventTag, bool, string>>>(reader);
+
+                if (property.Equals("LifetimeEvents"))
+                    lifeevents = serializer.Deserialize<Dictionary<string, bool>>(reader);
             }
 
-            return new PlayerAction(internalname, name, animations, events);
+            return new PlayerAction(internalname, name, animations, keyevents, lifeevents);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var action = (PlayerAction)value;
-            
 
             writer.WriteStartObject();
 
@@ -63,8 +65,19 @@ namespace HunterCombatMR.Converters
 
             var eventRefs = action.KeyFrameEvents.Select(x => Tuple.Create(x.Tag, x.IsEnabled, x.Event.Name));
 
-            writer.WritePropertyName("KeyFrameEvents");
-            serializer.Serialize(writer, eventRefs);
+            if (eventRefs.Any())
+            {
+                writer.WritePropertyName("KeyFrameEvents");
+                serializer.Serialize(writer, eventRefs);
+            }
+
+            var lifeevents = action.LifetimeEvents.Select(x => new KeyValuePair<string, bool>(x.Key.Name, x.Value));
+
+            if (lifeevents.Any())
+            {
+                writer.WritePropertyName("LifetimeEvents");
+                serializer.Serialize(writer, eventRefs);
+            }
 
             writer.WriteEndObject();
         }

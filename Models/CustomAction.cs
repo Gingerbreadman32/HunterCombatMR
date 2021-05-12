@@ -10,7 +10,8 @@ namespace HunterCombatMR.Models
         IAnimated,
         INamed
     {
-        private IEnumerable<TaggedEvent<T>> _events;
+        private IEnumerable<TaggedEvent<T>> _keyFrameEvents;
+        private IDictionary<Event<T>, bool> _lifetimeEvents;
 
         public CustomAction(string name,
                     string displayName = "")
@@ -22,15 +23,22 @@ namespace HunterCombatMR.Models
             Name = string.IsNullOrEmpty(displayName) ? name : displayName;
             KeyFrameProfile = new KeyFrameProfile();
             Animations = new ActionAnimationReference();
-            _events = new List<TaggedEvent<T>>();
+            _keyFrameEvents = new List<TaggedEvent<T>>();
+            _lifetimeEvents = new Dictionary<Event<T>, bool>();
         }
 
         public ActionAnimationReference Animations { get; protected set; }
 
         public IEnumerable<TaggedEvent<T>> KeyFrameEvents
         {
-            get => _events;
-            protected set { _events = value; }
+            get => _keyFrameEvents;
+            protected set { _keyFrameEvents = value; }
+        }
+
+        public IDictionary<Event<T>, bool> LifetimeEvents
+        {
+            get => _lifetimeEvents;
+            protected set { _lifetimeEvents = value; }
         }
 
         public KeyFrameProfile KeyFrameProfile { get; protected set; }

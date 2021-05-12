@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System;
 
-namespace HunterCombatMR.Converters
+namespace HunterCombatMR.JSONConverters
 {
     public class RectangleConverter
         : JsonConverter

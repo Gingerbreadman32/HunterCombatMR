@@ -18,21 +18,29 @@ namespace HunterCombatMR.AttackEngine.Models
         public PlayerAction(string name,
             string displayName,
             IDictionary<int, string> animations,
-            IEnumerable<Tuple<EventTag, bool, string>> events)
+            IEnumerable<Tuple<EventTag, bool, string>> keyFrameEvents,
+            IDictionary<string, bool> lifetimeEvents)
             : base(name, displayName)
         {
             Animations.AnimationReferences = animations;
 
             var setEvents = new List<TaggedEvent<HunterCombatPlayer>>();
+            var lifeEvents = new Dictionary<Event<HunterCombatPlayer>, bool>();
 
-            foreach (var taggedEvent in events)
+            foreach (var taggedEvent in keyFrameEvents)
             {
                 setEvents.Add(new TaggedEvent<HunterCombatPlayer>(taggedEvent.Item1,
                     HunterCombatMR.Instance.GetPlayerActionEvent(taggedEvent.Item3),
                     taggedEvent.Item2));
             }
 
+            foreach (var lifetimeEvent in lifetimeEvents)
+            {
+                lifeEvents.Add(HunterCombatMR.Instance.GetPlayerActionEvent(lifetimeEvent.Key), lifetimeEvent.Value);
+            }
+
             KeyFrameEvents = setEvents;
+            LifetimeEvents = lifeEvents;
             Initialize<PlayerAnimation>();
         }
 
@@ -44,6 +52,7 @@ namespace HunterCombatMR.AttackEngine.Models
             KeyFrameProfile = new KeyFrameProfile(copy.KeyFrameProfile);
             KeyFrameEvents = new List<TaggedEvent<HunterCombatPlayer>>(copy.KeyFrameEvents);
             IsStoredInternally = copy.IsStoredInternally;
+            LifetimeEvents = new Dictionary<Event<HunterCombatPlayer>, bool>(copy.LifetimeEvents);
 
             Initialize<PlayerAnimation>();
         }

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace HunterCombatMR.Converters
+namespace HunterCombatMR.JSONConverters
 {
     public class KeyFrameProfileConverter
         : JsonConverter
@@ -37,7 +37,7 @@ namespace HunterCombatMR.Converters
                     SpecificKeyFrameSpeeds = serializer.Deserialize<Dictionary<int, int>>(reader);
             }
 
-            return new KeyFrameProfile(KeyFrameAmount, DefaultKeyFrameSpeed, SpecificKeyFrameSpeeds?.ConvertToLengthList() ?? new SortedList<int, FrameLength>());
+            return new KeyFrameProfile(KeyFrameAmount, DefaultKeyFrameSpeed, SpecificKeyFrameSpeeds.ConvertToLengthList() ?? new SortedList<int, FrameLength>());
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -50,8 +50,12 @@ namespace HunterCombatMR.Converters
             serializer.Serialize(writer, (int)profile.KeyFrameAmount);
             writer.WritePropertyName("DefaultKeyFrameSpeed");
             serializer.Serialize(writer, (int)profile.DefaultKeyFrameLength);
-            writer.WritePropertyName("SpecificKeyFrameSpeeds");
-            serializer.Serialize(writer, profile.KeyFrameLengths);
+
+            if (profile.KeyFrameLengths.Count > 0)
+            {
+                writer.WritePropertyName("SpecificKeyFrameSpeeds");
+                serializer.Serialize(writer, profile.KeyFrameLengths);
+            }
 
             writer.WriteEndObject();
         }
