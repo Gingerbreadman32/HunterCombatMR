@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Models.Player;
 using System.Collections.Generic;
 using System.Linq;
 

@@ -26,12 +26,12 @@ namespace HunterCombatMR.Services
             return action;
         }
 
-        internal IEnumerable<PlayerAnimation> RegisterAnimations()
+        internal ICollection<PlayerAnimation> RegisterAnimations()
         {
             var actions = new List<PlayerAnimation>();
             foreach (var animation in Containers.SelectMany(x => x.AnimatedActions))
             {
-                if (!actions.Any(x => x.Name.Equals(animation.Key)))
+                if (!actions.Any(x => x.DisplayName.Equals(animation.Key)))
                 {
                     var action = new PlayerAnimation(animation.Key, animation.Value, true);
                     action.Initialize();
@@ -41,7 +41,7 @@ namespace HunterCombatMR.Services
             return actions;
         }
 
-        internal IEnumerable<ICustomAnimation> RegisterAnimations(IEnumerable<ICustomAnimation> loadedActions)
+        internal ICollection<ICustomAnimation> RegisterAnimations(IEnumerable<ICustomAnimation> loadedActions)
         {
             var actions = new List<ICustomAnimation>();
             foreach (var animation in loadedActions)

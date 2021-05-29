@@ -21,7 +21,7 @@ namespace HunterCombatMR.Models
             string texturePath,
             byte defaultDepth = 1)
         {
-            Name = name;
+            DisplayName = name;
             KeyFrames = new Dictionary<int, LayerFrameInfo>();
             SpriteFrameRectangle = spriteframeRectangle;
             DefaultDepth = defaultDepth;
@@ -31,7 +31,7 @@ namespace HunterCombatMR.Models
 
         public AnimationLayer(AnimationLayer copy)
         {
-            Name = copy.Name;
+            DisplayName = copy.DisplayName;
             KeyFrames = new Dictionary<int, LayerFrameInfo>();
             SpriteFrameRectangle = copy.SpriteFrameRectangle;
             DefaultDepth = copy.DefaultDepth;
@@ -56,7 +56,7 @@ namespace HunterCombatMR.Models
         /// <summary>
         /// Name of the layer
         /// </summary>
-        public string Name { get; set; }
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// The size and offset of the first frame the spritesheet being used. Leave x and y at 0, 0 if the sprite starts at the top-left.
@@ -84,7 +84,7 @@ namespace HunterCombatMR.Models
             bool framesEqual = comparer.Equals(KeyFrames, other.KeyFrames);
 
             return framesEqual
-                && Name.Equals(other.Name)
+                && DisplayName.Equals(other.DisplayName)
                 && SpriteFrameRectangle.Equals(other.SpriteFrameRectangle)
                 && DefaultDepth.Equals(other.DefaultDepth)
                 && TexturePath.Equals(other.TexturePath);

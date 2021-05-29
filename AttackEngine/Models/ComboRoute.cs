@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AttackEngine.Constants;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Models.Player;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
@@ -31,7 +32,7 @@ namespace HunterCombatMR.AttackEngine.Models
         #region Public Properties
 
         /// <summary>
-        /// The <see cref="Models.ComboAction"/> to transition to
+        /// The <see cref="HunterCombatMR.Models.Player.ComboAction"/> to transition to
         /// </summary>
         public ComboAction ComboAction { get; }
 

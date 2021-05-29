@@ -8,7 +8,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public EventParameter(string name,
             float defaultValue)
         {
-            Name = name;
+            DisplayName = name;
             DefaultValue = defaultValue;
             Value = defaultValue;
         }
@@ -16,13 +16,13 @@ namespace HunterCombatMR.AttackEngine.Models
         public EventParameter(EventParameter parameter,
             float newValue)
         {
-            Name = parameter.Name;
+            DisplayName = parameter.DisplayName;
             DefaultValue = parameter.DefaultValue;
             Value = newValue;
         }
 
         public float DefaultValue { get; }
-        public string Name { get; }
+        public string DisplayName { get; }
 
         public float Value { get; set; }
     }

@@ -1,10 +1,8 @@
-﻿using HunterCombatMR.Models;
+﻿using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Drawing.Drawing2D;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.Graphics;
 
 namespace HunterCombatMR.Extensions
 {
@@ -15,18 +13,18 @@ namespace HunterCombatMR.Extensions
         /// </summary>
         /// <param name="value">The <see cref="DrawData"/> of the sprite being drawn</param>
         /// <param name="drawPlayer">The <see cref="Player"/></param>
-        /// <param name="frameInfo">The <see cref="LayerFrameInfo"/> of the current frame of the sprite being drawn</param>
+        /// <param name="frameInfo">The <see cref="LayerData"/> of the current frame of the sprite being drawn</param>
         public static DrawData SetSpriteOrientation(this DrawData value,
             Player drawPlayer,
-            LayerFrameInfo frameInfo,
+            LayerData frameInfo,
             Rectangle layerRectangle)
         {
             var flippedHori = false;
             var flippedVert = false;
 
-            if (frameInfo.SpriteOrientation.Equals(SpriteEffects.FlipHorizontally))
+            if (frameInfo.Orientation.Equals(SpriteEffects.FlipHorizontally))
                 flippedHori ^= true;
-            else if (frameInfo.SpriteOrientation.Equals(SpriteEffects.FlipVertically))
+            else if (frameInfo.Orientation.Equals(SpriteEffects.FlipVertically))
                 flippedVert ^= true;
 
             if (drawPlayer.direction != 1)

@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +39,7 @@ namespace HunterCombatMR.UI.Elements
 
         public UIList InformationList { get; }
         public int KeyFrame { get; private set; }
-        public AnimationLayer Layer { get; private set; }
+        public Layer Layer { get; private set; }
 
         internal LayerTextInfo VisableInformation
         {
@@ -104,10 +105,10 @@ namespace HunterCombatMR.UI.Elements
             _textBoxes = boxes;
         }
 
-        public void SetLayerAndKeyFrame(AnimationLayer layer,
+        public void SetLayerAndKeyFrame(Layer layer,
             int keyFrame)
         {
-            if (layer != null && layer.IsActive(keyFrame))
+            if (layer?.IsActive(keyFrame) ?? false)
             {
                 Layer = layer;
                 KeyFrame = keyFrame;

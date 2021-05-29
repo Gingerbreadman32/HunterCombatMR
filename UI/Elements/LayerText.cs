@@ -1,7 +1,9 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,7 +18,7 @@ namespace HunterCombatMR.UI.Elements
     {
         private string _displayText;
 
-        public LayerText(ICustomAnimation animation,
+        public LayerText(ICustomAnimationV2 animation,
             string layerName,
             int currentKeyFrame,
             LayerTextInfo infoArgs = LayerTextInfo.None)
@@ -28,7 +30,7 @@ namespace HunterCombatMR.UI.Elements
             OnRightClick += DeselectAllFrames;
         }
 
-        public LayerText(AnimationLayer layer,
+        public LayerText(Layer layer,
             int currentKeyFrame,
             LayerTextInfo infoArgs = LayerTextInfo.None)
         {
@@ -37,10 +39,10 @@ namespace HunterCombatMR.UI.Elements
             SetDisplayInformation(infoArgs);
         }
 
-        public ICustomAnimation AnimationReference { get; protected set; }
-        public int CurrentKeyFrame { get; }
+        public ICustomAnimationV2 AnimationReference { get; protected set; }
+        public FrameIndex CurrentKeyFrame { get; }
         public LayerTextInfo DisplayInfo { get; protected set; }
-        public AnimationLayer Layer { get; protected set; }
+        public Layer Layer { get; protected set; }
 
         public string Text
         {
@@ -66,15 +68,15 @@ namespace HunterCombatMR.UI.Elements
             GenerateText();
         }
 
-        public void SetLayer(ICustomAnimation animation,
+        public void SetLayer(ICustomAnimationV2 animation,
             string layerName)
         {
             AnimationReference = animation;
-            Layer = animation.LayerData.GetLayer(layerName);
+            Layer = animation.Layers[layerName];
             GenerateText();
         }
 
-        public void SetLayer(AnimationLayer layer)
+        public void SetLayer(Layer layer)
         {
             Layer = layer;
             GenerateText();
@@ -93,7 +95,7 @@ namespace HunterCombatMR.UI.Elements
             var MousePosition = new Vector2(Main.mouseX, Main.mouseY);
             if (Parent.GetElementAt(MousePosition) == this)
                 displayColor = Color.LightBlue;
-            else if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(Layer.Name)))
+            else if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(Layer.DisplayName)))
                 displayColor = Color.Red;
 
             CalculatedStyle innerDimensions = GetInnerDimensions();
@@ -107,24 +109,22 @@ namespace HunterCombatMR.UI.Elements
 
         protected void GenerateText()
         {
-            if (Layer != null && (Layer.IsActive(CurrentKeyFrame) || DisplayInfo == LayerTextInfo.None))
+            _displayText = "";
+
+            if ((Layer.IsActive(CurrentKeyFrame) || DisplayInfo == LayerTextInfo.None))
             {
                 foreach (LayerTextInfo info in DisplayInfo.GetFlags())
                 {
                     _displayText = InfoText(info);
                 }
             }
-            else
-            {
-                _displayText = "";
-            }
         }
 
         private string CoordinateInfoText()
-            => $"Coords: X- {Layer.KeyFrames[CurrentKeyFrame].Position.X} Y- {Layer.KeyFrames[CurrentKeyFrame].Position.Y} ";
+            => $"Coords: X- {Layer.KeyFrameData[CurrentKeyFrame].Position.X} Y- {Layer.KeyFrameData[CurrentKeyFrame].Position.Y} ";
 
         private string DepthInfoText()
-            => $"Default Depth: {Layer.GetDepth(CurrentKeyFrame)} ";
+            => $"Depth: {Layer.GetCurrentLayerDepth(CurrentKeyFrame)} ";
 
         private void DeselectAllFrames(UIMouseEvent evt, UIElement listeningElement)
         {
@@ -136,21 +136,21 @@ namespace HunterCombatMR.UI.Elements
         {
             if (Main.keyState.GetPressedKeys().Any(x => x.Equals(Keys.LeftShift)))
             {
-                if (!HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(Layer.Name)))
+                if (!HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(Layer.DisplayName)))
                 {
-                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Add(Layer.Name);
+                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Add(Layer.DisplayName);
                 }
                 else
                 {
-                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Remove(Layer.Name);
+                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Remove(Layer.DisplayName);
                 }
             }
             else
             {
                 HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Clear();
-                if (!HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(Layer.Name)))
+                if (!HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(Layer.DisplayName)))
                 {
-                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Add(Layer.Name);
+                    HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Add(Layer.DisplayName);
                 }
             }
         }
@@ -181,14 +181,14 @@ namespace HunterCombatMR.UI.Elements
                     return TextureBoundsInfoText();
 
                 default:
-                    return Layer.Name;
+                    return Layer.DisplayName;
             }
         }
 
         private string OrientationInfoText()
         {
             string text = "Orientation: ";
-            SpriteEffects orientation = Layer.GetOrientation(CurrentKeyFrame);
+            SpriteEffects orientation = Layer.KeyFrameData[CurrentKeyFrame].Orientation;
 
             switch (orientation)
             {
@@ -212,15 +212,15 @@ namespace HunterCombatMR.UI.Elements
         }
 
         private string RotationInfoText()
-            => $"Rotation: {MathHelper.ToDegrees(Layer.GetRotation(CurrentKeyFrame))}° ";
+            => $"Rotation: {MathHelper.ToDegrees(Layer.KeyFrameData[CurrentKeyFrame].Rotation)}° ";
 
         private string TextureBoundsInfoText()
-            => $"Bounds: W- {Layer.SpriteFrameRectangle.Width} H- {Layer.SpriteFrameRectangle.Height}";
+            => $"Bounds: W- {Layer.Tag.Size.X} H- {Layer.Tag.Size.Y}";
 
         private string TextureFrameInfoText()
-                    => $"Frame: {Layer.GetTextureFrame(CurrentKeyFrame)} / {Layer.GetTotalTextureFrames()} ";
+                    => $"Frame: {Layer.KeyFrameData[CurrentKeyFrame].SheetFrame}";
 
         private string TextureNameInfoText()
-            => $"Texture: {Layer.Texture.Name.Split('/')[Layer.Texture.Name.Split('/').Length - 1]}";
+            => $"Texture Tag: {Layer.Tag.DisplayName}";
     }
 }

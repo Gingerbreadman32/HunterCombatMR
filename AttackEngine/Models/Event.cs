@@ -10,7 +10,7 @@ namespace HunterCombatMR.AttackEngine.Models
     {
         public Event()
         {
-            Name = GetType().Name;
+            DisplayName = GetType().Name;
             CurrentParameters = (DefaultParameters != null)
                 ? DefaultParameters.ToList()
                 : new List<EventParameter>();
@@ -21,7 +21,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public Event(FrameLength length)
         {
-            Name = GetType().Name;
+            DisplayName = GetType().Name;
             LengthActive = length;
 
             CurrentParameters = (DefaultParameters != null)
@@ -32,13 +32,13 @@ namespace HunterCombatMR.AttackEngine.Models
                 CurrentParameters.Add(new EventParameter("Active", 1));
         }
 
-        public IList<EventParameter> CurrentParameters { get; private set; }
+        public ICollection<EventParameter> CurrentParameters { get; }
 
         public virtual IEnumerable<EventParameter> DefaultParameters { get; }
 
         public FrameLength LengthActive { get; } = FrameLength.One;
 
-        public string Name { get; }
+        public string DisplayName { get; }
 
         public float GetParameterValue(string name)
             => GetParameter(name).Value;
@@ -62,6 +62,6 @@ namespace HunterCombatMR.AttackEngine.Models
             => GetParameter(name).Value = newValue;
 
         private EventParameter GetParameter(string name)
-                                                    => CurrentParameters.SingleOrDefault(x => x.Name.Equals(name));
+            => CurrentParameters.SingleOrDefault(x => x.DisplayName.Equals(name));
     }
 }

@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Models.Player;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.AttackEngine.Interfaces

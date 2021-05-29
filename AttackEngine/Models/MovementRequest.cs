@@ -10,12 +10,12 @@ namespace HunterCombatMR.AttackEngine.Models
             Vector2 velocity,
             bool set = false)
         {
-            Name = name;
+            DisplayName = name;
             Velocity = velocity;
             SetVelocity = set;
         }
 
-        public string Name { get; }
+        public string DisplayName { get; }
 
         public bool SetVelocity { get; }
         public Vector2 Velocity { get; }

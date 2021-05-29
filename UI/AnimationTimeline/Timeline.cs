@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Enumerations;
-using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Animation;
+using HunterCombatMR.Models;
 using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,8 +14,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
     public partial class Timeline
         : UIElement
     {
-        #region Private Fields
-
         private const int _fullHeight = 44;
         private const int _maxFrames = 1024;
         private const int _segmentHeight = 18;
@@ -28,16 +27,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private Texture2D _timelineEdgeTexture;
         private Texture2D _timelineMidTexture;
 
-        #endregion Private Fields
-
-        #region Protected Properties
-
-        protected IEnumerable<TimelineButton> Buttons { get; set; }
-
-        #endregion Protected Properties
-
-        #region Public Constructors
-
         public Timeline(int scale = 1,
                     bool showAllFrames = false)
         {
@@ -47,12 +36,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
             ShowAllFrames = showAllFrames;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public ICustomAnimation Animation { get; protected set; }
-
+        public ICustomAnimationV2 Animation { get; set; }
+        public Animator Animator { get; set; }
         public int Scale { get; }
 
         /// <summary>
@@ -68,22 +53,14 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public Texture2D TimelineBarEdgeTexture { get; set; }
         public Texture2D TimelineBarMidTexture { get; set; }
-
-        #endregion Public Properties
-
-        #region Internal Properties
-
         internal HorizontalUIList<TimelineKeyFrameGroup> FrameList { get; }
-
-        #endregion Internal Properties
-
-        #region Public Methods
+        protected IEnumerable<TimelineButton> Buttons { get; set; }
 
         public void InitializeAnimation()
         {
-            foreach (var keyFrame in Animation.AnimationData.KeyFrames)
+            foreach (var keyFrame in Animator.KeyFrames)
             {
-                bool HasLayers = Animation.LayerData.Layers.Any(x => x.IsActive(keyFrame.Key));
+                bool HasLayers = Animation.Layers.Any(x => x.Value.IsActive(keyFrame.Key));
 
                 var element = new TimelineKeyFrameGroup(this, (HasLayers) ? FrameType.Keyframe : FrameType.Empty, keyFrame.Key, Scale, keyFrame.Value.FrameLength);
 
@@ -113,7 +90,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public void ResetFrames()
         {
-            TimelineKeyFrameGroup keyFrame = (TimelineKeyFrameGroup)FrameList._items[Animation.AnimationData.CurrentKeyFrameIndex];
+            TimelineKeyFrameGroup keyFrame = (TimelineKeyFrameGroup)FrameList._items[Animator.CurrentKeyFrameIndex];
 
             foreach (TimelineKeyFrameGroup offFrame in FrameList._items.Where(x => x != keyFrame))
             {
@@ -122,7 +99,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             }
         }
 
-        public void SetAnimation(ICustomAnimation animation)
+        public void SetAnimation(ICustomAnimationV2 animation)
         {
             FrameList.Clear();
             Animation = animation;
@@ -151,10 +128,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
                     SetAnimation(Animation);
             }
         }
-
-        #endregion Public Methods
-
-        #region Protected Methods
 
         protected override void DrawChildren(SpriteBatch spriteBatch)
         {
@@ -233,10 +206,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
             DrawOverride(spriteBatch, true);
         }
 
-        #endregion Protected Methods
-
-        #region Private Methods
-
         private int CalculateWidth()
             => ((_timelineMidTexture != null) ? TimelineBarMidTexture.Width : 0 * Scale) * _size;
 
@@ -254,7 +223,5 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
             }
         }
-
-        #endregion Private Methods
     }
 }

@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AttackEngine.Interfaces;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Models.Player;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -45,16 +46,16 @@ namespace HunterCombatMR.AttackEngine.Models
         #region Public Methods
 
         public bool ActionExists(string name)
-            => Actions.Any(x => x.Name.Equals(name));
+            => Actions.Any(x => x.DisplayName.Equals(name));
 
         public ComboAction GetAction(string name)
-            => Actions.First(x => x.Name.Equals(name))
+            => Actions.First(x => x.DisplayName.Equals(name))
                 ?? throw new System.Exception($"Requested action {name} does not exist for moveset {InternalName}!");
 
         public ComboRoute GetNeutralRoute(string actionName)
         {
             if (NeutralRouteExists(actionName))
-                return NeutralRoutes.First(x => x.ComboAction.Name.Equals(actionName));
+                return NeutralRoutes.First(x => x.ComboAction.DisplayName.Equals(actionName));
             else
                 throw new System.Exception($"Requested neutral route for action {actionName} does not exist for moveset {InternalName}!");
         }
@@ -69,7 +70,7 @@ namespace HunterCombatMR.AttackEngine.Models
         }
 
         public bool NeutralRouteExists(string actionName)
-                    => NeutralRoutes.Any(x => x.ComboAction.Name.Equals(actionName));
+                    => NeutralRoutes.Any(x => x.ComboAction.DisplayName.Equals(actionName));
 
         public bool RouteExistsAnywhere(string actionName,
             ActionInputs input = ActionInputs.NoInput)

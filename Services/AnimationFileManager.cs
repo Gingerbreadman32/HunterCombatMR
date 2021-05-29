@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
@@ -29,7 +30,7 @@ namespace HunterCombatMR.Services
 
         public AnimationFileManager()
         {
-            foreach (var converter in typeof(AnimationFileManager).Assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(JsonConverter))))
+            foreach (var converter in typeof(AnimationFileManager).Assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(JsonConverter)) && !x.IsAbstract))
             {
                 _serializerSettings.Converters.Add((JsonConverter)Activator.CreateInstance(converter));
             }
@@ -54,14 +55,12 @@ namespace HunterCombatMR.Services
                 HunterCombatMR.Instance.StaticLogger.Warn($"Custom animation {name} does not exist!");
                 return CustomAnimationFileExistStatus.FileMissing;
             }
-            else
-            {
-                return CustomAnimationFileExistStatus.FileExists;
-            }
+
+            return CustomAnimationFileExistStatus.FileExists;
         }
 
         public CustomAnimationFileExistStatus CustomAnimationFileExists(ICustomAnimation animation)
-            => CustomAnimationFileExists(animation.Name, animation.AnimationType);
+            => CustomAnimationFileExists(animation.DisplayName, animation.AnimationType);
 
         public PlayerAnimation LoadAnimation(AnimationType type,
             string fileName,
@@ -151,10 +150,35 @@ namespace HunterCombatMR.Services
             return actions;
         }
 
+        public FileSaveStatus SaveAnimation(ICustomAnimationV2 anim,
+            bool overwrite)
+        {
+            var animPath = Path.Combine(_customFilePath, anim.AnimationType.ToString(), anim.InternalName + _fileType);
+
+            if (!overwrite & File.Exists(animPath))
+            {
+                return FileSaveStatus.FileExists;
+            }
+
+            try
+            {
+                var serialized = JsonConvert.SerializeObject(anim, _serializerSettings);
+                File.WriteAllText(animPath, serialized);
+                File.SetAttributes(animPath, FileAttributes.Normal);
+                return FileSaveStatus.Saved;
+            }
+            catch (Exception ex)
+            {
+                Main.NewText($"Error: Failed to save animation {anim.InternalName}! Check log for stacktrace.", Color.Red);
+                HunterCombatMR.Instance.StaticLogger.Error(ex.Message, ex);
+                return FileSaveStatus.Error;
+            }
+        }
+
         public FileSaveStatus SaveCustomAnimation(PlayerAnimation anim,
                     string newName = null,
                     bool overwrite = false)
-                    => SaveAnimation(anim, newName, overwrite, false);
+                    => SavePlayerAnimation(anim, newName, overwrite, false);
 
         public bool SetupCustomFolders(IEnumerable<AnimationType> types)
         {
@@ -193,7 +217,7 @@ namespace HunterCombatMR.Services
         internal FileSaveStatus SaveInternalAnimation(PlayerAnimation anim,
             string newName = null,
             bool overwrite = false)
-            => SaveAnimation(anim, newName, overwrite, true);
+            => SavePlayerAnimation(anim, newName, overwrite, true);
 
         private string CustomAnimationPath(string name,
                                                                             AnimationType type)
@@ -215,7 +239,7 @@ namespace HunterCombatMR.Services
             {
                 string json = File.ReadAllText(file);
                 var action = JsonConvert.DeserializeObject(json, type, _serializerSettings) as ICustomAnimation;
-                if (action != null && !actions.Any(x => x.Name.Equals(action.Name)))
+                if (action != null && !actions.Any(x => x.DisplayName.Equals(action.DisplayName)))
                     actions.Add(action);
                 else
                     HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {_fileType} file!");
@@ -238,7 +262,7 @@ namespace HunterCombatMR.Services
             }
         }
 
-        private FileSaveStatus SaveAnimation(PlayerAnimation anim,
+        private FileSaveStatus SavePlayerAnimation(PlayerAnimation anim,
                             string newName,
             bool overwrite,
             bool internalSave)
@@ -246,8 +270,8 @@ namespace HunterCombatMR.Services
             bool rename = !string.IsNullOrEmpty(newName);
             FileSaveStatus status;
             PlayerAnimation action = rename ? new PlayerAnimation(newName, anim.LayerData, anim.IsStoredInternally) : anim;
-            var animPath = internalSave ? InternalAnimationPath(action.Name, action.AnimationType) : CustomAnimationPath(action.Name, action.AnimationType);
-            var oldPath = internalSave ? InternalAnimationPath(anim.Name, anim.AnimationType) : CustomAnimationPath(anim.Name, anim.AnimationType);
+            var animPath = internalSave ? InternalAnimationPath(action.DisplayName, action.AnimationType) : CustomAnimationPath(action.DisplayName, action.AnimationType);
+            var oldPath = internalSave ? InternalAnimationPath(anim.DisplayName, anim.AnimationType) : CustomAnimationPath(anim.DisplayName, anim.AnimationType);
 
             if (!overwrite & File.Exists(animPath))
             {
@@ -266,7 +290,7 @@ namespace HunterCombatMR.Services
             catch (Exception ex)
             {
                 status = FileSaveStatus.Error;
-                Main.NewText($"Error: Failed to save animation {action.Name}! Check log for stacktrace.", Color.Red);
+                Main.NewText($"Error: Failed to save animation {action.DisplayName}! Check log for stacktrace.", Color.Red);
                 HunterCombatMR.Instance.StaticLogger.Error(ex.Message, ex);
             }
 

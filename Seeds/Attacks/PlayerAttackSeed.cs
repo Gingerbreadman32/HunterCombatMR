@@ -2,32 +2,33 @@
 using HunterCombatMR.Events;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Action;
 
 namespace HunterCombatMR.Seeds.Attacks
 {
     internal static class PlayerAttackSeed
     {
-        internal static PlayerAction CreateDefault(string internalName,
+        internal static CustomAction<HunterCombatPlayer> CreateDefault(string internalName,
             string displayName,
             int activeFrame = 0,
             int recoveryFrame = 0)
         {
-            var action = new PlayerAction(internalName, displayName);
+            var action = new CustomAction<HunterCombatPlayer>(internalName, displayName);
 
-            action.Animations.AnimationReferences.Add(0, internalName);
+            action.Animations.AddAnimation(internalName);
 
-            action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.AttackStartup), FrameIndex.Zero);
-            action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.ActiveAttack), activeFrame);
-            action.AddKeyFrameEvent(new SetPlayerActionState(Enumerations.AttackState.AttackRecovery), recoveryFrame);
+            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.AttackState.AttackStartup), FrameIndex.Zero);
+            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.AttackState.ActiveAttack), activeFrame);
+            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.AttackState.AttackRecovery), recoveryFrame);
 
             return action;
         }
 
-        internal static PlayerAction WithEvent(this PlayerAction action,
+        internal static CustomAction<HunterCombatPlayer> WithEvent(this CustomAction<HunterCombatPlayer> action,
             Event<HunterCombatPlayer> @event,
             int frameNumber)
         {
-            action.AddKeyFrameEvent(@event, frameNumber);
+            action.Events.AddKeyframeEvent(@event, frameNumber);
 
             return action;
         }

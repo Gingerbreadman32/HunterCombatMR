@@ -9,8 +9,7 @@ using Terraria.ModLoader;
 namespace HunterCombatMR.Models
 {
     public abstract class AttackProjectile
-        : ModProjectile,
-        IAnimatedEntity<ProjectileAnimation>
+        : ModProjectile
     {
         private ProjectileAnimation _animation;
 
@@ -21,7 +20,7 @@ namespace HunterCombatMR.Models
             _animation = animation;
         }
 
-        public ProjectileAnimation CurrentAnimation { get => _animation; }
+        public ProjectileAnimation AnimationController { get => _animation; }
         public ICollection<Hitbox> Hitboxes { get; set; }
 
         public bool IsPlayerActive { get => Main.player[projectile.owner]?.GetModPlayer<HunterCombatPlayer>().ActiveProjectiles?.Contains(projectile.Name) ?? false; }
@@ -75,17 +74,17 @@ namespace HunterCombatMR.Models
                 return true;
             }
 
-            if (newAnimation == CurrentAnimation)
+            if (newAnimation == AnimationController)
                 return true;
 
             _animation = (ProjectileAnimation)newAnimation;
 
-            return CurrentAnimation != null;
+            return AnimationController != null;
         }
 
         public override void SetDefaults()
         {
-            projectile.timeLeft = CurrentAnimation.AnimationData.TotalFrames;
+            projectile.timeLeft = AnimationController.AnimationData.TotalFrames;
             _animation.AnimationData.Play();
         }
     }

@@ -4,6 +4,7 @@
     {
         string InternalName { get; }
 
-        IHunterCombatContentInstance CloneFrom(string internalName);
+        bool IsStoredInternally { get; }
+        IHunterCombatContentInstance CreateNew(string internalName);
     }
 }

@@ -1,52 +1,46 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Enumerations;
+using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Action;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HunterCombatMR.AttackEngine.Models
+namespace HunterCombatMR.Models.Player
 {
     public class ComboAction
+        : INamed
     {
-        #region Public Constructors
-
-        public ComboAction(PlayerAction attack,
+        public ComboAction(ICustomAction<HunterCombatPlayer> attack,
             IEnumerable<ComboRoute> routes,
             PlayerState state = PlayerState.Neutral,
             string name = null)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
             Routes = routes ?? throw new ArgumentNullException(nameof(routes));
-            Name = name ?? Attack.Name;
+            DisplayName = name ?? Attack.DisplayName;
             PlayerStateRequired = state;
         }
 
-        public ComboAction(PlayerAction attack,
+        public ComboAction(ICustomAction<HunterCombatPlayer> attack,
             PlayerState state = PlayerState.Neutral)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
-            Name = Attack.Name;
+            DisplayName = Attack.DisplayName;
             Routes = new List<ComboRoute>();
             PlayerStateRequired = state;
         }
 
-        #endregion Public Constructors
+        public ICustomAction<HunterCombatPlayer> Attack { get; }
 
-        #region Public Properties
-
-        public PlayerAction Attack { get; }
-
-        public string Name { get; }
-
-        public IEnumerable<ComboRoute> Routes { get; set; }
+        public string DisplayName { get; }
 
         /// <summary>
         /// What state the player needs to be in in order to perform the action.
         /// </summary>
         public PlayerState PlayerStateRequired { get; set; }
 
-        #endregion Public Properties
-
-        #region Public Methods
+        public IEnumerable<ComboRoute> Routes { get; set; }
 
         public void AddRoute(ComboAction action,
             ActionInputs input,
@@ -60,23 +54,20 @@ namespace HunterCombatMR.AttackEngine.Models
             AddRouteInternal(route);
         }
 
-        public bool RouteExists(string actionName,
-            ActionInputs input)
-            => Routes.Any(y => y.ComboAction.Name.Equals(actionName)
-                && (!input.Equals(ActionInputs.NoInput)) ? y.Input.Equals(input) : true);
-
         public ComboRoute GetRoute(string actionName,
             ActionInputs input)
         {
             if (RouteExists(actionName, input))
-                return Routes.Single(y => y.ComboAction.Name.Equals(actionName)
-                    && (!input.Equals(ActionInputs.NoInput)) ? y.Input.Equals(input) : true);
+                return Routes.Single(y => y.ComboAction.DisplayName.Equals(actionName)
+                    && !input.Equals(ActionInputs.NoInput) ? y.Input.Equals(input) : true);
             else
-                throw new Exception($"Combo route for action {actionName} with input {input.ToString()} does not exist in relation to current action: {Name}");
+                throw new Exception($"Combo route for action {actionName} with input {input.ToString()} does not exist in relation to current action: {DisplayName}");
         }
-        #endregion Public Methods
 
-        #region Private Methods
+        public bool RouteExists(string actionName,
+                    ActionInputs input)
+            => Routes.Any(y => y.ComboAction.DisplayName.Equals(actionName)
+                && !input.Equals(ActionInputs.NoInput) ? y.Input.Equals(input) : true);
 
         private void AddRouteInternal(ComboRoute route)
         {
@@ -86,7 +77,5 @@ namespace HunterCombatMR.AttackEngine.Models
 
             Routes = routes;
         }
-
-        #endregion Private Methods
     }
 }

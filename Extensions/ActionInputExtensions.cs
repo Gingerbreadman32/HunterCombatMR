@@ -4,7 +4,7 @@ using Terraria.GameInput;
 
 namespace HunterCombatMR.Extensions
 {
-    public static class ActionInputExtentions
+    public static class ActionInputExtensions
     {
         public static string GetGameCommand(this ActionInputs input)
         {

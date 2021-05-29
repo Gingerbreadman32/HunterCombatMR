@@ -100,10 +100,10 @@ namespace HunterCombatMR.UI
             Layers = layers;
             var highlighted = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
 
-            if (highlighted.Count() == 1 && layers.Any(x => x.Layer.Name.Equals(highlighted.FirstOrDefault())))
+            if (highlighted.Count() == 1 && layers.Any(x => x.Layer.DisplayName.Equals(highlighted.FirstOrDefault())))
             {
-                var selected = layers.FirstOrDefault(y => y.Layer.Name.Equals(highlighted.FirstOrDefault()));
-                var currentKeyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.CurrentKeyFrameIndex;
+                var selected = layers.FirstOrDefault(y => y.Layer.DisplayName.Equals(highlighted.FirstOrDefault()));
+                var currentKeyFrame = Player.AnimationController.Animator;
                 if (!_popUps.Any(x => x.AttachedElement == selected))
                 {
                     ClearPopUps();
@@ -111,15 +111,15 @@ namespace HunterCombatMR.UI
                     var upButton = new PopUpButton('\u25B2', 40f, 40f, selected, new Vector2(120f, -50f)).WithFadedMouseOver();
                     upButton.OnClick += (evt, list) =>
                         {
-                            selected.Layer.UpdateLayerDepth(-1, currentKeyFrame, layers.Select(x => x.Layer));
+                            //selected.Layer.UpdateLayerDepth(-1, currentKeyFrame, layers.Select(x => x.Layer));
                             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
                         };
                     _popUps.Add(upButton);
 
-                    var enableButton = new PopUpButton((selected.Layer.KeyFrames[currentKeyFrame].IsEnabled) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
+                    var enableButton = new PopUpButton((selected.Layer.DisplayName != null) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
                     enableButton.OnClick += (evt, list) =>
                     {
-                        selected.Layer.ToggleVisibility(currentKeyFrame);
+                        //selected.Layer.ToggleVisibility(currentKeyFrame);
                         HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
                     };
                     _popUps.Add(enableButton);
@@ -127,7 +127,7 @@ namespace HunterCombatMR.UI
                     var downButton = new PopUpButton('\u25BC', 40f, 40f, selected, new Vector2(120f, 50f)).WithFadedMouseOver();
                     downButton.OnClick += (evt, list) =>
                     {
-                        selected.Layer.UpdateLayerDepth(1, currentKeyFrame, layers.Select(x => x.Layer));
+                        //selected.Layer.UpdateLayerDepth(1, currentKeyFrame, layers.Select(x => x.Layer));
                         HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
                     };
                     _popUps.Add(downButton);
@@ -151,7 +151,7 @@ namespace HunterCombatMR.UI
         {
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit))
             {
-                Player.SetCurrentAnimation(null);
+                Player.AnimationController.CurrentAnimation = null;
                 HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.None;
             }
             else

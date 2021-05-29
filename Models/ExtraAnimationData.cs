@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace HunterCombatMR.Models
 {
-    public sealed class LayerData
-        : IEquatable<LayerData>
+    public sealed class ExtraAnimationData
+        : IEquatable<ExtraAnimationData>
     {
         [JsonConstructor]
-        public LayerData(KeyFrameProfile frameProfile,
+        public ExtraAnimationData(KeyFrameProfile frameProfile,
             IEnumerable<AnimationLayer> layers,
             LoopStyle loop = 0)
         {
@@ -21,7 +21,7 @@ namespace HunterCombatMR.Models
             Loop = loop;
         }
 
-        public LayerData(LayerData copy)
+        public ExtraAnimationData(ExtraAnimationData copy)
         {
             KeyFrameProfile = new KeyFrameProfile(copy.KeyFrameProfile);
             Layers = new List<AnimationLayer>();
@@ -44,7 +44,7 @@ namespace HunterCombatMR.Models
             Layers.Add(layerInfo);
         }
 
-        public bool Equals(LayerData other)
+        public bool Equals(ExtraAnimationData other)
         {
             bool paramEquals = KeyFrameProfile.Equals(other.KeyFrameProfile)
                 && Loop.Equals(other.Loop);
@@ -59,10 +59,10 @@ namespace HunterCombatMR.Models
             => Layers.ToDictionary(x => x, x => x.KeyFrames[keyFrameIndex]);
 
         public AnimationLayer GetLayer(string layerName)
-                    => Layers.FirstOrDefault(x => x.Name.Equals(layerName));
+                    => Layers.FirstOrDefault(x => x.DisplayName.Equals(layerName));
 
         public int GetTextureFrameAtKeyFrameForLayer(int keyFrameIndex,
                     string layerName)
-            => Layers.SingleOrDefault(x => x.Name.Equals(layerName))?.GetTextureFrame(keyFrameIndex) ?? 0;
+            => Layers.SingleOrDefault(x => x.DisplayName.Equals(layerName))?.GetTextureFrame(keyFrameIndex) ?? 0;
     }
 }

@@ -128,7 +128,7 @@ namespace HunterCombatMR.Seeds.Animations
             var timings = new SortedList<int, FrameLength>() { { 2, 4 }, { 3, 8 }, { 4, 14 }, { 5, 4 }, { 7, 52 } };
 
             AnimatedActions.Add("SNS-StandingLL",
-                new LayerData(new KeyFrameProfile(keyframes, holdframes, timings),
+                new ExtraAnimationData(new KeyFrameProfile(keyframes, holdframes, timings),
                     layers));
         }
 

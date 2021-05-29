@@ -3,6 +3,7 @@ using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Items;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Player;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace HunterCombatMR
 {
     public class HunterCombatPlayer
         : ModPlayer,
-        IAnimatedEntity<PlayerAnimation>
+        IAnimatedEntity<PlayerAnimationController>
     {
         private WeaponBase _equippedWeapon;
         private bool _showDefaultLayers = true;
@@ -26,12 +27,13 @@ namespace HunterCombatMR
             InputBuffers = new PlayerBufferInformation();
             LayerPositions = new Dictionary<string, Vector2>();
             StateController = new PlayerStateController(this);
+            AnimationController = new PlayerAnimationController();
         }
 
         public ICollection<string> ActiveProjectiles { get; set; }
         public bool ActuallyInWorld { get; private set; }
         public override bool CloneNewInstances => false;
-        public PlayerAnimation CurrentAnimation { get; private set; }
+        public PlayerAnimationController AnimationController { get; }
 
         public WeaponBase EquippedWeapon
         {
@@ -43,24 +45,25 @@ namespace HunterCombatMR
         public IDictionary<string, Vector2> LayerPositions { get; set; }
         public PlayerStateController StateController { get; private set; }
 
+        PlayerAnimationController IAnimatedEntity<PlayerAnimationController>.AnimationController => throw new NotImplementedException();
+
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
-            {
                 return;
-            }
-            if (CurrentAnimation != null && CurrentAnimation.AnimationData.CurrentKeyFrameIndex > 0)
+
+            /* Gotta just rework this, broken for now
+            if (AnimationController.CurrentAnimation != null && AnimationController.Animator.CurrentKeyFrameIndex > 0)
             {
                 _showDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
-                        CurrentAnimation.LayerData,
-                        CurrentAnimation.AnimationData.CurrentKeyFrameIndex - 1,
+                        AnimationController.Animator,
+                        AnimationController.Animator.CurrentKeyFrameIndex - 1,
                         Color.White);
             }
+            */
 
             if (!_showDefaultLayers)
-            {
                 return;
-            }
 
             string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
                     "faceColor", "bodyColor", "legColor", "shirtColor", "underShirtColor",
@@ -82,10 +85,8 @@ namespace HunterCombatMR
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
-            if (CurrentAnimation == null)
-            {
+            if (AnimationController == null)
                 return;
-            }
 
             if (!_showDefaultLayers || HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
@@ -97,7 +98,7 @@ namespace HunterCombatMR
 
             layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
 
-            layers = CurrentAnimation.DrawPlayerLayers(layers);
+            layers = AnimationController.DrawPlayerLayers(layers);
         }
 
         public override void OnEnterWorld(Player player)
@@ -111,13 +112,10 @@ namespace HunterCombatMR
 
             _showDefaultLayers = true;
 
-            if (ActiveProjectiles == null)
-                throw new Exception("Player's active projectiles not initialized!");
-
             if (InputBuffers == null)
                 throw new Exception("Player's input buffer information not initialized!");
 
-            ActiveProjectiles.Clear();
+            ActiveProjectiles = new List<string>();
 
             InputBuffers.ResetBuffers();
         }
@@ -133,7 +131,7 @@ namespace HunterCombatMR
             if (Main.gameMenu)
             {
                 ActuallyInWorld = false;
-                CurrentAnimation = null;
+                AnimationController.CurrentAnimation = null;
                 _showDefaultLayers = true;
             }
 
@@ -148,7 +146,7 @@ namespace HunterCombatMR
             InputBuffers.Update(StateController.State, player.mouseInterface);
             StateController.StateUpdate();
             StateController.EditorUpdate();
-            CurrentAnimation?.Update();
+            AnimationController.Animator.Update();
             StateController.PostUpdate();
         }
 
@@ -178,32 +176,6 @@ namespace HunterCombatMR
         public override void PreUpdateMovement()
         {
             StateController.MovementUpdate();
-        }
-
-        public bool SetCurrentAnimation(ICustomAnimation newAnimation,
-            bool newFile = false)
-        {
-            if (newAnimation == null)
-            {
-                CurrentAnimation?.Uninitialize();
-                CurrentAnimation = null;
-                return true;
-            }
-
-            if (!(newAnimation is PlayerAnimation))
-                return false;
-
-            PlayerAnimation newPlayerAnimation = newAnimation as PlayerAnimation;
-
-            if (newPlayerAnimation == CurrentAnimation)
-                return true;
-
-            //PlayerActionAnimation newAnim = new PlayerActionAnimation(newAnimation, newFile);
-            CurrentAnimation?.Uninitialize();
-            CurrentAnimation = newPlayerAnimation;
-            CurrentAnimation?.Initialize();
-
-            return CurrentAnimation != null;
         }
 
         public override void UpdateDead()

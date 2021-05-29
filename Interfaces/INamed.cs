@@ -2,6 +2,6 @@
 {
     public interface INamed
     {
-        string Name { get; }
+        string DisplayName { get; }
     }
 }

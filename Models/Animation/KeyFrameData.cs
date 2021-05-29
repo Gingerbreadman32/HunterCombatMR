@@ -1,0 +1,101 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace HunterCombatMR.Models
+{
+    public class KeyFrameData<T>
+        : IDictionary<string, T>, IKeyFrameData where T : class
+    {
+        private IDictionary<string, T> _data;
+
+        public KeyFrameData(FrameLength frames)
+        {
+            Frames = frames;
+            _data = new Dictionary<string, T>();
+        }
+
+        public KeyFrameData(FrameLength frames,
+            IDictionary<string, T> data)
+        {
+            Frames = frames;
+            _data = new Dictionary<string, T>(data);
+        }
+
+        public int Count => _data.Count;
+
+        public FrameLength Frames { get; set; }
+
+        public bool IsReadOnly { get; set; }
+
+        public ICollection<string> Keys => _data.Keys;
+
+        public ICollection<T> Values => _data.Values;
+
+        public T this[string name]
+        {
+            get => _data[name];
+            set => _data[name] = value;
+        }
+
+        public void Add(string key, T value)
+        {
+            if (_data.ContainsKey(key))
+            {
+                _data[key] = value;
+                return;
+            }
+
+            _data.Add(key, value);
+        }
+
+        public void Add(KeyValuePair<string, T> item)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Clear()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool Contains(KeyValuePair<string, T> item)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool ContainsKey(string key)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IEnumerator<KeyValuePair<string, T>> GetEnumerator()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool Remove(string key)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool Remove(KeyValuePair<string, T> item)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool TryGetValue(string key, out T value)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+}

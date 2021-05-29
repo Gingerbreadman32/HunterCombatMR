@@ -3,6 +3,7 @@ using HunterCombatMR.AttackEngine.MoveSets;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Events;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Action;
 using HunterCombatMR.Models;
 using HunterCombatMR.Seeds.Attacks;
 using HunterCombatMR.Services;
@@ -20,12 +21,12 @@ namespace HunterCombatMR
             typeof(ProjectileAnimation) };
 
         private AnimationLoader _animationLoader;
-        private IDictionary<Type, IEnumerable<IHunterCombatContentInstance>> _contentStream;
+        private IDictionary<Type, ICollection<IHunterCombatContentInstance>> _contentStream;
         private AnimationFileManager _fileManager;
 
         public HunterCombatContent(AnimationFileManager fileManager)
         {
-            _contentStream = new Dictionary<Type, IEnumerable<IHunterCombatContentInstance>>();
+            _contentStream = new Dictionary<Type, ICollection<IHunterCombatContentInstance>>();
             _animationLoader = new AnimationLoader();
             _fileManager = fileManager;
         }
@@ -93,19 +94,17 @@ namespace HunterCombatMR
             }
         }
 
-        internal string DuplicateContentInstance<T>(T duplicate) where T : IHunterCombatContentInstance
+        internal IHunterCombatContentInstance DuplicateContentInstance<T>(T duplicate) where T : IHunterCombatContentInstance
         {
             if (!_contentStream.ContainsKey(typeof(T)))
                 throw new Exception($"Content stream not initialized for {typeof(T).Name}");
 
             if (duplicate == null)
-                throw new ArgumentNullException("No animation to duplicate!");
+                throw new ArgumentNullException("No instance to duplicate!");
 
-            var newInstance = GetContentInstance(duplicate).CloneFrom(DuplicateName<T>(duplicate.InternalName, 0));
-            var stream = new List<IHunterCombatContentInstance>(_contentStream[typeof(T)]);
-            stream.Add(newInstance);
-            _contentStream[typeof(T)] = stream;
-            return newInstance.InternalName;
+            var newInstance = GetContentInstance(duplicate).CreateNew(DuplicateName<T>(duplicate.InternalName, 0));
+            _contentStream[typeof(T)].Add(newInstance);
+            return newInstance;
         }
 
         internal string DuplicateName<T>(string name,
@@ -159,16 +158,13 @@ namespace HunterCombatMR
             foreach (var type in typesToLoad)
             {
                 Type typeDef = _animationMap[(int)type];
-                if (_contentStream.ContainsKey(typeDef))
-                    _contentStream[typeDef] = _animationLoader.RegisterAnimations(_fileManager.LoadAnimations(type, typeDef));
-                else
-                    _contentStream.Add(typeDef, _animationLoader.RegisterAnimations(_fileManager.LoadAnimations(type, typeDef)));
+                _contentStream.Add(typeDef, new List<IHunterCombatContentInstance>(_animationLoader.RegisterAnimations(_fileManager.LoadAnimations(type, typeDef))));
             }
         }
 
         private void LoadAttacks()
         {
-            var loadedAttacks = new List<PlayerAction>();
+            var loadedAttacks = new List<ICustomAction<HunterCombatPlayer>>();
 
             // Seeding, add a dedicated method for this later
             loadedAttacks.Add(PlayerAttackSeed
@@ -178,12 +174,7 @@ namespace HunterCombatMR
                 .WithEvent(new SetPlayerVelocityDirect(3, 0, true, 1), 0)
                 .WithEvent(new SetPlayerVelocityDirect(0, 0, true, 1), 5));
 
-            foreach (var attack in loadedAttacks)
-            {
-                attack.Initialize<PlayerAnimation>();
-            }
-
-            _contentStream.Add(typeof(PlayerAction), loadedAttacks);
+            _contentStream.Add(typeof(ICustomAction<HunterCombatPlayer>), new List<IHunterCombatContentInstance>(loadedAttacks));
         }
 
         private void LoadMoveSets()
@@ -191,7 +182,7 @@ namespace HunterCombatMR
             var loadedMovesets = new List<MoveSet>();
 
             loadedMovesets.Add(new SwordAndShieldMoveSet());
-            _contentStream.Add(typeof(MoveSet), loadedMovesets);
+            _contentStream.Add(typeof(MoveSet), new List<IHunterCombatContentInstance>(loadedMovesets));
         }
     }
 }

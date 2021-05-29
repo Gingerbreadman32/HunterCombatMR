@@ -1,6 +1,8 @@
 ﻿using HunterCombatMR.AttackEngine.Constants;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Action;
+using HunterCombatMR.Models.Player;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -24,17 +26,15 @@ namespace HunterCombatMR.AttackEngine.MoveSets
         {
         }
 
-        public override IHunterCombatContentInstance CloneFrom(string internalName)
-        {
-            throw new NotImplementedException();
-        }
+        public override IHunterCombatContentInstance CreateNew(string internalName)
+            => new SwordAndShieldMoveSet();
 
         protected override IEnumerable<ComboAction> PopulateDefaultActions()
         {
             var actions = new List<ComboAction>();
 
-            actions.Add(new ComboAction(ContentUtils.Get<PlayerAction>(_doubleSlash)));
-            actions.Add(new ComboAction(ContentUtils.Get<PlayerAction>(_runningSlash), Enumerations.PlayerState.Walking));
+            actions.Add(new ComboAction(ContentUtils.GetPlayerAction(_doubleSlash)));
+            actions.Add(new ComboAction(ContentUtils.GetPlayerAction(_runningSlash), Enumerations.PlayerState.Walking));
 
             return actions;
         }

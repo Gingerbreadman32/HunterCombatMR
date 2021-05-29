@@ -48,7 +48,7 @@ namespace HunterCombatMR
         public bool VanillaBlockInput { get; set; }
 
         public Event<HunterCombatPlayer> GetPlayerActionEvent(string name)
-            => PlayerActionEvents.FirstOrDefault(x => x.Name.Equals(name));
+            => PlayerActionEvents.FirstOrDefault(x => x.DisplayName.Equals(name));
 
         public override void Load()
         {
@@ -170,7 +170,7 @@ namespace HunterCombatMR
             // @@warn This method shouldn't be in here tbh.
             Content.DeleteContentInstance(animation);
 
-            FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);
+            FileManager.DeleteCustomAnimation(animation.AnimationType, animation.DisplayName);
         }
 
         internal void SetUIPlayer(HunterCombatPlayer player)

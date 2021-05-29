@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Player;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace HunterCombatMR.AttackEngine.Models
             MovementInformation = new MovementInfo();
         }
 
-        public SortedList<int, string> ActionHistory { get; private set; }
+        public SortedList<int, string> ActionHistory { get; }
         public AttackState ActionState { get; set; }
 
         public ComboAction CurrentAction
@@ -127,13 +128,13 @@ namespace HunterCombatMR.AttackEngine.Models
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit)
                     && (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationType.Equals(AnimationType.Player) ?? false))
             {
-                Player.SetCurrentAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
+                Player.AnimationController.CurrentAnimation = EditorUtils.EditingAnimation;
             }
 
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit) 
-                && Player.CurrentAnimation != null)
+                    && Player.AnimationController.CurrentAnimation != null)
             {
-                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(Player.CurrentAnimation, Player.player.direction);
+                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(Player.AnimationController.CurrentAnimation, Player.player.direction);
             }
         }
 
@@ -157,9 +158,10 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             CurrentAction.Attack.ActionLogic(Player, _actionAnimator);
 
-            var currentAnimation = CurrentAction.Attack.Animations.GetAnimationByKeyFrame(CurrentActionKeyFrame);
+            /* need to get rid of this to test
+            CurrentAction.Attack.Animations.TryGetAnimation(CurrentActionKeyFrame, out var currentAnimation);
             Player.SetCurrentAnimation(currentAnimation);
-
+            */
             _actionAnimator.Update();
 
             if (_actionAnimator.Flags.Equals(AnimatorFlags.Locked))
@@ -169,9 +171,9 @@ namespace HunterCombatMR.AttackEngine.Models
         private void ActionReset()
         {
             CurrentAction = null;
-            Player.SetCurrentAnimation(null);
+            Player.AnimationController.CurrentAnimation = null;
             ActionState = AttackState.NotAttacking;
-            Main.blockInput = false;
+            Main.blockInput = HunterCombatMR.Instance.VanillaBlockInput;
         }
 
         private void FullStateReset()
@@ -204,7 +206,7 @@ namespace HunterCombatMR.AttackEngine.Models
                 return;
             }
 
-            _actionAnimator.Initialize(CurrentAction.Attack.KeyFrameProfile);
+            _actionAnimator.Initialize(CurrentAction.Attack.FrameData);
         }
     }
 }

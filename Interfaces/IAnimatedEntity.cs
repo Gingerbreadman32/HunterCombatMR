@@ -1,10 +1,7 @@
 ﻿namespace HunterCombatMR.Interfaces
 {
-    public interface IAnimatedEntity<T> where T : ICustomAnimation
+    public interface IAnimatedEntity<T> where T : IAnimationController
     {
-        T CurrentAnimation { get; }
-
-        bool SetCurrentAnimation(ICustomAnimation newAnimation,
-            bool newFile = false);
+        T AnimationController { get; }
     }
 }

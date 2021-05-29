@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
 using System;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         public void AddButton(string name,
             TimelineButtonIcon iconType,
             Action buttonEvent,
-            Func<ICustomAnimation, TimelineButton, bool> conditionEvent = null)
+            Func<ICustomAnimationV2, TimelineButton, bool> conditionEvent = null)
         {
             var currentButtons = Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))).Count();
             var newButton = new TimelineButton(name, iconType, Scale, activeCondition: conditionEvent)
@@ -25,31 +26,32 @@ namespace HunterCombatMR.UI.AnimationTimeline
             Append(newButton);
         }
 
-        private bool AddButtonCondition(ICustomAnimation animation,
+        private bool AddButtonCondition(ICustomAnimationV2 animation,
             TimelineButton button)
-            => (TimelineButton.DefaultCondition(animation, button)) && !(!ShowAllFrames && animation.AnimationData.KeyFrames.Count == _maxFrames)
-                || (ShowAllFrames && animation.AnimationData.TotalFrames == _maxFrames);
+            => (TimelineButton.DefaultCondition(animation, button)) 
+                && !(!ShowAllFrames && animation.Layers.FrameData.Sum(x => x.Value.Frames) == _maxFrames)
+                    || (ShowAllFrames && Animator.TotalFrames == _maxFrames);
 
         private void AddButtonLogic()
         {
-            Animation.AddKeyFrame((FrameLength)Animation.KeyFrameProfile.DefaultKeyFrameLength);
+            //Animation.AddKeyFrame(Animation.LayerData.KeyFrameProfile.DefaultKeyFrameLength);
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
         }
 
         private void CopyButtonLogic()
         {
-            var copyKeyframe = Animation.AnimationData.CurrentKeyFrame;
-            Animation.AddKeyFrame(copyKeyframe);
+            //var copyKeyframe = Animation.AnimationData.CurrentKeyFrame;
+            //Animation.AddKeyFrame(copyKeyframe);
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
         }
 
-        private bool DeleteButtonCondition(ICustomAnimation animation,
+        private bool DeleteButtonCondition(ICustomAnimationV2 animation,
             TimelineButton button)
-            => (TimelineButton.DefaultCondition(animation, button)) && (animation.AnimationData.KeyFrames.Count > 1);
+            => (TimelineButton.DefaultCondition(animation, button)) && (Animator.KeyFrames.Count > 1);
 
         private void DeleteButtonLogic()
         {
-            Animation.RemoveKeyFrame(Animation.AnimationData.CurrentKeyFrameIndex);
+            //Animation.RemoveKeyFrame(Animation.AnimationData.CurrentKeyFrameIndex);
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
         }
 
@@ -66,12 +68,12 @@ namespace HunterCombatMR.UI.AnimationTimeline
             Buttons = Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))).Select(x => (x as TimelineButton));
         }
 
-        private bool LoopButtonCondition(ICustomAnimation animation,
+        private bool LoopButtonCondition(ICustomAnimationV2 animation,
             TimelineButton button)
         {
             if (TimelineButton.DefaultCondition(animation, button))
             {
-                switch (Animation.AnimationData.CurrentLoopStyle)
+                switch (Animator.CurrentLoopStyle)
                 {
                     case LoopStyle.Loop:
                         button.Icon = TimelineButtonIcon.Loop;
@@ -104,10 +106,10 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         private void LoopButtonLogic()
         {
-            if (!Animation.AnimationData.CurrentLoopStyle.Equals(LoopStyle.PlayPause))
-                Animation.UpdateLoopType(Animation.AnimationData.CurrentLoopStyle + 1);
+            if (!Animator.CurrentLoopStyle.Equals(LoopStyle.PlayPause))
+                Animator.CurrentLoopStyle = (Animator.CurrentLoopStyle + 1);
             else
-                Animation.UpdateLoopType(0);
+                Animator.CurrentLoopStyle = 0;
 
             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
         }
@@ -116,27 +118,27 @@ namespace HunterCombatMR.UI.AnimationTimeline
         {
             return () =>
             {
-                int currentKeyFrame = Animation.AnimationData.CurrentKeyFrameIndex;
-                Animation.MoveKeyFrame(currentKeyFrame, (forward) ? currentKeyFrame + 1 : currentKeyFrame - 1);
+                //int currentKeyFrame = Animation.AnimationData.CurrentKeyFrameIndex;
+                //Animation.MoveKeyFrame(currentKeyFrame, (forward) ? currentKeyFrame + 1 : currentKeyFrame - 1);
                 HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
             };
         }
 
-        private bool MoveLeftButtonCondition(ICustomAnimation animation,
+        private bool MoveLeftButtonCondition(ICustomAnimationV2 animation,
             TimelineButton button)
-            => (TimelineButton.DefaultCondition(animation, button)) && (animation.AnimationData.CurrentKeyFrameIndex > 0);
+            => (TimelineButton.DefaultCondition(animation, button)) && (Animator.CurrentKeyFrameIndex > 0);
 
-        private bool MoveRightButtonCondition(ICustomAnimation animation,
+        private bool MoveRightButtonCondition(ICustomAnimationV2 animation,
             TimelineButton button)
                     => (TimelineButton.DefaultCondition(animation, button))
-                        && (animation.AnimationData.CurrentKeyFrameIndex < animation.AnimationData.KeyFrames.Count - 1);
+                        && (Animator.CurrentKeyFrameIndex < Animator.KeyFrames.Count - 1);
 
-        private bool PlayPauseButtonCondition(ICustomAnimation animation,
+        private bool PlayPauseButtonCondition(ICustomAnimationV2 animation,
             TimelineButton button)
         {
             if (TimelineButton.DefaultCondition(animation, button))
             {
-                button.Icon = (Animation.AnimationData.Flags.HasFlag(AnimatorFlags.Locked))
+                button.Icon = (Animator.Flags.HasFlag(AnimatorFlags.Locked))
                     ? TimelineButtonIcon.Play
                     : TimelineButtonIcon.Pause;
 
@@ -150,16 +152,17 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         private void PlayPauseButtonLogic()
         {
-            Animation.AnimationData.PlayPause();
+            if (!Animator.Play())
+                Animator.Pause();
         }
 
-        private bool StopButtonCondition(ICustomAnimation animation,
+        private bool StopButtonCondition(ICustomAnimationV2 animation,
             TimelineButton button)
-            => TimelineButton.DefaultCondition(animation, button) && animation.AnimationData.Flags.HasFlag(AnimatorFlags.Started);
+            => TimelineButton.DefaultCondition(animation, button) && Animator.Flags.HasFlag(AnimatorFlags.Started);
 
         private void StopButtonLogic()
         {
-            Animation.AnimationData.Stop(false);
+            Animator.Stop(false);
         }
 
         internal static class TimelineButtonNames

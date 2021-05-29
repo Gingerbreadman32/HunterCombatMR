@@ -5,6 +5,7 @@ namespace HunterCombatMR.Models
     public struct FrameIndex
         : IEquatable<int>,
         IComparable<int>,
+        IComparable<FrameIndex>,
         IFormattable
     {
         private int _value;
@@ -73,6 +74,9 @@ namespace HunterCombatMR.Models
 
         public int CompareTo(int other)
             => _value.CompareTo(other);
+
+        public int CompareTo(FrameIndex other)
+            => Value.CompareTo(other.Value);
 
         public bool Equals(int other)
             => _value.Equals(other);
