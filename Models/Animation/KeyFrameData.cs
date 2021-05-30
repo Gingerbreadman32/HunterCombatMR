@@ -4,7 +4,8 @@ using System.Collections.Generic;
 namespace HunterCombatMR.Models
 {
     public class KeyFrameData<T>
-        : IDictionary<string, T>, IKeyFrameData where T : class
+        : IDictionary<string, T>, 
+        IKeyFrameData where T : class
     {
         private IDictionary<string, T> _data;
 
@@ -50,52 +51,52 @@ namespace HunterCombatMR.Models
 
         public void Add(KeyValuePair<string, T> item)
         {
-            throw new System.NotImplementedException();
+            _data.Add(item);
         }
 
         public void Clear()
         {
-            throw new System.NotImplementedException();
+            _data.Clear();
         }
 
         public bool Contains(KeyValuePair<string, T> item)
-        {
-            throw new System.NotImplementedException();
-        }
+            => _data.Contains(item);
 
         public bool ContainsKey(string key)
-        {
-            throw new System.NotImplementedException();
-        }
+            => _data.ContainsKey(key);
 
         public void CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
         {
-            throw new System.NotImplementedException();
+            _data.CopyTo(array, arrayIndex);
         }
 
         public IEnumerator<KeyValuePair<string, T>> GetEnumerator()
         {
-            throw new System.NotImplementedException();
+            foreach (var data in _data)
+            {
+                yield return new KeyValuePair<string, T>(data.Key, data.Value);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new System.NotImplementedException();
-        }
+            => GetEnumerator();
 
         public bool Remove(string key)
-        {
-            throw new System.NotImplementedException();
-        }
+            =>_data.Remove(key);
+
 
         public bool Remove(KeyValuePair<string, T> item)
-        {
-            throw new System.NotImplementedException();
-        }
+            => _data.Remove(item);
 
         public bool TryGetValue(string key, out T value)
         {
-            throw new System.NotImplementedException();
+            value = null;
+
+            if (!ContainsKey(key))
+                return false;
+
+            value = this[key];
+            return true;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.Interfaces.Animation;
+using System.Collections.Generic;
 
 namespace HunterCombatMR.Utilities
 {
@@ -14,6 +15,11 @@ namespace HunterCombatMR.Utilities
         {
             get => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing;
             set => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = value;
+        }
+
+        public static ICollection<string> HighlightedLayerNames
+        {
+            get => HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
         }
     }
 }

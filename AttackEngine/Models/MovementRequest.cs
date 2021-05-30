@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 namespace HunterCombatMR.AttackEngine.Models
 {
     public sealed class MovementRequest
-        : INamed
+        : IDisplayNamed
     {
         public MovementRequest(string name,
             Vector2 velocity,

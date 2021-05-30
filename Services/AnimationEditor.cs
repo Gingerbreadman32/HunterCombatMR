@@ -83,32 +83,21 @@ namespace HunterCombatMR.Services
             return true;
         }
 
-        public void AdjustPositionLogic(ICustomAnimationV2 animation,
-            int currentFrame,
+        public void AdjustPositionLogic(IEnumerable<LayerReference> layers,
             int direction = 1)
         {
-            List<string> framelessNames = new List<string>(HighlightedLayers);
-            framelessNames.ForEach(layerName => layerName = layerName.Split('-')[0].Trim());
             Vector2 mousePosition = new Vector2(Main.mouseX, Main.mouseY);
 
             var nudgeAmount = NudgeLogic();
 
-            foreach (string layerName in framelessNames)
+            foreach (LayerReference layer in layers)
             {
-                Layer layer; 
-
-                if (!animation.Layers.TryGetValue(layerName, out layer))
-                    continue;
-
-                if (layer.KeyFrameData[currentFrame].Orientation.Equals(SpriteEffects.FlipHorizontally))
+                if (layer.FrameData.Orientation.Equals(SpriteEffects.FlipHorizontally))
                     direction *= -1;
 
                 var layerNudgeAmount = nudgeAmount;
                 layerNudgeAmount.X *= direction;
-                var keyframe = layer.KeyFrameData[currentFrame];
-
-                layer.KeyFrameData[currentFrame] = keyframe.ModifyValue(LayerDataParameters.PositionX, keyframe.Position.X + layerNudgeAmount.X);
-                layer.KeyFrameData[currentFrame] = keyframe.ModifyValue(LayerDataParameters.PositionY, keyframe.Position.Y + layerNudgeAmount.Y);
+                layer.FrameData.Position += layerNudgeAmount;
             }
             /*
             if (SelectedLayer == layerName)

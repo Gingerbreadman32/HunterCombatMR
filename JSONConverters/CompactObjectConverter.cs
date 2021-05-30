@@ -28,7 +28,7 @@ namespace HunterCombatMR.JSONConverters
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var array = ((ICompact<Ta>)value).Save().Where(x => x != null).ToArray();
+            var array = ((ICompact<Ta>)value).Save();
             if (!array.Any())
                 return;
 

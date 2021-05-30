@@ -3,7 +3,7 @@
 namespace HunterCombatMR.AttackEngine.Models
 {
     public class EventParameter
-        : INamed
+        : IDisplayNamed
     {
         public EventParameter(string name,
             float defaultValue)

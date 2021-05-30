@@ -138,6 +138,7 @@ namespace HunterCombatMR.Services
                 LoadAnimationsInternal(actions, assembly, resource, type);
             }
 
+            /*
             var path = Path.Combine(_customFilePath, animType.ToString());
             if (!Directory.Exists(_customFilePath) || !Directory.Exists(path))
             {
@@ -146,6 +147,7 @@ namespace HunterCombatMR.Services
             }
 
             LoadAnimationsExternal(actions, path, type);
+            */
 
             return actions;
         }

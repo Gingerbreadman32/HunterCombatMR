@@ -9,7 +9,7 @@ using System.Linq;
 namespace HunterCombatMR.Models.Player
 {
     public class ComboAction
-        : INamed
+        : IDisplayNamed
     {
         public ComboAction(ICustomAction<HunterCombatPlayer> attack,
             IEnumerable<ComboRoute> routes,

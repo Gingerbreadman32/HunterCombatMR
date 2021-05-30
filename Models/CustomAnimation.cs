@@ -9,7 +9,7 @@ namespace HunterCombatMR.Models
 {
     public abstract class CustomAnimation
         : HunterCombatContentInstance,
-        INamed,
+        IDisplayNamed,
         IModifiable,
         ICustomAnimation
     {

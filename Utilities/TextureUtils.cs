@@ -8,7 +8,7 @@ namespace HunterCombatMR.Utilities
     {
         public static Texture2D GetTextureFromTag(TextureTag tag)
         {
-            switch (tag.DisplayName)
+            switch (tag.Name)
             {
                 case "HC_Head":
                     return ModContent.GetTexture("HunterCombatMR/Textures/SnS/Limbs/HeadFrames");

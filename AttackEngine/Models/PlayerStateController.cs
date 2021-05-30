@@ -134,7 +134,8 @@ namespace HunterCombatMR.AttackEngine.Models
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit) 
                     && Player.AnimationController.CurrentAnimation != null)
             {
-                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(Player.AnimationController.CurrentAnimation, Player.player.direction);
+                FrameIndex index = Player.AnimationController.Animator.CurrentKeyFrameIndex;
+                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(Player.AnimationController.CurrentAnimation.Layers.GetOrderedActiveLayerData(index), Player.player.direction);
             }
         }
 

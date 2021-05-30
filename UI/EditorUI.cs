@@ -603,20 +603,20 @@ namespace HunterCombatMR.UI
             }
         }
 
-        private void DisplayLayers(IAnimationController animation)
+        private void DisplayLayers(IAnimationController controller)
         {
-            HunterCombatMR.Instance.EditorInstance.AnimationEdited = false;
-            _layerlist.Clear();
-
-            if (animation == null)
-                return;
-
-            var currentKeyFrame = animation.Animator.CurrentKeyFrameIndex;
-            foreach (var layer in animation.CurrentAnimation.Layers.OrderBy(x => x.Value.GetCurrentLayerDepth(currentKeyFrame)))
+            if (controller.CurrentAnimation == null) 
             {
-                if (!_layerlist._items.Any(x => (x as LayerText).Layer.Equals(layer)))
+                _layerlist.Clear();
+                return;
+            }
+
+            var currentKeyFrame = controller.Animator.CurrentKeyFrameIndex;
+            foreach (var layer in controller.CurrentAnimation.Layers.GetOrderedActiveLayerData(currentKeyFrame))
+            {
+                if (!_layerlist._items.Any(x => (x as LayerText).LayerRef.Equals(layer)))
                 {
-                    _layerlist.Add(new LayerText(animation.CurrentAnimation, layer.Key, currentKeyFrame, LayerTextInfo.None));
+                    _layerlist.Add(new LayerText(layer, LayerTextInfo.None));
                 }
             }
         }
@@ -638,14 +638,16 @@ namespace HunterCombatMR.UI
 
             FrameLength newLength = amount + keyFrame.FrameLength;
 
-            EditorUtils.EditingAnimation.FrameData = EditorUtils.EditingAnimation.FrameData.ModifyKeyframeLength(currentKeyframeIndex, newLength);
-            animator.Initialize(EditorUtils.EditingAnimation.FrameData);
+            EditorUtils.EditingAnimation.Layers[currentKeyframeIndex].Frames = newLength;
+            animator.Initialize(EditorUtils.EditingAnimation.Layers.FrameData);
             animator.CurrentFrame = keyFrame.StartingFrameIndex;
         }
 
         private void LayerPanelUpdate(int currentKeyFrame)
         {
-            if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Count() != 1)
+            if (EditorUtils.HighlightedLayerNames.Count() != 1
+                || !EditorUtils.EditingAnimation.Layers
+                    .TryGetValue(EditorUtils.HighlightedLayerNames.Single(), currentKeyFrame, out var layer))
             {
                 _currentlayertextureframe.SetText("");
                 _layertexturebutton.SetText("");
@@ -654,22 +656,20 @@ namespace HunterCombatMR.UI
                 return;
             }
 
-            var layer = _currentPlayer
-                ?.AnimationController.CurrentAnimation.Layers[HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Single()];
             // Current Layer's Texture Frame
-            string layertexframe = layer?.KeyFrameData[currentKeyFrame].SheetFrame.ToString() ?? "";
+            string layertexframe = layer.FrameData.SheetFrame.ToString() ?? "";
             _currentlayertextureframe.SetText(layertexframe);
 
             // Current Layer's Texture
-            string layertexture = layer?.Tag.DisplayName.ToString() ?? "";
+            string layertexture = layer.Layer.Tag.Name.ToString() ?? "";
             _layertexturebutton.SetText(layertexture);
 
-            if (_layerInfoPanel.Layer != layer || _layerInfoPanel.KeyFrame != currentKeyFrame)
+            if (_layerInfoPanel.LayerRef != layer)
             {
-                _layerInfoPanel.SetLayerAndKeyFrame(layer, currentKeyFrame);
+                _layerInfoPanel.LayerRef = layer;
             }
 
-            if (_layerInfoPanel.IsCollapsed && _layerInfoPanel.Layer != null)
+            if (_layerInfoPanel.IsCollapsed && _layerInfoPanel.LayerRef != null)
                 _layerInfoPanel.Reveal();
         }
 
@@ -694,11 +694,12 @@ namespace HunterCombatMR.UI
                 return;
             }
 
-            var layer = _currentPlayer.AnimationController.CurrentAnimation.Layers[HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Single()];
             var key = _currentPlayer.AnimationController.Animator.CurrentKeyFrameIndex;
-            var totalFrames = TextureUtils.GetTotalTextureFrames(TextureUtils.GetTextureFromTag(layer.Tag), layer.Tag);
+            var layer = _currentPlayer.AnimationController.CurrentAnimation.Layers[HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Single(), key];
+            
+            var totalFrames = TextureUtils.GetTotalTextureFrames(TextureUtils.GetTextureFromTag(layer.Layer.Tag), layer.Layer.Tag);
 
-            int newFrame = layer.KeyFrameData[key].SheetFrame + modifier;
+            int newFrame = layer.FrameData.SheetFrame + modifier;
 
             if (newFrame >= totalFrames)
                 newFrame = 0;
@@ -706,7 +707,7 @@ namespace HunterCombatMR.UI
             if (newFrame < 0)
                 newFrame = totalFrames - 1;
 
-            layer.KeyFrameData[key] = layer.KeyFrameData[key].ModifyValue(LayerDataParameters.SheetFrame, newFrame);
+            layer.FrameData.SheetFrame = newFrame;
         }
 
         private void NextTextureFrame(UIMouseEvent evt, UIElement listeningElement)

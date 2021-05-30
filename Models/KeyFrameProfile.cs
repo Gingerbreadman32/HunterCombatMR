@@ -80,6 +80,18 @@ namespace HunterCombatMR.Models
             DefaultKeyFrameLength = FrameLength.One;
         }
 
+        public IEnumerator<FrameLength> GetEnumerator()
+        {
+            for (var k = 0; k < KeyFrameAmount; k++)
+            {
+                FrameLength frameSpeed = DefaultKeyFrameLength;
+                if (KeyFrameLengths != null && KeyFrameLengths.ContainsKey(k))
+                    frameSpeed = KeyFrameLengths[k];
+
+                yield return frameSpeed;
+            }
+        }
+
         public bool Equals(KeyFrameProfile other)
         {
             KeyFrameProfileEqualityComparer comparer = new KeyFrameProfileEqualityComparer();

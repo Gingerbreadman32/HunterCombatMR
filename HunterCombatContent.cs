@@ -4,6 +4,7 @@ using HunterCombatMR.Enumerations;
 using HunterCombatMR.Events;
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Action;
+using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
 using HunterCombatMR.Seeds.Attacks;
 using HunterCombatMR.Services;
@@ -151,14 +152,19 @@ namespace HunterCombatMR
             }
         }
 
-        // @@warn Can probably genericize most of these loads as well as split them between internal loads and file loads, will need to figure out a way to keep
-        // The reload file versions seperate from the internal ones as well.
+        // @@warn Can probably genericize most of these loads as well as split them between internal
+        // loads and file loads, will need to figure out a way to keep The reload file versions
+        // seperate from the internal ones as well.
         private void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
         {
-            foreach (var type in typesToLoad)
+            var actions = _fileManager.LoadAnimations(AnimationType.Player, typeof(PlayerAnimation));
+            _contentStream.Add(typeof(PlayerAnimation), new List<IHunterCombatContentInstance>(_animationLoader.RegisterAnimations(actions)));
+            _contentStream.Add(typeof(ICustomAnimationV2), new List<IHunterCombatContentInstance>());
+            foreach (var action in actions)
             {
-                Type typeDef = _animationMap[(int)type];
-                _contentStream.Add(typeDef, new List<IHunterCombatContentInstance>(_animationLoader.RegisterAnimations(_fileManager.LoadAnimations(type, typeDef))));
+                var V2 = new CustomAnimationV2(action);
+                _contentStream[typeof(ICustomAnimationV2)].Add(V2);
+                _fileManager.SaveAnimation(V2, true);
             }
         }
 

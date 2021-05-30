@@ -6,7 +6,7 @@ using System.Linq;
 namespace HunterCombatMR.AttackEngine.Models
 {
     public abstract class Event<T>
-        : INamed
+        : IDisplayNamed
     {
         public Event()
         {

@@ -13,7 +13,7 @@ namespace HunterCombatMR.Models
 {
     public class AnimationLayer
         : IEquatable<AnimationLayer>,
-        INamed
+        IDisplayNamed
     {
         [JsonConstructor]
         public AnimationLayer(string name,

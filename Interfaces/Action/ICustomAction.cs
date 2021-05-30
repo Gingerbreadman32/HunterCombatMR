@@ -11,7 +11,7 @@ namespace HunterCombatMR.Interfaces.Action
         ActionAnimations Animations { get; }
         string DisplayName { get; }
         ActionEvents<T> Events { get; }
-        SortedList<FrameIndex, IKeyFrameData> FrameData { get; }
+        SortedList<FrameIndex, KeyFrameData<ICustomAnimationV2>> FrameData { get; }
 
         void ActionLogic(T entity, Animator animator);
     }

@@ -8,7 +8,7 @@ namespace HunterCombatMR.Models.Action
 {
     public class CustomAction<T>
         : HunterCombatContentInstance,
-        INamed,
+        IDisplayNamed,
         ICustomAction<T>
     {
         public CustomAction(string name,
@@ -19,12 +19,27 @@ namespace HunterCombatMR.Models.Action
                 throw new ArgumentException("Action name must not be blank!");
 
             DisplayName = string.IsNullOrEmpty(displayName) ? name : displayName;
+            Animations = new ActionAnimations();
+            Events = new ActionEvents<T>();
+            FrameData = new SortedList<FrameIndex, KeyFrameData<ICustomAnimationV2>>();
+        }
+
+        public CustomAction(string name,
+            ICustomAction<T> copy)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Action name must not be blank!");
+
+            DisplayName = string.IsNullOrEmpty(displayName) ? name : displayName;
+            Animations = new ActionAnimations();
+            Events = new ActionEvents<T>(copy.Events);
+            FrameData = copy.FrameData;
         }
 
         public ActionAnimations Animations { get; }
         public string DisplayName { get; }
         public ActionEvents<T> Events { get; }
-        public SortedList<FrameIndex, IKeyFrameData> FrameData { get; }
+        public SortedList<FrameIndex, KeyFrameData<ICustomAnimationV2>> FrameData { get; }
 
         public void ActionLogic(T entity,
             Animator animator)

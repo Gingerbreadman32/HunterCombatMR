@@ -1,6 +1,6 @@
 ﻿namespace HunterCombatMR.Interfaces
 {
-    public interface INamed
+    public interface IDisplayNamed
     {
         string DisplayName { get; }
     }
