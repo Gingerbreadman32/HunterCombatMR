@@ -155,7 +155,7 @@ namespace HunterCombatMR.Services
         public FileSaveStatus SaveAnimation(ICustomAnimationV2 anim,
             bool overwrite)
         {
-            var animPath = Path.Combine(_customFilePath, anim.AnimationType.ToString(), anim.InternalName + _fileType);
+            var animPath = Path.Combine(_customFilePath, anim.AnimationType.ToString(), "V2", anim.InternalName + _fileType);
 
             if (!overwrite & File.Exists(animPath))
             {

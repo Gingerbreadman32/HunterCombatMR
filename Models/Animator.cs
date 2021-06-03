@@ -131,7 +131,7 @@ namespace HunterCombatMR.Models
             Play();
         }
 
-        public void Initialize(SortedList<FrameIndex, IKeyFrameData> frameData)
+        public void Initialize(IEnumerable<IKeyFrameData> frameData)
         {
             if (!frameData.Any())
                 throw new Exception($"No Keyframes to initialize in animation!");
@@ -225,13 +225,13 @@ namespace HunterCombatMR.Models
             }
         }
 
-        private void CreateKeyFrames(SortedList<FrameIndex, IKeyFrameData> frameData)
+        private void CreateKeyFrames(IEnumerable<IKeyFrameData> frameData)
         {
             KeyFrames.Clear();
 
             foreach (var keyframe in frameData)
             {
-                AppendKeyFrame(keyframe.Value.Frames);
+                AppendKeyFrame(keyframe.Frames);
             }
         }
 

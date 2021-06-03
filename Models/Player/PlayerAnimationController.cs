@@ -33,7 +33,7 @@ namespace HunterCombatMR.Models.Player
                 Animator.Uninitialize();
                 _currentAnimation = value;
                 if (value != null)
-                    Animator.Initialize(_currentAnimation.Layers.FrameData); 
+                    Animator.Initialize(_currentAnimation.Layers.FrameData.Values); 
             } 
         }
 

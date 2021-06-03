@@ -28,14 +28,11 @@ namespace HunterCombatMR.JSONConverters
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var array = ((ICompact<Ta>)value).Save();
+            var array = ((ICompact<Ta>)value).Save().Where(x => x != null).ToArray();
             if (!array.Any())
                 return;
 
-            var tempFormat = writer.Formatting;
-            writer.Formatting = Formatting.None;
-            serializer.Serialize(writer, array);
-            writer.Formatting = tempFormat;
+            writer.WriteRawValue(JsonConvert.SerializeObject(array, Formatting.None));
         }
     }
 }

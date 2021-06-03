@@ -28,7 +28,14 @@ namespace HunterCombatMR.Models.Action
             }
         }
 
+        public ActionAnimations(ActionAnimations copy)
+        {
+            _animations = copy._animations;
+        }
+
         public int Count => _animations.Count();
+
+        public bool Any => _animations.Any();
 
         public void AddAnimation(ICustomAnimationV2 animation)
         {
@@ -44,28 +51,6 @@ namespace HunterCombatMR.Models.Action
 
             AddAnimation(animation);
         }
-
-        /*
-        public KeyFrameData CreateActionFrameData()
-        {
-            if (!_animations.Any())
-                throw new KeyNotFoundException("No animations initalized for this action!");
-
-            KeyFrameData temp = _animations[0].FrameData;
-
-            for (var i = 1; i < _animations.Count; i++)
-            {
-                if (!_animations.ContainsKey(i))
-                    continue;
-
-                var data = _animations[i].FrameData;
-
-                temp += data;
-            }
-
-            return temp;
-        }
-        */
 
         public FrameIndex MoveAnimation(FrameIndex currentKeyframe,
                     FrameIndex newKeyframe)

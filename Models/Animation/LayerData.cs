@@ -7,14 +7,14 @@ namespace HunterCombatMR.Models.Animation
 {
     public static class LayerDataParameters
     {
-        public const int Alpha = 1;
+        public const int Alpha = 0;
         public const int DepthOverride = 7;
-        public const int Orientation = 6;
-        public const int PositionX = 2;
-        public const int PositionY = 3;
-        public const int Rotation = 4;
-        public const int SheetFrame = 5;
-        public const int Visible = 0;
+        public const int Orientation = 5;
+        public const int PositionX = 1;
+        public const int PositionY = 2;
+        public const int Rotation = 3;
+        public const int SheetFrame = 4;
+        public const int Scale = 6;
     }
 
     public class LayerData
@@ -28,6 +28,7 @@ namespace HunterCombatMR.Models.Animation
             SheetFrame = copy.SheetFrame;
             Orientation = copy.Orientation;
             Alpha = copy.Alpha;
+            Scale = copy.Scale;
         }
 
         /// <summary>
@@ -42,6 +43,7 @@ namespace HunterCombatMR.Models.Animation
             Orientation = (SpriteEffects)Enum.Parse(typeof(SpriteEffects), infoArray[LayerDataParameters.Orientation]);
             Alpha = float.Parse(infoArray[LayerDataParameters.Alpha]);
             DepthOverride = string.IsNullOrEmpty(infoArray[LayerDataParameters.DepthOverride]) ? null : new int?(int.Parse(infoArray[LayerDataParameters.DepthOverride]));
+            Scale = float.Parse(infoArray[LayerDataParameters.Scale]);
         }
 
         public LayerData(LayerFrameInfo legacy)
@@ -52,6 +54,7 @@ namespace HunterCombatMR.Models.Animation
             SheetFrame = legacy.SpriteFrame;
             Orientation = legacy.SpriteOrientation;
             Alpha = 255f;
+            Scale = 1f;
         }
 
         /// <summary>
@@ -86,6 +89,8 @@ namespace HunterCombatMR.Models.Animation
         /// </summary>
         public int SheetFrame { get; set; }
 
+        public float Scale { get; set; } = 1f;
+
         public string[] Save()
                     => new string[]
             {
@@ -95,6 +100,7 @@ namespace HunterCombatMR.Models.Animation
                 Rotation.ToString(),
                 SheetFrame.ToString(),
                 Orientation.ToString(),
+                Scale.ToString(),
                 DepthOverride?.ToString() ?? null
             };
     }

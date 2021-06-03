@@ -1,7 +1,10 @@
-﻿namespace HunterCombatMR.Interfaces
+﻿using HunterCombatMR.Models;
+using System.Collections.Generic;
+
+namespace HunterCombatMR.Interfaces
 {
-    public interface IAnimatedEntity<T> where T : IAnimationController
+    public interface IAnimatedEntity
     {
-        T AnimationController { get; }
+        SortedList<FrameIndex, IKeyFrameData> AnimatorKeyFrameData { get; }
     }
 }

@@ -10,9 +10,19 @@ namespace HunterCombatMR.Models.Action
     {
         private IEnumerable<TaggedEvent<T>> _events;
 
+        public ActionEvents()
+        {
+            _events = new List<TaggedEvent<T>>();
+        }
+
         public ActionEvents(ActionEvents<T> copy)
         {
-            _events = new List<TaggedEvent<T>>(copy._events);
+            _events = new List<TaggedEvent<T>>();
+
+            foreach (var actionEvent in copy._events)
+            {
+                AddKeyframeEvent(actionEvent.Event, actionEvent.Tag.StartKeyframe);
+            }
         }
 
         public void AddKeyframeEvent(Event<T> keyframeEvent,

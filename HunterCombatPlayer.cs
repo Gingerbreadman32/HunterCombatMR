@@ -15,7 +15,7 @@ namespace HunterCombatMR
 {
     public class HunterCombatPlayer
         : ModPlayer,
-        IAnimatedEntity<PlayerAnimationController>
+        IAnimationControlled<PlayerAnimationController>
     {
         private WeaponBase _equippedWeapon;
         private bool _showDefaultLayers = true;
@@ -45,7 +45,7 @@ namespace HunterCombatMR
         public IDictionary<string, Vector2> LayerPositions { get; set; }
         public PlayerStateController StateController { get; private set; }
 
-        PlayerAnimationController IAnimatedEntity<PlayerAnimationController>.AnimationController => throw new NotImplementedException();
+        PlayerAnimationController IAnimationControlled<PlayerAnimationController>.AnimationController => throw new NotImplementedException();
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {

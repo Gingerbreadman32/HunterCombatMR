@@ -639,7 +639,7 @@ namespace HunterCombatMR.UI
             FrameLength newLength = amount + keyFrame.FrameLength;
 
             EditorUtils.EditingAnimation.Layers[currentKeyframeIndex].Frames = newLength;
-            animator.Initialize(EditorUtils.EditingAnimation.Layers.FrameData);
+            animator.Initialize(EditorUtils.EditingAnimation.Layers.FrameData.Values);
             animator.CurrentFrame = keyFrame.StartingFrameIndex;
         }
 

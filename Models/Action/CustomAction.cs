@@ -11,8 +11,10 @@ namespace HunterCombatMR.Models.Action
         IDisplayNamed,
         ICustomAction<T>
     {
+        private readonly SortedList<FrameIndex, KeyFrameData<ActionAnimationKeyframe>> _frameData;
+
         public CustomAction(string name,
-                    string displayName = "")
+            string displayName = "")
             : base(name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -21,25 +23,26 @@ namespace HunterCombatMR.Models.Action
             DisplayName = string.IsNullOrEmpty(displayName) ? name : displayName;
             Animations = new ActionAnimations();
             Events = new ActionEvents<T>();
-            FrameData = new SortedList<FrameIndex, KeyFrameData<ICustomAnimationV2>>();
+            _frameData = new SortedList<FrameIndex, KeyFrameData<ActionAnimationKeyframe>>();
         }
 
         public CustomAction(string name,
             ICustomAction<T> copy)
+            : base(copy.InternalName)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Action name must not be blank!");
 
-            DisplayName = string.IsNullOrEmpty(displayName) ? name : displayName;
-            Animations = new ActionAnimations();
+            DisplayName = copy.DisplayName;
+            Animations = new ActionAnimations(copy.Animations);
             Events = new ActionEvents<T>(copy.Events);
-            FrameData = copy.FrameData;
+            _frameData = new SortedList<FrameIndex, KeyFrameData<ActionAnimationKeyframe>>(copy.FrameData);
         }
 
         public ActionAnimations Animations { get; }
-        public string DisplayName { get; }
+        public string DisplayName { get; set; }
         public ActionEvents<T> Events { get; }
-        public SortedList<FrameIndex, KeyFrameData<ICustomAnimationV2>> FrameData { get; }
+        public SortedList<FrameIndex, KeyFrameData<ActionAnimationKeyframe>> FrameData => _frameData;
 
         public void ActionLogic(T entity,
             Animator animator)
@@ -51,8 +54,8 @@ namespace HunterCombatMR.Models.Action
         }
 
         public override IHunterCombatContentInstance CreateNew(string internalName)
-        {
-            throw new NotImplementedException();
-        }
+            => new CustomAction<T>(internalName, this);
+
+        // Create frame data from ordered animations
     }
 }

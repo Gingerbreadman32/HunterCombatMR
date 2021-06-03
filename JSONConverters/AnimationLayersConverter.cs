@@ -36,14 +36,14 @@ namespace HunterCombatMR.JSONConverters
             (
                 lVal.FrameData.Select(x =>
                 new JObject {
-                    { "FrameLength", x.Value.Frames.Value },
+                    { "Length", x.Value.Frames.Value },
                     { 
-                        "Layers", 
-                        JObject.FromObject(lVal.GetOrderedActiveLayerData(x.Key).ToDictionary(y => y.Layer.Name, y => JArray.FromObject(y.FrameData, tempFormat)), serializer) 
+                        "Data", 
+                        JObject.FromObject(lVal.GetOrderedActiveLayerData(x.Key).ToDictionary(y => y.Layer.Name, y => JToken.FromObject(y.FrameData, tempFormat)), tempFormat) 
                     }
                 })
             );
-            var jObject = new JObject { { "LayerReferences", layers }, { "FrameData", frames } };
+            var jObject = new JObject { { "References", layers }, { "FrameData", frames } };
             jObject.WriteTo(writer, serializer.Converters.ToArray());
         }
     }
