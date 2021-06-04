@@ -207,7 +207,7 @@ namespace HunterCombatMR.AttackEngine.Models
                 return;
             }
 
-            _actionAnimator.Initialize(CurrentAction.Attack.FrameData.Values);
+            _actionAnimator.Initialize(CurrentAction.Attack.Animations.FrameData.Values);
         }
     }
 }

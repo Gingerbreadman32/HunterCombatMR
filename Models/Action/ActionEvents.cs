@@ -1,14 +1,14 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace HunterCombatMR.Models.Action
 {
-    public class ActionEvents<T> :
-        ICompact<KeyValuePair<string, bool>>
+    public class ActionEvents<T>
     {
         private IEnumerable<TaggedEvent<T>> _events;
+
+        private IEnumerable<string> _eventTriggers;
 
         public ActionEvents()
         {
@@ -41,16 +41,6 @@ namespace HunterCombatMR.Models.Action
         public IEnumerable<Event<T>> GetActiveTags(FrameIndex keyframe)
         {
             return _events.Where(x => x.IsEnabled && x.Tag.IsActive(keyframe)).Select(x => x.Event);
-        }
-
-        public ICompact<KeyValuePair<string, bool>> Load(KeyValuePair<string, bool>[] arrayValue)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public KeyValuePair<string, bool>[] Save()
-        {
-            throw new System.NotImplementedException();
         }
 
         private void AddEvent(Event<T> @event, EventTag tag)

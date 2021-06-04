@@ -100,9 +100,9 @@ namespace HunterCombatMR.UI
             Layers = layers;
             var highlighted = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
 
-            if (highlighted.Count() == 1 && layers.Any(x => x.LayerRef.Layer.Name.Equals(highlighted.FirstOrDefault())))
+            if (highlighted.Count() == 1 && layers.Any(x => x.LayerRef.Layer.ReferenceName.Equals(highlighted.FirstOrDefault())))
             {
-                var selected = layers.FirstOrDefault(y => y.LayerRef.Layer.Name.Equals(highlighted.FirstOrDefault()));
+                var selected = layers.FirstOrDefault(y => y.LayerRef.Layer.ReferenceName.Equals(highlighted.FirstOrDefault()));
                 var currentKeyFrame = Player.AnimationController.Animator;
                 if (!_popUps.Any(x => x.AttachedElement == selected))
                 {
@@ -116,7 +116,7 @@ namespace HunterCombatMR.UI
                         };
                     _popUps.Add(upButton);
 
-                    var enableButton = new PopUpButton((selected.LayerRef.Layer.Name != null) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
+                    var enableButton = new PopUpButton((selected.LayerRef.Layer.ReferenceName != null) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
                     enableButton.OnClick += (evt, list) =>
                     {
                         //selected.Layer.ToggleVisibility(currentKeyFrame);

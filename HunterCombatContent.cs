@@ -6,6 +6,7 @@ using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Action;
 using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
 using HunterCombatMR.Seeds.Attacks;
 using HunterCombatMR.Services;
 using System;

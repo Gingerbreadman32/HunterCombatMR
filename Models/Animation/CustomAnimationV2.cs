@@ -1,10 +1,9 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Animation;
-using HunterCombatMR.Models.Animation;
 using Newtonsoft.Json;
 
-namespace HunterCombatMR.Models
+namespace HunterCombatMR.Models.Animation
 {
     public class CustomAnimationV2
         : HunterCombatContentInstance,
@@ -41,6 +40,8 @@ namespace HunterCombatMR.Models
 
         public LoopStyle DefaultLoopStyle { get; set; }
         public AnimationLayers Layers { get; set; }
+
+        public string ReferenceName => InternalName;
 
         public override IHunterCombatContentInstance CreateNew(string internalName)
             => new CustomAnimationV2(internalName, this);

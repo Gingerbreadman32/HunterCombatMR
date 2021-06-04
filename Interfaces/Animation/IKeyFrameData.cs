@@ -1,6 +1,6 @@
 ﻿namespace HunterCombatMR.Models
 {
-    public interface IKeyFrameData
+    public interface IKeyframeData
     {
         FrameLength Frames { get; set; }
     }

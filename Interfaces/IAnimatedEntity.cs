@@ -5,6 +5,6 @@ namespace HunterCombatMR.Interfaces
 {
     public interface IAnimatedEntity
     {
-        SortedList<FrameIndex, IKeyFrameData> AnimatorKeyFrameData { get; }
+        SortedList<FrameIndex, IKeyframeData> AnimatorKeyFrameData { get; }
     }
 }

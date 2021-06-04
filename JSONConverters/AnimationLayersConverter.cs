@@ -1,11 +1,9 @@
-﻿using HunterCombatMR.Models.Animation;
+﻿using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HunterCombatMR.JSONConverters
 {
@@ -24,7 +22,7 @@ namespace HunterCombatMR.JSONConverters
             {
                 throw new JsonReaderException("Animation Layers entry is not an object!");
             }
-            return new AnimationLayers();
+            return new KeyframeDataCollection<Layer, LayerData>();
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -32,14 +30,14 @@ namespace HunterCombatMR.JSONConverters
             var lVal = (AnimationLayers)value;
             var layers = new JArray { lVal.Values.Select(x => JObject.FromObject(x, serializer)) };
             var tempFormat = JsonSerializer.Create(new JsonSerializerSettings() { Formatting = Formatting.None, Converters = serializer.Converters });
-            var frames = new JArray 
+            var frames = new JArray
             (
                 lVal.FrameData.Select(x =>
                 new JObject {
                     { "Length", x.Value.Frames.Value },
-                    { 
-                        "Data", 
-                        JObject.FromObject(lVal.GetOrderedActiveLayerData(x.Key).ToDictionary(y => y.Layer.Name, y => JToken.FromObject(y.FrameData, tempFormat)), tempFormat) 
+                    {
+                        "Data",
+                        JObject.FromObject(lVal.GetOrderedActiveLayerData(x.Key).ToDictionary(y => y.Layer.ReferenceName, y => JToken.FromObject(y.FrameData, tempFormat)), tempFormat)
                     }
                 })
             );

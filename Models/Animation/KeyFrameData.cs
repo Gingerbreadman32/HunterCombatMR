@@ -3,19 +3,19 @@ using System.Collections.Generic;
 
 namespace HunterCombatMR.Models
 {
-    public class KeyFrameData<T>
+    public class KeyframeData<T>
         : IDictionary<string, T>, 
-        IKeyFrameData where T : class
+        IKeyframeData where T : class
     {
         private IDictionary<string, T> _data;
 
-        public KeyFrameData(FrameLength frames)
+        public KeyframeData(FrameLength frames)
         {
             Frames = frames;
             _data = new Dictionary<string, T>();
         }
 
-        public KeyFrameData(FrameLength frames,
+        public KeyframeData(FrameLength frames,
             IDictionary<string, T> data)
         {
             Frames = frames;
