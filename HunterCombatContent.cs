@@ -17,7 +17,7 @@ namespace HunterCombatMR
 {
     public sealed class HunterCombatContent
     {
-        private const int _animationNameMax = 64;
+        private const int _animationNameMax = 72;
 
         private readonly Type[] _animationMap = new Type[] { typeof(PlayerAnimation),
             typeof(ProjectileAnimation) };
@@ -45,8 +45,8 @@ namespace HunterCombatMR
         public T GetContentInstance<T>(T instance) where T : IHunterCombatContentInstance
             => (T)_contentStream[typeof(T)].FirstOrDefault(x => x.Equals(instance));
 
-        public IEnumerable<T> GetContentList<T>() where T : HunterCombatContentInstance
-            => _contentStream[typeof(T)].Select(x => x as T);
+        public IEnumerable<T> GetContentList<T>() where T : IHunterCombatContentInstance
+            => _contentStream[typeof(T)].Select(x => (T)x);
 
         public bool LoadAnimationFile(AnimationType animationType,
             string fileName,
@@ -158,15 +158,9 @@ namespace HunterCombatMR
         // seperate from the internal ones as well.
         private void LoadAnimations(IEnumerable<AnimationType> typesToLoad)
         {
-            var actions = _fileManager.LoadAnimations(AnimationType.Player, typeof(PlayerAnimation));
-            _contentStream.Add(typeof(PlayerAnimation), new List<IHunterCombatContentInstance>(_animationLoader.RegisterAnimations(actions)));
-            _contentStream.Add(typeof(ICustomAnimationV2), new List<IHunterCombatContentInstance>());
-            foreach (var action in actions)
-            {
-                var V2 = new CustomAnimationV2(action);
-                _contentStream[typeof(ICustomAnimationV2)].Add(V2);
-                _fileManager.SaveAnimation(V2, true);
-            }
+            //var actions = _fileManager.LoadAnimations(AnimationType.Player, typeof(PlayerAnimation));
+            //_contentStream.Add(typeof(PlayerAnimation), new List<IHunterCombatContentInstance>(_animationLoader.RegisterAnimations(actions)));
+            _contentStream.Add(typeof(ICustomAnimationV2), new List<IHunterCombatContentInstance>(_fileManager.LoadAnimations()));
         }
 
         private void LoadAttacks()

@@ -10,10 +10,10 @@ namespace HunterCombatMR.Models.Animation
         ICustomAnimationV2
     {
         [JsonConstructor]
-        public CustomAnimationV2(string name,
+        public CustomAnimationV2(string internalName,
             AnimationType type,
             AnimationLayers layers)
-            : base(name)
+            : base(internalName)
         {
             AnimationType = type;
             Layers = new AnimationLayers(layers);
@@ -41,6 +41,7 @@ namespace HunterCombatMR.Models.Animation
         public LoopStyle DefaultLoopStyle { get; set; }
         public AnimationLayers Layers { get; set; }
 
+        [JsonIgnore]
         public string ReferenceName => InternalName;
 
         public override IHunterCombatContentInstance CreateNew(string internalName)

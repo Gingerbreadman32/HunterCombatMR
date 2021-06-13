@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.Models
 {
@@ -15,11 +17,19 @@ namespace HunterCombatMR.Models
             _data = new Dictionary<string, T>();
         }
 
+        
         public KeyframeData(FrameLength frames,
             IDictionary<string, T> data)
         {
             Frames = frames;
             _data = new Dictionary<string, T>(data);
+        }
+
+        [JsonConstructor]
+        public KeyframeData(IEnumerable<KeyValuePair<string, T>> data)
+        {
+            Frames = FrameLength.One;
+            _data = data.ToDictionary(x => x.Key, x => x.Value);
         }
 
         public int Count => _data.Count;

@@ -9,11 +9,11 @@ namespace HunterCombatMR.Models.Animation
         : IKeyframeDataReference
     {
         [JsonConstructor]
-        public Layer(string name,
+        public Layer(string referenceName,
             int depth,
             TextureTag tag)
         {
-            ReferenceName = name ?? throw new ArgumentException("Layer name must be specified!");
+            ReferenceName = referenceName ?? throw new ArgumentException("Layer name must be specified!");
             Depth = depth;
             Tag = tag;
         }

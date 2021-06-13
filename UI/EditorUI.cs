@@ -532,9 +532,9 @@ namespace HunterCombatMR.UI
             LayerPanelUpdate(currentKeyFrame);
 
             // Animation List Window
-            foreach (var animation in HunterCombatMR.Instance.Content.GetContentList<PlayerAnimation>())
+            foreach (var animation in HunterCombatMR.Instance.Content.GetContentList<ICustomAnimationV2>())
             {
-                UIAutoScaleTextTextPanel<string> animationButton = new UIAutoScaleTextTextPanel<string>(animation.DisplayName)
+                UIAutoScaleTextTextPanel<string> animationButton = new UIAutoScaleTextTextPanel<string>(animation.InternalName)
                 {
                     TextColor = Color.White,
                     Width = new StyleDimension(-10f, 1f),

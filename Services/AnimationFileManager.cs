@@ -2,6 +2,7 @@
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
@@ -30,7 +31,9 @@ namespace HunterCombatMR.Services
 
         public AnimationFileManager()
         {
-            foreach (var converter in typeof(AnimationFileManager).Assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(JsonConverter)) && !x.IsAbstract))
+            var converters = typeof(AnimationFileManager).Assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(JsonConverter)) && !x.IsAbstract);
+
+            foreach (var converter in converters.Where(x => !x.IsGenericType))
             {
                 _serializerSettings.Converters.Add((JsonConverter)Activator.CreateInstance(converter));
             }
@@ -113,7 +116,23 @@ namespace HunterCombatMR.Services
             return action;
         }
 
-        public IEnumerable<ICustomAnimation> LoadAnimations(AnimationType animType, Type type)
+        public IEnumerable<ICustomAnimationV2> LoadAnimations()
+        {
+            var actions = new List<ICustomAnimationV2>();
+
+            var path = Path.Combine(_customFilePath, "Player", "V2");
+            if (!Directory.Exists(_customFilePath) || !Directory.Exists(path))
+            {
+                HunterCombatMR.Instance.StaticLogger.Warn($"No custom animation directory for animation type: Player");
+                return actions;
+            }
+
+            actions = LoadAnimationsExternal(path);
+
+            return actions;
+        }
+
+        public IEnumerable<ICustomAnimation> LoadLegacyAnimations(AnimationType animType, Type type)
         {
             var actions = new List<ICustomAnimation>();
             var assembly = Assembly.GetExecutingAssembly();
@@ -221,8 +240,8 @@ namespace HunterCombatMR.Services
             bool overwrite = false)
             => SavePlayerAnimation(anim, newName, overwrite, true);
 
-        private string CustomAnimationPath(string name,
-                                                                            AnimationType type)
+        private string CustomAnimationPath(string name, 
+            AnimationType type)
                 => Path.Combine(_customFilePath, type.ToString(), name + _fileType);
 
         private string InternalAnimationManifest(string name,
@@ -230,22 +249,27 @@ namespace HunterCombatMR.Services
                 => $"{_manifestPath}.{type.ToString()}.{name + _fileType}";
 
         private string InternalAnimationPath(string name,
-                    AnimationType type)
+            AnimationType type)
                 => Path.Combine(_internalFilePath, type.ToString(), name + _fileType);
 
-        private void LoadAnimationsExternal(List<ICustomAnimation> actions, string path, Type type)
+        private List<ICustomAnimationV2> LoadAnimationsExternal(string path)
         {
             var files = Directory.GetFiles(path);
+            var actions = new List<ICustomAnimationV2>();
 
             foreach (var file in files.Where(x => x.Contains(_fileType)))
             {
                 string json = File.ReadAllText(file);
-                var action = JsonConvert.DeserializeObject(json, type, _serializerSettings) as ICustomAnimation;
-                if (action != null && !actions.Any(x => x.DisplayName.Equals(action.DisplayName)))
+                var action = JsonConvert.DeserializeObject(json, typeof(CustomAnimationV2), _serializerSettings) as ICustomAnimationV2;
+                if (action != null && !actions.Any(x => x.InternalName.Equals(action.InternalName)))
+                {
                     actions.Add(action);
-                else
-                    HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {_fileType} file!");
+                    continue;
+                }
+                HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {_fileType} file or an animation already exists with that name!");
             }
+
+            return actions;
         }
 
         private void LoadAnimationsInternal(List<ICustomAnimation> actions, Assembly assembly, string resource, Type animType)
@@ -261,6 +285,21 @@ namespace HunterCombatMR.Services
                     else
                         HunterCombatMR.Instance.StaticLogger.Error($"{resource} is not a valid animation {_fileType} file!");
                 }
+            }
+        }
+
+        private void LoadLegacyAnimationsExternal(List<ICustomAnimation> actions, string path, Type type)
+        {
+            var files = Directory.GetFiles(path);
+
+            foreach (var file in files.Where(x => x.Contains(_fileType)))
+            {
+                string json = File.ReadAllText(file);
+                var action = JsonConvert.DeserializeObject(json, type, _serializerSettings) as ICustomAnimation;
+                if (action != null && !actions.Any(x => x.DisplayName.Equals(action.DisplayName)))
+                    actions.Add(action);
+                else
+                    HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {_fileType} file!");
             }
         }
 

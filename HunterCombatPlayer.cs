@@ -18,7 +18,6 @@ namespace HunterCombatMR
         IAnimationControlled<PlayerAnimationController>
     {
         private WeaponBase _equippedWeapon;
-        private bool _showDefaultLayers = true;
 
         public HunterCombatPlayer()
             : base()
@@ -49,38 +48,10 @@ namespace HunterCombatMR
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) || AnimationController == null)
                 return;
 
-            /* Gotta just rework this, broken for now
-            if (AnimationController.CurrentAnimation != null && AnimationController.Animator.CurrentKeyFrameIndex > 0)
-            {
-                _showDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
-                        AnimationController.Animator,
-                        AnimationController.Animator.CurrentKeyFrameIndex - 1,
-                        Color.White);
-            }
-            */
-
-            if (!_showDefaultLayers)
-                return;
-
-            string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
-                    "faceColor", "bodyColor", "legColor", "shirtColor", "underShirtColor",
-                    "pantsColor", "shoeColor", "upperArmorColor", "middleArmorColor",
-                    "lowerArmorColor" };
-
-            var properties = drawInfo.GetType().GetFields();
-
-            object temp = drawInfo;
-
-            // @@warn cache this, probably shouldn't be using reflection like this every frame
-            foreach (var prop in properties.Where(x => propertiesToChange.Contains(x.Name)))
-            {
-                prop.SetValue(temp, MakeTransparent((Color)prop.GetValue(temp), 30));
-            }
-
-            drawInfo = (PlayerDrawInfo)temp;
+            AnimationController.OnionSkinLogic(ref drawInfo);
         }
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
@@ -88,17 +59,7 @@ namespace HunterCombatMR
             if (AnimationController == null)
                 return;
 
-            if (!_showDefaultLayers || HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
-            {
-                foreach (PlayerLayer item in layers)
-                {
-                    item.visible = false;
-                }
-            }
-
-            layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
-
-            layers = AnimationController.DrawPlayerLayers(layers);
+            AnimationController.DrawPlayerLayers(layers);
         }
 
         public override void OnEnterWorld(Player player)
@@ -109,8 +70,6 @@ namespace HunterCombatMR
 
             if (player.whoAmI == Main.myPlayer)
                 HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
-
-            _showDefaultLayers = true;
 
             if (InputBuffers == null)
                 throw new Exception("Player's input buffer information not initialized!");
@@ -132,7 +91,6 @@ namespace HunterCombatMR
             {
                 ActuallyInWorld = false;
                 AnimationController.CurrentAnimation = null;
-                _showDefaultLayers = true;
             }
 
             base.PostSavePlayer();
@@ -187,14 +145,6 @@ namespace HunterCombatMR
                 ActiveProjectiles.Clear();
 
             InputBuffers.ResetBuffers();
-        }
-
-        private Color MakeTransparent(Color original,
-                                    byte amount)
-        {
-            var newColor = original;
-            newColor.A = amount;
-            return newColor;
         }
     }
 }

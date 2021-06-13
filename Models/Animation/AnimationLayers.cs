@@ -36,6 +36,12 @@ namespace HunterCombatMR.Models.Animation
             }
         }
 
+        public AnimationLayers(IEnumerable<Layer> references, SortedList<FrameIndex, KeyframeData<LayerData>> frameData)
+        {
+            _references = new List<Layer>(references);
+            _frameData = frameData;
+        }
+
         public LayerReference this[string layer, FrameIndex index]// @@warn
         {
             get => new LayerReference(this[layer], _frameData[index][layer], index, GetLayerDepth(layer, index));

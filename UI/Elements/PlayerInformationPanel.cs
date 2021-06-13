@@ -102,7 +102,7 @@ namespace HunterCombatMR.UI.Elements
                 : _noneText;
 
         private string AnimationText()
-            => Player.AnimationController != null
+            => Player.AnimationController.CurrentAnimation != null
                 ? $"{Player.AnimationController.CurrentAnimation.InternalName} - {Player.AnimationController.Animator.CurrentFrame}"
                 : _noneText;
 

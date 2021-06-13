@@ -1,13 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 
 namespace HunterCombatMR.Models.Animation
 {
     public struct TextureTag
     {
-        public TextureTag(string value,
+        [JsonConstructor]
+        public TextureTag(string name,
             Point size)
         {
-            Name = value;
+            Name = name;
             Size = size;
         }
 

@@ -37,13 +37,16 @@ namespace HunterCombatMR.Models.Animation
         /// <param name="infoArray">The array of parameters in order.</param>
         public LayerData(string[] infoArray)
         {
+            DepthOverride = null;
             Position = new Vector2(float.Parse(infoArray[LayerDataParameters.PositionX]), float.Parse(infoArray[LayerDataParameters.PositionY]));
             Rotation = float.Parse(infoArray[LayerDataParameters.Rotation]);
             SheetFrame = int.Parse(infoArray[LayerDataParameters.SheetFrame]);
             Orientation = (SpriteEffects)Enum.Parse(typeof(SpriteEffects), infoArray[LayerDataParameters.Orientation]);
             Alpha = float.Parse(infoArray[LayerDataParameters.Alpha]);
-            DepthOverride = string.IsNullOrEmpty(infoArray[LayerDataParameters.DepthOverride]) ? null : new int?(int.Parse(infoArray[LayerDataParameters.DepthOverride]));
             Scale = float.Parse(infoArray[LayerDataParameters.Scale]);
+
+            if (infoArray.Length > LayerDataParameters.DepthOverride)
+                DepthOverride = new int?(int.Parse(infoArray[LayerDataParameters.DepthOverride]));
         }
 
         public LayerData(LayerFrameInfo legacy)

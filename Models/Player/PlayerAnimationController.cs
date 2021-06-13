@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Extensions;
+﻿using HunterCombatMR.Enumerations;
+using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models.Animation;
@@ -17,6 +18,7 @@ namespace HunterCombatMR.Models.Player
         : IAnimationController
     {
         private ICustomAnimationV2 _currentAnimation;
+        private bool _showDefaultLayers = true;
 
         public PlayerAnimationController()
         {
@@ -24,6 +26,8 @@ namespace HunterCombatMR.Models.Player
         }
 
         public Animator Animator { get; }
+
+        public bool IsAnimationReady { get => (CurrentAnimation == null || !Animator.Initialized); }
 
         public ICustomAnimationV2 CurrentAnimation 
         { 
@@ -60,7 +64,15 @@ namespace HunterCombatMR.Models.Player
 
         public List<PlayerLayer> DrawPlayerLayers(List<PlayerLayer> layers)
         {
-            List<PlayerLayer> animLayers = layers;
+            if (!_showDefaultLayers || HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            {
+                foreach (PlayerLayer item in layers)
+                {
+                    item.visible = false;
+                }
+            }
+
+            layers.Where(x => x.Name.Contains("MiscEffects")).ToList().ForEach(x => x.visible = false);
 
             var currentFrame = Animator.CurrentKeyFrameIndex;
 
@@ -70,10 +82,51 @@ namespace HunterCombatMR.Models.Player
                 {
                     Main.playerDrawData.Add(CombatLimbDraw(drawInfo, TextureUtils.GetTextureFromTag(layer.Layer.Tag), layer.Layer.Tag.Size, layer.FrameData, Color.White));
                 });
-                animLayers.Add(newLayer);
+                layers.Add(newLayer);
             }
 
-            return animLayers;
+            return layers;
+        }
+
+        internal void OnionSkinLogic(ref PlayerDrawInfo drawInfo)
+        {
+            /* Gotta just rework this, broken for now
+            if (AnimationController.CurrentAnimation != null && AnimationController.Animator.CurrentKeyFrameIndex > 0)
+            {
+                _showDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
+                        AnimationController.Animator,
+                        AnimationController.Animator.CurrentKeyFrameIndex - 1,
+                        Color.White);
+            }
+            */
+
+            if (!_showDefaultLayers)
+                return;
+
+            string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
+                    "faceColor", "bodyColor", "legColor", "shirtColor", "underShirtColor",
+                    "pantsColor", "shoeColor", "upperArmorColor", "middleArmorColor",
+                    "lowerArmorColor" };
+
+            var properties = drawInfo.GetType().GetFields();
+
+            object temp = drawInfo;
+
+            // @@warn cache this, probably shouldn't be using reflection like this every frame
+            foreach (var prop in properties.Where(x => propertiesToChange.Contains(x.Name)))
+            {
+                prop.SetValue(temp, MakeTransparent((Color)prop.GetValue(temp), 30));
+            }
+
+            drawInfo = (PlayerDrawInfo)temp;
+        }
+
+        private Color MakeTransparent(Color original,
+                                    byte amount)
+        {
+            var newColor = original;
+            newColor.A = amount;
+            return newColor;
         }
     }
 }

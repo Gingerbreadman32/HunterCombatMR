@@ -1,7 +1,7 @@
 ﻿using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Utilities;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace HunterCombatMR.Models.Action
 {
@@ -15,6 +15,18 @@ namespace HunterCombatMR.Models.Action
         public ActionAnimations(ActionAnimations copy)
             : base(copy)
         { }
+
+        public ActionAnimations(IEnumerable<string> references, SortedList<FrameIndex, KeyframeData<AnimationData>> frameData)
+        {
+            _references = new List<ICustomAnimationV2>();
+
+            foreach (var name in references)
+            {
+                AddAnimation(name);
+            }
+
+            _frameData = frameData;
+        }
 
         public void AddAnimation(string animationName)
         {
