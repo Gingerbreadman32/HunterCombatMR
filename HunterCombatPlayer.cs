@@ -48,17 +48,11 @@ namespace HunterCombatMR
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) || AnimationController == null)
-                return;
-
             AnimationController.OnionSkinLogic(ref drawInfo);
         }
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
-            if (AnimationController == null)
-                return;
-
             AnimationController.DrawPlayerLayers(layers);
         }
 
@@ -115,7 +109,7 @@ namespace HunterCombatMR
 
         public override bool PreItemCheck()
         {
-            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+            if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) || EquippedWeapon != null)
             {
                 if (player.itemTime > 0)
                     player.itemTime = 0;

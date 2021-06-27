@@ -27,7 +27,7 @@ namespace HunterCombatMR.Models.Player
 
         public Animator Animator { get; }
 
-        public bool IsAnimationReady { get => (CurrentAnimation == null || !Animator.Initialized); }
+        public bool IsAnimationReady { get => (CurrentAnimation != null && Animator.Initialized); }
 
         public ICustomAnimationV2 CurrentAnimation 
         { 
@@ -64,6 +64,9 @@ namespace HunterCombatMR.Models.Player
 
         public List<PlayerLayer> DrawPlayerLayers(List<PlayerLayer> layers)
         {
+            if (!IsAnimationReady)
+                return layers;
+
             if (!_showDefaultLayers || HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
                 foreach (PlayerLayer item in layers)
@@ -100,7 +103,7 @@ namespace HunterCombatMR.Models.Player
             }
             */
 
-            if (!_showDefaultLayers)
+            if (!_showDefaultLayers || !IsAnimationReady || HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
                 return;
 
             string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
