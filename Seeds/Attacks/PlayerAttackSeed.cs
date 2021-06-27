@@ -1,6 +1,5 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Events;
-using HunterCombatMR.Extensions;
 using HunterCombatMR.Models;
 using HunterCombatMR.Models.Action;
 
@@ -13,7 +12,7 @@ namespace HunterCombatMR.Seeds.Attacks
             int activeFrame = 0,
             int recoveryFrame = 0)
         {
-            var action = new CustomAction<HunterCombatPlayer>(internalName, displayName);
+            var action = new CustomAction<HunterCombatPlayer>(internalName, internalName, displayName);
 
             action.Animations.AddAnimation(internalName);
 

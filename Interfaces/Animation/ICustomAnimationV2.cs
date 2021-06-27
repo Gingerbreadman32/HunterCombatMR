@@ -10,5 +10,7 @@ namespace HunterCombatMR.Interfaces.Animation
         AnimationType AnimationType { get; }
         LoopStyle DefaultLoopStyle { get; set; }
         AnimationLayers Layers { get; }
+
+        int TotalFrames { get; }
     }
 }

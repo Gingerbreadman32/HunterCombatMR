@@ -66,6 +66,18 @@ namespace HunterCombatMR.Models
             Add(item.Key, item.Value);
         }
 
+        public virtual void AddToKeyframe(FrameIndex keyFrame,
+            string referenceName,
+            TData data)
+        {
+            if (this[keyFrame] == null)
+            {
+                throw new Exception("No keyframe exists here, use AddKeyframe instead.");
+            }
+
+            this[keyFrame].Add(referenceName, data);
+        }
+
         public void Clear()
         {
             _references.Clear();

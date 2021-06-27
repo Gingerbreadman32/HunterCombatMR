@@ -25,6 +25,14 @@ namespace HunterCombatMR.Models
             _data = new Dictionary<string, T>(data);
         }
 
+        public KeyframeData(FrameLength frames,
+            string reference,
+            T data)
+        {
+            Frames = frames;
+            _data = new Dictionary<string, T>() { { reference, data } };
+        }
+
         [JsonConstructor]
         public KeyframeData(IEnumerable<KeyValuePair<string, T>> data)
         {

@@ -45,6 +45,8 @@ namespace HunterCombatMR.Models.Animation
         [JsonIgnore]
         public string ReferenceName => InternalName;
 
+        public int TotalFrames { get => Layers.FrameData.Values.Sum(x => x.Frames); }
+
         public override IContent CreateNew(string internalName)
             => new CustomAnimationV2(internalName, this);
     }
