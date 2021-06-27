@@ -26,7 +26,7 @@ namespace HunterCombatMR.AttackEngine.MoveSets
         {
         }
 
-        public override IHunterCombatContentInstance CreateNew(string internalName)
+        public override IContent CreateNew(string internalName)
             => new SwordAndShieldMoveSet();
 
         protected override IEnumerable<ComboAction> PopulateDefaultActions()

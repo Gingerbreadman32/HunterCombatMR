@@ -24,7 +24,7 @@ namespace HunterCombatMR.Models
 
         public override AnimationType AnimationType => AnimationType.Projectile;
 
-        public override IHunterCombatContentInstance CreateNew(string internalName)
+        public override IContent CreateNew(string internalName)
             => new ProjectileAnimation(this, internalName);
     }
 }

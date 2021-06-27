@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace HunterCombatMR.Interfaces
 {
     public interface ICustomAnimation
-        : IHunterCombatContentInstance
+        : IContent
     {
         [JsonIgnore]
         Animator AnimationData { get; }

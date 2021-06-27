@@ -12,10 +12,10 @@ namespace HunterCombatMR.Utilities
 {
     public static class ContentUtils
     {
-        public static T Get<T>(string name) where T : IHunterCombatContentInstance
+        public static T Get<T>(string name) where T : IContent
                     => (T)GetInstance<T>(name).CreateNew(name);
 
-        public static bool TryGet<T>(string name, out T instance) where T : IHunterCombatContentInstance
+        public static bool TryGet<T>(string name, out T instance) where T : IContent
         {
             bool exists = HunterCombatMR.Instance.Content.CheckContentInstanceByName<T>(name);
             instance = default(T);
@@ -41,7 +41,7 @@ namespace HunterCombatMR.Utilities
         /// <remarks>
         /// ONLY use this for modification, otherwise use GetNew.
         /// </remarks>
-        internal static T GetInstance<T>(string name) where T : IHunterCombatContentInstance
+        internal static T GetInstance<T>(string name) where T : IContent
             => HunterCombatMR.Instance.Content.GetContentInstance<T>(name);
 
         internal static FileSaveStatus SaveAnimation(ICustomAnimationV2 modifiedInstance)

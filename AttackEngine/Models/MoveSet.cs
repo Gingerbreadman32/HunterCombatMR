@@ -7,7 +7,7 @@ using System.Linq;
 namespace HunterCombatMR.AttackEngine.Models
 {
     public abstract class MoveSet
-        : HunterCombatContentInstance, 
+        : Content, 
         IMoveSet
     {
         #region Public Constructors

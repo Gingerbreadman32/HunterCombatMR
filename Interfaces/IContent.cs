@@ -1,10 +1,10 @@
 ﻿namespace HunterCombatMR.Interfaces
 {
-    public interface IHunterCombatContentInstance
+    public interface IContent
     {
         string InternalName { get; }
 
         bool IsStoredInternally { get; }
-        IHunterCombatContentInstance CreateNew(string internalName);
+        IContent CreateNew(string internalName);
     }
 }

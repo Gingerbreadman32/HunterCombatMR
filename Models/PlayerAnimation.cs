@@ -16,7 +16,7 @@ namespace HunterCombatMR.Models
     public class PlayerAnimation
         : CustomAnimation,
         IPlayerAnimation,
-        IHunterCombatContentInstance
+        IContent
     {
         [JsonConstructor]
         public PlayerAnimation(string name,
@@ -63,7 +63,7 @@ namespace HunterCombatMR.Models
             return value;
         }
 
-        public override IHunterCombatContentInstance CreateNew(string internalName)
+        public override IContent CreateNew(string internalName)
             => new PlayerAnimation(this, internalName);
 
         public List<PlayerLayer> DrawPlayerLayers(List<PlayerLayer> layers)

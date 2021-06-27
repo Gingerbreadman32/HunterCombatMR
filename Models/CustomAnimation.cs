@@ -8,7 +8,7 @@ using System.Linq;
 namespace HunterCombatMR.Models
 {
     public abstract class CustomAnimation
-        : HunterCombatContentInstance,
+        : Content,
         IDisplayNamed,
         IModifiable,
         ICustomAnimation

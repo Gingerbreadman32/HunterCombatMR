@@ -5,7 +5,7 @@ using System;
 namespace HunterCombatMR.Models.Action
 {
     public class CustomAction<T>
-        : HunterCombatContentInstance,
+        : Content,
         IDisplayNamed,
         ICustomAction<T>
     {
@@ -46,7 +46,7 @@ namespace HunterCombatMR.Models.Action
             }
         }
 
-        public override IHunterCombatContentInstance CreateNew(string internalName)
+        public override IContent CreateNew(string internalName)
             => new CustomAction<T>(internalName, this);
 
         // Create frame data from ordered animations

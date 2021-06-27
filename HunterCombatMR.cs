@@ -41,7 +41,7 @@ namespace HunterCombatMR
         }
 
         public static HunterCombatMR Instance { get; private set; }
-        public HunterCombatContent Content { get; private set; }
+        public ContentService Content { get; private set; }
         public AnimationEditor EditorInstance { get; private set; }
         public AnimationFileManager FileManager { get; private set; }
         public IEnumerable<Event<HunterCombatPlayer>> PlayerActionEvents { get; private set; }
@@ -54,7 +54,7 @@ namespace HunterCombatMR
         {
             StaticLogger = Logger;
             FileManager = new AnimationFileManager();
-            Content = new HunterCombatContent(FileManager);
+            Content = new ContentService(FileManager);
             CachingUtils.Initialize();
 
             if (!Main.dedServ)

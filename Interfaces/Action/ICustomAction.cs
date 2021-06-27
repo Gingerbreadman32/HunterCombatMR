@@ -4,7 +4,7 @@ using HunterCombatMR.Models.Action;
 namespace HunterCombatMR.Interfaces.Action
 {
     public interface ICustomAction<T>
-        : IHunterCombatContentInstance
+        : IContent
     {
         ActionAnimations Animations { get; }
         string DisplayName { get; }

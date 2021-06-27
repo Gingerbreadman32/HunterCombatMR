@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace HunterCombatMR.AttackEngine.Interfaces
 {
     public interface IMoveSet
-        : IHunterCombatContentInstance
+        : IContent
     {
         #region Public Properties
 

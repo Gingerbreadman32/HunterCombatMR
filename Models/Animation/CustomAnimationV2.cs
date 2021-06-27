@@ -2,11 +2,12 @@
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Animation;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace HunterCombatMR.Models.Animation
 {
     public class CustomAnimationV2
-        : HunterCombatContentInstance,
+        : Content,
         ICustomAnimationV2
     {
         [JsonConstructor]
@@ -44,7 +45,7 @@ namespace HunterCombatMR.Models.Animation
         [JsonIgnore]
         public string ReferenceName => InternalName;
 
-        public override IHunterCombatContentInstance CreateNew(string internalName)
+        public override IContent CreateNew(string internalName)
             => new CustomAnimationV2(internalName, this);
     }
 }

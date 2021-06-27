@@ -2,10 +2,10 @@
 
 namespace HunterCombatMR
 {
-    public abstract class HunterCombatContentInstance
-        : IHunterCombatContentInstance
+    public abstract class Content
+        : IContent
     {
-        public HunterCombatContentInstance(string internalName)
+        public Content(string internalName)
         {
             InternalName = internalName;
         }
@@ -14,6 +14,6 @@ namespace HunterCombatMR
 
         public bool IsStoredInternally { get; internal set; }
 
-        public abstract IHunterCombatContentInstance CreateNew(string internalName);
+        public abstract IContent CreateNew(string internalName);
     }
 }
