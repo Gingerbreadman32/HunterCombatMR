@@ -9,10 +9,6 @@ namespace HunterCombatMR.Models.Action
     public sealed class ActionAnimations
         : KeyframeDataCollection<ICustomAnimationV2, AnimationData>
     {
-        public ActionAnimations()
-            : base()
-        { }
-
         public ActionAnimations(string animationName)
             : base()
         {
@@ -56,12 +52,6 @@ namespace HunterCombatMR.Models.Action
 
             Add(animation);
             AddToKeyframe(setFrame, animationName, new AnimationData(animationName));
-        }
-
-        public override void AddToKeyframe(FrameIndex keyFrame, string referenceName, AnimationData data)
-        {
-            base.AddToKeyframe(keyFrame, referenceName, data);
-            this[keyFrame].Frames = _references.Max(x => x.TotalFrames);
         }
 
         public void SwitchAnimations(FrameIndex firstAnimationIndex,

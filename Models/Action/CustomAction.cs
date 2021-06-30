@@ -10,18 +10,6 @@ namespace HunterCombatMR.Models.Action
         ICustomAction<T>
     {
         public CustomAction(string name,
-            string displayName = "")
-            : base(name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Action name must not be blank!");
-
-            DisplayName = string.IsNullOrEmpty(displayName) ? name : displayName;
-            Animations = new ActionAnimations();
-            Events = new ActionEvents<T>();
-        }
-
-        public CustomAction(string name,
             string animation,
             string displayName = "")
             : base(name)
