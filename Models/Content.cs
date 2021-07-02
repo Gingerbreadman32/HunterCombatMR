@@ -1,6 +1,6 @@
 ﻿using HunterCombatMR.Interfaces;
 
-namespace HunterCombatMR
+namespace HunterCombatMR.Models
 {
     public abstract class Content
         : IContent
