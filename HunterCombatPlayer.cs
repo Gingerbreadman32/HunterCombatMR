@@ -22,14 +22,11 @@ namespace HunterCombatMR
         public HunterCombatPlayer()
             : base()
         {
-            ActiveProjectiles = new List<string>();
             InputBuffers = new PlayerBufferInformation();
-            LayerPositions = new Dictionary<string, Vector2>();
             StateController = new PlayerStateController(this);
             AnimationController = new PlayerAnimationController();
         }
 
-        public ICollection<string> ActiveProjectiles { get; set; }
         public bool ActuallyInWorld { get; private set; }
         public override bool CloneNewInstances => false;
         public PlayerAnimationController AnimationController { get; }
@@ -41,10 +38,7 @@ namespace HunterCombatMR
         }
 
         public PlayerBufferInformation InputBuffers { get; }
-        public IDictionary<string, Vector2> LayerPositions { get; set; }
         public PlayerStateController StateController { get; private set; }
-
-        PlayerAnimationController IAnimationControlled<PlayerAnimationController>.AnimationController => throw new NotImplementedException();
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
@@ -67,8 +61,6 @@ namespace HunterCombatMR
 
             if (InputBuffers == null)
                 throw new Exception("Player's input buffer information not initialized!");
-
-            ActiveProjectiles = new List<string>();
 
             InputBuffers.ResetBuffers();
         }
@@ -134,9 +126,6 @@ namespace HunterCombatMR
         {
             if (StateController.State != PlayerState.Dead)
                 StateController.State = PlayerState.Dead;
-
-            if (ActiveProjectiles.Any())
-                ActiveProjectiles.Clear();
 
             InputBuffers.ResetBuffers();
         }
