@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Utilities;
+using System.Collections.Generic;
 using Terraria.GameInput;
 
 namespace HunterCombatMR.Extensions
@@ -12,16 +13,25 @@ namespace HunterCombatMR.Extensions
             return attribute?.GetName() ?? "";
         }
 
+        private static bool CheckKeyStatus(ActionInputs comboInput,
+            IDictionary<string, bool> triggerSet)
+        {
+            bool result;
+            if (triggerSet.TryGetValue(GetGameCommand(comboInput), out result))
+                return false;
+            return result;
+        }
+
         public static bool IsMouse(this ActionInputs comboInput)
              => GetGameCommand(comboInput).ContainsIgnoreCase("mouse");
 
         public static bool IsPressed(this ActionInputs comboInput)
-                     => PlayerInput.Triggers.Current.KeyStatus[GetGameCommand(comboInput)];
+            => CheckKeyStatus(comboInput, PlayerInput.Triggers.Current.KeyStatus);
 
         public static bool JustPressed(this ActionInputs comboInput)
-             => PlayerInput.Triggers.JustPressed.KeyStatus[GetGameCommand(comboInput)];
+             => CheckKeyStatus(comboInput, PlayerInput.Triggers.JustPressed.KeyStatus);
 
         public static bool JustReleased(this ActionInputs comboInput)
-             => PlayerInput.Triggers.JustReleased.KeyStatus[GetGameCommand(comboInput)];
+             => CheckKeyStatus(comboInput, PlayerInput.Triggers.JustReleased.KeyStatus);
     }
 }

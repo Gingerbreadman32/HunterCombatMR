@@ -1,13 +1,13 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Items;
-using HunterCombatMR.Models;
+using HunterCombatMR.Models.Components;
+using HunterCombatMR.Models.Messages.InputSystem;
 using HunterCombatMR.Models.Player;
-using Microsoft.Xna.Framework;
-using System;
+using HunterCombatMR.Services;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -15,29 +15,30 @@ namespace HunterCombatMR
 {
     public class HunterCombatPlayer
         : ModPlayer,
-        IAnimationControlled<PlayerAnimationController>
+        IAnimationControlled<PlayerAnimationController>,
+        IModEntity
     {
         private WeaponBase _equippedWeapon;
+        private PlayerStateComponent _stateComponent;
 
         public HunterCombatPlayer()
             : base()
         {
-            InputBuffers = new PlayerBufferInformation();
             StateController = new PlayerStateController(this);
             AnimationController = new PlayerAnimationController();
+            _stateComponent = new PlayerStateComponent();
         }
 
-        public bool ActuallyInWorld { get; private set; }
-        public override bool CloneNewInstances => false;
         public PlayerAnimationController AnimationController { get; }
+        public override bool CloneNewInstances => false;
 
         public WeaponBase EquippedWeapon
         {
             get => _equippedWeapon;
-            set { _equippedWeapon = value; InputBuffers?.ResetBuffers(); }
+            set { _equippedWeapon = value; }
         }
 
-        public PlayerBufferInformation InputBuffers { get; }
+        public int Id => player.whoAmI;
         public PlayerStateController StateController { get; private set; }
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
@@ -52,30 +53,22 @@ namespace HunterCombatMR
 
         public override void OnEnterWorld(Player player)
         {
-            ActuallyInWorld = true;
-            InputBuffers.Initialize();
-            StateController.State = PlayerState.Neutral;
+            StateController.State = EntityWorldStatus.Neutral;
 
             if (player.whoAmI == Main.myPlayer)
                 HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
-
-            if (InputBuffers == null)
-                throw new Exception("Player's input buffer information not initialized!");
-
-            InputBuffers.ResetBuffers();
         }
 
         public override void OnRespawn(Player player)
         {
-            StateController.State = PlayerState.Neutral;
-            InputBuffers.ResetBuffers();
+            StateController.State = EntityWorldStatus.Neutral;
+            SystemManager.SendMessage(new InputResetMessage(player.whoAmI));
         }
 
         public override void PostSavePlayer()
         {
             if (Main.gameMenu)
             {
-                ActuallyInWorld = false;
                 AnimationController.CurrentAnimation = null;
             }
 
@@ -84,19 +77,17 @@ namespace HunterCombatMR
 
         public override void PostUpdate()
         {
-            if (Main.gameMenu || !ActuallyInWorld)
+            if (Main.gameMenu)
                 return;
 
-            InputBuffers.Update(StateController.State, player.mouseInterface);
             StateController.StateUpdate();
             StateController.EditorUpdate();
             AnimationController.Animator.Update();
-            StateController.PostUpdate();
         }
 
         public override void PostUpdateRunSpeeds()
         {
-            StateController.MountUpdate();
+            MountUpdate();
         }
 
         public override bool PreItemCheck()
@@ -107,14 +98,11 @@ namespace HunterCombatMR
                     player.itemTime = 0;
                 if (player.itemAnimation > 0)
                     player.itemAnimation = 0;
+
+                return false;
             }
 
             return base.PreItemCheck();
-        }
-
-        public override void PreUpdate()
-        {
-            StateController.PreUpdate();
         }
 
         public override void PreUpdateMovement()
@@ -124,10 +112,18 @@ namespace HunterCombatMR
 
         public override void UpdateDead()
         {
-            if (StateController.State != PlayerState.Dead)
-                StateController.State = PlayerState.Dead;
+            StateController.State = EntityWorldStatus.Dead;
 
-            InputBuffers.ResetBuffers();
+            SystemManager.SendMessage(new InputResetMessage(player.whoAmI));
+        }
+
+        private void MountUpdate()
+        {
+            if (StateController.CurrentAction == null)
+                return;
+
+            if (player.mount.Active)
+                player.mount.Dismount(player);
         }
     }
 }

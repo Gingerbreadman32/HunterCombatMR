@@ -1,4 +1,6 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Models.Messages.InputSystem;
+using HunterCombatMR.Services;
 using HunterCombatMR.Utilities;
 using Terraria;
 using Terraria.ModLoader;
@@ -42,7 +44,7 @@ namespace HunterCombatMR.Items
             else
                 Unequip(modPlayer);
 
-            modPlayer.InputBuffers.ResetBuffers();
+            SystemManager.SendMessage(new InputResetMessage(player.whoAmI));
         }
 
         public virtual void Unequip(HunterCombatPlayer player)

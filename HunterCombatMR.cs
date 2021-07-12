@@ -2,6 +2,7 @@ using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Services;
+using HunterCombatMR.Services.Systems;
 using HunterCombatMR.UI;
 using HunterCombatMR.UI.Elements;
 using HunterCombatMR.Utilities;
@@ -45,13 +46,13 @@ namespace HunterCombatMR
         public AnimationEditor EditorInstance { get; private set; }
         public AnimationFileManager FileManager { get; private set; }
         public IEnumerable<Event<HunterCombatPlayer>> PlayerActionEvents { get; private set; }
-        public bool VanillaBlockInput { get; set; }
 
         public Event<HunterCombatPlayer> GetPlayerActionEvent(string name)
             => PlayerActionEvents.FirstOrDefault(x => x.DisplayName.Equals(name));
 
         public override void Load()
         {
+            SystemManager.Initialize(GetSystems());
             StaticLogger = Logger;
             FileManager = new AnimationFileManager();
             Content = new ContentService(FileManager);
@@ -73,6 +74,15 @@ namespace HunterCombatMR
                 EditorUIPanels.SetState(PanelState);
                 EditorUIPopUp.SetState(PopUpState);
             }
+        }
+
+        private static IEnumerable<ModSystem> GetSystems()
+        {
+            var systemsList = new List<ModSystem>();
+
+            systemsList.Add(new InputSystem());
+
+            return systemsList;
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -108,6 +118,11 @@ namespace HunterCombatMR
             }
         }
 
+        public override void PostUpdateInput()
+        {
+            SystemManager.PostInputUpdate();
+        }
+
         public override void PostSetupContent()
         {
             Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
@@ -136,6 +151,8 @@ namespace HunterCombatMR
             CachingUtils.Uninitialize();
             EditorInstance?.Dispose();
             EditorInstance = null;
+
+            SystemManager.Dispose();
 
             Instance.EditorInstance?.Dispose();
             Instance = null;

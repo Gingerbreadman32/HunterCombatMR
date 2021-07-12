@@ -13,7 +13,7 @@ namespace HunterCombatMR.Models.Player
     {
         public ComboAction(ICustomAction<HunterCombatPlayer> attack,
             IEnumerable<ComboRoute> routes,
-            PlayerState state = PlayerState.Neutral,
+            EntityWorldStatus state = EntityWorldStatus.Neutral,
             string name = null)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
@@ -23,7 +23,7 @@ namespace HunterCombatMR.Models.Player
         }
 
         public ComboAction(ICustomAction<HunterCombatPlayer> attack,
-            PlayerState state = PlayerState.Neutral)
+            EntityWorldStatus state = EntityWorldStatus.Neutral)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
             DisplayName = Attack.DisplayName;
@@ -38,7 +38,7 @@ namespace HunterCombatMR.Models.Player
         /// <summary>
         /// What state the player needs to be in in order to perform the action.
         /// </summary>
-        public PlayerState PlayerStateRequired { get; set; }
+        public EntityWorldStatus PlayerStateRequired { get; set; }
 
         public IEnumerable<ComboRoute> Routes { get; set; }
 

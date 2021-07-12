@@ -1,27 +1,42 @@
 ﻿using HunterCombatMR.Enumerations;
+using HunterCombatMR.Extensions;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
-    public struct BufferedInput
+    public class BufferedInput
     {
-        private const int _defaultMaxFrameBuffer = 5;
+        private const int _defaultMaxFrameBuffer = 60;
 
-        public BufferedInput(ActionInputs input,
-            int framesBuffered = 0,
-            int maxBufferFrames = _defaultMaxFrameBuffer)
+        public BufferedInput()
         {
-            Input = input;
-            FramesSinceBuffered = framesBuffered;
-            MaximumBufferFrames = maxBufferFrames;
+            Input = ActionInputs.NoInput;
         }
 
+        public BufferedInput(ActionInputs input)
+        {
+            Input = input;
+        }
+
+        public int FramesHeld { get; set; }
         public int FramesSinceBuffered { get; set; }
         public ActionInputs Input { get; set; }
-        public int MaximumBufferFrames { get; set; }
+        public int MaximumBufferFrames { get => _defaultMaxFrameBuffer; }
 
-        public void AddFramestoBuffer(int amount)
+        public void Reset()
         {
-            FramesSinceBuffered += amount;
+            Input = ActionInputs.NoInput;
+            FramesHeld = 0;
+            FramesSinceBuffered = 0;
+        }
+
+        public void Update()
+        {
+            FramesSinceBuffered++;
+            if (Input.IsPressed())
+                FramesHeld++;
+
+            if (FramesSinceBuffered > MaximumBufferFrames)
+                Reset();
         }
     }
 }

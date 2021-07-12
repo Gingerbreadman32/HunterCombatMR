@@ -6,6 +6,9 @@ namespace HunterCombatMR.Utilities
     {
         public static bool GameInputNotAccepted()
             => Main.gameMenu || Main.gameInactive || Main.gamePaused || !Main.hasFocus
-                || Main.ingameOptionsWindow;
+                || Main.ingameOptionsWindow || Main.blockInput;
+
+        public static bool NoGameInputAllowed()
+            => Main.gameMenu || Main.gameInactive;
     }
 }

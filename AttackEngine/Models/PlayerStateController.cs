@@ -28,7 +28,7 @@ namespace HunterCombatMR.AttackEngine.Models
         public PlayerStateController(HunterCombatPlayer player)
         {
             _actionAnimator = new Animator();
-            State = PlayerState.Neutral;
+            State = EntityWorldStatus.Neutral;
             ActionState = AttackState.NotAttacking;
             Player = player;
             ActionHistory = new SortedList<int, string>();
@@ -67,7 +67,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public MovementInfo MovementInformation { get; }
         public HunterCombatPlayer Player { get; }
-        public PlayerState State { get; set; }
+        public EntityWorldStatus State { get; set; }
         public bool StateOverride { get; set; }
 
         public void StateUpdate()
@@ -83,11 +83,11 @@ namespace HunterCombatMR.AttackEngine.Models
                 return;
             }
 
-            // Get the next action if available
+            /* Get the next action if available
             CurrentAction = PlayerActionComboUtils.GetNextAvailableAction(this,
                 CurrentMoveSet,
                 Player.InputBuffers);
-
+            */
             // If no actions, stop animations and return
             if (CurrentAction == null)
             {
@@ -96,20 +96,6 @@ namespace HunterCombatMR.AttackEngine.Models
             }
 
             ActionLogic();
-        }
-
-        public void PostUpdate()
-        {
-            Main.blockInput = HunterCombatMR.Instance.VanillaBlockInput;
-        }
-
-        public void MountUpdate()
-        {
-            if (CurrentAction == null)
-                return;
-
-            if (Player.player.mount.Active)
-                Player.player.mount.Dismount(Player.player);
         }
 
         public void EditorUpdate()
@@ -139,16 +125,6 @@ namespace HunterCombatMR.AttackEngine.Models
             }
         }
 
-        public void PreUpdate()
-        {
-            HunterCombatMR.Instance.VanillaBlockInput = Main.blockInput;
-
-            if (CurrentAction == null)
-                return;
-
-            Main.blockInput = true;
-        }
-
         public void MovementUpdate()
         {
             if (CurrentAction != null)
@@ -174,7 +150,6 @@ namespace HunterCombatMR.AttackEngine.Models
             CurrentAction = null;
             Player.AnimationController.CurrentAnimation = null;
             ActionState = AttackState.NotAttacking;
-            Main.blockInput = HunterCombatMR.Instance.VanillaBlockInput;
         }
 
         private void FullStateReset()
@@ -186,14 +161,14 @@ namespace HunterCombatMR.AttackEngine.Models
                 ActionHistory.Clear();
         }
 
-        private PlayerState SetStateLogic(Player player)
+        private EntityWorldStatus SetStateLogic(Player player)
         {
-            PlayerState currentState = PlayerState.Dead;
+            EntityWorldStatus currentState = EntityWorldStatus.Dead;
 
             for (var s = 0; s < _vanillaStateEvaluations.Length; s++)
             {
                 if (_vanillaStateEvaluations[s].Invoke(player))
-                    currentState = (PlayerState)s;
+                    currentState = (EntityWorldStatus)s;
             }
 
             return currentState;

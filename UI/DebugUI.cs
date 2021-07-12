@@ -85,11 +85,12 @@ namespace HunterCombatMR.UI
 
             // Buffer Window
             _bufferList.Clear();
-            foreach (var buffer in Player.InputBuffers.BufferedComboInputs)
+            /* Create a message for this
+            foreach (var buffer in Player.InputBuffers.BufferedInputs)
             {
                 _bufferList.Add(new UIText($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered}"));
             }
-
+            */
             _modeSwitch.SetText(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription());
 
             base.Update(gameTime);
