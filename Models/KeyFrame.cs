@@ -63,7 +63,7 @@ namespace HunterCombatMR.Models
             {
                 HunterCombatMR
                     .Instance
-                    .StaticLogger
+                    .Logger
                     .Error($"Current animation frame {currentFrame} does not include keyframe that starts at {StartingFrameIndex}.");
                 return FrameIndex.Zero;
             }

@@ -1,5 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Models.Components;
+using HunterCombatMR.Services;
 using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
@@ -77,23 +79,28 @@ namespace HunterCombatMR.UI
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Player == null || Player != Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>())
             {
                 Player = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
                 _playerInfoPanel.SetPlayer(Player);
             }
 
-            // Buffer Window
-            _bufferList.Clear();
-            /* Create a message for this
-            foreach (var buffer in Player.InputBuffers.BufferedInputs)
-            {
-                _bufferList.Add(new UIText($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered}"));
-            }
-            */
             _modeSwitch.SetText(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription());
 
-            base.Update(gameTime);
+
+            // Buffer Window
+            _bufferList.Clear();
+            if (!SystemManager.HasComponent<InputComponent>(Player.EntityReference))
+                return;
+
+            var inputs = SystemManager.GetComponent<InputComponent>(Player.EntityReference).BufferedInputs;
+            
+            foreach (var buffer in inputs.ToArray())
+            {
+                _bufferList.Add(new UIText($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered} - {buffer.FramesHeld}", 0.5f));
+            }
         }
 
         internal void UpdateActiveLayers(IEnumerable<LayerText> layers)

@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 namespace HunterCombatMR.Utilities
 {
-    public static class CachingUtils
+    public static class GameCommandCache
     {
         private static ConcurrentDictionary<string, GameCommand> _commandCache;
 

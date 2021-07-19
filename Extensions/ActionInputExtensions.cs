@@ -9,7 +9,7 @@ namespace HunterCombatMR.Extensions
     {
         public static string GetGameCommand(this ActionInputs input)
         {
-            var attribute = CachingUtils.GetGameCommand(input.ToString());
+            var attribute = GameCommandCache.GetGameCommand(input.ToString());
             return attribute?.GetName() ?? "";
         }
 
@@ -17,7 +17,7 @@ namespace HunterCombatMR.Extensions
             IDictionary<string, bool> triggerSet)
         {
             bool result;
-            if (triggerSet.TryGetValue(GetGameCommand(comboInput), out result))
+            if (!triggerSet.TryGetValue(GetGameCommand(comboInput), out result))
                 return false;
             return result;
         }

@@ -77,7 +77,7 @@ namespace HunterCombatMR.Models
             {
                 if (!Initialized)
                 {
-                    HunterCombatMR.Instance?.StaticLogger.Warn($"Animator must be initialized to set flags.");
+                    HunterCombatMR.Instance?.Logger.Warn($"Animator must be initialized to set flags.");
                     _flags = AnimatorFlags.Locked;
                     return;
                 }
@@ -267,7 +267,7 @@ namespace HunterCombatMR.Models
         {
             if (!Initialized)
             {
-                HunterCombatMR.Instance.StaticLogger.Warn($"Animation Not Initialized");
+                HunterCombatMR.Instance.Logger.Warn($"Animation Not Initialized");
                 return;
             }
 

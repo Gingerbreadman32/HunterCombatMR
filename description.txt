@@ -1,1 +1,1 @@
-A "melee rework" of Terraria focusing on game feel and combos. Currently adds one weapon style: the Sword and Shield, which combines defensive parry mechanics with acrobatic attacks.
+A full animation and state-based entity system for Terraria.

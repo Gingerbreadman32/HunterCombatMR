@@ -9,28 +9,28 @@ using HunterCombatMR.Models.Player;
 using HunterCombatMR.Services;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace HunterCombatMR
 {
     public class HunterCombatPlayer
         : ModPlayer,
-        IAnimationControlled<PlayerAnimationController>,
-        IModEntity
+        IAnimationControlled<PlayerAnimationController>
     {
         private WeaponBase _equippedWeapon;
-        private PlayerStateComponent _stateComponent;
+        private IModEntity _entity;
 
         public HunterCombatPlayer()
             : base()
         {
             StateController = new PlayerStateController(this);
             AnimationController = new PlayerAnimationController();
-            _stateComponent = new PlayerStateComponent();
         }
 
         public PlayerAnimationController AnimationController { get; }
         public override bool CloneNewInstances => false;
+        public bool IsMainPlayer { get => player.whoAmI == Main.myPlayer; }
 
         public WeaponBase EquippedWeapon
         {
@@ -38,8 +38,14 @@ namespace HunterCombatMR
             set { _equippedWeapon = value; }
         }
 
-        public int Id => player.whoAmI;
+        public IModEntity EntityReference { get => _entity; }
+
         public PlayerStateController StateController { get; private set; }
+
+        public override void Initialize()
+        {
+            _entity = SystemManager.CreateEntity().WithComponent<EntityStateComponent>();
+        }
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {
@@ -54,15 +60,17 @@ namespace HunterCombatMR
         public override void OnEnterWorld(Player player)
         {
             StateController.State = EntityWorldStatus.Neutral;
-
-            if (player.whoAmI == Main.myPlayer)
-                HunterCombatMR.Instance.SetUIPlayer(player.GetModPlayer<HunterCombatPlayer>());
+            if (IsMainPlayer && Main.netMode == NetmodeID.SinglePlayer)
+            {
+                var component = SystemManager.RegisterComponent<InputComponent>(_entity);
+                component.Player = player.whoAmI;
+            }
         }
 
         public override void OnRespawn(Player player)
         {
             StateController.State = EntityWorldStatus.Neutral;
-            SystemManager.SendMessage(new InputResetMessage(player.whoAmI));
+            SystemManager.SendMessage(new InputResetMessage(_entity.Id));
         }
 
         public override void PostSavePlayer()
@@ -114,7 +122,7 @@ namespace HunterCombatMR
         {
             StateController.State = EntityWorldStatus.Dead;
 
-            SystemManager.SendMessage(new InputResetMessage(player.whoAmI));
+            SystemManager.SendMessage(new InputResetMessage(_entity.Id));
         }
 
         private void MountUpdate()

@@ -49,13 +49,13 @@ namespace HunterCombatMR.Services
 
             if (!Directory.Exists(Path.Combine(_customFilePath, type.ToString())))
             {
-                HunterCombatMR.Instance.StaticLogger.Warn($"No custom animation directory for animation type: {type.ToString()}");
+                HunterCombatMR.Instance.Logger.Warn($"No custom animation directory for animation type: {type.ToString()}");
                 return CustomAnimationFileExistStatus.TypeDirectoryMissing;
             }
 
             if (!File.Exists(CustomAnimationPath(name, type)))
             {
-                HunterCombatMR.Instance.StaticLogger.Warn($"Custom animation {name} does not exist!");
+                HunterCombatMR.Instance.Logger.Warn($"Custom animation {name} does not exist!");
                 return CustomAnimationFileExistStatus.FileMissing;
             }
 
@@ -80,7 +80,7 @@ namespace HunterCombatMR.Services
 
                 if (manifestStream == null)
                 {
-                    HunterCombatMR.Instance.StaticLogger.Warn($"{InternalAnimationManifest(fileName, type)} does not exist!");
+                    HunterCombatMR.Instance.Logger.Warn($"{InternalAnimationManifest(fileName, type)} does not exist!");
                     return null;
                 }
 
@@ -110,7 +110,7 @@ namespace HunterCombatMR.Services
 
             if (action == null)
             {
-                HunterCombatMR.Instance.StaticLogger.Error($"{fileName} is not a valid animation {_fileType} file!");
+                HunterCombatMR.Instance.Logger.Error($"{fileName} is not a valid animation {_fileType} file!");
             }
 
             return action;
@@ -123,7 +123,7 @@ namespace HunterCombatMR.Services
             var path = Path.Combine(_customFilePath, "Player", "V2");
             if (!Directory.Exists(_customFilePath) || !Directory.Exists(path))
             {
-                HunterCombatMR.Instance.StaticLogger.Warn($"No custom animation directory for animation type: Player");
+                HunterCombatMR.Instance.Logger.Warn($"No custom animation directory for animation type: Player");
                 return actions;
             }
 
@@ -140,7 +140,7 @@ namespace HunterCombatMR.Services
 
             if (manifestStream == null)
             {
-                HunterCombatMR.Instance.StaticLogger.Warn($"No animations found internally!");
+                HunterCombatMR.Instance.Logger.Warn($"No animations found internally!");
             }
 
             var manifestFolder = _manifestPath + "." + animType.ToString();
@@ -149,7 +149,7 @@ namespace HunterCombatMR.Services
 
             if (!typeStream.Any())
             {
-                HunterCombatMR.Instance.StaticLogger.Warn($"No animations of type {animType.ToString()} exist internally!");
+                HunterCombatMR.Instance.Logger.Warn($"No animations of type {animType.ToString()} exist internally!");
             }
 
             foreach (var resource in typeStream)
@@ -161,7 +161,7 @@ namespace HunterCombatMR.Services
             var path = Path.Combine(_customFilePath, animType.ToString());
             if (!Directory.Exists(_customFilePath) || !Directory.Exists(path))
             {
-                HunterCombatMR.Instance.StaticLogger.Warn($"No custom animation directory for animation type: {animType.ToString()}");
+                HunterCombatMR.Instance.Logger.Warn($"No custom animation directory for animation type: {animType.ToString()}");
                 return actions;
             }
 
@@ -191,7 +191,7 @@ namespace HunterCombatMR.Services
             catch (Exception ex)
             {
                 Main.NewText($"Error: Failed to save animation {anim.InternalName}! Check log for stacktrace.", Color.Red);
-                HunterCombatMR.Instance.StaticLogger.Error(ex.Message, ex);
+                HunterCombatMR.Instance.Logger.Error(ex.Message, ex);
                 return FileSaveStatus.Error;
             }
         }
@@ -266,7 +266,7 @@ namespace HunterCombatMR.Services
                     actions.Add(action);
                     continue;
                 }
-                HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {_fileType} file or an animation already exists with that name!");
+                HunterCombatMR.Instance.Logger.Error($"{file} is not a valid animation {_fileType} file or an animation already exists with that name!");
             }
 
             return actions;
@@ -283,7 +283,7 @@ namespace HunterCombatMR.Services
                     if (action != null)
                         actions.Add(action);
                     else
-                        HunterCombatMR.Instance.StaticLogger.Error($"{resource} is not a valid animation {_fileType} file!");
+                        HunterCombatMR.Instance.Logger.Error($"{resource} is not a valid animation {_fileType} file!");
                 }
             }
         }
@@ -299,7 +299,7 @@ namespace HunterCombatMR.Services
                 if (action != null && !actions.Any(x => x.DisplayName.Equals(action.DisplayName)))
                     actions.Add(action);
                 else
-                    HunterCombatMR.Instance.StaticLogger.Error($"{file} is not a valid animation {_fileType} file!");
+                    HunterCombatMR.Instance.Logger.Error($"{file} is not a valid animation {_fileType} file!");
             }
         }
 
@@ -332,7 +332,7 @@ namespace HunterCombatMR.Services
             {
                 status = FileSaveStatus.Error;
                 Main.NewText($"Error: Failed to save animation {action.DisplayName}! Check log for stacktrace.", Color.Red);
-                HunterCombatMR.Instance.StaticLogger.Error(ex.Message, ex);
+                HunterCombatMR.Instance.Logger.Error(ex.Message, ex);
             }
 
             return status;

@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Constants;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Animation;
@@ -81,7 +82,7 @@ namespace HunterCombatMR.Models.Player
 
             foreach (var layer in CurrentAnimation.Layers.GetOrderedActiveLayerData(currentFrame))
             {
-                var newLayer = new PlayerLayer(HunterCombatMR.ModName, layer.Layer.ReferenceName, delegate (PlayerDrawInfo drawInfo)
+                var newLayer = new PlayerLayer(ModConstants.ModName, layer.Layer.ReferenceName, delegate (PlayerDrawInfo drawInfo)
                 {
                     Main.playerDrawData.Add(CombatLimbDraw(drawInfo, TextureUtils.GetTextureFromTag(layer.Layer.Tag), layer.Layer.Tag.Size, layer.FrameData, Color.White));
                 });

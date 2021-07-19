@@ -2,11 +2,11 @@
 {
     public struct InputResetMessage
     {
-        public InputResetMessage(int player)
+        public InputResetMessage(int entityId)
         {
-            Player = player;
+            EntityId = entityId;
         }
 
-        public int Player { get; }
+        public int EntityId { get; }
     }
 }

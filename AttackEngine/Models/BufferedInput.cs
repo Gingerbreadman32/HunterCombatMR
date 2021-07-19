@@ -1,41 +1,46 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Models;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
     public class BufferedInput
     {
         private const int _defaultMaxFrameBuffer = 60;
-
-        public BufferedInput()
-        {
-            Input = ActionInputs.NoInput;
-        }
+        private bool _markedForDelete;
+        private bool _held;
+        private int _framesHeld;
+        private int _framesSinceBuffered;
+        private ActionInputs _input;
 
         public BufferedInput(ActionInputs input)
         {
-            Input = input;
+            _input = input;
+            _held = true;
         }
 
-        public int FramesHeld { get; set; }
-        public int FramesSinceBuffered { get; set; }
-        public ActionInputs Input { get; set; }
-        public int MaximumBufferFrames { get => _defaultMaxFrameBuffer; }
+        public int FramesHeld { get => _framesHeld; set { _framesHeld = value; } }
+        public int FramesSinceBuffered { get => _framesSinceBuffered; set { _framesSinceBuffered = value; } }
+        public ActionInputs Input { get => _input; }
+        public FrameLength MaximumBufferFrames { get => _defaultMaxFrameBuffer; }
+
+        public bool MarkedForDeletion { get => _markedForDelete; }
 
         public void Reset()
         {
-            Input = ActionInputs.NoInput;
-            FramesHeld = 0;
-            FramesSinceBuffered = 0;
+            _markedForDelete = true;
         }
 
         public void Update()
         {
             FramesSinceBuffered++;
-            if (Input.IsPressed())
+            if (Input.IsPressed() && _held)
                 FramesHeld++;
 
-            if (FramesSinceBuffered > MaximumBufferFrames)
+            if (!Input.IsPressed())
+                _held = false;
+
+            if (FramesSinceBuffered > MaximumBufferFrames && !_held)
                 Reset();
         }
     }

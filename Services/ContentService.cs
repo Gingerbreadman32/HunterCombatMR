@@ -57,7 +57,7 @@ namespace HunterCombatMR.Services
 
                 if (animation == null)
                 {
-                    HunterCombatMR.Instance.StaticLogger.Error($"Animation {fileName} failed to load!");
+                    HunterCombatMR.Instance.Logger.Error($"Animation {fileName} failed to load!");
                     return false;
                 }
 
@@ -132,8 +132,8 @@ namespace HunterCombatMR.Services
         {
             var animTypes = new List<AnimationType>() { AnimationType.Player, AnimationType.Projectile };
             LoadAnimations(animTypes);
-            LoadAttacks();
-            LoadMoveSets();
+            //LoadAttacks();
+            //LoadMoveSets();
         }
 
         private string DuplicateNameFormat(string name,
@@ -165,14 +165,14 @@ namespace HunterCombatMR.Services
         {
             var loadedAttacks = new List<ICustomAction<HunterCombatPlayer>>();
 
-            /* Seeding, add a dedicated method for this later
+            
             loadedAttacks.Add(PlayerAttackSeed
                 .CreateDefault("DoubleSlash", "Double Slash", 2, 6));
             loadedAttacks.Add(PlayerAttackSeed
                 .CreateDefault("RunningSlash", "Running Slash", 3, 5)
                 .WithEvent(new SetPlayerVelocityDirect(3, 0, true, 1), 0)
                 .WithEvent(new SetPlayerVelocityDirect(0, 0, true, 1), 5));
-            */
+            
             _contentStream.Add(typeof(ICustomAction<HunterCombatPlayer>), new List<IContent>(loadedAttacks));
         }
 
