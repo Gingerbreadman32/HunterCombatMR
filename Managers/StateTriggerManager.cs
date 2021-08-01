@@ -8,12 +8,12 @@ namespace HunterCombatMR.Managers
     {
         protected override void OnDispose()
         {
-            throw new NotImplementedException();
+            return;
         }
 
         protected override void OnInitialize()
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 }
