@@ -13,13 +13,13 @@ namespace HunterCombatMR.Models.State
         public EntityState(StateController[] stateControllers,
             StateDef stateDef)
         {
-            StateValidation(stateControllers, false);
+            Validate(stateControllers, false);
 
             _controllers = stateControllers;
             _stateDef = stateDef;
         }
 
-        public static bool StateValidation(StateController[] stateControllers,
+        public static bool Validate(StateController[] stateControllers,
             bool ignoreErrors = true)
         {
             try

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.Utilities
 {
@@ -111,6 +113,31 @@ namespace HunterCombatMR.Utilities
             array = new T[0];
 
             return true;
+        }
+
+        public static IDictionary<int, IEnumerable<T>> JaggedArraytoDictionary<T>(T[][] array)
+        {
+            var dictionary = new Dictionary<int, IEnumerable<T>>();
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                dictionary.Add(i, array[i]);
+            }
+
+            return dictionary;
+        }
+
+        public static T[][] DictionarytoJaggedArray<T>(IDictionary<int, IEnumerable<T>> dictionary)
+        {
+            var array = new T[][] { };
+            ResizeAndFillArray(ref array, dictionary.Keys.Distinct().Count() + 1, new T[0]);
+
+            foreach (var row in dictionary.Keys.Distinct())
+            {
+                array[row] = dictionary[row].ToArray();
+            }
+
+            return array;
         }
     }
 }

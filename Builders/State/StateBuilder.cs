@@ -1,15 +1,16 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces.State.Builders;
+using HunterCombatMR.Models.State;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HunterCombatMR.Models.State.Builders
+namespace HunterCombatMR.Builders.State
 {
     public static class StateBuilderChainMethods
     {
-        public static StateBuilder WithNewStateController(this StateBuilder builder,
+        public static StateBuilder WithNewController(this StateBuilder builder,
             StateControllerType type,
             object parameter,
             StateTrigger[][] triggers,
@@ -33,21 +34,21 @@ namespace HunterCombatMR.Models.State.Builders
             return builder;
         }
 
-        public static StateBuilder WithStateController(this StateBuilder builder,
+        public static StateBuilder WithController(this StateBuilder builder,
                     StateController controller)
         {
             builder.AddController(controller);
             return builder;
         }
 
-        public static StateBuilder WithStateControllers(this StateBuilder builder,
+        public static StateBuilder WithControllers(this StateBuilder builder,
             IEnumerable<StateController> controllers)
         {
             builder.AddControllers(controllers);
             return builder;
         }
 
-        public static StateBuilder WithStatus(this StateBuilder builder,
+        public static StateBuilder WithEntityStatuses(this StateBuilder builder,
                     EntityWorldStatus worldStatus,
             EntityActionStatus actionStatus)
         {

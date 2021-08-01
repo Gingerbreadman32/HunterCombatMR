@@ -11,6 +11,8 @@ namespace HunterCombatMR.Models.State
             int persistency,
             bool noHitPause)
         {
+            Validate(triggers, persistency, false);
+
             Type = type;
             Triggers = triggers;
             Persistency = persistency;
@@ -45,7 +47,7 @@ namespace HunterCombatMR.Models.State
         /// </summary>
         public object[] Parameters { get; }
 
-        public static bool Validate(StateTrigger[,] triggers,
+        public static bool Validate(StateTrigger[][] triggers,
                                             int persistency,
             bool ignoreErrors = true)
         {

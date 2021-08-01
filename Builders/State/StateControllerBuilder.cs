@@ -1,43 +1,46 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces.State.Builders;
+using HunterCombatMR.Models.State;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HunterCombatMR.Models.State.Builders
+namespace HunterCombatMR.Builders.State
 {
     public static class StateControllerBuilderChainMethods
     {
-        public static StateControllerBuilder WithBasicTrigger(this StateControllerBuilder builder,
+        public static StateControllerBuilder WithNewTrigger(this StateControllerBuilder builder,
             string parameter,
             string @operator,
             IComparable value,
             int depth = 1)
         {
-            if (string.IsNullOrWhiteSpace(parameter))
-                throw new Exception("Parameter must be not be nothing!");
-
-            if (string.IsNullOrWhiteSpace(@operator) || !OperatorUtils.IsValidComparisonOperator(@operator))
-                throw new Exception("Operator must be a valid comparison operator! (Ex. >, <, <=, >=, =, !=, is, not)");
-
-            if (value == null)
-                throw new Exception("Must have a valid value!");
-
-            string script = $"{parameter} {@operator} {value}";
-
-            builder.AddTrigger(new StateTrigger(script), depth);
+            builder.AddTrigger(new StateTrigger(parameter, @operator, value), depth);
             return builder;
         }
 
         public static StateControllerBuilder WithTrigger(this StateControllerBuilder builder,
-            string trigger,
+            string triggerScript,
             int depth = 1)
         {
-            if (string.IsNullOrWhiteSpace(trigger))
-                throw new Exception("Trigger must be not be nothing!");
+            builder.AddTrigger(new StateTrigger(triggerScript), depth);
+            return builder;
+        }
 
-            builder.AddTrigger(new StateTrigger(trigger), depth);
+        public static StateControllerBuilder WithTrigger(this StateControllerBuilder builder,
+            StateTrigger trigger,
+            int depth = 1)
+        {
+            builder.AddTrigger(trigger, depth);
+            return builder;
+        }
+
+        public static StateControllerBuilder WithTriggers(this StateControllerBuilder builder,
+            IEnumerable<StateTrigger> triggers,
+            int depth = 1)
+        {
+            builder.AddTriggers(triggers, depth);
             return builder;
         }
 
@@ -62,15 +65,15 @@ namespace HunterCombatMR.Models.State.Builders
         }
     }
 
-    public class StateControllerBuilder 
+    public class StateControllerBuilder
         : IStateControllerBuilder
     {
-        private const int MAX_TRIGGER_DEPTH = 6;
+        private const int MAX_TRIGGER_DEPTH = 6; // Maybe move this out of here
 
         private bool _ignoreHitPause;
         private List<object> _params;
         private int _persistency;
-        private IDictionary<int, StateTrigger> _triggers;
+        private Dictionary<int, List<StateTrigger>> _triggers;
         private StateControllerType _type;
 
         public StateControllerBuilder(StateControllerType controllerType)
@@ -78,13 +81,23 @@ namespace HunterCombatMR.Models.State.Builders
             _type = controllerType;
             _persistency = 1;
             _ignoreHitPause = false;
-            _triggers = new Dictionary<int, StateTrigger>();
+            _triggers = new Dictionary<int, List<StateTrigger>>();
             _params = new List<object>();
+        }
+
+        public StateControllerBuilder(StateController copy)
+        {
+            _type = copy.Type;
+            _persistency = copy.Persistency;
+            _ignoreHitPause = copy.IgnoreHitPause;
+            _triggers = ArrayUtils.JaggedArraytoDictionary(copy.Triggers).ToDictionary(x => x.Key, x => new List<StateTrigger>(x.Value));
+            _params = new List<object>(copy.Parameters);
         }
 
         public StateControllerType ControllerType { get => _type; set => _type = value; }
         public bool IgnoreHitPause { get => _ignoreHitPause; set => _ignoreHitPause = value; }
         public int Persistency { get => _persistency; set => _persistency = value; }
+        public Dictionary<int, List<StateTrigger>> Triggers { get => _triggers; set => _triggers = value; }
 
         public void AddParameters(IEnumerable<object> parameters)
         {
@@ -94,21 +107,45 @@ namespace HunterCombatMR.Models.State.Builders
         public void AddTrigger(StateTrigger trigger,
                     int depth)
         {
+            AddTriggers(new StateTrigger[1] { trigger }, depth);
+        }
+
+        public void AddTriggers(IEnumerable<StateTrigger> triggers,
+                    int depth)
+        {
+            CheckTriggerDepth(depth);
+
+            AddDepth(depth);
+
+            _triggers[depth].AddRange(triggers);
+        }
+
+        public void RemoveTrigger(int depth,
+            int index)
+        {
+            if (index < 0)
+                throw new IndexOutOfRangeException("Trigger cannot exist on an index lower than 0!");
+
+            CheckTriggerDepth(depth);
+
+
+        }
+
+        private static void CheckTriggerDepth(int depth)
+        {
             if (depth > MAX_TRIGGER_DEPTH || depth < 0)
                 throw new Exception($"Trigger depth must be within 0 to {MAX_TRIGGER_DEPTH}.");
+        }
 
-            _triggers.Add(depth, trigger);
+        private void AddDepth(int depth)
+        {
+            if (!_triggers.ContainsKey(depth))
+                _triggers.Add(depth, new List<StateTrigger>());
         }
 
         public StateController Build()
         {
-            var triggers = new StateTrigger[][] { };
-            ArrayUtils.ResizeAndFillArray(ref triggers, _triggers.Keys.Distinct().Count() + 1, new StateTrigger[0]);
-
-            foreach (var row in _triggers.Keys.Distinct())
-            {
-                triggers[row] = _triggers.Where(x => x.Key.Equals(row)).Select(x => x.Value).ToArray();
-            }
+            var triggers = ArrayUtils.DictionarytoJaggedArray(_triggers.ToDictionary(x => x.Key, x => (IEnumerable<StateTrigger>)x.Value));
 
             return new StateController(_type, _params.ToArray(), triggers, _persistency, _ignoreHitPause);
         }

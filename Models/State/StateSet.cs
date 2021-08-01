@@ -20,14 +20,14 @@ namespace HunterCombatMR.Models.State
 
         public StateSet(IDictionary<int, EntityState> states)
         {
-            StateSetValidation(states, false);
+            Validate(states, false);
 
             _states = new ReadOnlyDictionary<int, EntityState>(states);
         }
 
         public IReadOnlyDictionary<int, EntityState> States { get => _states; }
 
-        public static bool StateSetValidation(IDictionary<int, EntityState> states,
+        public static bool Validate(IDictionary<int, EntityState> states,
             bool ignoreErrors = true)
         {
             try
