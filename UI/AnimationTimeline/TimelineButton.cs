@@ -1,6 +1,6 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
-using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -13,8 +13,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
     public class TimelineButton
         : UIElement
     {
-        #region Private Fields
-
         private const string _defaultButtonTexturePath = UITexturePaths.TimelineTextures + "timelinebutton";
 
         // Constants
@@ -31,15 +29,11 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private TimelineButtonIcon _icon;
         private Texture2D _iconTexture;
 
-        #endregion Private Fields
-
-        #region Public Constructors
-
         public TimelineButton(string name,
             TimelineButtonIcon icon,
             int scale,
             Texture2D buttonTexture = null,
-            Func<ICustomAnimation, TimelineButton, bool> activeCondition = null)
+            Func<ICustomAnimationV2, TimelineButton, bool> activeCondition = null)
         {
             Name = name;
             Icon = icon;
@@ -54,11 +48,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 ActiveConditionEvent = DefaultCondition;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public event Func<ICustomAnimation, TimelineButton, bool> ActiveConditionEvent;
+        public event Func<ICustomAnimationV2, TimelineButton, bool> ActiveConditionEvent;
 
         public event Action ClickActionEvent;
 
@@ -108,11 +98,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             }
         }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public bool CheckCondition(ICustomAnimation animation)
+        public bool CheckCondition(ICustomAnimationV2 animation)
             => ActiveConditionEvent.Invoke(animation, this);
 
         public override void OnInitialize()
@@ -157,9 +143,9 @@ namespace HunterCombatMR.UI.AnimationTimeline
             }
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
+        internal static bool DefaultCondition(ICustomAnimationV2 animation,
+            TimelineButton button)
+            => animation != null;
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
@@ -195,15 +181,5 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 effects: (_flippedIcons.Contains(_icon)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
                 layerDepth: 0f);
         }
-
-        #endregion Protected Methods
-
-        #region Internal Methods
-
-        internal static bool DefaultCondition(ICustomAnimation animation,
-            TimelineButton button)
-            => (animation != null && animation.AnimationData.Initialized);
-
-        #endregion Internal Methods
     }
 }

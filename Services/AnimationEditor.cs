@@ -1,6 +1,8 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -31,7 +33,7 @@ namespace HunterCombatMR.Services
 
         public EditorMode CurrentEditMode { get; set; }
 
-        public PlayerAnimation CurrentAnimationEditing { get; set; }
+        public ICustomAnimationV2 CurrentAnimationEditing { get; set; }
 
         public bool AnimationEdited { get; set; }
 
@@ -59,7 +61,7 @@ namespace HunterCombatMR.Services
         }
 
         public bool DrawOnionSkin(PlayerDrawInfo drawInfo,
-            LayerData layerData,
+            ExtraAnimationData layerData,
             int keyFrameToDraw,
             Color color)
         {
@@ -81,30 +83,21 @@ namespace HunterCombatMR.Services
             return true;
         }
 
-        public void AdjustPositionLogic(PlayerAnimation animation,
+        public void AdjustPositionLogic(IEnumerable<LayerReference> layers,
             int direction = 1)
         {
-            List<string> framelessNames = new List<string>(HighlightedLayers);
-            framelessNames.ForEach(layerName => layerName = layerName.Split('-')[0].Trim());
             Vector2 mousePosition = new Vector2(Main.mouseX, Main.mouseY);
-            int currentFrame = animation.AnimationData.CurrentKeyFrameIndex;
 
             var nudgeAmount = NudgeLogic();
 
-            foreach (string layerName in framelessNames)
+            foreach (LayerReference layer in layers)
             {
-                AnimationLayer layer = animation.LayerData.Layers.FirstOrDefault(x => x.Name.Equals(layerName));
-
-                if (layer == null)
-                    continue;
-
-                if (layer.KeyFrames[currentFrame].SpriteOrientation.Equals(SpriteEffects.FlipHorizontally))
+                if (layer.FrameData.Orientation.Equals(SpriteEffects.FlipHorizontally))
                     direction *= -1;
 
                 var layerNudgeAmount = nudgeAmount;
                 layerNudgeAmount.X *= direction;
-
-                layer.SetPosition(currentFrame, layer.KeyFrames[currentFrame].Position + layerNudgeAmount);
+                layer.FrameData.Position += layerNudgeAmount;
             }
             /*
             if (SelectedLayer == layerName)

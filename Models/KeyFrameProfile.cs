@@ -30,7 +30,7 @@ namespace HunterCombatMR.Models
                 KeyFrameLengths = new SortedList<int, FrameLength>();
         }
 
-        public KeyFrameProfile(SortedList<int, KeyFrame> keyFrames,
+        public KeyFrameProfile(SortedList<int, Keyframe> keyFrames,
             FrameLength defaultKeyFrameSpeed)
         {
             KeyFrameAmount = keyFrames.Count();
@@ -80,6 +80,18 @@ namespace HunterCombatMR.Models
             DefaultKeyFrameLength = FrameLength.One;
         }
 
+        public IEnumerator<FrameLength> GetEnumerator()
+        {
+            for (var k = 0; k < KeyFrameAmount; k++)
+            {
+                FrameLength frameSpeed = DefaultKeyFrameLength;
+                if (KeyFrameLengths != null && KeyFrameLengths.ContainsKey(k))
+                    frameSpeed = KeyFrameLengths[k];
+
+                yield return frameSpeed;
+            }
+        }
+
         public bool Equals(KeyFrameProfile other)
         {
             KeyFrameProfileEqualityComparer comparer = new KeyFrameProfileEqualityComparer();
@@ -105,7 +117,7 @@ namespace HunterCombatMR.Models
             SwitchIndex(newFrameIndex, curSpeed);
         }
 
-        private SortedList<int, FrameLength> CreateTimingsFromKeyFrames(SortedList<int, KeyFrame> keyFrames)
+        private SortedList<int, FrameLength> CreateTimingsFromKeyFrames(SortedList<int, Keyframe> keyFrames)
         {
             var timings = new SortedList<int, FrameLength>();
             foreach (var keyFrame in keyFrames)

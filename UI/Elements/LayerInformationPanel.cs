@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace HunterCombatMR.UI.Elements
     {
         private LayerTextInfo _infoFlags;
         private IEnumerable<LayerInfoTextBox> _textBoxes;
+        private LayerReference layerRef;
 
         public LayerInformationPanel(bool startCollapsed)
             : base(startCollapsed)
@@ -37,8 +39,7 @@ namespace HunterCombatMR.UI.Elements
         }
 
         public UIList InformationList { get; }
-        public int KeyFrame { get; private set; }
-        public AnimationLayer Layer { get; private set; }
+        public LayerReference LayerRef { get => layerRef; set { layerRef = value; ResetInformationDisplay(); PopulateBoxes(); } }
 
         internal LayerTextInfo VisableInformation
         {
@@ -79,7 +80,7 @@ namespace HunterCombatMR.UI.Elements
         {
             InformationList.Clear();
 
-            if (Layer == null || !Layer.IsActive(KeyFrame))
+            if (LayerRef == null)
                 return;
 
             var boxes = new List<LayerInfoTextBox>();
@@ -88,7 +89,7 @@ namespace HunterCombatMR.UI.Elements
 
             foreach (LayerTextInfo block in infoBlocks.Where(x => !x.Equals(LayerTextInfo.None)))
             {
-                InformationList.Add(new LayerText(layer: Layer, KeyFrame, block));
+                InformationList.Add(new LayerText(LayerRef, block));
                 if (block == LayerTextInfo.Coordinates || block == LayerTextInfo.TextureFrameRectangle)
                 {
                     var box1 = new LayerInfoTextBox("0", block, 4, false, false, null)
@@ -104,19 +105,11 @@ namespace HunterCombatMR.UI.Elements
             _textBoxes = boxes;
         }
 
-        public void SetLayerAndKeyFrame(AnimationLayer layer,
-            int keyFrame)
+        private void PopulateBoxes()
         {
-            if (layer != null && layer.IsActive(keyFrame))
-            {
-                Layer = layer;
-                KeyFrame = keyFrame;
-                ResetInformationDisplay();
-            }
-
             foreach (var box in _textBoxes)
             {
-                box.SetLayerAndKeyFrame(layer, keyFrame);
+                box.LayerRef = LayerRef;
             }
         }
 

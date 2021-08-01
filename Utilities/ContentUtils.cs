@@ -1,5 +1,8 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Action;
+using HunterCombatMR.Interfaces.Animation;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -9,11 +12,22 @@ namespace HunterCombatMR.Utilities
 {
     public static class ContentUtils
     {
-        public static T Get<T>(string name) where T : IHunterCombatContentInstance
-                    => (T)GetInstance<T>(name).CloneFrom(name);
+        public static T Get<T>(string name) where T : IContent
+                    => (T)GetInstance<T>(name).CreateNew(name);
 
-        public static T Get<T>(T instance) where T : IHunterCombatContentInstance
-                    => (T)instance.CloneFrom(instance.InternalName);
+        public static bool TryGet<T>(string name, out T instance) where T : IContent
+        {
+            bool exists = HunterCombatMR.Instance.Content.CheckContentInstanceByName<T>(name);
+            instance = default(T);
+
+            if (exists)
+                instance = (T)GetInstance<T>(name).CreateNew(name);
+
+            return exists;
+        }
+
+        public static ICustomAction<HunterCombatPlayer> GetPlayerAction(string name)
+            => Get<ICustomAction<HunterCombatPlayer>>(name); 
 
         /// <summary>
         /// Gets the original instance of a specified content type.
@@ -27,8 +41,15 @@ namespace HunterCombatMR.Utilities
         /// <remarks>
         /// ONLY use this for modification, otherwise use GetNew.
         /// </remarks>
-        internal static T GetInstance<T>(string name) where T : IHunterCombatContentInstance
+        internal static T GetInstance<T>(string name) where T : IContent
             => HunterCombatMR.Instance.Content.GetContentInstance<T>(name);
+
+        internal static FileSaveStatus SaveAnimation(ICustomAnimationV2 modifiedInstance)
+        {
+            ICustomAnimationV2 original = GetInstance<ICustomAnimationV2>(modifiedInstance.InternalName);
+            original = modifiedInstance;
+            return HunterCombatMR.Instance.FileManager.SaveAnimation(original, true);
+        }
 
         public static IDictionary<string, Texture2D> GetTexturesFromPath(string path)
             => HunterCombatMR.Instance.VariableTextures.Where(x => x.Key.StartsWith(path)).ToDictionary(x => x.Key, y => y.Value);

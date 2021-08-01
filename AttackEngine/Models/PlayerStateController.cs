@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Player;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,8 @@ namespace HunterCombatMR.AttackEngine.Models
     {
         private readonly Func<Player, bool>[] _vanillaStateEvaluations = new Func<Player, bool>[] 
             { 
-                (p) => { return true; },  
+                (p) => { return true; },
+                (p) => { return true; },
                 (p) => p.IsPlayerWalking(),
                 (p) => p.IsPlayerAerial(),
                 (p) => p.IsPlayerJumping(),
@@ -27,15 +29,15 @@ namespace HunterCombatMR.AttackEngine.Models
         public PlayerStateController(HunterCombatPlayer player)
         {
             _actionAnimator = new Animator();
-            State = PlayerState.Neutral;
-            ActionState = AttackState.NotAttacking;
+            State = EntityWorldStatus.NoStatus;
+            ActionState = EntityActionStatus.Idle;
             Player = player;
             ActionHistory = new SortedList<int, string>();
             MovementInformation = new MovementInfo();
         }
 
-        public SortedList<int, string> ActionHistory { get; private set; }
-        public AttackState ActionState { get; set; }
+        public SortedList<int, string> ActionHistory { get; }
+        public EntityActionStatus ActionState { get; set; }
 
         public ComboAction CurrentAction
         {
@@ -66,7 +68,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public MovementInfo MovementInformation { get; }
         public HunterCombatPlayer Player { get; }
-        public PlayerState State { get; set; }
+        public EntityWorldStatus State { get; set; }
         public bool StateOverride { get; set; }
 
         public void StateUpdate()
@@ -82,11 +84,11 @@ namespace HunterCombatMR.AttackEngine.Models
                 return;
             }
 
-            // Get the next action if available
+            /* Get the next action if available
             CurrentAction = PlayerActionComboUtils.GetNextAvailableAction(this,
                 CurrentMoveSet,
                 Player.InputBuffers);
-
+            */
             // If no actions, stop animations and return
             if (CurrentAction == null)
             {
@@ -95,20 +97,6 @@ namespace HunterCombatMR.AttackEngine.Models
             }
 
             ActionLogic();
-        }
-
-        public void PostUpdate()
-        {
-            Main.blockInput = HunterCombatMR.Instance.VanillaBlockInput;
-        }
-
-        public void MountUpdate()
-        {
-            if (CurrentAction == null)
-                return;
-
-            if (Player.player.mount.Active)
-                Player.player.mount.Dismount(Player.player);
         }
 
         public void EditorUpdate()
@@ -127,24 +115,15 @@ namespace HunterCombatMR.AttackEngine.Models
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit)
                     && (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationType.Equals(AnimationType.Player) ?? false))
             {
-                Player.SetCurrentAnimation(HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing);
+                Player.AnimationController.CurrentAnimation = EditorUtils.EditingAnimation;
             }
 
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit) 
-                && Player.CurrentAnimation != null)
+                    && Player.AnimationController.CurrentAnimation != null)
             {
-                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(Player.CurrentAnimation, Player.player.direction);
+                FrameIndex index = Player.AnimationController.Animator.CurrentKeyFrameIndex;
+                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(Player.AnimationController.CurrentAnimation.Layers.GetOrderedActiveLayerData(index), Player.player.direction);
             }
-        }
-
-        public void PreUpdate()
-        {
-            HunterCombatMR.Instance.VanillaBlockInput = Main.blockInput;
-
-            if (CurrentAction == null)
-                return;
-
-            Main.blockInput = true;
         }
 
         public void MovementUpdate()
@@ -157,9 +136,10 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             CurrentAction.Attack.ActionLogic(Player, _actionAnimator);
 
-            var currentAnimation = CurrentAction.Attack.Animations.GetAnimationByKeyFrame(CurrentActionKeyFrame);
+            /* need to get rid of this to test
+            CurrentAction.Attack.Animations.TryGetAnimation(CurrentActionKeyFrame, out var currentAnimation);
             Player.SetCurrentAnimation(currentAnimation);
-
+            */
             _actionAnimator.Update();
 
             if (_actionAnimator.Flags.Equals(AnimatorFlags.Locked))
@@ -169,9 +149,8 @@ namespace HunterCombatMR.AttackEngine.Models
         private void ActionReset()
         {
             CurrentAction = null;
-            Player.SetCurrentAnimation(null);
-            ActionState = AttackState.NotAttacking;
-            Main.blockInput = false;
+            Player.AnimationController.CurrentAnimation = null;
+            ActionState = EntityActionStatus.Idle;
         }
 
         private void FullStateReset()
@@ -183,14 +162,14 @@ namespace HunterCombatMR.AttackEngine.Models
                 ActionHistory.Clear();
         }
 
-        private PlayerState SetStateLogic(Player player)
+        private EntityWorldStatus SetStateLogic(Player player)
         {
-            PlayerState currentState = PlayerState.Dead;
+            EntityWorldStatus currentState = EntityWorldStatus.Dead;
 
             for (var s = 0; s < _vanillaStateEvaluations.Length; s++)
             {
                 if (_vanillaStateEvaluations[s].Invoke(player))
-                    currentState = (PlayerState)s;
+                    currentState = (EntityWorldStatus)s;
             }
 
             return currentState;
@@ -204,7 +183,7 @@ namespace HunterCombatMR.AttackEngine.Models
                 return;
             }
 
-            _actionAnimator.Initialize(CurrentAction.Attack.KeyFrameProfile);
+            _actionAnimator.Initialize(CurrentAction.Attack.Animations.FrameData.Values);
         }
     }
 }

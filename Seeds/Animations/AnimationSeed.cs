@@ -6,11 +6,11 @@ namespace HunterCombatMR.Seeds.Animations
     /// <inheritdoc/>
     internal abstract class AnimationSeed
     {
-        internal Dictionary<string, LayerData> AnimatedActions { get; }
+        internal Dictionary<string, ExtraAnimationData> AnimatedActions { get; }
 
         internal AnimationSeed()
         {
-            AnimatedActions = new Dictionary<string, LayerData>();
+            AnimatedActions = new Dictionary<string, ExtraAnimationData>();
         }
 
         internal abstract void Load();

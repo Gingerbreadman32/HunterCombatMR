@@ -1,10 +1,10 @@
-﻿namespace HunterCombatMR.Interfaces
-{
-    public interface IAnimatedEntity<T> where T : ICustomAnimation
-    {
-        T CurrentAnimation { get; }
+﻿using HunterCombatMR.Models;
+using System.Collections.Generic;
 
-        bool SetCurrentAnimation(ICustomAnimation newAnimation,
-            bool newFile = false);
+namespace HunterCombatMR.Interfaces
+{
+    public interface IAnimatedEntity
+    {
+        SortedList<FrameIndex, IKeyframeData> AnimatorKeyFrameData { get; }
     }
 }

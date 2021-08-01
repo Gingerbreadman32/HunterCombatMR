@@ -1,6 +1,8 @@
 ﻿using HunterCombatMR.AttackEngine.Constants;
 using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.Action;
+using HunterCombatMR.Models.Player;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -24,17 +26,15 @@ namespace HunterCombatMR.AttackEngine.MoveSets
         {
         }
 
-        public override IHunterCombatContentInstance CloneFrom(string internalName)
-        {
-            throw new NotImplementedException();
-        }
+        public override IContent CreateNew(string internalName)
+            => new SwordAndShieldMoveSet();
 
         protected override IEnumerable<ComboAction> PopulateDefaultActions()
         {
             var actions = new List<ComboAction>();
 
-            actions.Add(new ComboAction(ContentUtils.Get<PlayerAction>(_doubleSlash)));
-            actions.Add(new ComboAction(ContentUtils.Get<PlayerAction>(_runningSlash), Enumerations.PlayerState.Walking));
+            //actions.Add(new ComboAction(ContentUtils.GetPlayerAction(_doubleSlash)));
+            //actions.Add(new ComboAction(ContentUtils.GetPlayerAction(_runningSlash), Enumerations.EntityWorldStatus.Walking));
 
             return actions;
         }
@@ -42,7 +42,7 @@ namespace HunterCombatMR.AttackEngine.MoveSets
         protected override IEnumerable<ComboRoute> SetNeutralRoutes()
         {
             var routes = new List<ComboRoute>();
-            var neutralstate = new Enumerations.AttackState[] { Enumerations.AttackState.NotAttacking };
+            var neutralstate = new Enumerations.EntityActionStatus[] { Enumerations.EntityActionStatus.Idle };
 
             routes.Add(new ComboRoute(GetAction("Double Slash"), Enumerations.ActionInputs.PrimaryAction, neutralstate));
             routes.Add(new ComboRoute(GetAction("Running Slash"), Enumerations.ActionInputs.PrimaryAction, neutralstate));

@@ -1,10 +1,11 @@
-using HunterCombatMR.AttackEngine.Models;
+using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
-using HunterCombatMR.Interfaces;
+using HunterCombatMR.Interfaces.System;
+using HunterCombatMR.Managers;
+using HunterCombatMR.Models.Systems;
 using HunterCombatMR.Services;
 using HunterCombatMR.UI;
 using HunterCombatMR.UI.Elements;
-using HunterCombatMR.Utilities;
 using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -22,18 +23,16 @@ namespace HunterCombatMR
     public class HunterCombatMR
         : Mod
     {
-        public const string ModName = "HunterCombat";
-        public string DataPath = Path.Combine(Program.SavePath, ModName, "Data");
+        public string DataPath = Path.Combine(Program.SavePath, ModConstants.ModName, "Data");
 
-        internal UserInterface EditorUIPanels;
-        internal UserInterface EditorUIPopUp;
-        internal EditorUI PanelState;
-        internal DebugUI PopUpState;
-        internal ILog StaticLogger;
-        internal IDictionary<string, Texture2D> VariableTextures;
-
-        private const string _variableTexturePath = "Textures/SnS/";
+        private UserInterface _editorUIPanels;
+        private UserInterface _editorUIPopUp;
         private GameTime _lastUpdateUiGameTime;
+        private EditorUI _panelState;
+        private DebugUI _popUpState;
+
+        private bool _managersLoaded;
+        private ICollection<ManagerBase> _managers;
 
         public HunterCombatMR()
         {
@@ -41,38 +40,77 @@ namespace HunterCombatMR
         }
 
         public static HunterCombatMR Instance { get; private set; }
-        public HunterCombatContent Content { get; private set; }
+        public ContentService Content { get; private set; }
         public AnimationEditor EditorInstance { get; private set; }
         public AnimationFileManager FileManager { get; private set; }
-        public IEnumerable<Event<HunterCombatPlayer>> PlayerActionEvents { get; private set; }
-        public bool VanillaBlockInput { get; set; }
+        public IDictionary<string, Texture2D> VariableTextures { get; set; }
 
-        public Event<HunterCombatPlayer> GetPlayerActionEvent(string name)
-            => PlayerActionEvents.FirstOrDefault(x => x.Name.Equals(name));
+        private void LoadManagers(Type[] assemblyTypes)
+        {
+            _managers = new List<ManagerBase>();
+
+            foreach (var type in assemblyTypes.Where(t => !t.IsAbstract && typeof(ManagerBase).IsAssignableFrom(t)))
+            {
+                _managers.Add((ManagerBase)Activator.CreateInstance(type));
+            }
+
+            _managersLoaded = true;
+        }
 
         public override void Load()
         {
-            StaticLogger = Logger;
+            var assemblyTypes = GetType().Assembly.GetTypes();
+
+            ManagerSetup(assemblyTypes);
             FileManager = new AnimationFileManager();
-            Content = new HunterCombatContent(FileManager);
-            CachingUtils.Initialize();
+            Content = new ContentService(FileManager);
 
             if (!Main.dedServ)
             {
                 VariableTextures = new Dictionary<string, Texture2D>();
-                var animTypes = new List<AnimationType>() { AnimationType.Player };
-                FileManager.SetupCustomFolders(animTypes);
+                FileManager.SetupCustomFolders(new List<AnimationType>() { AnimationType.Player });
                 EditorInstance = new AnimationEditor();
 
-                EditorUIPanels = new UserInterface();
-                PanelState = new EditorUI();
-                PanelState.Activate();
-                EditorUIPopUp = new UserInterface();
-                PopUpState = new DebugUI();
-                PopUpState.Activate();
-                EditorUIPanels.SetState(PanelState);
-                EditorUIPopUp.SetState(PopUpState);
+                _editorUIPanels = new UserInterface();
+                _panelState = new EditorUI();
+                _editorUIPopUp = new UserInterface();
+                _popUpState = new DebugUI();
             }
+
+            Content.SetupContent();
+        }
+
+        private void ManagerSetup(Type[] assemblyTypes)
+        {
+            LoadManagers(assemblyTypes);
+
+            InitializeManagers();
+
+            LoadSystems();
+        }
+
+        private void InitializeManagers()
+        {
+            if (!_managersLoaded)
+                throw new Exception("Managers not loaded or loaded improperly.");
+
+            foreach (var manager in _managers)
+            {
+                manager.Initialize();
+            }
+        }
+
+        private void DisposeManagers()
+        {
+            if (!_managersLoaded)
+                throw new Exception("Managers not loaded or loaded improperly.");
+
+            foreach (var manager in _managers)
+            {
+                manager.Dispose();
+            }
+
+            _managers = null;
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -84,9 +122,9 @@ namespace HunterCombatMR
                     "Hunter Combat Editor: Pop-Ups",
                     delegate
                     {
-                        if (_lastUpdateUiGameTime != null && EditorUIPopUp?.CurrentState != null)
+                        if (_lastUpdateUiGameTime != null && _editorUIPopUp?.CurrentState != null)
                         {
-                            EditorUIPopUp.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
+                            _editorUIPopUp.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
                         }
                         return true;
                     },
@@ -98,9 +136,9 @@ namespace HunterCombatMR
                     "Hunter Combat Editor: Panels",
                     delegate
                     {
-                        if (_lastUpdateUiGameTime != null && EditorUIPanels?.CurrentState != null)
+                        if (_lastUpdateUiGameTime != null && _editorUIPanels?.CurrentState != null)
                         {
-                            EditorUIPanels.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
+                            _editorUIPanels.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
                         }
                         return true;
                     },
@@ -110,18 +148,21 @@ namespace HunterCombatMR
 
         public override void PostSetupContent()
         {
-            Type[] assemblyTypes = typeof(HunterCombatMR).Assembly.GetTypes();
-            Content.SetupContent();
-
             var modTextures = (IDictionary<string, Texture2D>)typeof(HunterCombatMR).GetField("textures", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Instance);
-            VariableTextures = modTextures.Where(x => x.Key.StartsWith(_variableTexturePath)).ToDictionary(x => x.Key, y => y.Value);
+            VariableTextures = modTextures.Where(x => x.Key.StartsWith(ModConstants.VariableTexturePath)).ToDictionary(x => x.Key, y => y.Value);
             modTextures = null;
 
-            PlayerActionEvents = assemblyTypes
-                .Where(x => x.IsSubclassOf(typeof(Event<HunterCombatPlayer>)) && !x.IsAbstract)
-                .Select(x => (Event<HunterCombatPlayer>)Activator.CreateInstance(x));
+            _panelState.Activate();
+            _popUpState.Activate();
+            _editorUIPanels.SetState(_panelState);
+            _editorUIPopUp.SetState(_popUpState);
+            _panelState.PostSetupContent();
+        }
 
-            PanelState.PostSetupContent();
+        public override void PostUpdateInput()
+        {
+            if (_managersLoaded)
+                SystemManager.PostInputUpdate();
         }
 
         public override void PreSaveAndQuit()
@@ -133,10 +174,9 @@ namespace HunterCombatMR
 
         public override void Unload()
         {
-            CachingUtils.Uninitialize();
+            DisposeManagers();
             EditorInstance?.Dispose();
             EditorInstance = null;
-
             Instance.EditorInstance?.Dispose();
             Instance = null;
         }
@@ -145,38 +185,30 @@ namespace HunterCombatMR
         {
             _lastUpdateUiGameTime = gameTime;
 
-            if (EditorUIPopUp?.CurrentState != null)
+            if (_editorUIPopUp?.CurrentState != null)
             {
-                PopUpState.UpdateActiveLayers(PanelState?.CurrentAnimationLayers ?? new List<LayerText>());
-                EditorUIPopUp.Update(gameTime);
+                _popUpState.UpdateActiveLayers(_panelState?.CurrentAnimationLayers ?? new List<LayerText>());
+                _editorUIPopUp.Update(gameTime);
             }
 
             if (EditorInstance.CurrentEditMode.Equals(EditorMode.None))
             {
-                EditorUIPanels?.SetState(null);
+                _editorUIPanels?.SetState(null);
                 return;
             }
 
-            if (EditorUIPanels?.CurrentState == null)
+            if (_editorUIPanels?.CurrentState == null)
             {
-                EditorUIPanels?.SetState(PanelState);
+                _editorUIPanels?.SetState(_panelState);
             }
 
-            EditorUIPanels.Update(gameTime);
+            _editorUIPanels.Update(gameTime);
         }
 
-        internal void DeleteAnimation(ICustomAnimation animation)
+        private void LoadSystems()
         {
-            // @@warn This method shouldn't be in here tbh.
-            Content.DeleteContentInstance(animation);
-
-            FileManager.DeleteCustomAnimation(animation.AnimationType, animation.Name);
-        }
-
-        internal void SetUIPlayer(HunterCombatPlayer player)
-        {
-            if (PanelState != null)
-                PanelState.Player = player;
+            SystemManager.AddSystem(new InputSystem());
+            SystemManager.AddSystem(new EntityStateSystem());
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.Models.Action;
 using Newtonsoft.Json;
 using System;
 
@@ -45,11 +45,11 @@ namespace HunterCombatMR.JSONConverters
             writer.WriteStartObject();
 
             writer.WritePropertyName("StartKeyFrame");
-            serializer.Serialize(writer, (int)tag.StartKeyFrame);
+            serializer.Serialize(writer, (int)tag.StartKeyframe);
             writer.WritePropertyName("EndKeyFrame");
-            serializer.Serialize(writer, (int)tag.EndKeyFrame);
+            serializer.Serialize(writer, (int)tag.EndKeyframe);
             writer.WritePropertyName("Id");
-            serializer.Serialize(writer, tag.Id);
+            serializer.Serialize(writer, tag.ID);
 
             writer.WriteEndObject();
         }

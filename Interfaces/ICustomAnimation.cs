@@ -6,8 +6,7 @@ using System.Collections.Generic;
 namespace HunterCombatMR.Interfaces
 {
     public interface ICustomAnimation
-        : IHunterCombatContentInstance,
-        IAnimated
+        : IContent
     {
         [JsonIgnore]
         Animator AnimationData { get; }
@@ -18,10 +17,10 @@ namespace HunterCombatMR.Interfaces
         bool IsInitialized { get; }
 
         bool IsStoredInternally { get; }
-        LayerData LayerData { get; }
-        string Name { get; }
+        ExtraAnimationData LayerData { get; }
+        string DisplayName { get; }
 
-        void AddKeyFrame(KeyFrame duplicate);
+        void AddKeyFrame(Keyframe duplicate);
 
         void AddKeyFrame(FrameLength frameLength, IDictionary<AnimationLayer, LayerFrameInfo> layerInfo = null);
 

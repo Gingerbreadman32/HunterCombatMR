@@ -1,5 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Managers;
+using HunterCombatMR.Models.Components;
 using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
@@ -77,22 +79,28 @@ namespace HunterCombatMR.UI
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Player == null || Player != Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>())
             {
                 Player = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
                 _playerInfoPanel.SetPlayer(Player);
             }
 
-            // Buffer Window
-            _bufferList.Clear();
-            foreach (var buffer in Player.InputBuffers.BufferedComboInputs)
-            {
-                _bufferList.Add(new UIText($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered}"));
-            }
-
             _modeSwitch.SetText(HunterCombatMR.Instance.EditorInstance.CurrentEditMode.GetDescription());
 
-            base.Update(gameTime);
+
+            // Buffer Window
+            _bufferList.Clear();
+            if (!ComponentManager.HasComponent<InputComponent>(Player.EntityReference))
+                return;
+
+            var inputs = ComponentManager.GetEntityComponent<InputComponent>(Player.EntityReference).BufferedInputs;
+            
+            foreach (var buffer in inputs.ToArray())
+            {
+                _bufferList.Add(new UIText($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered} - {buffer.FramesHeld}", 0.5f));
+            }
         }
 
         internal void UpdateActiveLayers(IEnumerable<LayerText> layers)
@@ -100,10 +108,10 @@ namespace HunterCombatMR.UI
             Layers = layers;
             var highlighted = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
 
-            if (highlighted.Count() == 1 && layers.Any(x => x.Layer.Name.Equals(highlighted.FirstOrDefault())))
+            if (highlighted.Count() == 1 && layers.Any(x => x.LayerRef.Layer.ReferenceName.Equals(highlighted.FirstOrDefault())))
             {
-                var selected = layers.FirstOrDefault(y => y.Layer.Name.Equals(highlighted.FirstOrDefault()));
-                var currentKeyFrame = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing.AnimationData.CurrentKeyFrameIndex;
+                var selected = layers.FirstOrDefault(y => y.LayerRef.Layer.ReferenceName.Equals(highlighted.FirstOrDefault()));
+                var currentKeyFrame = Player.AnimationController.Animator;
                 if (!_popUps.Any(x => x.AttachedElement == selected))
                 {
                     ClearPopUps();
@@ -111,15 +119,15 @@ namespace HunterCombatMR.UI
                     var upButton = new PopUpButton('\u25B2', 40f, 40f, selected, new Vector2(120f, -50f)).WithFadedMouseOver();
                     upButton.OnClick += (evt, list) =>
                         {
-                            selected.Layer.UpdateLayerDepth(-1, currentKeyFrame, layers.Select(x => x.Layer));
+                            //selected.Layer.UpdateLayerDepth(-1, currentKeyFrame, layers.Select(x => x.Layer));
                             HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
                         };
                     _popUps.Add(upButton);
 
-                    var enableButton = new PopUpButton((selected.Layer.KeyFrames[currentKeyFrame].IsEnabled) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
+                    var enableButton = new PopUpButton((selected.LayerRef.Layer.ReferenceName != null) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
                     enableButton.OnClick += (evt, list) =>
                     {
-                        selected.Layer.ToggleVisibility(currentKeyFrame);
+                        //selected.Layer.ToggleVisibility(currentKeyFrame);
                         HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
                     };
                     _popUps.Add(enableButton);
@@ -127,7 +135,7 @@ namespace HunterCombatMR.UI
                     var downButton = new PopUpButton('\u25BC', 40f, 40f, selected, new Vector2(120f, 50f)).WithFadedMouseOver();
                     downButton.OnClick += (evt, list) =>
                     {
-                        selected.Layer.UpdateLayerDepth(1, currentKeyFrame, layers.Select(x => x.Layer));
+                        //selected.Layer.UpdateLayerDepth(1, currentKeyFrame, layers.Select(x => x.Layer));
                         HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
                     };
                     _popUps.Add(downButton);
@@ -151,7 +159,7 @@ namespace HunterCombatMR.UI
         {
             if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit))
             {
-                Player.SetCurrentAnimation(null);
+                Player.AnimationController.CurrentAnimation = null;
                 HunterCombatMR.Instance.EditorInstance.CurrentEditMode = EditorMode.None;
             }
             else

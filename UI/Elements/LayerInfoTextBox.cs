@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -9,62 +10,52 @@ namespace HunterCombatMR.UI.Elements
 {
     internal static class LayerInfoTextBoxLogic
     {
-        internal static IDictionary<LayerTextInfo, Func<AnimationLayer, int, string, int, bool, string>> InfoToLogicMap
-            = new Dictionary<LayerTextInfo, Func<AnimationLayer, int, string, int, bool, string>>
+        internal static IDictionary<LayerTextInfo, Func<LayerReference, string, int, bool, string>> InfoToLogicMap
+            = new Dictionary<LayerTextInfo, Func<LayerReference, string, int, bool, string>>
             {
                 { LayerTextInfo.Coordinates, CoordinateLogic },
                 { LayerTextInfo.TextureFrameRectangle, TextureFrameBoundsLogic }
             };
 
-        internal static string CoordinateLogic(AnimationLayer layer,
-            int keyframe,
+        internal static string CoordinateLogic(LayerReference layer,
             string newText,
             int infoMod,
             bool interacting)
         {
-            Vector2 currentCoords = layer.GetPosition(keyframe);
-            var coordList = new string[2];
-            coordList[0] = currentCoords.X.ToString();
-            coordList[1] = currentCoords.Y.ToString();
+            Vector2 currentCoords = layer.FrameData.Position;
+            var coordList = new float[2];
+            coordList[0] = currentCoords.X;
+            coordList[1] = currentCoords.Y;
+            
+            if (string.IsNullOrWhiteSpace(newText) || newText.Equals(coordList[infoMod]) || !interacting)
+                return coordList[infoMod].ToString();
 
-            if (string.IsNullOrWhiteSpace(newText) || newText.Equals(coordList[infoMod]))
-                return coordList[infoMod];
+            coordList[infoMod] = float.Parse(newText);
 
-            if (interacting)
-            {
-                if (infoMod == 1)
-                    layer.SetPosition(keyframe, new Vector2(currentCoords.X, float.Parse(newText)));
-                else
-                    layer.SetPosition(keyframe, new Vector2(float.Parse(newText), currentCoords.Y));
-            }
-            else
-            {
-                newText = coordList[infoMod];
-            }
+            layer.FrameData.Position = new Vector2(coordList[0], coordList[1]);
 
             return newText;
         }
 
-        internal static string TextureFrameBoundsLogic(AnimationLayer layer,
-            int keyframe,
+        internal static string TextureFrameBoundsLogic(LayerReference layer,
             string newText,
             int infoMod,
             bool interacting)
         {
-            Rectangle currentBounds = layer.SpriteFrameRectangle;
+            Point currentBounds = layer.Layer.Tag.Size;
             var boundList = new string[2];
-            boundList[0] = currentBounds.Width.ToString();
-            boundList[1] = currentBounds.Height.ToString();
+            boundList[0] = currentBounds.X.ToString();
+            boundList[1] = currentBounds.Y.ToString();
 
-            if (string.IsNullOrWhiteSpace(newText) || newText.Equals(boundList[infoMod]))
+            if (string.IsNullOrWhiteSpace(newText) || newText.Equals(boundList[infoMod]) || !interacting)
                 return boundList[infoMod];
 
             if (infoMod == 1)
-                currentBounds.Height = int.Parse(newText);
+                currentBounds.X = int.Parse(newText);
             else
-                currentBounds.Width = int.Parse(newText);
+                currentBounds.Y = int.Parse(newText);
 
-            layer.SpriteFrameRectangle = currentBounds;
+            layer.Layer.Tag = new TextureTag(layer.Layer.Tag.Name, currentBounds);
             return newText;
         }
     }
@@ -87,13 +78,11 @@ namespace HunterCombatMR.UI.Elements
             InfoModifier = infoMod;
         }
 
-        internal event Func<AnimationLayer, int, string, int, bool, string> UpdateLogic;
+        internal event Func<LayerReference, string, int, bool, string> UpdateLogic;
 
         internal int InfoModifier { get; set; }
 
-        internal int KeyFrame { get; set; }
-
-        internal AnimationLayer Layer { get; set; }
+        internal LayerReference LayerRef { get; set; }
 
         internal LayerTextInfo TextInfoType
         {
@@ -111,22 +100,9 @@ namespace HunterCombatMR.UI.Elements
 
         public override void Update(GameTime gameTime)
         {
-            if (Layer != null && Layer.IsActive(KeyFrame))
-                Text = UpdateLogic(Layer, KeyFrame, Text, InfoModifier, Interacting);
-            else
-                Text = "";
+                Text = UpdateLogic(LayerRef, Text, InfoModifier, Interacting);
 
             base.Update(gameTime);
-        }
-
-        internal void SetLayerAndKeyFrame(AnimationLayer layer,
-                    int keyFrame)
-        {
-            if (layer != null && layer.IsActive(keyFrame))
-            {
-                Layer = layer;
-                KeyFrame = keyFrame;
-            }
         }
     }
 }

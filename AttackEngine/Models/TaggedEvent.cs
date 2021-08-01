@@ -1,4 +1,6 @@
-﻿namespace HunterCombatMR.AttackEngine.Models
+﻿using HunterCombatMR.Models.Action;
+
+namespace HunterCombatMR.AttackEngine.Models
 {
     public class TaggedEvent<T>
     {
@@ -12,7 +14,7 @@
         }
 
         public Event<T> Event { get; }
-        public bool IsEnabled { get; set; } = true;
+        public bool IsEnabled { get; set; }
         public EventTag Tag { get; }
     }
 }

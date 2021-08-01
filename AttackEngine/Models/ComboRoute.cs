@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.AttackEngine.Constants;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Models.Player;
 
 namespace HunterCombatMR.AttackEngine.Models
 {
@@ -9,7 +10,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public ComboRoute(ComboAction action,
                     ActionInputs input,
-                    AttackState[] states,
+                    EntityActionStatus[] states,
                     int buffer = DefaultAttackDetails.DefaultBufferWindow,
                     int priority = DefaultAttackDetails.DefaultInputPriority,
                     int delay = DefaultAttackDetails.DefaultInputDelay,
@@ -31,7 +32,7 @@ namespace HunterCombatMR.AttackEngine.Models
         #region Public Properties
 
         /// <summary>
-        /// The <see cref="Models.ComboAction"/> to transition to
+        /// The <see cref="HunterCombatMR.Models.Player.ComboAction"/> to transition to
         /// </summary>
         public ComboAction ComboAction { get; }
 
@@ -75,7 +76,7 @@ namespace HunterCombatMR.AttackEngine.Models
         /// <summary>
         /// All of the attack states the previous action may be in that this action can combo from.
         /// </summary>
-        public AttackState[] StatesCancellableFrom { get; }
+        public EntityActionStatus[] StatesCancellableFrom { get; }
 
         #endregion Public Properties
     }

@@ -8,15 +8,15 @@ using System.Linq;
 namespace HunterCombatMR.Models
 {
     public abstract class CustomAnimation
-        : HunterCombatContentInstance,
-        INamed,
+        : Content,
+        IDisplayNamed,
         IModifiable,
         ICustomAnimation
     {
         public CustomAnimation(string name)
             : base(name)
         {
-            Name = name;
+            DisplayName = name;
         }
 
         [JsonIgnore]
@@ -31,16 +31,16 @@ namespace HunterCombatMR.Models
         public bool IsModified { get; set; }
 
         [JsonIgnore]
-        public KeyFrameProfile KeyFrameProfile { get => LayerData.KeyFrameProfile; }
+        public KeyFrameProfile FrameData { get => LayerData.KeyFrameProfile; }
 
-        public LayerData LayerData { get; protected set; }
-        public string Name { get; protected set; }
+        public ExtraAnimationData LayerData { get; protected set; }
+        public string DisplayName { get; protected set; }
 
         /// <summary>
         /// Duplicate an existing keyframe.
         /// </summary>
         /// <param name="duplicate">Keyframe duplicating</param>
-        public void AddKeyFrame(KeyFrame duplicate)
+        public void AddKeyFrame(Keyframe duplicate)
         {
             AddKeyFrame(duplicate.FrameLength, LayerData.GetFrameInfoForLayers(AnimationData.KeyFrames.IndexOfValue(duplicate)));
         }
@@ -60,10 +60,10 @@ namespace HunterCombatMR.Models
 
             int newIndex = AnimationData.KeyFrames.Last().Key + 1;
 
-            if (!frameLength.Equals(KeyFrameProfile.DefaultKeyFrameLength))
-                KeyFrameProfile.KeyFrameLengths.Add(newIndex, frameLength);
+            if (!frameLength.Equals(FrameData.DefaultKeyFrameLength))
+                FrameData.KeyFrameLengths.Add(newIndex, frameLength);
 
-            KeyFrameProfile.KeyFrameAmount += 1;
+            FrameData.KeyFrameAmount += 1;
 
             if (layerInfo != null)
             {
@@ -88,7 +88,8 @@ namespace HunterCombatMR.Models
         /// </summary>
         public virtual void Initialize()
         {
-            AnimationData.Initialize(KeyFrameProfile, LayerData.Loop);
+            AnimationData.Initialize(FrameData);
+            AnimationData.CurrentLoopStyle = LayerData.Loop;
         }
 
         public void MoveKeyFrame(int keyFrameIndex,
@@ -142,22 +143,22 @@ namespace HunterCombatMR.Models
         public void UpdateKeyFrameLength(FrameIndex keyFrameIndex, FrameLength frameAmount)
         {
             IsModified = true;
-            var profileModified = KeyFrameProfile.KeyFrameLengths.ContainsKey(keyFrameIndex);
+            var profileModified = FrameData.KeyFrameLengths.ContainsKey(keyFrameIndex);
 
-            AnimationData.AdjustKeyFrameLength(keyFrameIndex, frameAmount, KeyFrameProfile.DefaultKeyFrameLength);
+            AnimationData.AdjustKeyFrameLength(keyFrameIndex, frameAmount, FrameData.DefaultKeyFrameLength);
 
             if (profileModified)
             {
-                KeyFrameProfile.KeyFrameLengths.Remove(keyFrameIndex);
+                FrameData.KeyFrameLengths.Remove(keyFrameIndex);
 
-                if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != KeyFrameProfile.DefaultKeyFrameLength)
+                if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != FrameData.DefaultKeyFrameLength)
                 {
-                    KeyFrameProfile.KeyFrameLengths.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
+                    FrameData.KeyFrameLengths.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
                 }
             }
-            else if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != KeyFrameProfile.DefaultKeyFrameLength)
+            else if (AnimationData.KeyFrames[keyFrameIndex].FrameLength != FrameData.DefaultKeyFrameLength)
             {
-                KeyFrameProfile.KeyFrameLengths.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
+                FrameData.KeyFrameLengths.Add(keyFrameIndex, AnimationData.KeyFrames[keyFrameIndex].FrameLength);
             }
         }
 

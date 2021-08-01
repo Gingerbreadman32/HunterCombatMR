@@ -11,7 +11,7 @@ namespace HunterCombatMR.Interfaces
         /// <summary>
         /// The list of action data
         /// </summary>
-        Dictionary<string, LayerData> AnimatedActions { get; }
+        Dictionary<string, ExtraAnimationData> AnimatedActions { get; }
 
         /// <summary>
         /// Override this method to create your list of actions

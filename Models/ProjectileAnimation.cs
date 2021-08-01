@@ -15,8 +15,8 @@ namespace HunterCombatMR.Models
             string name)
             : base(name)
         {
-            Name = copy.Name;
-            LayerData = new LayerData(copy.LayerData);
+            DisplayName = copy.DisplayName;
+            LayerData = new ExtraAnimationData(copy.LayerData);
             IsStoredInternally = copy.IsStoredInternally;
             AnimationData = new Animator();
             Initialize();
@@ -24,7 +24,7 @@ namespace HunterCombatMR.Models
 
         public override AnimationType AnimationType => AnimationType.Projectile;
 
-        public override IHunterCombatContentInstance CloneFrom(string internalName)
+        public override IContent CreateNew(string internalName)
             => new ProjectileAnimation(this, internalName);
     }
 }

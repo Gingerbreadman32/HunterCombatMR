@@ -98,12 +98,12 @@ namespace HunterCombatMR.UI.Elements
 
         private string ActionText()
             => Player.StateController.CurrentAction != null
-                ? $"{Player.StateController.CurrentAction.Name} - {Player.StateController.CurrentActionKeyFrame}"
+                ? $"{Player.StateController.CurrentAction.DisplayName} - {Player.StateController.CurrentActionKeyFrame}"
                 : _noneText;
 
         private string AnimationText()
-            => Player.CurrentAnimation != null
-                ? $"{Player.CurrentAnimation.Name} - {Player.CurrentAnimation.AnimationData.CurrentFrame}"
+            => Player.AnimationController.CurrentAnimation != null
+                ? $"{Player.AnimationController.CurrentAnimation.InternalName} - {Player.AnimationController.Animator.CurrentFrame}"
                 : _noneText;
 
         private string EquipText()

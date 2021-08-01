@@ -6,23 +6,23 @@ namespace HunterCombatMR.Models
     /// <summary>
     /// Object for storing keyframe info
     /// </summary>
-    public struct KeyFrame
-        : IComparable<KeyFrame>
+    public struct Keyframe
+        : IComparable<Keyframe>
     {
-        public KeyFrame(FrameLength length)
+        public Keyframe(FrameLength length)
         {
             FrameLength = length;
             StartingFrameIndex = 0;
         }
 
-        public KeyFrame(FrameIndex startingFrame,
+        public Keyframe(FrameIndex startingFrame,
                     FrameLength length)
         {
             StartingFrameIndex = startingFrame;
             FrameLength = length;
         }
 
-        public KeyFrame(KeyFrame copy)
+        public Keyframe(Keyframe copy)
         {
             StartingFrameIndex = copy.StartingFrameIndex;
             FrameLength = copy.FrameLength;
@@ -47,14 +47,14 @@ namespace HunterCombatMR.Models
         /// </summary>
         public FrameIndex StartingFrameIndex { get; set; }
 
-        public static bool operator <=(KeyFrame a, KeyFrame b)
+        public static bool operator <=(Keyframe a, Keyframe b)
             => a.StartingFrameIndex <= b.StartingFrameIndex;
 
-        public static bool operator >=(KeyFrame a, KeyFrame b)
+        public static bool operator >=(Keyframe a, Keyframe b)
             => a.StartingFrameIndex >= b.StartingFrameIndex;
 
         /// <inheritdoc/>
-        public int CompareTo(KeyFrame other)
+        public int CompareTo(Keyframe other)
             => other.StartingFrameIndex.CompareTo(other.StartingFrameIndex);
 
         public FrameIndex GetFrameProgress(FrameIndex currentFrame)
@@ -63,7 +63,7 @@ namespace HunterCombatMR.Models
             {
                 HunterCombatMR
                     .Instance
-                    .StaticLogger
+                    .Logger
                     .Error($"Current animation frame {currentFrame} does not include keyframe that starts at {StartingFrameIndex}.");
                 return FrameIndex.Zero;
             }
