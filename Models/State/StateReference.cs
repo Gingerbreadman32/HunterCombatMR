@@ -5,11 +5,11 @@
         public StateReference(int id,
             string name)
         {
-            StateId = id;
+            StateNumber = id;
             StateName = name;
         }
 
-        public int StateId { get; }
+        public int StateNumber { get; }
 
         public string StateName { get; }
     }

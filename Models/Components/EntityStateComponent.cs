@@ -1,19 +1,31 @@
 ﻿using HunterCombatMR.Models.State;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.Models.Components
 {
-    public class EntityStateComponent
-        : ModComponent
+    public struct EntityStateComponent
     {
-        public EntityStateComponent()
-            : base()
+        public EntityStateComponent(IEnumerable<StateSet> stateSets)
         {
-            StateSets = new SortedList<int, StateSet>();
+            StateSets = stateSets.ToArray();
+            CurrentState = 0;
+            CurrentStateSet = 0;
+            CurrentStateTime = 0;
         }
 
-        public SortedList<int, StateSet> StateSets { get; set; }
+        public EntityStateComponent(StateSet stateSet)
+        {
+            StateSets = new StateSet[] { stateSet };
+            CurrentState = 0;
+            CurrentStateSet = 0;
+            CurrentStateTime = 0;
+        }
 
         public int CurrentState { get; set; }
+        public int CurrentStateSet { get; set; }
+
+        public int CurrentStateTime { get; set; }
+        public StateSet[] StateSets { get; set; }
     }
 }
