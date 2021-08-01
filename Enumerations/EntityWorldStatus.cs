@@ -5,10 +5,11 @@
     /// </summary>
     public enum EntityWorldStatus
     {
-        Neutral = 0,
-        Walking = 1,
-        Aerial = 2,
-        Jumping = 3,
-        Dead = 4
+        NoStatus = 0,
+        Grounded = 1,
+        Walking = 2,
+        Aerial = 3,
+        Jumping = 4,
+        Dead = 5
     }
 }

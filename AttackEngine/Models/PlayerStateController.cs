@@ -14,7 +14,8 @@ namespace HunterCombatMR.AttackEngine.Models
     {
         private readonly Func<Player, bool>[] _vanillaStateEvaluations = new Func<Player, bool>[] 
             { 
-                (p) => { return true; },  
+                (p) => { return true; },
+                (p) => { return true; },
                 (p) => p.IsPlayerWalking(),
                 (p) => p.IsPlayerAerial(),
                 (p) => p.IsPlayerJumping(),
@@ -28,15 +29,15 @@ namespace HunterCombatMR.AttackEngine.Models
         public PlayerStateController(HunterCombatPlayer player)
         {
             _actionAnimator = new Animator();
-            State = EntityWorldStatus.Neutral;
-            ActionState = AttackState.NotAttacking;
+            State = EntityWorldStatus.NoStatus;
+            ActionState = EntityActionStatus.Idle;
             Player = player;
             ActionHistory = new SortedList<int, string>();
             MovementInformation = new MovementInfo();
         }
 
         public SortedList<int, string> ActionHistory { get; }
-        public AttackState ActionState { get; set; }
+        public EntityActionStatus ActionState { get; set; }
 
         public ComboAction CurrentAction
         {
@@ -149,7 +150,7 @@ namespace HunterCombatMR.AttackEngine.Models
         {
             CurrentAction = null;
             Player.AnimationController.CurrentAnimation = null;
-            ActionState = AttackState.NotAttacking;
+            ActionState = EntityActionStatus.Idle;
         }
 
         private void FullStateReset()

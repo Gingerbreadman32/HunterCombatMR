@@ -8,7 +8,7 @@ namespace HunterCombatMR.Events
     public sealed class SetPlayerActionState
         : Event<HunterCombatPlayer>
     {
-        public SetPlayerActionState(AttackState state)
+        public SetPlayerActionState(EntityActionStatus state)
             : base()
         {
             ModifyParameter("ActionState", (float)state);
@@ -23,7 +23,7 @@ namespace HunterCombatMR.Events
             Animator animator)
         {
             int parameterValue = (int)GetParameterValue ("ActionState");
-            entity.StateController.ActionState = (AttackState)parameterValue;
+            entity.StateController.ActionState = (EntityActionStatus)parameterValue;
         }
     }
 }

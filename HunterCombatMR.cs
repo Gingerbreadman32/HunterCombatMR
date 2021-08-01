@@ -1,14 +1,15 @@
 using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces.System;
+using HunterCombatMR.Managers;
 using HunterCombatMR.Models.Systems;
 using HunterCombatMR.Services;
 using HunterCombatMR.UI;
 using HunterCombatMR.UI.Elements;
-using HunterCombatMR.Utilities;
 using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,9 @@ namespace HunterCombatMR
         private EditorUI _panelState;
         private DebugUI _popUpState;
 
+        private bool _managersLoaded;
+        private ICollection<ManagerBase> _managers;
+
         public HunterCombatMR()
         {
             Instance = this;
@@ -41,12 +45,25 @@ namespace HunterCombatMR
         public AnimationFileManager FileManager { get; private set; }
         public IDictionary<string, Texture2D> VariableTextures { get; set; }
 
+        private void LoadManagers(Type[] assemblyTypes)
+        {
+            _managers = new List<ManagerBase>();
+
+            foreach (var type in assemblyTypes.Where(t => !t.IsAbstract && typeof(ManagerBase).IsAssignableFrom(t)))
+            {
+                _managers.Add((ManagerBase)Activator.CreateInstance(type));
+            }
+
+            _managersLoaded = true;
+        }
+
         public override void Load()
         {
-            SystemManager.Initialize(LoadSystems());
+            var assemblyTypes = GetType().Assembly.GetTypes();
+
+            ManagerSetup(assemblyTypes);
             FileManager = new AnimationFileManager();
             Content = new ContentService(FileManager);
-            GameCommandCache.Initialize();
 
             if (!Main.dedServ)
             {
@@ -61,6 +78,39 @@ namespace HunterCombatMR
             }
 
             Content.SetupContent();
+        }
+
+        private void ManagerSetup(Type[] assemblyTypes)
+        {
+            LoadManagers(assemblyTypes);
+
+            InitializeManagers();
+
+            LoadSystems();
+        }
+
+        private void InitializeManagers()
+        {
+            if (!_managersLoaded)
+                throw new Exception("Managers not loaded or loaded improperly.");
+
+            foreach (var manager in _managers)
+            {
+                manager.Initialize();
+            }
+        }
+
+        private void DisposeManagers()
+        {
+            if (!_managersLoaded)
+                throw new Exception("Managers not loaded or loaded improperly.");
+
+            foreach (var manager in _managers)
+            {
+                manager.Dispose();
+            }
+
+            _managers = null;
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -111,7 +161,8 @@ namespace HunterCombatMR
 
         public override void PostUpdateInput()
         {
-            SystemManager.PostInputUpdate();
+            if (_managersLoaded)
+                SystemManager.PostInputUpdate();
         }
 
         public override void PreSaveAndQuit()
@@ -123,12 +174,9 @@ namespace HunterCombatMR
 
         public override void Unload()
         {
-            GameCommandCache.Uninitialize();
+            DisposeManagers();
             EditorInstance?.Dispose();
             EditorInstance = null;
-
-            SystemManager.Dispose();
-
             Instance.EditorInstance?.Dispose();
             Instance = null;
         }
@@ -157,14 +205,10 @@ namespace HunterCombatMR
             _editorUIPanels.Update(gameTime);
         }
 
-        private static IEnumerable<IModSystem> LoadSystems()
+        private void LoadSystems()
         {
-            var systemsList = new List<IModSystem>();
-
-            systemsList.Add(new InputSystem());
-            systemsList.Add(new EntityStateSystem());
-
-            return systemsList;
+            SystemManager.AddSystem(new InputSystem());
+            SystemManager.AddSystem(new EntityStateSystem());
         }
     }
 }

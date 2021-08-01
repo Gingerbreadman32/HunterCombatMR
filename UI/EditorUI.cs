@@ -2,7 +2,6 @@
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
-using HunterCombatMR.Models.Animation;
 using HunterCombatMR.UI.AnimationTimeline;
 using HunterCombatMR.UI.Elements;
 using HunterCombatMR.Utilities;
@@ -39,38 +38,22 @@ namespace HunterCombatMR.UI
 
         private UIText _currentlayertextureframe;
 
-        private HunterCombatPlayer CurrentPlayer => Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
-
         private UIAutoScaleTextTextPanel<string> _defaulttimebutton;
-
         private UIElement _framegroup;
-
         private UIText _frametotal;
-
         private LayerInformationPanel _layerInfoPanel;
-
         private UIList _layerlist;
-
         private UIPanel _layerpanel;
-
         private UIAutoScaleTextTextPanel<string> _layertexturebutton;
-
         private UIAutoScaleTextTextPanel<string> _loadbutton;
-
         private UIAutoScaleTextTextPanel<string> _onionskinbutton;
-
         private UIAutoScaleTextTextPanel<string> _savebutton;
-
         private UIAutoScaleTextTextPanel<string> _subtimebutton;
-
         private UIList _testlist;
-
         private UIPanel _testlistpanel;
-
         private IList<Texture2D> _textures;
-
         private UIElement _timinggroup;
-
+        private HunterCombatPlayer CurrentPlayer;
         private int loadTimer = 0;
 
         private int saveTimer = 0;
@@ -98,8 +81,6 @@ namespace HunterCombatMR.UI
         public override void OnInitialize()
         {
             base.OnInitialize();
-
-            
 
             _layerpanel = new UIPanel();
             _layerpanel.Width.Set(0, 0.15f);
@@ -447,13 +428,22 @@ namespace HunterCombatMR.UI
         {
             base.Update(gameTime);
 
-            if (Main.gameMenu || CurrentPlayer == null)
+            if (Main.gameMenu || Main.LocalPlayer == null)
             {
                 return;
             }
 
             // Editor Check
             var inEditor = !HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None);
+
+            //if (!inEditor)
+            //{
+                _testlist.Clear();
+                return;
+            //}
+
+            if (CurrentPlayer == null || !CurrentPlayer.IsMainPlayer)
+                CurrentPlayer = Main.LocalPlayer.GetModPlayer<HunterCombatPlayer>();
 
             // Save Button
             if (saveTimer > 0 && saveTimer < SAVETIMERMAX)
@@ -484,11 +474,9 @@ namespace HunterCombatMR.UI
             }
 
             // Animation Name Text Box
-            _animationname.Hidden = (!inEditor || CurrentPlayer == null || EditorUtils.EditingAnimation == null);
-            if (CurrentPlayer?.AnimationController.CurrentAnimation != null)
-            {
-                _animationname.DefaultText = EditorUtils.EditingAnimation.InternalName;
-            }
+            _animationname.Hidden = (!inEditor || EditorUtils.EditingAnimation == null);
+            _animationname.DefaultText = EditorUtils.EditingAnimation?.InternalName;
+
             if (Main.mouseLeft && !_animationname.IsMouseHovering)
                 _animationname.StopInteracting();
 
@@ -499,23 +487,6 @@ namespace HunterCombatMR.UI
             {
                 _layerlist.Clear();
             }
-
-            if (!inEditor)
-            {
-                _testlist.Clear();
-                return;
-            }
-
-            var currentKeyFrame = CurrentPlayer?.AnimationController.Animator.CurrentKeyFrameIndex ?? 0;
-            // Current Keyframe Timing Text
-            var framenumtext = CurrentPlayer?.AnimationController.Animator.CurrentKeyFrame.FrameLength.ToString() ?? "0";
-            _currentframetime.SetText(framenumtext);
-
-            // Total Amount of Animation KeyFrames
-            var totalframenumtext = CurrentPlayer?.AnimationController.Animator.TotalFrames.ToString() ?? "0";
-            _frametotal.SetText(totalframenumtext);
-
-            LayerPanelUpdate(currentKeyFrame);
 
             // Animation List Window
             foreach (var animation in HunterCombatMR.Instance.Content.GetContentList<ICustomAnimationV2>())
@@ -538,20 +509,35 @@ namespace HunterCombatMR.UI
             if (_testlist._items.Any())
                 _testlist._items.ForEach(x => (x as UIAutoScaleTextTextPanel<string>).TextColor = Color.White);
 
-            if (CurrentPlayer?.AnimationController.CurrentAnimation != null)
+            if (CurrentPlayer.AnimationController.CurrentAnimation == null)
             {
-                UIAutoScaleTextTextPanel<string> listSelected = (UIAutoScaleTextTextPanel<string>)_testlist._items.FirstOrDefault(x => EditorUtils.EditingAnimation.InternalName.Equals((x as UIAutoScaleTextTextPanel<string>).Text));
-                if (listSelected != null)
-                {
-                    listSelected.TextColor = Color.Aqua;
+                return;
+            }
 
-                    if (EditorUtils.AnimationEdited)
-                        listSelected.TextColor = Color.OrangeRed;
-                }
+            // None of this shit fucking works lmfao component time
+
+            var currentKeyFrame = CurrentPlayer.AnimationController.Animator?.CurrentKeyFrameIndex ?? 0;
+            // Current Keyframe Timing Text
+            var framenumtext = CurrentPlayer.AnimationController.Animator?.CurrentKeyFrame.FrameLength.ToString() ?? "0";
+            _currentframetime.SetText(framenumtext);
+
+            // Total Amount of Animation KeyFrames
+            var totalframenumtext = CurrentPlayer.AnimationController.Animator?.TotalFrames.ToString() ?? "0";
+            _frametotal.SetText(totalframenumtext);
+
+            LayerPanelUpdate(currentKeyFrame);
+
+            UIAutoScaleTextTextPanel<string> listSelected = (UIAutoScaleTextTextPanel<string>)_testlist._items.FirstOrDefault(x => EditorUtils.EditingAnimation.InternalName.Equals((x as UIAutoScaleTextTextPanel<string>).Text));
+            if (listSelected != null)
+            {
+                listSelected.TextColor = Color.Aqua;
+
+                if (EditorUtils.AnimationEdited)
+                    listSelected.TextColor = Color.OrangeRed;
             }
 
             if (EditorUtils.AnimationEdited)
-                DisplayLayers(CurrentPlayer?.AnimationController);
+                DisplayLayers(CurrentPlayer.AnimationController);
         }
 
         internal void ButtonAction(Action<UIMouseEvent, UIElement> action,
@@ -588,7 +574,7 @@ namespace HunterCombatMR.UI
 
         private void DisplayLayers(IAnimationController controller)
         {
-            if (controller.CurrentAnimation == null) 
+            if (controller.CurrentAnimation == null)
             {
                 _layerlist.Clear();
                 return;
@@ -679,7 +665,7 @@ namespace HunterCombatMR.UI
 
             var key = CurrentPlayer.AnimationController.Animator.CurrentKeyFrameIndex;
             var layer = CurrentPlayer.AnimationController.CurrentAnimation.Layers[HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Single(), key];
-            
+
             var totalFrames = TextureUtils.GetTotalTextureFrames(TextureUtils.GetTextureFromTag(layer.Layer.Tag), layer.Layer.Tag);
 
             int newFrame = layer.FrameData.SheetFrame + modifier;

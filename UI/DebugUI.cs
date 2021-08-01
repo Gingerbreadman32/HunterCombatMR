@@ -1,7 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
+using HunterCombatMR.Managers;
 using HunterCombatMR.Models.Components;
-using HunterCombatMR.Services;
 using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
@@ -92,10 +92,10 @@ namespace HunterCombatMR.UI
 
             // Buffer Window
             _bufferList.Clear();
-            if (!SystemManager.HasComponent<InputComponent>(Player.EntityReference))
+            if (!ComponentManager.HasComponent<InputComponent>(Player.EntityReference))
                 return;
 
-            var inputs = SystemManager.GetComponent<InputComponent>(Player.EntityReference).BufferedInputs;
+            var inputs = ComponentManager.GetEntityComponent<InputComponent>(Player.EntityReference).BufferedInputs;
             
             foreach (var buffer in inputs.ToArray())
             {

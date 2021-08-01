@@ -2,6 +2,7 @@
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces.System;
+using HunterCombatMR.Managers;
 using HunterCombatMR.Models.Components;
 using HunterCombatMR.Models.Messages.InputSystem;
 using HunterCombatMR.Utilities;
@@ -27,18 +28,20 @@ namespace HunterCombatMR.Models.Systems
 
         public bool HandleMessage(InputResetMessage message)
         {
-            if (!HasComponent(message.EntityId))
+            if (!ComponentManager.HasComponent<InputComponent>(message.EntityId))
                 return false;
 
-            ResetBuffers(GetComponent(message.EntityId).BufferedInputs);
+            ResetBuffers(ComponentManager.GetEntityComponent<InputComponent>(message.EntityId).BufferedInputs);
 
             return true;
         }
 
         public override void PostInputUpdate()
         {
-            foreach (var component in Components.Values)
+            foreach (var entity in ReadEntities())
             {
+                ref var component = ref ComponentManager.GetEntityComponent<InputComponent>(entity);
+
                 if (InputCheckingUtils.PlayerInputBufferPaused())
                 {
                     if (InputCheckingUtils.NoGameInputExists()

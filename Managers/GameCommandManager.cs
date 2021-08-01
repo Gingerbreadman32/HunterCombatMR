@@ -1,11 +1,13 @@
 ﻿using HunterCombatMR.Attributes;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Services;
 using System;
 using System.Collections.Concurrent;
 
-namespace HunterCombatMR.Utilities
+namespace HunterCombatMR.Managers
 {
-    public static class GameCommandCache
+    public sealed class GameCommandManager
+        : ManagerBase
     {
         private static ConcurrentDictionary<string, GameCommand> _commandCache;
 
@@ -23,12 +25,12 @@ namespace HunterCombatMR.Utilities
             return command;
         }
 
-        internal static void Initialize()
+        protected override void OnDispose()
         {
             _commandCache = new ConcurrentDictionary<string, GameCommand>();
         }
 
-        internal static void Uninitialize()
+        protected override void OnInitialize()
         {
             _commandCache = null;
         }

@@ -58,6 +58,8 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public void InitializeAnimation()
         {
+            Animator.Initialize(Animation.Layers.FrameData.Values);
+
             foreach (var keyFrame in Animator.KeyFrames)
             {
                 bool HasLayers = Animation.Layers[keyFrame.Key].Any();
@@ -72,6 +74,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         public override void OnInitialize()
         {
             base.OnInitialize();
+            Animator = new Animator();
             _timelineEdgeTexture = ModContent.GetTexture(_timelineEdgePath);
             _timelineMidTexture = ModContent.GetTexture(_timelineMiddlePath);
             TimelineBarEdgeTexture = ModContent.GetTexture(_timelineBarEdgePath);

@@ -13,7 +13,7 @@ namespace HunterCombatMR.Models.Player
     {
         public ComboAction(ICustomAction<HunterCombatPlayer> attack,
             IEnumerable<ComboRoute> routes,
-            EntityWorldStatus state = EntityWorldStatus.Neutral,
+            EntityWorldStatus state = EntityWorldStatus.NoStatus,
             string name = null)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
@@ -23,7 +23,7 @@ namespace HunterCombatMR.Models.Player
         }
 
         public ComboAction(ICustomAction<HunterCombatPlayer> attack,
-            EntityWorldStatus state = EntityWorldStatus.Neutral)
+            EntityWorldStatus state = EntityWorldStatus.NoStatus)
         {
             Attack = attack ?? throw new ArgumentNullException(nameof(attack));
             DisplayName = Attack.DisplayName;
@@ -44,7 +44,7 @@ namespace HunterCombatMR.Models.Player
 
         public void AddRoute(ComboAction action,
             ActionInputs input,
-            AttackState[] states)
+            EntityActionStatus[] states)
         {
             AddRouteInternal(new ComboRoute(action, input, states));
         }

@@ -10,7 +10,7 @@ namespace HunterCombatMR.AttackEngine.Models
 
         public ComboRoute(ComboAction action,
                     ActionInputs input,
-                    AttackState[] states,
+                    EntityActionStatus[] states,
                     int buffer = DefaultAttackDetails.DefaultBufferWindow,
                     int priority = DefaultAttackDetails.DefaultInputPriority,
                     int delay = DefaultAttackDetails.DefaultInputDelay,
@@ -76,7 +76,7 @@ namespace HunterCombatMR.AttackEngine.Models
         /// <summary>
         /// All of the attack states the previous action may be in that this action can combo from.
         /// </summary>
-        public AttackState[] StatesCancellableFrom { get; }
+        public EntityActionStatus[] StatesCancellableFrom { get; }
 
         #endregion Public Properties
     }

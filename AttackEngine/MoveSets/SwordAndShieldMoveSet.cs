@@ -42,7 +42,7 @@ namespace HunterCombatMR.AttackEngine.MoveSets
         protected override IEnumerable<ComboRoute> SetNeutralRoutes()
         {
             var routes = new List<ComboRoute>();
-            var neutralstate = new Enumerations.AttackState[] { Enumerations.AttackState.NotAttacking };
+            var neutralstate = new Enumerations.EntityActionStatus[] { Enumerations.EntityActionStatus.Idle };
 
             routes.Add(new ComboRoute(GetAction("Double Slash"), Enumerations.ActionInputs.PrimaryAction, neutralstate));
             routes.Add(new ComboRoute(GetAction("Running Slash"), Enumerations.ActionInputs.PrimaryAction, neutralstate));

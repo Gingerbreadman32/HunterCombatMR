@@ -3,11 +3,12 @@ using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Items;
+using HunterCombatMR.Managers;
 using HunterCombatMR.Models.Components;
 using HunterCombatMR.Models.Messages.InputSystem;
 using HunterCombatMR.Models.Player;
-using HunterCombatMR.Services;
 using System.Collections.Generic;
+using HunterCombatMR.Extensions;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -44,7 +45,8 @@ namespace HunterCombatMR
 
         public override void Initialize()
         {
-            _entity = SystemManager.CreateEntity().WithComponent<EntityStateComponent>();
+            _entity = EntityManager.CreateEntity();
+            ComponentManager.RegisterComponent(new EntityStateComponent(), _entity);
         }
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
@@ -59,17 +61,16 @@ namespace HunterCombatMR
 
         public override void OnEnterWorld(Player player)
         {
-            StateController.State = EntityWorldStatus.Neutral;
+            StateController.State = EntityWorldStatus.Grounded;
             if (IsMainPlayer && Main.netMode == NetmodeID.SinglePlayer)
             {
-                var component = SystemManager.RegisterComponent<InputComponent>(_entity);
-                component.Player = player.whoAmI;
+                ComponentManager.RegisterComponent(new InputComponent(player.whoAmI), _entity);
             }
         }
 
         public override void OnRespawn(Player player)
         {
-            StateController.State = EntityWorldStatus.Neutral;
+            StateController.State = EntityWorldStatus.Grounded;
             SystemManager.SendMessage(new InputResetMessage(_entity.Id));
         }
 

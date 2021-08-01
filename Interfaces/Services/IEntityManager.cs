@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.Interfaces.Component;
-using HunterCombatMR.Interfaces.Entity;
+﻿using HunterCombatMR.Interfaces.Entity;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.Interfaces.Services

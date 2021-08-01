@@ -1,18 +1,16 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Utilities;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.Models.Components
 {
-    public class InputComponent
-        : ModComponent
+    public struct InputComponent
     {
-        public InputComponent() 
-            : base()
+        public InputComponent(int player,
+            bool ignoreBlockInput = true)
         {
             BufferedInputs = new Queue<BufferedInput>();
-            IgnoreBlockInput = true;
-            Player = -1;
+            IgnoreBlockInput = ignoreBlockInput;
+            Player = player;
         }
 
         public Queue<BufferedInput> BufferedInputs { get; set; }

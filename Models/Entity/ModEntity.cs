@@ -1,6 +1,4 @@
-﻿using HunterCombatMR.Interfaces.Component;
-using HunterCombatMR.Interfaces.Entity;
-using System.Collections.Generic;
+﻿using HunterCombatMR.Interfaces.Entity;
 
 namespace HunterCombatMR.Models.Entity
 {

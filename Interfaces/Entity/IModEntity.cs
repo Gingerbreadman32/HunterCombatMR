@@ -1,7 +1,4 @@
-﻿using HunterCombatMR.Interfaces.Component;
-using System.Collections.Generic;
-
-namespace HunterCombatMR.Interfaces.Entity
+﻿namespace HunterCombatMR.Interfaces.Entity
 {
     public interface IModEntity
     {

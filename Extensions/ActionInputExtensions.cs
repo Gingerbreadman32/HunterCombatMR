@@ -1,5 +1,5 @@
 ﻿using HunterCombatMR.Enumerations;
-using HunterCombatMR.Utilities;
+using HunterCombatMR.Managers;
 using System.Collections.Generic;
 using Terraria.GameInput;
 
@@ -9,7 +9,7 @@ namespace HunterCombatMR.Extensions
     {
         public static string GetGameCommand(this ActionInputs input)
         {
-            var attribute = GameCommandCache.GetGameCommand(input.ToString());
+            var attribute = GameCommandManager.GetGameCommand(input.ToString());
             return attribute?.GetName() ?? "";
         }
 

@@ -16,9 +16,9 @@ namespace HunterCombatMR.Seeds.Attacks
 
             action.Animations.AddAnimation(internalName);
 
-            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.AttackState.AttackStartup), FrameIndex.Zero);
-            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.AttackState.ActiveAttack), activeFrame);
-            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.AttackState.AttackRecovery), recoveryFrame);
+            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.EntityActionStatus.ActionStartup), FrameIndex.Zero);
+            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.EntityActionStatus.CurrentlyActing), activeFrame);
+            action.Events.AddKeyframeEvent(new SetPlayerActionState(Enumerations.EntityActionStatus.ForcedRecovery), recoveryFrame);
 
             return action;
         }
