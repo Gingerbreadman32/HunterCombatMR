@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using HunterCombatMR.Managers;
+using HunterCombatMR.Models.Components;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
@@ -12,6 +14,7 @@ namespace HunterCombatMR.UI.Elements
     {
         private const string _noneText = "N/A";
         private string[] _parameters = new string[6];
+        private readonly bool _stateVersion = true;
 
         public PlayerInformationPanel()
         {
@@ -71,17 +74,37 @@ namespace HunterCombatMR.UI.Elements
             if (Player == null)
                 return;
 
-            _parameters = new string[6]
+            // Debug
+            if (_stateVersion)
             {
-                $"PState: {Player.StateController.State.ToString()} ({(int)Player.StateController.State})",
+                if (!ComponentManager.HasComponent<EntityStateComponent>(Player.EntityReference))
+                    return;
+
+                var component = ComponentManager.GetEntityComponent<EntityStateComponent>(Player.EntityReference);
+                var currentState = component.GetCurrentState();
+
+                _parameters = new string[]
+                {
+                $"State No.: {component.CurrentStateNumber}",
+                $"W. Status: {currentState.Definition.WorldStatus}",
+                $"A. Status: {currentState.Definition.ActionStatus}",
+                $"State Time: {component.CurrentStateInfo.Time}",
+                $"State Set: {component.CurrentStateInfo.StateSet}"
+                };
+            } else
+            {
+                _parameters = new string[6]
+                {
+                $"WStatus: {Player.StateController.State.ToString()} ({(int)Player.StateController.State})",
+                $"AStatus: {Player.StateController.ActionState.ToString()} ({(int)Player.StateController.ActionState})",
                 $"Anim: {AnimationText()}",
                 $"Vel: {Math.Round(Player.player.velocity.X, 2)}, {Math.Round(Player.player.velocity.Y, 2)}",
-                $"Action: {ActionText()}",
-                $"AState: {Player.StateController.ActionState.ToString()} ({(int)Player.StateController.ActionState})",
+                $"State No.: {ActionText()}",
                 $"Equip: {EquipText()}"
-            };
+                };
+            }
 
-            for (var i = 0; i < ParameterList._items.Count(); i++)
+            for (var i = 0; i < _parameters.Length; i++)
             {
                 (ParameterList._items[i] as UIText).SetText(_parameters[i]);
             }
@@ -97,8 +120,8 @@ namespace HunterCombatMR.UI.Elements
         }
 
         private string ActionText()
-            => Player.StateController.CurrentAction != null
-                ? $"{Player.StateController.CurrentAction.DisplayName} - {Player.StateController.CurrentActionKeyFrame}"
+            => ComponentManager.HasComponent<EntityStateComponent>(Player.EntityReference)
+                ? $"{ComponentManager.GetEntityComponent<EntityStateComponent>(Player.EntityReference).CurrentStateNumber}"
                 : _noneText;
 
         private string AnimationText()

@@ -13,5 +13,10 @@
         /// How long the entity has been in the current state.
         /// </summary>
         public int Time { get; set; }
+
+        /// <summary>
+        /// The stateset this state is associated with.
+        /// </summary>
+        public int StateSet { get; set; }
     }
 }
