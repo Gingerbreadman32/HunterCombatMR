@@ -29,6 +29,17 @@ namespace HunterCombatMR.Managers
             }
         }
 
+        public static void PostUpdateEverything()
+        {
+            if (!Initialized)
+                return;
+
+            foreach (var system in _systems)
+            {
+                system.PostEntityUpdate();
+            }
+        }
+
         public static bool SendMessage<TMessage>(TMessage message) where TMessage : struct
         {
             InitializeCheck();
