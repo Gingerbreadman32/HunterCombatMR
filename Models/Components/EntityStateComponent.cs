@@ -1,4 +1,7 @@
-﻿using HunterCombatMR.Models.State;
+﻿using HunterCombatMR.Attributes;
+using HunterCombatMR.Constants;
+using HunterCombatMR.Models.State;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,23 +12,35 @@ namespace HunterCombatMR.Models.Components
         public EntityStateComponent(IEnumerable<StateSet> stateSets)
         {
             StateSets = stateSets.ToArray();
-            CurrentState = 0;
-            CurrentStateSet = 0;
-            CurrentStateTime = 0;
+            CurrentStateNumber = 0;
+            CurrentStateInfo = new StateInfo();
         }
 
         public EntityStateComponent(StateSet stateSet)
         {
             StateSets = new StateSet[] { stateSet };
-            CurrentState = 0;
-            CurrentStateSet = 0;
-            CurrentStateTime = 0;
+            CurrentStateNumber = 0;
+            CurrentStateInfo = new StateInfo();
         }
 
-        public int CurrentState { get; set; }
-        public int CurrentStateSet { get; set; }
+        public int CurrentStateNumber { get; set; }
+        
+        public StateInfo CurrentStateInfo { get; set; }
 
-        public int CurrentStateTime { get; set; }
+        [TriggerParameter(CommonTriggerParams.StateTime)]
+        public int CurrentStateTime { get => CurrentStateInfo.Time; }
+
         public StateSet[] StateSets { get; set; }
+
+        public EntityState GetCurrentState()
+            => GetState(CurrentStateNumber);
+
+        public EntityState GetState(int stateNumber)
+        {
+            if (!StateSets.Any(x => x.States.ContainsKey(stateNumber)))
+                throw new Exception($"No stateset on this entity contains a state with state no. {stateNumber}.");
+
+            return StateSets.First(x => x.States.ContainsKey(stateNumber)).States[stateNumber];
+        }
     }
 }

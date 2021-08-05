@@ -1,4 +1,7 @@
-﻿namespace HunterCombatMR.Enumerations
+﻿using HunterCombatMR.Attributes;
+using HunterCombatMR.Models.Components;
+
+namespace HunterCombatMR.Constants
 {
     /// <summary>
     /// Common trigger params that should apply to most entity types.
@@ -29,6 +32,7 @@
         /// <summary>
         /// [EntityStateComponent] The time the entity has been in its current state.
         /// </summary>
+        [ComponentDependency(typeof(EntityStateComponent))]
         public const string StateTime = "time";
 
         /// <summary>
