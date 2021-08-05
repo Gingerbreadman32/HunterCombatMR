@@ -93,6 +93,7 @@ namespace HunterCombatMR.Managers
             }
 
             ComponentData<TComponent>.EntityComponents[entityIndex] = component;
+            ComponentData<TComponent>.EntityIdReferences[entityIndex] = entityId;
         }
 
         private static void AddOrReplaceEntityComponent<TComponent>(TComponent component, int entityId) where TComponent : struct

@@ -27,12 +27,12 @@ namespace HunterCombatMR.Managers
 
         protected override void OnDispose()
         {
-            _commandCache = new ConcurrentDictionary<string, GameCommand>();
+            _commandCache = null;
         }
 
         protected override void OnInitialize()
         {
-            _commandCache = null;
+            _commandCache = new ConcurrentDictionary<string, GameCommand>();
         }
     }
 }
