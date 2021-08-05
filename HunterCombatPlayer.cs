@@ -12,6 +12,10 @@ using HunterCombatMR.Extensions;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using HunterCombatMR.Models.State.Builders;
+using HunterCombatMR.Constants;
+using HunterCombatMR.Models.State;
+using HunterCombatMR.Builders.State;
 
 namespace HunterCombatMR
 {
@@ -46,7 +50,23 @@ namespace HunterCombatMR
         public override void Initialize()
         {
             _entity = EntityManager.CreateEntity();
-            ComponentManager.RegisterComponent(new EntityStateComponent(), _entity);
+
+            var states = new EntityState[2];
+            states[0] = new StateBuilder()
+                .WithNewController(StateControllerType.ChangeState, 1, new StateTrigger("time = 600"))
+                .WithEntityStatuses(EntityWorldStatus.Grounded, EntityActionStatus.Idle)
+                .Build();
+            states[1] = new StateBuilder()
+                .WithNewController(StateControllerType.ChangeState, 0, new StateTrigger("time = 600"))
+                .WithEntityStatuses(EntityWorldStatus.Grounded, EntityActionStatus.Idle)
+                .Build();
+
+            var stateSet = new StateSetBuilder()
+                .WithState(StateNumberConstants.Default, states[0])
+                .WithState(1, states[1])
+                .Build();
+
+            ComponentManager.RegisterComponent(new EntityStateComponent(stateSet), _entity);
         }
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)

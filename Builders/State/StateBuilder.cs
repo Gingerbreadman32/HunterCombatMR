@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces.State.Builders;
 using HunterCombatMR.Models.State;
+using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,21 @@ namespace HunterCombatMR.Builders.State
             int persistency = 1,
             bool noHitPause = false)
         {
+            builder.AddController(new StateController(type, new object[1] { parameter }, triggers, persistency, noHitPause));
+            return builder;
+        }
+
+        public static StateBuilder WithNewController(this StateBuilder builder,
+            StateControllerType type,
+            object parameter,
+            StateTrigger trigger,
+            int persistency = 1,
+            bool noHitPause = false,
+            int triggerDepth = 1)
+        {
+            StateTrigger[][] triggers = new StateTrigger[0][];
+            ArrayUtils.ResizeAndFillArray(ref triggers, triggerDepth + 1, new StateTrigger[0]);
+            ArrayUtils.ResizeAndFillArray(ref triggers[triggerDepth], 1, trigger);
             builder.AddController(new StateController(type, new object[1] { parameter }, triggers, persistency, noHitPause));
             return builder;
         }
