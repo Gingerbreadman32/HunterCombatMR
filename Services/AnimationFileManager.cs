@@ -39,30 +39,30 @@ namespace HunterCombatMR.Services
             }
         }
 
-        public CustomAnimationFileExistStatus CustomAnimationFileExists(string name,
+        public FileStatus CustomAnimationFileExists(string name,
             AnimationType type)
         {
             if (!Directory.Exists(_customFilePath))
             {
-                return CustomAnimationFileExistStatus.BaseDirectoryMissing;
+                return FileStatus.BaseDirectoryMissing;
             }
 
             if (!Directory.Exists(Path.Combine(_customFilePath, type.ToString())))
             {
                 HunterCombatMR.Instance.Logger.Warn($"No custom animation directory for animation type: {type.ToString()}");
-                return CustomAnimationFileExistStatus.TypeDirectoryMissing;
+                return FileStatus.TypeDirectoryMissing;
             }
 
             if (!File.Exists(CustomAnimationPath(name, type)))
             {
                 HunterCombatMR.Instance.Logger.Warn($"Custom animation {name} does not exist!");
-                return CustomAnimationFileExistStatus.FileMissing;
+                return FileStatus.FileMissing;
             }
 
-            return CustomAnimationFileExistStatus.FileExists;
+            return FileStatus.FileExists;
         }
 
-        public CustomAnimationFileExistStatus CustomAnimationFileExists(ICustomAnimation animation)
+        public FileStatus CustomAnimationFileExists(ICustomAnimation animation)
             => CustomAnimationFileExists(animation.DisplayName, animation.AnimationType);
 
         public PlayerAnimation LoadAnimation(AnimationType type,
@@ -97,7 +97,7 @@ namespace HunterCombatMR.Services
 
             if (!fileFound)
             {
-                if (CustomAnimationFileExists(fileName, type).Equals(CustomAnimationFileExistStatus.FileExists))
+                if (CustomAnimationFileExists(fileName, type).Equals(FileStatus.FileExists))
                     json = File.ReadAllText(CustomAnimationPath(fileName, type));
                 else
                     return null;
@@ -227,7 +227,7 @@ namespace HunterCombatMR.Services
         internal void DeleteCustomAnimation(AnimationType type,
             string fileName)
         {
-            if (CustomAnimationFileExists(fileName, type).Equals(CustomAnimationFileExistStatus.FileExists))
+            if (CustomAnimationFileExists(fileName, type).Equals(FileStatus.FileExists))
                 File.Delete(CustomAnimationPath(fileName, type));
         }
 

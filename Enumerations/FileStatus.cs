@@ -1,6 +1,6 @@
 ﻿namespace HunterCombatMR.Enumerations
 {
-    public enum CustomAnimationFileExistStatus
+    public enum FileStatus
     {
         DefaultError = 0,
         FileExists = 1,
