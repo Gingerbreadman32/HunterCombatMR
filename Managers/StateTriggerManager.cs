@@ -5,7 +5,6 @@ using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace HunterCombatMR.Managers
@@ -16,23 +15,32 @@ namespace HunterCombatMR.Managers
         private static IDictionary<Tuple<Type, string>, Func<object, object>> _getPropertyDelegates;
         private static IDictionary<string, Tuple<Type, string>> _triggerParameterDependencies;
 
-        public static TValue GetComponentPropertyForTriggerParameter<TComponent, TValue>(TComponent component,
-            string triggerParameter) where TComponent : struct
+        public static object GetComponentProperty(in object componentRef,
+            string trigger)
         {
-            Type componentType = typeof(TComponent);
+            var componentType = componentRef.GetType();
+
             if (!_getPropertyDelegates.Any(x => x.Key.Item1 == componentType))
                 throw new Exception("No component references exist for this type of component");
 
-            if (!_triggerParameterDependencies.ContainsKey(triggerParameter) || _triggerParameterDependencies[triggerParameter].Item1 != componentType)
+            if (!_triggerParameterDependencies.ContainsKey(trigger) || _triggerParameterDependencies[trigger].Item1 != componentType)
                 throw new Exception("Trigger parameter dependency does not match current component passed.");
 
-            var propertyName = _triggerParameterDependencies[triggerParameter].Item2;
+            var propertyName = _triggerParameterDependencies[trigger].Item2;
             var propertyDetails = new Tuple<Type, string>(componentType, propertyName);
 
             if (!_getPropertyDelegates.Any(x => x.Key.Item2 == propertyName))
                 throw new Exception($"No component references exist for property {propertyName} in component type!");
 
-            return (TValue)_getPropertyDelegates[propertyDetails](component);
+            return _getPropertyDelegates[propertyDetails](componentRef);
+        }
+
+        public static Type GetParameterComponentType(string trigger)
+        {
+            if (!_triggerParameterDependencies.ContainsKey(trigger))
+                throw new Exception($"Trigger {trigger} has no saved component dependencies!");
+
+            return _triggerParameterDependencies[trigger].Item1;
         }
 
         protected override void OnDispose()
@@ -73,7 +81,7 @@ namespace HunterCombatMR.Managers
                 if (propertyReference == null)
                     throw new Exception($"No property on required component {componentType.Name} has required attribute to load for trigger parameter {constantValue}!");
 
-                Func<object, object> result = CreateDelegate(propertyReference);
+                Func<object, object> result = ReflectionUtils.CreateGetMethodDelegate(propertyReference);
 
                 var propertyDetails = new Tuple<Type, string>(componentType,
                     propertyReference.Name);
@@ -81,23 +89,6 @@ namespace HunterCombatMR.Managers
                 _triggerParameterDependencies.Add(constantValue, propertyDetails);
                 _getPropertyDelegates.Add(propertyDetails, result);
             }
-        }
-
-        private Func<object, object> CreateDelegate(PropertyInfo propertyReference)
-        {
-            var resultType = propertyReference.PropertyType;
-            var declaringType = propertyReference.DeclaringType;
-
-            var expressionParameter = Expression.Parameter(declaringType);
-            var getMethodDelegate = Expression.Lambda(Expression.GetFuncType(declaringType, resultType), 
-                    Expression.Property(expressionParameter, propertyReference.Name), 
-                    expressionParameter)
-                .Compile();
-
-            var member = ReflectionUtils.GetMethodInfo(() => ReflectionUtils.CallInnerDelegate<object, object>(null));
-            var genericMethod = member.MakeGenericMethod(declaringType, resultType);
-
-            return (Func<object, object>)genericMethod.Invoke(null, new[] { getMethodDelegate });
         }
     }
 }

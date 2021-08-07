@@ -28,10 +28,15 @@ namespace HunterCombatMR.Models.Systems
 
         public bool HandleMessage(InputResetMessage message)
         {
-            if (!ComponentManager.HasComponent<InputComponent>(message.EntityId))
+            if (!EntityManager.EntityExists(message.EntityId))
                 return false;
 
-            ResetBuffers(ComponentManager.GetEntityComponent<InputComponent>(message.EntityId).BufferedInputs);
+            var entity = EntityManager.GetEntity(message.EntityId);
+
+            if (!ComponentManager.HasComponent<InputComponent>(entity))
+                return false;
+
+            ResetBuffers(ComponentManager.GetEntityComponent<InputComponent>(entity).BufferedInputs);
 
             return true;
         }

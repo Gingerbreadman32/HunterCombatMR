@@ -42,5 +42,11 @@ namespace HunterCombatMR.Models.Components
 
             return StateSets.First(x => x.States.ContainsKey(stateNumber)).States[stateNumber];
         }
+
+        public void SetState(int stateNumber)
+        {
+            CurrentStateInfo = new StateInfo(Array.FindIndex(StateSets, x => x.States.ContainsKey(stateNumber)), CurrentStateNumber);
+            CurrentStateNumber = stateNumber;
+        }
     }
 }

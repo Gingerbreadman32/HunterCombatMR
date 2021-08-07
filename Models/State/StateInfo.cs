@@ -9,6 +9,23 @@
 
         public StateControllerInfo[] StateControllerInfo { get => _controllerInfo; }
 
+        public StateInfo()
+        {
+            Time = 0;
+            StateSet = 0;
+            PreviousStateNumber = -1;
+            _controllerInfo = new StateControllerInfo[] { };
+        }
+
+        public StateInfo(int setIndex,
+            int prevStateNo)
+        {
+            Time = 0;
+            StateSet = setIndex;
+            PreviousStateNumber = prevStateNo;
+            _controllerInfo = new StateControllerInfo[] { };
+        }
+
         /// <summary>
         /// How long the entity has been in the current state.
         /// </summary>
@@ -18,5 +35,10 @@
         /// The stateset this state is associated with.
         /// </summary>
         public int StateSet { get; set; }
+
+        /// <summary>
+        /// The state number of the previous state.
+        /// </summary>
+        public int PreviousStateNumber { get; set; }
     }
 }

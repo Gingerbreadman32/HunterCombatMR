@@ -10,33 +10,36 @@ namespace HunterCombatMR.Models.State
             if (string.IsNullOrWhiteSpace(script))
                 throw new Exception("Trigger must have a script to convert!");
 
-            Script = script;
-            Logic = Convert(Script);
+            var split = script.Split(' ');
+            Validate(split[0], split[1], false);
+
+            float value;
+
+            if (!float.TryParse(split[2], out value))
+                throw new Exception("Must have a valid float value!");
+
+            Parameter = split[0];
+            Operator = split[1];
+            Value = value;
         }
 
         public StateTrigger(string parameter,
             string @operator,
-            object value)
+            float value)
         {
-            ValidateBasicTrigger(parameter, @operator, value, false);
+            Validate(parameter, @operator, false);
 
-            Script = $"{parameter} {@operator} {value}";
-            Logic = Convert(Script);
+            Parameter = parameter;
+            Operator = @operator;
+            Value = value;
         }
 
-        public Func<int, int, bool> Logic { get; }
+        public string Operator { get; }
+        public string Parameter { get; }
+        public float Value { get; }
 
-        public string Script { get; }
-
-        private static Func<int, int, bool> Convert(string text)
-        {
-            // Fill this
-            return (x, y) => { return false; };
-        }
-
-        private static bool ValidateBasicTrigger(string parameter,
-                                    string @operator,
-            object value,
+        public static bool Validate(string parameter,
+            string @operator,
             bool ignoreErrors = true)
         {
             try
@@ -46,9 +49,6 @@ namespace HunterCombatMR.Models.State
 
                 if (string.IsNullOrWhiteSpace(@operator) || !OperatorUtils.IsValidComparisonOperator(@operator))
                     throw new Exception("Operator must be a valid comparison operator! (Ex. >, <, <=, >=, =, !=, is, not)");
-
-                if (value == null)
-                    throw new Exception("Must have a valid value!");
 
                 return true;
             }
@@ -61,10 +61,7 @@ namespace HunterCombatMR.Models.State
             }
         }
 
-        private string Convert(Func<int, int, bool> logic)
-        {
-            // Fill this
-            return "";
-        }
+        public string PrintScript()
+                    => $"{Parameter} {Operator} {Value}";
     }
 }

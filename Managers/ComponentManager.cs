@@ -2,27 +2,36 @@
 using HunterCombatMR.Services;
 using HunterCombatMR.Utilities;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace HunterCombatMR.Managers
 {
     public sealed class ComponentManager
         : ManagerBase
     {
+        private const string EntityComponents = "EntityComponents";
+        private const string EntityIdReferences = "EntityIdReferences";
+        private static IDictionary<Tuple<Type, Type>, Func<object, object>> _componentListDelegates;
+        private static IDictionary<Tuple<Type, Type>, Func<object, object>> _idListDelegates;
+
         public static ref TComponent GetEntityComponent<TComponent>(in IModEntity entity) where TComponent : struct
         {
             EntityExists(entity);
-
-            return ref GetEntityComponent<TComponent>(entity.Id);
+            EntityCheck(entity.Id);
+            int idIndex = GetEntityComponentIndex(ComponentData<TComponent>.EntityIdReferences, entity.Id);
+            return ref ComponentData<TComponent>.EntityComponents[idIndex];
         }
 
-        public static ref TComponent GetEntityComponent<TComponent>(int entityId) where TComponent : struct
+        public static ref object GetEntityComponent(in IModEntity entity,
+            Type componentType)
         {
-            EntityCheck(entityId);
+            var components = GetEntityComponentsGeneric(componentType);
+            int idIndex = GetEntityComponentIndex(GetEntityIdsGeneric(componentType), entity.Id);
 
-            int idIndex = GetEntityComponentIndex<TComponent>(entityId);
-
-            return ref ComponentData<TComponent>.EntityComponents[idIndex];
+            return ref components[idIndex];
         }
 
         public static ref TComponent GetGlobalComponent<TComponent>() where TComponent : struct
@@ -33,42 +42,52 @@ namespace HunterCombatMR.Managers
         public static bool HasComponent<TComponent>(in IModEntity entity) where TComponent : struct
         {
             EntityExists(entity);
-
-            return HasComponent<TComponent>(entity.Id);
+            EntityCheck(entity.Id);
+            var idReference = GetEntityComponentIndex(ComponentData<TComponent>.EntityIdReferences, entity.Id);
+            return idReference > -1;
         }
 
-        public static bool HasComponent<TComponent>(int entityId) where TComponent : struct
+        public static bool HasComponent(in IModEntity entity,
+            Type componentType)
         {
-            EntityCheck(entityId);
-            var idReference = GetEntityComponentIndex<TComponent>(entityId);
+            EntityExists(entity);
+            EntityCheck(entity.Id);
+            var idReference = GetEntityComponentIndex(GetEntityIdsGeneric(componentType), entity.Id);
             return idReference > -1;
         }
 
         public static void RegisterComponent<TComponent>(TComponent component, in IModEntity entity) where TComponent : struct
         {
             EntityExists(entity);
-
-            AddOrReplaceEntityComponent(component, entity.Id);
+            EntityCheck(entity.Id);
+            AddOrReplaceEntityComponent(component, entity);
         }
 
         public static void RemoveComponent<TComponent>(in IModEntity entity) where TComponent : struct
         {
             EntityExists(entity);
+            EntityCheck(entity.Id);
 
             if (!HasComponent<TComponent>(entity))
                 throw new Exception("Entity has no components of this type!");
 
-            int id = entity.Id;
-            RemoveComponent<TComponent>(id);
+            int index = GetEntityComponentIndex(ComponentData<TComponent>.EntityIdReferences, entity.Id);
+            ComponentData<TComponent>.EntityIdReferences[index] = -1;
+            ComponentData<TComponent>.EntityComponents[index] = default(TComponent);
         }
 
         protected override void OnDispose()
         {
+            _componentListDelegates = null;
+            _idListDelegates = null;
             ComponentDataManager.Dispose?.Invoke();
         }
 
         protected override void OnInitialize()
         {
+            _componentListDelegates = new Dictionary<Tuple<Type, Type>, Func<object, object>>();
+            _idListDelegates = new Dictionary<Tuple<Type, Type>, Func<object, object>>();
+
             if (ComponentDataManager.Dispose == null)
                 ComponentDataManager.Dispose = new Action(() => { });
         }
@@ -81,34 +100,40 @@ namespace HunterCombatMR.Managers
             {
                 if (!ComponentData<TComponent>.EntityIdReferences.Contains(-1))
                 {
-                    ArrayUtils.ResizeAndFillArray(ref ComponentData<TComponent>.EntityIdReferences,
+                    var temp = ComponentData<TComponent>.EntityIdReferences;
+                    ArrayUtils.ResizeAndFillArray(ref temp,
                         ComponentData<TComponent>.EntityIdReferences.Length + 1,
                         -1);
+                    ComponentData<TComponent>.EntityIdReferences = temp;
                 }
 
                 entityIndex = Array.IndexOf(ComponentData<TComponent>.EntityIdReferences, -1);
 
                 if (ComponentData<TComponent>.EntityComponents.Length < entityIndex + 1)
-                    Array.Resize(ref ComponentData<TComponent>.EntityComponents, entityIndex + 1);
+                {
+                    var temp = ComponentData<TComponent>.EntityComponents;
+                    Array.Resize(ref temp, entityIndex + 1);
+                    ComponentData<TComponent>.EntityComponents = temp;
+                }
             }
 
             ComponentData<TComponent>.EntityComponents[entityIndex] = component;
             ComponentData<TComponent>.EntityIdReferences[entityIndex] = entityId;
         }
 
-        private static void AddOrReplaceEntityComponent<TComponent>(TComponent component, int entityId) where TComponent : struct
+        private static void AddOrReplaceEntityComponent<TComponent>(TComponent component, in IModEntity entity) where TComponent : struct
         {
-            if (entityId < 0)
-                throw new Exception("Entity id must be more than 0!");
+            EntityExists(entity);
+            EntityCheck(entity.Id);
 
-            if (HasComponent<TComponent>(entityId))
+            if (HasComponent<TComponent>(entity))
             {
-                var index = GetEntityComponentIndex<TComponent>(entityId);
+                var index = GetEntityComponentIndex(ComponentData<TComponent>.EntityIdReferences, entity.Id);
                 ComponentData<TComponent>.EntityComponents[index] = component;
                 return;
             }
 
-            AddEntityComponent(component, entityId);
+            AddEntityComponent(component, entity.Id);
         }
 
         private static void EntityCheck(int entityId)
@@ -123,40 +148,71 @@ namespace HunterCombatMR.Managers
                 throw new Exception("Entity intialized incorrectly, make sure to create entities using SystemManager.CreateEntry().");
         }
 
-        private static int GetEntityComponentIndex<TComponent>(int entityId) where TComponent : struct
+        private static int GetEntityComponentIndex(int[] ids,
+            int entityId)
         {
-            if (!ComponentData<TComponent>.EntityIdReferences.Contains(entityId))
+            if (!ids.Contains(entityId))
                 return -1;
 
-            return Array.IndexOf(ComponentData<TComponent>.EntityIdReferences, entityId);
+            return Array.IndexOf(ids, entityId);
         }
 
-        private static void RemoveComponent<TComponent>(int entityId) where TComponent : struct
+        private static object[] GetEntityComponentsGeneric(Type componentType)
         {
-            EntityCheck(entityId);
+            var getMethod = GetOrAddDelegate(componentType, _componentListDelegates, EntityComponents);
+            var components = getMethod.Invoke(null) as IList;
+            return components.Cast<object>().ToArray();
+        }
 
-            if (!HasComponent<TComponent>(entityId))
-                throw new Exception("Entity has no components of this type!");
+        private static int[] GetEntityIdsGeneric(Type componentType)
+        {
+            var getMethod = GetOrAddDelegate(componentType, _idListDelegates, EntityIdReferences);
 
-            int index = GetEntityComponentIndex<TComponent>(entityId);
-            ComponentData<TComponent>.EntityIdReferences[index] = -1;
-            ComponentData<TComponent>.EntityComponents[index] = default(TComponent);
+            return (int[])getMethod.Invoke(null);
+        }
+
+        private static Func<object, object> GetOrAddDelegate(Type componentType,
+            IDictionary<Tuple<Type, Type>, Func<object, object>> delegateList,
+            string propertyName)
+        {
+            Tuple<Type, Type> typeKey;
+
+            if (TryGetDelegateKey(componentType, delegateList, out typeKey))
+                return delegateList[typeKey];
+
+            var generic = typeof(ComponentData<>).MakeGenericType(componentType);
+            var getMethodDel = ReflectionUtils.CreateGetMethodDelegate(generic.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Static));
+
+            delegateList.Add(new Tuple<Type, Type>(componentType, generic), getMethodDel);
+            return getMethodDel;
+        }
+
+        private static bool TryGetDelegateKey(Type componentType, IDictionary<Tuple<Type, Type>, Func<object, object>> delegateList,
+            out Tuple<Type, Type> key)
+        {
+            key = delegateList.Keys.SingleOrDefault(x => x.Item1 == componentType);
+
+            return key != null;
         }
 
         private static class ComponentData<TComponent> where TComponent : struct
         {
-            public static TComponent[] EntityComponents;
-
-            public static int[] EntityIdReferences;
-
-            public static TComponent GlobalComponent;
+            private static TComponent[] entityComponents;
+            private static int[] entityIdReferences;
+            private static TComponent globalComponent;
 
             static ComponentData()
             {
-                EntityIdReferences = new int[0];
-                EntityComponents = new TComponent[0];
-                ComponentDataManager.Dispose += () => { EntityComponents = null; EntityIdReferences = null; };
+                entityIdReferences = new int[0];
+                entityComponents = new TComponent[0];
+                ComponentDataManager.Dispose += () => { entityComponents = null; entityIdReferences = null; };
             }
+
+            public static TComponent[] EntityComponents { get => entityComponents; set => entityComponents = value; }
+
+            public static int[] EntityIdReferences { get => entityIdReferences; set => entityIdReferences = value; }
+
+            public static ref TComponent GlobalComponent { get => ref globalComponent; }
         }
 
         private static class ComponentDataManager

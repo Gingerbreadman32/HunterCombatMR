@@ -13,7 +13,7 @@ namespace HunterCombatMR.Builders.State
         public static StateControllerBuilder WithNewTrigger(this StateControllerBuilder builder,
             string parameter,
             string @operator,
-            IComparable value,
+            float value,
             int depth = 1)
         {
             builder.AddTrigger(new StateTrigger(parameter, @operator, value), depth);
