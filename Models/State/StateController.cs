@@ -1,11 +1,11 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Constants;
 using System;
 
 namespace HunterCombatMR.Models.State
 {
     public struct StateController
     {
-        public StateController(StateControllerType type,
+        public StateController(string type,
             object[] parameters,
             StateTrigger[][] triggers,
             int persistency,
@@ -40,7 +40,7 @@ namespace HunterCombatMR.Models.State
         /// <summary>
         /// The logic this controller will perform upon a trigger being hit. Must be within defined types.
         /// </summary>
-        public StateControllerType Type { get; }
+        public string Type { get; }
 
         /// <summary>
         /// The parameters being passed to the state controller.

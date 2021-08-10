@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Constants;
 using HunterCombatMR.Interfaces.State.Builders;
 using HunterCombatMR.Models.State;
 using HunterCombatMR.Utilities;
@@ -74,9 +74,9 @@ namespace HunterCombatMR.Builders.State
         private List<object> _params;
         private int _persistency;
         private Dictionary<int, List<StateTrigger>> _triggers;
-        private StateControllerType _type;
+        private string _type;
 
-        public StateControllerBuilder(StateControllerType controllerType)
+        public StateControllerBuilder(string controllerType)
         {
             _type = controllerType;
             _persistency = 1;
@@ -94,7 +94,7 @@ namespace HunterCombatMR.Builders.State
             _params = new List<object>(copy.Parameters);
         }
 
-        public StateControllerType ControllerType { get => _type; set => _type = value; }
+        public string ControllerType { get => _type; set => _type = value; }
         public bool IgnoreHitPause { get => _ignoreHitPause; set => _ignoreHitPause = value; }
         public int Persistency { get => _persistency; set => _persistency = value; }
         public Dictionary<int, List<StateTrigger>> Triggers { get => _triggers; set => _triggers = value; }

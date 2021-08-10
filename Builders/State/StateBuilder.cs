@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Constants;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces.State.Builders;
 using HunterCombatMR.Models.State;
 using HunterCombatMR.Utilities;
@@ -12,7 +13,7 @@ namespace HunterCombatMR.Builders.State
     public static class StateBuilderChainMethods
     {
         public static StateBuilder WithNewController(this StateBuilder builder,
-            StateControllerType type,
+            string type,
             object parameter,
             StateTrigger[][] triggers,
             int persistency = 1,
@@ -23,7 +24,7 @@ namespace HunterCombatMR.Builders.State
         }
 
         public static StateBuilder WithNewController(this StateBuilder builder,
-            StateControllerType type,
+            string type,
             object parameter,
             StateTrigger trigger,
             int persistency = 1,

@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Constants;
 using HunterCombatMR.Models.State;
 using System.Collections.Generic;
 
@@ -6,7 +6,7 @@ namespace HunterCombatMR.Interfaces.State.Builders
 {
     public interface IStateControllerBuilder
     {
-        StateControllerType ControllerType { get; set; }
+        string ControllerType { get; set; }
         bool IgnoreHitPause { get; set; }
         int Persistency { get; set; }
 

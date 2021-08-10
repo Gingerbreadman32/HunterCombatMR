@@ -53,11 +53,11 @@ namespace HunterCombatMR
 
             var states = new EntityState[2];
             states[0] = new StateBuilder()
-                .WithNewController(StateControllerType.ChangeState, 1, new StateTrigger("time = 600"))
+                .WithNewController(StateControllerTypes.ChangeState, 1, new StateTrigger("time = 600"))
                 .WithEntityStatuses(EntityWorldStatus.Grounded, EntityActionStatus.Idle)
                 .Build();
             states[1] = new StateBuilder()
-                .WithNewController(StateControllerType.ChangeState, 0, new StateTrigger("time = 600"))
+                .WithNewController(StateControllerTypes.ChangeState, 0, new StateTrigger("time = 600"))
                 .WithEntityStatuses(EntityWorldStatus.Grounded, EntityActionStatus.Idle)
                 .Build();
 

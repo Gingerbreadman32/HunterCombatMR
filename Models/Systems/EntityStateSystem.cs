@@ -20,23 +20,18 @@ namespace HunterCombatMR.Models.Systems
                     continue;
 
                 component.CurrentStateInfo.Time++;
-
-                int newState = EvaluateControllers(entity, component.GetCurrentState());
-                if (newState > -1)
-                    component.SetState((component.CurrentStateNumber == 0) ? 1 : 0);
+                EvaluateControllers(in entity, component.GetCurrentState());
             }
         }
 
-        private int EvaluateControllers(IModEntity entity,
+        private void EvaluateControllers(in IModEntity entity,
             EntityState state)
         {
             for (int c = 0; c < state.Controllers.Length; c++)
             {
                 if (EvaluateTriggers(state.Controllers[c].Triggers, entity))
-                    return c;
+                    StateControllerManager.InvokeController(state.Controllers[c].Type, in entity, state.Controllers[c].Parameters);
             }
-
-            return -1;
         }
 
         private bool EvaluateTrigger(StateTrigger trigger,
