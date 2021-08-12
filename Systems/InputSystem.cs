@@ -3,15 +3,15 @@ using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
+using HunterCombatMR.Messages.InputSystem;
 using HunterCombatMR.Models.Components;
-using HunterCombatMR.Models.Messages.InputSystem;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 
-namespace HunterCombatMR.Models.Systems
+namespace HunterCombatMR.Systems
 {
     public sealed class InputSystem
         : ModSystem<InputComponent>,
@@ -79,7 +79,7 @@ namespace HunterCombatMR.Models.Systems
         private void SetNewestInput(ActionInputs input,
             InputComponent component)
         {
-            bool mouseInterface = (component.Player >= 0) ? Main.player[component.Player].mouseInterface : false;
+            bool mouseInterface = component.Player >= 0 ? Main.player[component.Player].mouseInterface : false;
 
             if (input.JustPressed() && (!input.IsMouse() || !mouseInterface))
             {

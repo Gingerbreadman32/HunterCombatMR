@@ -1,4 +1,4 @@
-﻿namespace HunterCombatMR.Models.Messages.InputSystem
+﻿namespace HunterCombatMR.Messages.InputSystem
 {
     public struct InputMouseInterfaceMessage
     {

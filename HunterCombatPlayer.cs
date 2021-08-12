@@ -5,7 +5,6 @@ using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Items;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Models.Components;
-using HunterCombatMR.Models.Messages.InputSystem;
 using HunterCombatMR.Models.Player;
 using System.Collections.Generic;
 using HunterCombatMR.Extensions;
@@ -16,6 +15,8 @@ using HunterCombatMR.Models.State.Builders;
 using HunterCombatMR.Constants;
 using HunterCombatMR.Models.State;
 using HunterCombatMR.Builders.State;
+using HunterCombatMR.Messages.InputSystem;
+using HunterCombatMR.Messages.EntityStateSystem;
 
 namespace HunterCombatMR
 {
@@ -81,7 +82,7 @@ namespace HunterCombatMR
 
         public override void OnEnterWorld(Player player)
         {
-            StateController.State = EntityWorldStatus.Grounded;
+            SystemManager.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Grounded));
             if (IsMainPlayer && Main.netMode == NetmodeID.SinglePlayer)
             {
                 ComponentManager.RegisterComponent(new InputComponent(player.whoAmI), _entity);
@@ -90,7 +91,7 @@ namespace HunterCombatMR
 
         public override void OnRespawn(Player player)
         {
-            StateController.State = EntityWorldStatus.Grounded;
+            SystemManager.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Grounded));
             SystemManager.SendMessage(new InputResetMessage(_entity.Id));
         }
 
@@ -141,8 +142,7 @@ namespace HunterCombatMR
 
         public override void UpdateDead()
         {
-            StateController.State = EntityWorldStatus.Dead;
-
+            SystemManager.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Dead));
             SystemManager.SendMessage(new InputResetMessage(_entity.Id));
         }
 

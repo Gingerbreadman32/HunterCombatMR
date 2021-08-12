@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HunterCombatMR.Models.Systems
+namespace HunterCombatMR.Systems
 {
     public abstract class ModSystem<TComponent>
         : IModSystem
@@ -16,11 +16,14 @@ namespace HunterCombatMR.Models.Systems
         public ModSystem()
         {
             GetMessageTypes();
+            OnCreate();
         }
 
         public Type ComponentType { get => typeof(TComponent); }
 
         public IEnumerable<Type> MessageTypes { get => _messageTypes; }
+
+        protected virtual void OnCreate() { }
 
         public ref TComponent GetComponent(in IModEntity entity)
             => ref ComponentManager.GetEntityComponent<TComponent>(entity);

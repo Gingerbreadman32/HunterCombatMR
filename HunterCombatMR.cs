@@ -1,8 +1,8 @@
 using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Managers;
-using HunterCombatMR.Models.Systems;
 using HunterCombatMR.Services;
+using HunterCombatMR.Systems;
 using HunterCombatMR.UI;
 using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;
@@ -97,6 +97,12 @@ namespace HunterCombatMR
                     },
                        InterfaceScaleType.UI));
             }
+        }
+
+        public override void PreUpdateEntities()
+        {
+            if (_managersInitialized)
+                SystemManager.PreUpdateEverything();
         }
 
         public override void PostUpdateEverything()

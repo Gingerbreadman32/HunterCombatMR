@@ -40,6 +40,17 @@ namespace HunterCombatMR.Managers
             }
         }
 
+        public static void PreUpdateEverything()
+        {
+            if (!Initialized)
+                return;
+
+            foreach (var system in _systems)
+            {
+                system.PreEntityUpdate();
+            }
+        }
+
         public static bool SendMessage<TMessage>(TMessage message) where TMessage : struct
         {
             InitializeCheck();

@@ -1,6 +1,6 @@
 ﻿using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Managers;
-using HunterCombatMR.Models.Messages.InputSystem;
+using HunterCombatMR.Messages.InputSystem;
 using HunterCombatMR.Utilities;
 using Terraria;
 using Terraria.ModLoader;
