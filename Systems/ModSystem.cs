@@ -28,7 +28,7 @@ namespace HunterCombatMR.Systems
         public ref TComponent GetComponent(in IModEntity entity)
             => ref ComponentManager.GetEntityComponent<TComponent>(entity);
 
-        public bool HandleMessage<TMessage>(TMessage message) where TMessage : struct
+        public bool HandleMessage<TMessage>(TMessage message)
         {
             return (this as IMessageHandler<TMessage>).HandleMessage(message);
         }

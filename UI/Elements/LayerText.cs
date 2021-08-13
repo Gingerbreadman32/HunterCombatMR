@@ -67,7 +67,7 @@ namespace HunterCombatMR.UI.Elements
             var MousePosition = new Vector2(Main.mouseX, Main.mouseY);
             if (Parent.GetElementAt(MousePosition) == this)
                 displayColor = Color.LightBlue;
-            else if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(LayerRef.Layer.ReferenceName)))
+            else if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(LayerRef.Layer.Name)))
                 displayColor = Color.Red;
 
             CalculatedStyle innerDimensions = GetInnerDimensions();
@@ -107,20 +107,20 @@ namespace HunterCombatMR.UI.Elements
         {
             if (Main.keyState.GetPressedKeys().Any(x => x.Equals(Keys.LeftShift)))
             {
-                if (!EditorUtils.HighlightedLayerNames.Any(x => x.Equals(LayerRef.Layer.ReferenceName)))
+                if (!EditorUtils.HighlightedLayerNames.Any(x => x.Equals(LayerRef.Layer.Name)))
                 {
-                    EditorUtils.HighlightedLayerNames.Add(LayerRef.Layer.ReferenceName);
+                    EditorUtils.HighlightedLayerNames.Add(LayerRef.Layer.Name);
                     return;
                 }
 
-                EditorUtils.HighlightedLayerNames.Remove(LayerRef.Layer.ReferenceName);
+                EditorUtils.HighlightedLayerNames.Remove(LayerRef.Layer.Name);
                 return;
             }
 
             EditorUtils.HighlightedLayerNames.Clear();
-            if (!EditorUtils.HighlightedLayerNames.Any(x => x.Equals(LayerRef.Layer.ReferenceName)))
+            if (!EditorUtils.HighlightedLayerNames.Any(x => x.Equals(LayerRef.Layer.Name)))
             {
-                EditorUtils.HighlightedLayerNames.Add(LayerRef.Layer.ReferenceName);
+                EditorUtils.HighlightedLayerNames.Add(LayerRef.Layer.Name);
             }
         }
 
@@ -150,7 +150,7 @@ namespace HunterCombatMR.UI.Elements
                     return TextureBoundsInfoText();
 
                 default:
-                    return LayerRef.Layer.ReferenceName;
+                    return LayerRef.Layer.Name;
             }
         }
 

@@ -20,6 +20,23 @@ namespace HunterCombatMR.Models.Animation
     public class LayerData
             : ICompact<string>
     {
+        internal LayerData(int? depth,
+            Vector2 pos,
+            float rot,
+            int frame,
+            SpriteEffects effects,
+            float alpha,
+            float scale)
+        {
+            DepthOverride = depth;
+            Position = pos;
+            Rotation = rot;
+            SheetFrame = frame;
+            Orientation = effects;
+            Alpha = alpha;
+            Scale = scale;
+        }
+
         public LayerData(LayerData copy)
         {
             DepthOverride = copy.DepthOverride;

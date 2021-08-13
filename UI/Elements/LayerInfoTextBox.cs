@@ -55,7 +55,7 @@ namespace HunterCombatMR.UI.Elements
             else
                 currentBounds.Y = int.Parse(newText);
 
-            layer.Layer.Tag = new TextureTag(layer.Layer.Tag.Name, currentBounds);
+            //layer.Layer.Tag = new TextureTag(layer.Layer.Tag.Name, currentBounds);
             return newText;
         }
     }

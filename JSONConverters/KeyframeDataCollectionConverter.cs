@@ -43,10 +43,10 @@ namespace HunterCombatMR.JSONConverters
             (
                 lVal.FrameData.Select(x =>
                 new JObject {
-                    { "Length", x.Value.Frames.Value },
+                    { "Length", x.Frames.Value },
                     {
                         "Data",
-                        JObject.FromObject(lVal.FrameData[x.Key].ToDictionary(y => y.Key, y => JToken.FromObject(y.Value, serializer)), serializer)
+                        JObject.FromObject(x.ToDictionary(y => y.Key, y => JToken.FromObject(y.Value, serializer)), serializer)
                     }
                 })
             );
@@ -54,11 +54,11 @@ namespace HunterCombatMR.JSONConverters
             jObject.WriteTo(writer, serializer.Converters.ToArray());
         }
 
-        protected abstract KeyframeDataCollection<TReference, TData> CreateObjectFromData(SortedList<FrameIndex, KeyframeData<TData>> frameData, 
+        protected abstract KeyframeDataCollection<TReference, TData> CreateObjectFromData(KeyframeData<TData>[] frameData, 
             JArray references,
             JsonSerializer serializer);
 
-        protected abstract SortedList<FrameIndex, KeyframeData<TData>> ReadKeyframeData(JArray token,
+        protected abstract KeyframeData<TData>[] ReadKeyframeData(JArray token,
             JsonSerializer serializer);
 
         private JArray CreateReferences(KeyframeDataCollection<TReference, TData> value, JsonSerializer serializer)

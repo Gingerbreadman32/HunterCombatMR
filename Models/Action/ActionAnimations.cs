@@ -19,7 +19,7 @@ namespace HunterCombatMR.Models.Action
             : base(copy)
         { }
 
-        public ActionAnimations(IEnumerable<string> references, SortedList<FrameIndex, KeyframeData<AnimationData>> frameData)
+        public ActionAnimations(IEnumerable<string> references, KeyframeData<AnimationData>[] frameData)
         {
             _references = new List<ICustomAnimationV2>();
 
@@ -39,7 +39,7 @@ namespace HunterCombatMR.Models.Action
                 throw new ArgumentOutOfRangeException($"Animation with name {animationName} does not exist within loaded animations!");
 
             Add(animation);
-            this[_frameData.Count] = new KeyframeData<AnimationData>(animation.TotalFrames, animationName, new AnimationData(animationName));
+            this[_frameData.Length] = new KeyframeData<AnimationData>(animation.TotalFrames, animationName, new AnimationData(animationName));
         }
 
         public void AddAnimation(string animationName,
@@ -57,10 +57,10 @@ namespace HunterCombatMR.Models.Action
         public void SwitchAnimations(FrameIndex firstAnimationIndex,
                     FrameIndex secondAnimationIndex)
         {
-            if (!FrameData.ContainsKey(firstAnimationIndex))
+            if (FrameData.Length < firstAnimationIndex)
                 throw new ArgumentOutOfRangeException($"No animation exists at this keyframe: {firstAnimationIndex}!");
 
-            if (!FrameData.ContainsKey(secondAnimationIndex))
+            if (FrameData.Length < secondAnimationIndex)
                 throw new ArgumentOutOfRangeException($"No animation exists at this keyframe: {secondAnimationIndex}!");
 
             var temp = FrameData[firstAnimationIndex];

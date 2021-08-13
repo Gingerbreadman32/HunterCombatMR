@@ -51,8 +51,11 @@ namespace HunterCombatMR.Managers
             }
         }
 
-        public static bool SendMessage<TMessage>(TMessage message) where TMessage : struct
+        public static bool SendMessage<TMessage>(TMessage message)
         {
+            if (message == null)
+                throw new ArgumentNullException("Message cannot be null!");
+
             InitializeCheck();
             IModSystem system = GetSystemByMessageType(typeof(TMessage));
 

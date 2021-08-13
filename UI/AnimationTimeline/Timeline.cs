@@ -58,7 +58,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public void InitializeAnimation()
         {
-            Animator.Initialize(Animation.Layers.FrameData.Values);
+            Animator.Initialize(Animation.Layers.FrameData);
 
             foreach (var keyFrame in Animator.KeyFrames)
             {

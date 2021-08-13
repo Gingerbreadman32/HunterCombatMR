@@ -38,11 +38,11 @@ namespace HunterCombatMR.Models.Player
                 Animator.Uninitialize();
                 _currentAnimation = value;
                 if (value != null)
-                    Animator.Initialize(_currentAnimation.Layers.FrameData.Values); 
+                    Animator.Initialize(_currentAnimation.Layers.FrameData); 
             } 
         }
 
-        public static DrawData CombatLimbDraw(PlayerDrawInfo drawInfo,
+        public static DrawData SetDrawLayer(PlayerDrawInfo drawInfo,
             Texture2D texture,
             Point textureSize,
             LayerData frameInfo,
@@ -82,9 +82,9 @@ namespace HunterCombatMR.Models.Player
 
             foreach (var layer in CurrentAnimation.Layers.GetOrderedActiveLayerData(currentFrame))
             {
-                var newLayer = new PlayerLayer(ModConstants.ModName, layer.Layer.ReferenceName, delegate (PlayerDrawInfo drawInfo)
+                var newLayer = new PlayerLayer(ModConstants.ModName, layer.Layer.Name, delegate (PlayerDrawInfo drawInfo)
                 {
-                    Main.playerDrawData.Add(CombatLimbDraw(drawInfo, TextureUtils.GetTextureFromTag(layer.Layer.Tag), layer.Layer.Tag.Size, layer.FrameData, Color.White));
+                    Main.playerDrawData.Add(SetDrawLayer(drawInfo, TextureUtils.GetTextureFromTag(layer.Layer.Tag), layer.Layer.Tag.Size, layer.FrameData, Color.White));
                 });
                 layers.Add(newLayer);
             }

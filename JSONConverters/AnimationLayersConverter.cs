@@ -16,18 +16,16 @@ namespace HunterCombatMR.JSONConverters
         public override bool CanConvert(Type objectType)
             => objectType == typeof(AnimationLayers);
 
-        protected override KeyframeDataCollection<Layer, LayerData> CreateObjectFromData(SortedList<FrameIndex, KeyframeData<LayerData>> frameData, 
+        protected override KeyframeDataCollection<Layer, LayerData> CreateObjectFromData(KeyframeData<LayerData>[] frameData, 
             JArray references,
             JsonSerializer serializer)
             => new AnimationLayers(references.ToObject<Layer[]>(serializer), frameData);
 
-        protected override SortedList<FrameIndex, KeyframeData<LayerData>> ReadKeyframeData(JArray token,
+        protected override KeyframeData<LayerData>[] ReadKeyframeData(JArray token,
             JsonSerializer serializer)
         {
             var value = token.ToObject<KeyframeData<LayerData>[]>(serializer);
-            var data = value.ToDictionary(x => (FrameIndex)Array.IndexOf(value, x), x => x);
-
-            return new SortedList<FrameIndex, KeyframeData<LayerData>>(data);
+            return value;
         }
     }
 }

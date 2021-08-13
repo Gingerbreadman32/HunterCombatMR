@@ -80,9 +80,6 @@ namespace HunterCombatMR.UI.Elements
         {
             InformationList.Clear();
 
-            if (LayerRef == null)
-                return;
-
             var boxes = new List<LayerInfoTextBox>();
 
             var infoBlocks = _infoFlags.GetFlags();

@@ -2,14 +2,15 @@
 {
     public enum AnimationType
     {
-        Player = 0,
-        Projectile = 1,
-        Item = 2,
-        NPC = 3,
-        FX = 4,
-        Dust = 5,
-        Gore = 6,
-        UI = 7,
-        Other = 8
+        None = 0,
+        Player = 1,
+        Projectile = 2,
+        Item = 3,
+        NPC = 4,
+        FX = 5,
+        Dust = 6,
+        Gore = 7,
+        UI = 8,
+        Other = 9
     }
 }

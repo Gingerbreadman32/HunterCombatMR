@@ -1,7 +1,11 @@
 ﻿using HunterCombatMR.Enumerations;
+using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces;
 using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation;
+using HunterCombatMR.Models.Animation.Entity;
+using HunterCombatMR.Models.Components;
 using HunterCombatMR.UI.AnimationTimeline;
 using HunterCombatMR.UI.Elements;
 using HunterCombatMR.Utilities;
@@ -367,12 +371,6 @@ namespace HunterCombatMR.UI
                 },
                 Left = new StyleDimension(0, panelPercent2)
             }.WithFadedMouseOver();
-            duplicatebutton.OnClick += (evt, list) => ButtonAction((x, y) =>
-            {
-                ICustomAnimationV2 newAnim = (ICustomAnimationV2)HunterCombatMR.Instance.Content.DuplicateContentInstance(CurrentPlayer?.AnimationController.CurrentAnimation);
-                EditorUtils.EditingAnimation = newAnim;
-                _animationname.Text = newAnim.InternalName;
-            }, evt, list, EditorModePreset.InEditor, true);
             panelPercent2 += duplicatebutton.Width.Percent;
             othertoolpanel.Append(duplicatebutton);
 
@@ -389,7 +387,7 @@ namespace HunterCombatMR.UI
             deletebutton.OnClick += (evt, list) => ButtonAction((x, y) =>
             {
                 ICustomAnimationV2 animToDelete = HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing;
-                CurrentPlayer.AnimationController.CurrentAnimation = null;
+                CurrentPlayer.EntityReference.RemoveComponent<AnimationComponent>();
                 HunterCombatMR.Instance.Content.DeleteContentInstance(animToDelete);
                 _animationname.Text = string.Empty;
                 _testlist.Clear();
@@ -509,20 +507,19 @@ namespace HunterCombatMR.UI
             if (_testlist._items.Any())
                 _testlist._items.ForEach(x => (x as UIAutoScaleTextTextPanel<string>).TextColor = Color.White);
 
-            if (CurrentPlayer.AnimationController.CurrentAnimation == null)
+            if (!CurrentPlayer.EntityReference.HasComponent<AnimationComponent>())
             {
                 return;
             }
 
-            // None of this shit fucking works lmfao component time
-
-            var currentKeyFrame = CurrentPlayer.AnimationController.Animator?.CurrentKeyFrameIndex ?? 0;
+            var component = CurrentPlayer.EntityReference.GetComponent<AnimationComponent>();
+            var currentKeyFrame = component.CurrentKeyFrame;
             // Current Keyframe Timing Text
-            var framenumtext = CurrentPlayer.AnimationController.Animator?.CurrentKeyFrame.FrameLength.ToString() ?? "0";
+            var framenumtext = component.Animator.Keyframes[currentKeyFrame].Frames.ToString();
             _currentframetime.SetText(framenumtext);
 
             // Total Amount of Animation KeyFrames
-            var totalframenumtext = CurrentPlayer.AnimationController.Animator?.TotalFrames.ToString() ?? "0";
+            var totalframenumtext = component.Animator.GetTotalFrames().ToString();
             _frametotal.SetText(totalframenumtext);
 
             LayerPanelUpdate(currentKeyFrame);
@@ -537,7 +534,7 @@ namespace HunterCombatMR.UI
             }
 
             if (EditorUtils.AnimationEdited)
-                DisplayLayers(CurrentPlayer.AnimationController);
+                DisplayLayers(component.Animation, currentKeyFrame);
         }
 
         internal void ButtonAction(Action<UIMouseEvent, UIElement> action,
@@ -554,13 +551,14 @@ namespace HunterCombatMR.UI
             {
                 action(evt, listen);
                 Main.PlaySound(SoundID.MenuTick);
-                DisplayLayers(CurrentPlayer.AnimationController);
+                var component = CurrentPlayer.EntityReference.GetComponent<AnimationComponent>();
+                DisplayLayers(component.Animation, component.CurrentKeyFrame);
             }
         }
 
         private void CycleTexture(UIMouseEvent evt, UIElement listeningElement)
         {
-            if (CurrentPlayer?.AnimationController.Animator.Initialized ?? false)
+            if (!CurrentPlayer.EntityReference.HasComponent<AnimationComponent>())
             {
                 var layers = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
                 if (layers.Count() == 1)
@@ -572,16 +570,10 @@ namespace HunterCombatMR.UI
             }
         }
 
-        private void DisplayLayers(IAnimationController controller)
+        private void DisplayLayers(EntityAnimation animation,
+            int keyFrame)
         {
-            if (controller.CurrentAnimation == null)
-            {
-                _layerlist.Clear();
-                return;
-            }
-
-            var currentKeyFrame = controller.Animator.CurrentKeyFrameIndex;
-            foreach (var layer in controller.CurrentAnimation.Layers.GetOrderedActiveLayerData(currentKeyFrame))
+            foreach (var layer in animation.Layers.GetOrderedActiveLayerData(keyFrame))
             {
                 if (!_layerlist._items.Any(x => (x as LayerText).LayerRef.Equals(layer)))
                 {
@@ -592,24 +584,36 @@ namespace HunterCombatMR.UI
 
         private void FrameTimeLogic(int amount)
         {
-            if (CurrentPlayer == null)
+            if (CurrentPlayer == null || !CurrentPlayer.EntityReference.HasComponent<AnimationComponent>())
                 return;
 
-            var animator = CurrentPlayer.AnimationController.Animator;
-            if (!animator.Initialized || !animator.Flags.HasFlag(AnimatorFlags.Locked))
+            var animator = CurrentPlayer.EntityReference.GetComponent<AnimationComponent>().Animator;
+            if (!animator.Initialized)
                 return;
 
-            FrameIndex currentKeyframeIndex = CurrentPlayer.AnimationController.Animator.CurrentKeyFrameIndex;
-            Keyframe keyFrame = CurrentPlayer.AnimationController.Animator.KeyFrames[currentKeyframeIndex];
+            FrameIndex currentKeyframeIndex = animator.GetCurrentKeyFrame();
+            Models.Animation.Entity.Keyframe keyFrame = animator.Keyframes[currentKeyframeIndex];
 
-            if (amount + animator.CurrentKeyFrame.FrameLength <= 0)
+            if (amount + keyFrame.Frames <= 0)
                 return;
 
-            FrameLength newLength = amount + keyFrame.FrameLength;
+            FrameLength newLength = amount + keyFrame.Frames;
 
             EditorUtils.EditingAnimation.Layers[currentKeyframeIndex].Frames = newLength;
-            animator.Initialize(EditorUtils.EditingAnimation.Layers.FrameData.Values);
-            animator.CurrentFrame = keyFrame.StartingFrameIndex;
+            animator.Initialize(EditorUtils.EditingAnimation.Layers.FrameData);
+
+            SetToClosestFrame(animator.Frame, animator.GetTotalFrames());
+        }
+
+        private static FrameIndex SetToClosestFrame(FrameIndex frame,
+            int totalFrames)
+        {
+            if (frame > totalFrames)
+            {
+                frame--;
+                SetToClosestFrame(frame, totalFrames);
+            }
+            return frame;
         }
 
         private void LayerPanelUpdate(int currentKeyFrame)
@@ -633,12 +637,12 @@ namespace HunterCombatMR.UI
             string layertexture = layer.Layer.Tag.Name.ToString() ?? "";
             _layertexturebutton.SetText(layertexture);
 
-            if (_layerInfoPanel.LayerRef != layer)
+            if (_layerInfoPanel.LayerRef.Equals(layer))
             {
                 _layerInfoPanel.LayerRef = layer;
             }
 
-            if (_layerInfoPanel.IsCollapsed && _layerInfoPanel.LayerRef != null)
+            if (_layerInfoPanel.IsCollapsed)
                 _layerInfoPanel.Reveal();
         }
 
@@ -646,25 +650,26 @@ namespace HunterCombatMR.UI
         {
             var newAnim = ContentUtils.Get<ICustomAnimationV2>(name);
             EditorUtils.EditingAnimation = newAnim;
-            CurrentPlayer.AnimationController.CurrentAnimation = newAnim;
             _animationname.Text = EditorUtils.EditingAnimation?.InternalName;
             _animationTimeline.SetAnimation(EditorUtils.EditingAnimation);
         }
 
         private void ModifyTextureFrame(int modifier)
         {
-            if (!CurrentPlayer.AnimationController.Animator.Initialized)
+            if (!CurrentPlayer.EntityReference.HasComponent<AnimationComponent>())
             {
                 return;
             }
+
             var layers = HunterCombatMR.Instance.EditorInstance.HighlightedLayers;
             if (layers.Count() != 1)
             {
                 return;
             }
 
-            var key = CurrentPlayer.AnimationController.Animator.CurrentKeyFrameIndex;
-            var layer = CurrentPlayer.AnimationController.CurrentAnimation.Layers[HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Single(), key];
+            var component = CurrentPlayer.EntityReference.GetComponent<AnimationComponent>();
+            var key = component.Animator.GetCurrentKeyFrame();
+            var layer = component.Animation.Layers[HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Single(), key];
 
             var totalFrames = TextureUtils.GetTotalTextureFrames(TextureUtils.GetTextureFromTag(layer.Layer.Tag), layer.Layer.Tag);
 

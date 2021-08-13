@@ -17,12 +17,13 @@ using HunterCombatMR.Models.State;
 using HunterCombatMR.Builders.State;
 using HunterCombatMR.Messages.InputSystem;
 using HunterCombatMR.Messages.EntityStateSystem;
+using HunterCombatMR.Messages.AnimationSystem;
+using HunterCombatMR.Models.Animation;
 
 namespace HunterCombatMR
 {
     public class HunterCombatPlayer
-        : ModPlayer,
-        IAnimationControlled<PlayerAnimationController>
+        : ModPlayer
     {
         private WeaponBase _equippedWeapon;
         private IModEntity _entity;
@@ -31,10 +32,8 @@ namespace HunterCombatMR
             : base()
         {
             StateController = new PlayerStateController(this);
-            AnimationController = new PlayerAnimationController();
         }
 
-        public PlayerAnimationController AnimationController { get; }
         public override bool CloneNewInstances => false;
         public bool IsMainPlayer { get => player.whoAmI == Main.myPlayer; }
 
@@ -56,10 +55,12 @@ namespace HunterCombatMR
             states[0] = new StateBuilder()
                 .WithNewController(StateControllerTypes.ChangeState, 1, new StateTrigger("time = 600"))
                 .WithEntityStatuses(EntityWorldStatus.Grounded, EntityActionStatus.Idle)
+                .WithParameters(animation: -1)
                 .Build();
             states[1] = new StateBuilder()
                 .WithNewController(StateControllerTypes.ChangeState, 0, new StateTrigger("time = 600"))
                 .WithEntityStatuses(EntityWorldStatus.Grounded, EntityActionStatus.Idle)
+                .WithParameters(animation: 1)
                 .Build();
 
             var stateSet = new StateSetBuilder()
@@ -70,19 +71,14 @@ namespace HunterCombatMR
             ComponentManager.RegisterComponent(new EntityStateComponent(stateSet), _entity);
         }
 
-        public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
-        {
-            AnimationController.OnionSkinLogic(ref drawInfo);
-        }
-
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
         {
-            AnimationController.DrawPlayerLayers(layers);
+            _entity.SendMessage(new CreatePlayerLayersMessage(_entity.Id, ref layers));
         }
 
         public override void OnEnterWorld(Player player)
         {
-            SystemManager.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Grounded));
+            _entity.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Grounded));
             if (IsMainPlayer && Main.netMode == NetmodeID.SinglePlayer)
             {
                 ComponentManager.RegisterComponent(new InputComponent(player.whoAmI), _entity);
@@ -91,15 +87,15 @@ namespace HunterCombatMR
 
         public override void OnRespawn(Player player)
         {
-            SystemManager.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Grounded));
-            SystemManager.SendMessage(new InputResetMessage(_entity.Id));
+            _entity.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Grounded));
+            _entity.SendMessage(new InputResetMessage(_entity.Id));
         }
 
         public override void PostSavePlayer()
         {
-            if (Main.gameMenu)
+            if (Main.gameMenu && _entity.HasComponent<AnimationComponent>())
             {
-                AnimationController.CurrentAnimation = null;
+                _entity.RemoveComponent<AnimationComponent>();
             }
 
             base.PostSavePlayer();
@@ -111,8 +107,6 @@ namespace HunterCombatMR
                 return;
 
             StateController.StateUpdate();
-            StateController.EditorUpdate();
-            AnimationController.Animator.Update();
         }
 
         public override void PostUpdateRunSpeeds()
@@ -142,8 +136,8 @@ namespace HunterCombatMR
 
         public override void UpdateDead()
         {
-            SystemManager.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Dead));
-            SystemManager.SendMessage(new InputResetMessage(_entity.Id));
+            _entity.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Dead));
+            _entity.SendMessage(new InputResetMessage(_entity.Id));
         }
 
         private void MountUpdate()

@@ -11,14 +11,14 @@ namespace HunterCombatMR.Models
         where TData : class
         where TReference : IKeyframeDataReference
     {
-        private protected SortedList<FrameIndex, KeyframeData<TData>> _frameData;
+        private protected KeyframeData<TData>[] _frameData;
 
         private protected ICollection<TReference> _references;
 
         public KeyframeDataCollection()
         {
             _references = new List<TReference>();
-            _frameData = new SortedList<FrameIndex, KeyframeData<TData>>() { { 0, new KeyframeData<TData>(1) } };
+            _frameData = new KeyframeData<TData>[0];
         }
 
         public KeyframeDataCollection(KeyframeDataCollection<TReference, TData> copy)
@@ -29,20 +29,20 @@ namespace HunterCombatMR.Models
 
         public int Count => _references.Count;
 
-        public SortedList<FrameIndex, KeyframeData<TData>> FrameData
+        public KeyframeData<TData>[] FrameData
         {
             get => _frameData;
         }
 
         public bool IsReadOnly { get; set; }
-        public ICollection<string> Keys => _references.Select(x => x.ReferenceName).ToList();
+        public ICollection<string> Keys => _references.Select(x => x.Name).ToList();
 
         public ICollection<TReference> Values { get => _references; }
 
         public TReference this[string referenceName]
         {
-            get => Values.SingleOrDefault(x => x.ReferenceName.Equals(referenceName));
-            set { if (Keys.Contains(referenceName)) { _references.Remove(_references.Single(x => x.ReferenceName.Equals(referenceName))); _references.Add(value); } }
+            get => Values.SingleOrDefault(x => x.Name.Equals(referenceName));
+            set { if (Keys.Contains(referenceName)) { _references.Remove(_references.Single(x => x.Name.Equals(referenceName))); _references.Add(value); } }
         }
 
         public KeyframeData<TData> this[FrameIndex index]
@@ -53,7 +53,7 @@ namespace HunterCombatMR.Models
 
         public void Add(TReference layer)
         {
-            this[layer.ReferenceName] = layer;
+            this[layer.Name] = layer;
         }
 
         public void Add(string key, TReference value)
@@ -105,7 +105,7 @@ namespace HunterCombatMR.Models
         {
             foreach (var reference in _references)
             {
-                yield return new KeyValuePair<string, TReference>(reference.ReferenceName, reference);
+                yield return new KeyValuePair<string, TReference>(reference.Name, reference);
             }
         }
 
@@ -116,7 +116,7 @@ namespace HunterCombatMR.Models
         {
             if (Keys.Contains(key))
             {
-                _references.Remove(_references.Single(x => x.ReferenceName.Equals(key)));
+                _references.Remove(_references.Single(x => x.Name.Equals(key)));
                 return !Keys.Contains(key);
             }
 

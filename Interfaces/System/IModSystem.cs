@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.Interfaces.Entity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.Interfaces.System
@@ -10,7 +9,7 @@ namespace HunterCombatMR.Interfaces.System
 
         IEnumerable<Type> MessageTypes { get; }
 
-        bool HandleMessage<TMessage>(TMessage message) where TMessage : struct;
+        bool HandleMessage<TMessage>(TMessage message);
 
         void PostEntityUpdate();
 

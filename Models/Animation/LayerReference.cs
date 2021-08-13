@@ -1,6 +1,6 @@
 ﻿namespace HunterCombatMR.Models.Animation
 {
-    public class LayerReference
+    public struct LayerReference
     {
         public LayerReference(Layer layer, 
             LayerData frameData, 

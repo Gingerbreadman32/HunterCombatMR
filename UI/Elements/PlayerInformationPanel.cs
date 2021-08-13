@@ -93,11 +93,10 @@ namespace HunterCombatMR.UI.Elements
                 };
             } else
             {
-                _parameters = new string[6]
+                _parameters = new string[5]
                 {
                 $"WStatus: {Player.StateController.State.ToString()} ({(int)Player.StateController.State})",
                 $"AStatus: {Player.StateController.ActionState.ToString()} ({(int)Player.StateController.ActionState})",
-                $"Anim: {AnimationText()}",
                 $"Vel: {Math.Round(Player.player.velocity.X, 2)}, {Math.Round(Player.player.velocity.Y, 2)}",
                 $"State No.: {ActionText()}",
                 $"Equip: {EquipText()}"
@@ -122,11 +121,6 @@ namespace HunterCombatMR.UI.Elements
         private string ActionText()
             => ComponentManager.HasComponent<EntityStateComponent>(Player.EntityReference)
                 ? $"{ComponentManager.GetEntityComponent<EntityStateComponent>(Player.EntityReference).CurrentStateNumber}"
-                : _noneText;
-
-        private string AnimationText()
-            => Player.AnimationController.CurrentAnimation != null
-                ? $"{Player.AnimationController.CurrentAnimation.InternalName} - {Player.AnimationController.Animator.CurrentFrame}"
                 : _noneText;
 
         private string EquipText()

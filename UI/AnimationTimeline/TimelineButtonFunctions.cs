@@ -29,7 +29,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private bool AddButtonCondition(ICustomAnimationV2 animation,
             TimelineButton button)
             => (TimelineButton.DefaultCondition(animation, button)) 
-                && !(!ShowAllFrames && animation.Layers.FrameData.Sum(x => x.Value.Frames) == _maxFrames)
+                && !(!ShowAllFrames && animation.Layers.FrameData.Sum(x => x.Frames) == _maxFrames)
                     || (ShowAllFrames && Animator.TotalFrames == _maxFrames);
 
         private void AddButtonLogic()

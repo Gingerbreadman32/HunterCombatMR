@@ -5,7 +5,7 @@ using System;
 
 namespace HunterCombatMR.Models.Animation
 {
-    public class Layer
+    public struct Layer
         : IKeyframeDataReference
     {
         [JsonConstructor]
@@ -13,21 +13,21 @@ namespace HunterCombatMR.Models.Animation
             int depth,
             TextureTag tag)
         {
-            ReferenceName = referenceName ?? throw new ArgumentException("Layer name must be specified!");
+            Name = referenceName ?? throw new ArgumentException("Layer name must be specified!");
             Depth = depth;
             Tag = tag;
         }
 
         public Layer(Layer copy)
         {
-            ReferenceName = copy.ReferenceName;
+            Name = copy.Name;
             Depth = copy.Depth;
             Tag = copy.Tag;
         }
 
         public Layer(AnimationLayer legacyLayer)
         {
-            ReferenceName = legacyLayer.DisplayName;
+            Name = legacyLayer.DisplayName;
             Depth = legacyLayer.DefaultDepth;
             Tag = new TextureTag(legacyLayer.DisplayName, new Point(legacyLayer.SpriteFrameRectangle.Width, legacyLayer.SpriteFrameRectangle.Height));
         }
@@ -40,7 +40,7 @@ namespace HunterCombatMR.Models.Animation
         /// <summary>
         /// Name of the layer
         /// </summary>
-        public string ReferenceName { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// A tag indicating the type of texture that can be applied to this layer. Defined by name and restricted by size.

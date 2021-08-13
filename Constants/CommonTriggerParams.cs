@@ -12,11 +12,13 @@ namespace HunterCombatMR.Constants
         /// <summary>
         /// [AnimationComponent] The current frame time of the entity.
         /// </summary>
+        [ComponentDependency(typeof(AnimationComponent))]
         public const string FrameTime = "frame";
 
         /// <summary>
         /// [AnimationComponent] The current key frame time of the entity.
         /// </summary>
+        [ComponentDependency(typeof(AnimationComponent))]
         public const string KeyframeTime = "kframe";
 
         /// <summary>

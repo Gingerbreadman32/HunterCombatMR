@@ -99,33 +99,6 @@ namespace HunterCombatMR.AttackEngine.Models
             ActionLogic();
         }
 
-        public void EditorUpdate()
-        {
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
-            {
-                if (Main.blockInput)
-                    Main.blockInput = false;
-                return;
-            }
-                Main.blockInput = true;
-                Player.player.immune = true;
-                Player.player.immuneNoBlink = true;
-                Player.player.immuneTime = 2;
-
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit)
-                    && (HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing?.AnimationType.Equals(AnimationType.Player) ?? false))
-            {
-                Player.AnimationController.CurrentAnimation = EditorUtils.EditingAnimation;
-            }
-
-            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.AnimationEdit) 
-                    && Player.AnimationController.CurrentAnimation != null)
-            {
-                FrameIndex index = Player.AnimationController.Animator.CurrentKeyFrameIndex;
-                HunterCombatMR.Instance.EditorInstance.AdjustPositionLogic(Player.AnimationController.CurrentAnimation.Layers.GetOrderedActiveLayerData(index), Player.player.direction);
-            }
-        }
-
         public void MovementUpdate()
         {
             if (CurrentAction != null)
@@ -149,7 +122,6 @@ namespace HunterCombatMR.AttackEngine.Models
         private void ActionReset()
         {
             CurrentAction = null;
-            Player.AnimationController.CurrentAnimation = null;
             ActionState = EntityActionStatus.Idle;
         }
 
@@ -183,7 +155,7 @@ namespace HunterCombatMR.AttackEngine.Models
                 return;
             }
 
-            _actionAnimator.Initialize(CurrentAction.Attack.Animations.FrameData.Values);
+            _actionAnimator.Initialize(CurrentAction.Attack.Animations.FrameData);
         }
     }
 }

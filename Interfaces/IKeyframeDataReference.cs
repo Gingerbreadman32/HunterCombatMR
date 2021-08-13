@@ -2,6 +2,6 @@
 {
     public interface IKeyframeDataReference
     {
-        string ReferenceName { get; }
+        string Name { get; }
     }
 }
