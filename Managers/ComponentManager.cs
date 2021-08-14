@@ -35,24 +35,14 @@ namespace HunterCombatMR.Managers
         }
 
         public static ref TComponent GetGlobalComponent<TComponent>() where TComponent : struct
-        {
-            return ref ComponentData<TComponent>.GlobalComponent;
-        }
+            => ref ComponentData<TComponent>.GlobalComponent;
 
         public static bool HasComponent<TComponent>(IModEntity entity) where TComponent : struct
-        {
-            EntityExists(entity);
-            var idReference = GetEntityComponentIndex(ComponentData<TComponent>.EntityIdReferences, entity.Id);
-            return idReference > -1;
-        }
+            => CheckEntityComponent(entity.Id, ComponentData<TComponent>.EntityIdReferences, typeof(TComponent));
 
         public static bool HasComponent(IModEntity entity,
             Type componentType)
-        {
-            EntityExists(entity);
-            var idReference = GetEntityComponentIndex(GetEntityIdsGeneric(componentType), entity.Id);
-            return idReference > -1;
-        }
+            => CheckEntityComponent(entity.Id, GetEntityIdsGeneric(componentType), componentType);
 
         public static void RegisterComponent<TComponent>(TComponent component, IModEntity entity) where TComponent : struct
         {
@@ -135,6 +125,16 @@ namespace HunterCombatMR.Managers
             ComponentData<TComponent>.EntityIdReferences[entityIndex] = entityId;
         }
 
+        private static bool CheckEntityComponent(int entityId,
+            int[] entityReferences,
+            Type componentType)
+        {
+            EntityExists(entityId);
+            bool hasComponent = GetEntityComponentIndex(entityReferences, entityId) > -1;
+            UpdateEntityComponentTypes(entityId, hasComponent, componentType);
+            return hasComponent;
+        }
+
         private static bool EntityExists(int entityId)
         {
             if (!EntityManager.EntityExists(entityId))
@@ -196,6 +196,19 @@ namespace HunterCombatMR.Managers
             key = delegateList.Keys.SingleOrDefault(x => x.Item1 == componentType);
 
             return key != null;
+        }
+
+        private static void UpdateEntityComponentTypes(int entityId,
+            bool hasComponent,
+            Type componentType)
+        {
+            if (hasComponent)
+            {
+                EntityManager.AddComponentTypeToEntity(entityId, componentType);
+                return;
+            }
+
+            EntityManager.RemoveComponentTypeFromEntity(entityId, componentType);
         }
 
         private static class ComponentData<TComponent> where TComponent : struct
