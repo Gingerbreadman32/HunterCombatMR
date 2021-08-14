@@ -78,6 +78,7 @@ namespace HunterCombatMR.Managers
             int index = GetEntityComponentIndex(ComponentData<TComponent>.EntityIdReferences, entity.Id);
             ComponentData<TComponent>.EntityIdReferences[index] = -1;
             ComponentData<TComponent>.EntityComponents[index] = default(TComponent);
+            EntityManager.RemoveComponentTypeFromEntity(entity.Id, typeof(TComponent));
         }
 
         protected override void OnDispose()
