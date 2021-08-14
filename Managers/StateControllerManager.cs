@@ -16,7 +16,7 @@ namespace HunterCombatMR.Managers
             => _stateControllers.Any(x => x.ControllerType.Equals(controllerType));
 
         public static void InvokeController(string controllerType,
-                    in IModEntity entity,
+                    int entityId,
             params object[] args)
         {
             var controller = _stateControllers.Single(x => x.ControllerType.Equals(controllerType));
@@ -24,7 +24,7 @@ namespace HunterCombatMR.Managers
             if (args.Length < controller.RequiredArguments)
                 throw new ArgumentOutOfRangeException($"Controller {controllerType} requires at least {controller.RequiredArguments} arguments!");
 
-            controller.Invoke(in entity, args);
+            controller.Invoke(entityId, args);
         }
 
         protected override void OnDispose()

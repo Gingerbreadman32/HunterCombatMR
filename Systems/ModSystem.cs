@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Interfaces.Entity;
+﻿using HunterCombatMR.Extensions;
+using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using System;
@@ -26,7 +27,7 @@ namespace HunterCombatMR.Systems
         protected virtual void OnCreate() { }
 
         public ref TComponent GetComponent(in IModEntity entity)
-            => ref ComponentManager.GetEntityComponent<TComponent>(entity);
+            => ref entity.GetComponent<TComponent>();
 
         public bool HandleMessage<TMessage>(TMessage message)
         {
@@ -34,7 +35,7 @@ namespace HunterCombatMR.Systems
         }
 
         public bool HasComponent(in IModEntity entity)
-            => ComponentManager.HasComponent<TComponent>(entity);
+            => entity.HasComponent<TComponent>();
 
         public virtual void PostEntityUpdate()
         {
@@ -52,7 +53,7 @@ namespace HunterCombatMR.Systems
         {
             IEnumerable<IModEntity> entities = new List<IModEntity>();
 
-            return EntityManager.EntityList.Where(x => ComponentManager.HasComponent<TComponent>(x));
+            return EntityManager.EntityList.Where(x => x.HasComponent<TComponent>());
         }
 
         private void GetMessageTypes()

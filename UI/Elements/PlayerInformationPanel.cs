@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Managers;
+﻿using HunterCombatMR.Extensions;
+using HunterCombatMR.Managers;
 using HunterCombatMR.Models.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -77,10 +78,10 @@ namespace HunterCombatMR.UI.Elements
             // Debug
             if (_stateVersion)
             {
-                if (!ComponentManager.HasComponent<EntityStateComponent>(Player.EntityReference))
+                if (!Player.EntityReference.HasComponent<EntityStateComponent>())
                     return;
 
-                var component = ComponentManager.GetEntityComponent<EntityStateComponent>(Player.EntityReference);
+                var component = Player.EntityReference.GetComponent<EntityStateComponent>();
                 var currentState = component.GetCurrentState();
 
                 _parameters = new string[]
@@ -119,8 +120,8 @@ namespace HunterCombatMR.UI.Elements
         }
 
         private string ActionText()
-            => ComponentManager.HasComponent<EntityStateComponent>(Player.EntityReference)
-                ? $"{ComponentManager.GetEntityComponent<EntityStateComponent>(Player.EntityReference).CurrentStateNumber}"
+            => Player.EntityReference.HasComponent<EntityStateComponent>()
+                ? $"{Player.EntityReference.GetComponent<EntityStateComponent>().CurrentStateNumber}"
                 : _noneText;
 
         private string EquipText()

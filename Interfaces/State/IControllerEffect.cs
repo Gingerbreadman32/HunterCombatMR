@@ -1,12 +1,10 @@
-﻿using HunterCombatMR.Interfaces.Entity;
-
-namespace HunterCombatMR.Interfaces.State
+﻿namespace HunterCombatMR.Interfaces.State
 {
     public interface IControllerEffect
     {
-        int RequiredArguments { get; }
         string ControllerType { get; }
+        int RequiredArguments { get; }
 
-        void Invoke(in IModEntity entity, params object[] args);
+        void Invoke(int entityId, params object[] args);
     }
 }

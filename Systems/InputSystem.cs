@@ -33,10 +33,10 @@ namespace HunterCombatMR.Systems
 
             var entity = EntityManager.GetEntity(message.EntityId);
 
-            if (!ComponentManager.HasComponent<InputComponent>(entity))
+            if (!entity.HasComponent<InputComponent>())
                 return false;
 
-            ResetBuffers(ComponentManager.GetEntityComponent<InputComponent>(entity).BufferedInputs);
+            ResetBuffers(entity.GetComponent<InputComponent>().BufferedInputs);
 
             return true;
         }
@@ -45,7 +45,7 @@ namespace HunterCombatMR.Systems
         {
             foreach (var entity in ReadEntities())
             {
-                ref var component = ref ComponentManager.GetEntityComponent<InputComponent>(entity);
+                ref var component = ref entity.GetComponent<InputComponent>();
 
                 if (InputCheckingUtils.PlayerInputBufferPaused())
                 {

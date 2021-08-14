@@ -68,7 +68,7 @@ namespace HunterCombatMR
                 .WithState(1, states[1])
                 .Build();
 
-            ComponentManager.RegisterComponent(new EntityStateComponent(stateSet), _entity);
+            _entity.RegisterComponent(new EntityStateComponent(stateSet));
         }
 
         public override void ModifyDrawLayers(List<PlayerLayer> layers)
@@ -81,7 +81,7 @@ namespace HunterCombatMR
             _entity.SendMessage(new SetWorldStatusMessage(_entity.Id, EntityWorldStatus.Grounded));
             if (IsMainPlayer && Main.netMode == NetmodeID.SinglePlayer)
             {
-                ComponentManager.RegisterComponent(new InputComponent(player.whoAmI), _entity);
+                _entity.RegisterComponent(new InputComponent(player.whoAmI));
             }
         }
 

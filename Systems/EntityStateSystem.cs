@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Interfaces.Entity;
+﻿using HunterCombatMR.Extensions;
+using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Messages.EntityStateSystem;
@@ -27,7 +28,7 @@ namespace HunterCombatMR.Systems
         {
             foreach (var entity in ReadEntities())
             {
-                ref var component = ref ComponentManager.GetEntityComponent<EntityStateComponent>(entity);
+                ref var component = ref entity.GetComponent<EntityStateComponent>();
 
                 SetWorldStatusFromMessages(entity, component);
 
@@ -35,18 +36,8 @@ namespace HunterCombatMR.Systems
                     continue;
 
                 component.CurrentStateInfo.Time++;
-                EvaluateControllers(in entity, component.GetCurrentState());
+                EvaluateControllers(entity.Id, component.GetCurrentState());
             }
-        }
-
-        private void SetWorldStatusFromMessages(IModEntity entity, EntityStateComponent component)
-        {
-            foreach (var worldMessage in _worldStatusMessages.Where(x => x.EntityId.Equals(entity.Id)))
-            {
-                component.CurrentStateInfo.WorldStatus = worldMessage.Status;
-            }
-
-            _worldStatusMessages.RemoveAll(x => x.EntityId.Equals(entity.Id));
         }
 
         protected override void OnCreate()
@@ -54,25 +45,25 @@ namespace HunterCombatMR.Systems
             _worldStatusMessages = new List<SetWorldStatusMessage>();
         }
 
-        private void EvaluateControllers(in IModEntity entity,
+        private void EvaluateControllers(int entityId,
             EntityState state)
         {
             for (int c = 0; c < state.Controllers.Length; c++)
             {
-                if (EvaluateTriggers(state.Controllers[c].Triggers, entity))
-                    StateControllerManager.InvokeController(state.Controllers[c].Type, in entity, state.Controllers[c].Parameters);
+                if (EvaluateTriggers(state.Controllers[c].Triggers, entityId))
+                    StateControllerManager.InvokeController(state.Controllers[c].Type, entityId, state.Controllers[c].Parameters);
             }
         }
 
         private bool EvaluateTrigger(StateTrigger trigger,
-            IModEntity entity)
+            int entityId)
         {
             var type = StateTriggerManager.GetParameterComponentType(trigger.Parameter);
 
-            if (!ComponentManager.HasComponent(entity, type))
+            if (!ComponentManager.HasComponent(entityId, type))
                 return false;
 
-            ref readonly var component = ref ComponentManager.GetEntityComponent(entity, type);
+            ref readonly var component = ref ComponentManager.GetEntityComponent(entityId, type);
             var property = StateTriggerManager.GetComponentProperty(in component, trigger.Parameter);
 
             return Convert.ToSingle(property) == trigger.Value; // testing
@@ -80,7 +71,7 @@ namespace HunterCombatMR.Systems
 
         // Make unit tests for this
         private bool EvaluateTriggers(StateTrigger[][] triggers,
-                    IModEntity entity)
+                    int entityId)
         {
             bool qualified = false;
 
@@ -91,7 +82,7 @@ namespace HunterCombatMR.Systems
 
                 for (int t = 0; t < triggers[s].Length; t++)
                 {
-                    var triggerStatus = EvaluateTrigger(triggers[s][t], entity);
+                    var triggerStatus = EvaluateTrigger(triggers[s][t], entityId);
 
                     if (!triggerStatus)
                     {
@@ -110,6 +101,16 @@ namespace HunterCombatMR.Systems
             }
 
             return qualified;
+        }
+
+        private void SetWorldStatusFromMessages(IModEntity entity, EntityStateComponent component)
+        {
+            foreach (var worldMessage in _worldStatusMessages.Where(x => x.EntityId.Equals(entity.Id)))
+            {
+                component.CurrentStateInfo.WorldStatus = worldMessage.Status;
+            }
+
+            _worldStatusMessages.RemoveAll(x => x.EntityId.Equals(entity.Id));
         }
     }
 }

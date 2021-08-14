@@ -96,7 +96,7 @@ namespace HunterCombatMR.Systems
         {
             foreach (var entity in ReadEntities())
             {
-                ref var component = ref ComponentManager.GetEntityComponent<AnimationComponent>(entity);
+                ref var component = ref entity.GetComponent<AnimationComponent>();
 
                 if (InputCheckingUtils.PlayerInputBufferPaused())
                     continue;

@@ -92,10 +92,10 @@ namespace HunterCombatMR.UI
 
             // Buffer Window
             _bufferList.Clear();
-            if (!ComponentManager.HasComponent<InputComponent>(Player.EntityReference))
+            if (!Player.EntityReference.HasComponent<InputComponent>())
                 return;
 
-            var inputs = ComponentManager.GetEntityComponent<InputComponent>(Player.EntityReference).BufferedInputs;
+            var inputs = Player.EntityReference.GetComponent<InputComponent>().BufferedInputs;
             
             foreach (var buffer in inputs.ToArray())
             {
