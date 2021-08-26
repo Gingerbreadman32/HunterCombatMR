@@ -93,9 +93,9 @@ namespace HunterCombatMR
 
         public override void PostSavePlayer()
         {
-            if (Main.gameMenu && _entity.HasComponent<AnimationComponent>())
+            if (Main.gameMenu)
             {
-                _entity.RemoveComponent<AnimationComponent>();
+                _entity.RemoveAllComponents();
             }
 
             base.PostSavePlayer();

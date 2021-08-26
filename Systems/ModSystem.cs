@@ -53,7 +53,7 @@ namespace HunterCombatMR.Systems
         {
             IEnumerable<IModEntity> entities = new List<IModEntity>();
 
-            return EntityManager.EntityList.Where(x => x.HasComponent<TComponent>());
+            return EntityManager.EntityList.Where(x => ComponentManager.HasComponent<TComponent>(x)).Select(x => EntityManager.GetEntity(x));
         }
 
         private void GetMessageTypes()

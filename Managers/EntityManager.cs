@@ -10,19 +10,15 @@ namespace HunterCombatMR.Managers
     public sealed class EntityManager
         : ManagerBase
     {
-        private static ICollection<IModEntity> _entities; // Do I need this?
         private static ICollection<int> _ids;
         private static IDictionary<int, ICollection<Type>> _componentTypes;
-        public static IEnumerable<IModEntity> EntityList { get { return _entities; } }
-        public static IEnumerable<int> IdList { get { return _ids; } }
+        public static IEnumerable<int> EntityList { get { return _ids; } }
 
         public static IModEntity CreateEntity()
         {
             var id = IdManager.NextID();
-            var entity = new ModEntity(id);
             _ids.Add(id);
-            _entities.Add(entity);
-            return entity;
+            return new ModEntity(id);
         }
 
         public static IReadOnlyList<Type> GetEntityComponentTypes(int id)
@@ -61,10 +57,7 @@ namespace HunterCombatMR.Managers
         }
 
         public static bool EntityExists(int id)
-            => _ids.Contains(id) && _entities.Any(x => x.Id == id);
-
-        public static bool EntityExists(IModEntity entity)
-            => _entities.Contains(entity);
+            => _ids.Contains(id);
 
         public static IModEntity GetEntity(int id)
         {
@@ -73,13 +66,12 @@ namespace HunterCombatMR.Managers
                 throw new IndexOutOfRangeException($"No entity exists with id of {id}");
             }
 
-            return _entities.Single(x => x.Id == id);
+            return new ModEntity(id);
         }
 
         public static void RemoveEntity(int id)
         {
             IdManager.Free(id);
-            _entities.Remove(GetEntity(id));
             _ids.Remove(id);
             if (_componentTypes.ContainsKey(id))
                 _componentTypes.Remove(id);
@@ -87,7 +79,6 @@ namespace HunterCombatMR.Managers
 
         protected override void OnDispose()
         {
-            _entities = null;
             _ids = null;
             _componentTypes = null;
         }
@@ -95,7 +86,6 @@ namespace HunterCombatMR.Managers
         protected override void OnInitialize()
         {
             _ids = new List<int>();
-            _entities = new List<IModEntity>();
             _componentTypes = new Dictionary<int, ICollection<Type>>();
         }
     }

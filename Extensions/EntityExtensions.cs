@@ -26,6 +26,14 @@ namespace HunterCombatMR.Extensions
         public static void RemoveComponent<TComponent>(this IModEntity entity) where TComponent : struct
                     => ComponentManager.RemoveComponent<TComponent>(entity.Id);
 
+        public static void RemoveAllComponents(this IModEntity entity)
+        {
+            foreach (var component in entity.GetComponentTypes())
+            {
+                ComponentManager.RemoveComponent(entity.Id, component);
+            }
+        }
+
         public static bool SendMessage<TMessage>(this IModEntity entity, TMessage message)
             => SystemManager.SendMessage(message);
     }

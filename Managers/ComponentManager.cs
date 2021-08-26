@@ -79,6 +79,22 @@ namespace HunterCombatMR.Managers
             EntityManager.RemoveComponentTypeFromEntity(entityId, typeof(TComponent));
         }
 
+        public static void RemoveComponent(int entityId,
+            Type componentType)
+        {
+            EntityExists(entityId);
+
+            if (!HasComponent(entityId, componentType))
+                throw new Exception("Entity has no components of this type!");
+
+            var idRefs = GetEntityIdsGeneric(componentType);
+            var components = GetEntityComponentsGeneric(componentType);
+            int index = GetEntityComponentIndex(idRefs, entityId);
+            idRefs[index] = -1;
+            components[index] = Activator.CreateInstance(componentType);
+            EntityManager.RemoveComponentTypeFromEntity(entityId, componentType);
+        }
+
         protected override void OnDispose()
         {
             _componentListDelegates = null;
