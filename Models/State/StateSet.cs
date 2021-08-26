@@ -11,7 +11,6 @@ namespace HunterCombatMR.Models.State
     /// </summary>
     /// <remarks>
     /// Must have a state equal to the default <see cref="StateNumberConstants.Default"/>.
-    /// States numbered <see cref="StateNumberConstants.Minimum"/> through -1 will have their controllers hit every tick the entity is active in order from lowest to highest.
     /// State <see cref="StateNumberConstants.Default"/> is the default state and will be what the entity is sent to if it is told to end without a state to change to.
     /// </remarks>
     public struct StateSet
@@ -34,9 +33,6 @@ namespace HunterCombatMR.Models.State
             {
                 if (!states.Any(x => x.Key.Equals(StateNumberConstants.Default)))
                     throw new Exception($"State set must have a state number {StateNumberConstants.Default}!");
-
-                if (states.Any(x => x.Key < StateNumberConstants.Minimum))
-                    throw new Exception($"State number cannot be below {StateNumberConstants.Minimum}!");
 
                 return true;
             }
