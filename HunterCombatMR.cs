@@ -212,6 +212,7 @@ namespace HunterCombatMR
         {
             SystemManager.AddSystem(new InputSystem());
             SystemManager.AddSystem(new EntityStateSystem());
+            SystemManager.AddSystem(new AnimationSystem());
         }
 
         private void ManagerSetup(Type[] assemblyTypes)

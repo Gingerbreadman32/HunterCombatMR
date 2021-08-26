@@ -1,70 +1,228 @@
-﻿using HunterCombatMR.Models;
-using HunterCombatMR.Models.Animation;
+﻿using HunterCombatMR.Enumerations;
+using HunterCombatMR.Models;
+using HunterCombatMR.Models.Animation.Entity;
 using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterCombatMR.Builders.Animation
 {
-    public sealed class LayerBuilder
+    public static class LayerBuilderChainMethods
     {
-        private int _depth;
-        private LayerDataBuilder[] _layerData;
-        private string _name;
-        private string _tagName;
-        private Point _tagSize;
-
-        public LayerBuilder(string layerName,
-            string textureName)
+        public static LayerBuilder WithKeyframe(this LayerBuilder builder,
+            int sheetNumber = 0,
+            int sheetFrame = 0,
+            Point position = new Point(),
+            float rotation = 0f,
+            float alpha = 255f,
+            float scale = 1f,
+            SpriteEffects orientation = SpriteEffects.None,
+            int depth = 0)
         {
-            Name = layerName;
-            TagName = textureName;
-            _tagSize = Point.Zero;
-            _layerData = new LayerDataBuilder[1] { new LayerDataBuilder() };
+            builder.AddKeyframe(new EntityAnimationLayerData(0, sheetNumber, sheetFrame, position, rotation, alpha, scale, orientation, depth));
+            return builder;
         }
 
-        public int DefaultDepth { get => _depth; }
-        public int Frames { get => _layerData.Length; }
-        public string Name { get => _name; set => _name = value; }
-        public string TagName { get => _tagName; set => _tagName = value; }
-        public Point TagSize { get => _tagSize; set => _tagSize = value; }
-
-        public Layer Build()
+        public static LayerBuilder BuildKeyframe(this LayerBuilder builder,
+            CopyKeyframe action = CopyKeyframe.None,
+            int setKeyframe = 1)
         {
-            return new Layer(_name, _depth, new TextureTag(_tagName, _tagSize));
+            builder.KeyframeEditing = builder.DuplicateKeyframe(action, setKeyframe);
+
+            return builder;
         }
 
-        public void MoveKeyframe(FrameIndex keyFrameIndex,
-            FrameIndex newFrameIndex)
+        public static LayerBuilder AtPosition(this LayerBuilder builder,
+            int xCoordinate,
+            int yCoordinate)
         {
-            LayerDataBuilder temp = _layerData[keyFrameIndex];
-            _layerData[keyFrameIndex] = _layerData[newFrameIndex];
-            _layerData[newFrameIndex] = temp;
+            builder.KeyframeEditing.Position = new Point(xCoordinate, yCoordinate);
+            return builder;
         }
 
-        public void RemoveKeyframe(FrameIndex keyFrameIndex)
+        public static LayerBuilder WithDepth(this LayerBuilder builder,
+            int depth)
         {
-            ArrayUtils.Remove(ref _layerData, keyFrameIndex);
+            builder.KeyframeEditing.Depth = depth;
+            return builder;
         }
 
-        public void AddKeyframe(LayerDataBuilder dataBuilder)
+        public static LayerBuilder Flipped(this LayerBuilder builder,
+            SpriteEffects flipDirection)
         {
-            ArrayUtils.ResizeAndFillArray(ref _layerData, _layerData.Length + 1, dataBuilder);
-        }
-
-        public void SetDepth(int depth,
-            int atFrame = -1)
-        {
-            if (atFrame < -1 || atFrame >= Frames)
-                throw new ArgumentOutOfRangeException($"{atFrame} is not a applicable frame index! Use -1 if no index is needed.");
-
-            if (atFrame > -1)
+            if (builder.KeyframeEditing.Orientation.HasFlag(flipDirection))
             {
-                _layerData[atFrame].DepthOverride = depth;
-                return;
+                builder.KeyframeEditing.Orientation &= ~flipDirection;
+                return builder;
             }
 
-            _depth = depth;
+            builder.KeyframeEditing.Orientation |= flipDirection;
+            return builder;
+        }
+
+        public static LayerBuilder NextSprite(this LayerBuilder builder,
+            int positionNumber = -1)
+        {
+            if (positionNumber < 0)
+            {
+                builder.KeyframeEditing.SheetFrame++;
+                return builder;
+            }
+            builder.KeyframeEditing.SheetFrame = positionNumber;
+            return builder;
+        }
+
+        public static LayerBuilder FinishKeyframe(this LayerBuilder builder)
+        {
+            builder.AddKeyframe(builder.KeyframeEditing);
+            return builder;
+        }
+    }
+
+    public sealed class LayerBuilder
+    {
+        private LayerDataBuilder[] _layerData;
+        private string _name;
+
+        public LayerBuilder(string layerName)
+        {
+            _name = layerName;
+            _layerData = new LayerDataBuilder[0];
+        }
+
+        public LayerBuilder(EntityAnimationLayer layer,
+            IEnumerable<EntityAnimationLayerData> layerData)
+        {
+            _name = layer.Name;
+            _layerData = layerData.Select(x => new LayerDataBuilder(x)).ToArray();
+            KeyframeEditing = new LayerDataBuilder();
+        }
+
+        public LayerBuilder(LayerBuilder copy)
+        {
+            _name = copy._name;
+            _layerData = copy._layerData;
+            KeyframeEditing = new LayerDataBuilder();
+        }
+
+        public int Frames { get => _layerData.Length; }
+        public string Name { get => _name; set => _name = value; }
+
+        public LayerDataBuilder KeyframeEditing { get; set; }
+
+        public LayerDataBuilder AddKeyframe()
+        {
+            return AddKeyframe(default(EntityAnimationLayerData));
+        }
+
+        public LayerDataBuilder AddKeyframe(EntityAnimationLayerData data)
+        {
+            var builder = new LayerDataBuilder(data);
+            builder.AnimationKeyframe = _layerData.Length;
+            ArrayUtils.Add(ref _layerData, builder);
+            return builder;
+        }
+
+        public LayerDataBuilder AddKeyframe(LayerDataBuilder builder)
+        {
+            var newBuilder = new LayerDataBuilder(builder);
+            newBuilder.AnimationKeyframe = _layerData.Length;
+            ArrayUtils.Add(ref _layerData, newBuilder);
+            return newBuilder;
+        }
+
+        public LayerDataBuilder AddKeyframe(CopyKeyframe action,
+            int setKeyframe = 1)
+        {
+            if (_layerData.Length < 1)
+                throw new Exception("No keyframes to pull data from!");
+
+            return AddKeyframe(DuplicateKeyframe(action, setKeyframe));
+        }
+
+        public LayerDataBuilder DuplicateKeyframe(CopyKeyframe action, 
+            int setKeyframe = 1)
+        {
+            switch (action)
+            {
+                case CopyKeyframe.New:
+                case CopyKeyframe.None:
+                    return new LayerDataBuilder();
+                case CopyKeyframe.Last:
+                    return new LayerDataBuilder(GetLatestLayerData());
+                case CopyKeyframe.First:
+                    return new LayerDataBuilder(GetLayerData(0));
+                case CopyKeyframe.Set:
+                    return new LayerDataBuilder(GetLayerData(setKeyframe - 1));
+                default:
+                    throw new Exception("No valid frame action selected.");
+            }
+        }
+
+        public EntityAnimationLayer Build()
+        {
+            Validate();
+            var layerData = _layerData.Select(x => x.Build());
+            return new EntityAnimationLayer(_name, layerData);
+        }
+
+        public LayerDataBuilder GetLayerData(int index)
+        {
+            if (index > _layerData.Length || index < 0)
+                throw new ArgumentOutOfRangeException($"Index {index} is out of the range of the current layer data array {_layerData.Length}.");
+            return _layerData[index];
+        }
+
+        public LayerDataBuilder GetLatestLayerData()
+        {
+            if (!_layerData.Any())
+                throw new ArgumentOutOfRangeException($"There are no latest layer data. ");
+            return _layerData.Last();
+        }
+
+        public LayerDataBuilder GetLayerData(FrameIndex animationKeyframeIndex)
+        {
+            var predicate = new Func<LayerDataBuilder, bool>(x => x.AnimationKeyframe.Equals(animationKeyframeIndex));
+            if (!_layerData.Any(predicate))
+            {
+                throw new ArgumentOutOfRangeException($"No layer data exists corresponding to animation frame of {animationKeyframeIndex}");
+            }
+            return _layerData.First(predicate);
+        }
+
+        public void RemoveKeyframe(int index)
+        {
+            if (index > _layerData.Length || index < 0)
+                throw new ArgumentOutOfRangeException($"Index {index} is out of the range of the current layer data array {_layerData.Length}.");
+            ArrayUtils.Remove(ref _layerData, index);
+        }
+
+        public int SetLayerData(EntityAnimationLayerData data)
+        {
+            return SetLayerData(new LayerDataBuilder(data));
+        }
+
+        public int SetLayerData(LayerDataBuilder dataBuilder)
+        {
+            var predicate = new Func<LayerDataBuilder, bool>(x => x.AnimationKeyframe.Equals(dataBuilder.AnimationKeyframe));
+            if (!_layerData.Any(predicate))
+            {
+                ArrayUtils.Add(ref _layerData, dataBuilder);
+                return _layerData.Length - 1;
+            }
+            var index = Array.FindIndex(_layerData, new Predicate<LayerDataBuilder>(predicate));
+
+            _layerData[index] = dataBuilder;
+            return index;
+        }
+
+        public void Validate()
+        {
+            if (_layerData.GroupBy(x => x.AnimationKeyframe).Any(x => x.Count() > 1))
+                throw new Exception("Cannot have multiple instaces of layer data with the same animation frame!");
         }
     }
 }

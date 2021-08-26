@@ -7,7 +7,7 @@ namespace HunterCombatMR.Models
 {
     public class KeyframeData<T>
         : IDictionary<string, T>, 
-        IKeyframeData where T : class
+        IKeyframeData
     {
         private IDictionary<string, T> _data;
 
@@ -108,10 +108,11 @@ namespace HunterCombatMR.Models
 
         public bool TryGetValue(string key, out T value)
         {
-            value = null;
-
             if (!ContainsKey(key))
+            {
+                value = default(T);
                 return false;
+            }
 
             value = this[key];
             return true;

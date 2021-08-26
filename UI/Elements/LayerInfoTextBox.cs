@@ -32,7 +32,7 @@ namespace HunterCombatMR.UI.Elements
 
             coordList[infoMod] = float.Parse(newText);
 
-            layer.FrameData.Position = new Vector2(coordList[0], coordList[1]);
+            //layer.FrameData.Position = new Vector2(coordList[0], coordList[1]);
 
             return newText;
         }

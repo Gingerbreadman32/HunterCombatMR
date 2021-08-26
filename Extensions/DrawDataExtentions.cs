@@ -16,15 +16,15 @@ namespace HunterCombatMR.Extensions
         /// <param name="frameInfo">The <see cref="LayerData"/> of the current frame of the sprite being drawn</param>
         public static DrawData SetSpriteOrientation(this DrawData value,
             Player drawPlayer,
-            LayerData frameInfo,
+            SpriteEffects effects,
             Rectangle layerRectangle)
         {
             var flippedHori = false;
             var flippedVert = false;
 
-            if (frameInfo.Orientation.Equals(SpriteEffects.FlipHorizontally))
+            if (effects.Equals(SpriteEffects.FlipHorizontally))
                 flippedHori ^= true;
-            else if (frameInfo.Orientation.Equals(SpriteEffects.FlipVertically))
+            else if (effects.Equals(SpriteEffects.FlipVertically))
                 flippedVert ^= true;
 
             if (drawPlayer.direction != 1)

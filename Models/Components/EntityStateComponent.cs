@@ -1,5 +1,8 @@
 ﻿using HunterCombatMR.Attributes;
 using HunterCombatMR.Constants;
+using HunterCombatMR.Managers;
+using HunterCombatMR.Messages.AnimationSystem;
+using HunterCombatMR.Models.Animation;
 using HunterCombatMR.Models.State;
 using System;
 using System.Collections.Generic;
@@ -9,18 +12,22 @@ namespace HunterCombatMR.Models.Components
 {
     public struct EntityStateComponent
     {
-        public EntityStateComponent(IEnumerable<StateSet> stateSets)
+        public EntityStateComponent(IEnumerable<StateSet> stateSets,
+            IEnumerable<EntityAnimation> animationSet)
         {
             StateSets = stateSets.ToArray();
             CurrentStateNumber = 0;
             CurrentStateInfo = new StateInfo();
+            AnimationSet = animationSet.ToArray();
         }
 
-        public EntityStateComponent(StateSet stateSet)
+        public EntityStateComponent(StateSet stateSet,
+            IEnumerable<EntityAnimation> animationSet)
         {
             StateSets = new StateSet[] { stateSet };
             CurrentStateNumber = 0;
             CurrentStateInfo = new StateInfo();
+            AnimationSet = animationSet.ToArray();
         }
 
         public int CurrentStateNumber { get; set; }
@@ -32,6 +39,8 @@ namespace HunterCombatMR.Models.Components
 
         public StateSet[] StateSets { get; set; }
 
+        public EntityAnimation[] AnimationSet { get; set; }
+
         public EntityState GetCurrentState()
             => GetState(CurrentStateNumber);
 
@@ -41,15 +50,6 @@ namespace HunterCombatMR.Models.Components
                 throw new Exception($"No stateset on this entity contains a state with state no. {stateNumber}.");
 
             return StateSets.First(x => x.States.ContainsKey(stateNumber)).States[stateNumber];
-        }
-
-        public void SetState(int stateNumber)
-        {
-            CurrentStateInfo = new StateInfo(CurrentStateInfo, 
-                CurrentStateNumber, 
-                GetState(stateNumber).Definition, 
-                Array.FindIndex(StateSets, x => x.States.ContainsKey(stateNumber)));
-            CurrentStateNumber = stateNumber;
         }
     }
 }

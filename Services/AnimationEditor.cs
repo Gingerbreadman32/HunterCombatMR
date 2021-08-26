@@ -97,7 +97,7 @@ namespace HunterCombatMR.Services
 
                 var layerNudgeAmount = nudgeAmount;
                 layerNudgeAmount.X *= direction;
-                layer.FrameData.Position += layerNudgeAmount;
+                //layer.FrameData.Position += layerNudgeAmount;
             }
             /*
             if (SelectedLayer == layerName)

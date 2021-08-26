@@ -1,6 +1,7 @@
 ﻿using HunterCombatMR.Constants;
 using HunterCombatMR.Interfaces.State;
 using HunterCombatMR.Managers;
+using HunterCombatMR.Messages.EntityStateSystem;
 using HunterCombatMR.Models.Components;
 using System;
 
@@ -16,7 +17,7 @@ namespace HunterCombatMR.Models.State.Controllers
         {
             ref var component = ref ComponentManager.GetEntityComponent<EntityStateComponent>(entityId);
 
-            component.SetState(Convert.ToInt32(args[0]));
+            SystemManager.SendMessage(new ChangeStateMessage(entityId, Convert.ToInt32(args[0])));
         }
     }
 }

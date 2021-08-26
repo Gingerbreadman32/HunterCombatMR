@@ -10,7 +10,6 @@ namespace HunterCombatMR.JSONConverters
 {
     public class KeyframeDataConverter<TData>
         : JsonConverter
-        where TData : class
     {
         public override bool CanConvert(Type objectType)
             => objectType == (typeof(KeyframeData<TData>));

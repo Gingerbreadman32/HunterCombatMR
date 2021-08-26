@@ -34,7 +34,7 @@ namespace HunterCombatMR.Models.Animation.Entity
         {
             Frame = FrameIndex.Zero;
             _keyframeTable = new FrameIndex[0];
-            Initialize(animation.Layers.FrameData);
+            Initialize(animation.FrameData, animation.LoopStyle);
         }
 
         /// <summary>
@@ -95,7 +95,8 @@ namespace HunterCombatMR.Models.Animation.Entity
         public int GetTotalFrames()
             => _keyframeTable.Length;
 
-        public void Initialize(IEnumerable<IKeyframeData> frameData)
+        public void Initialize(IEnumerable<FrameLength> frameData,
+            LoopStyle loop = LoopStyle.Once)
         {
             if (!frameData.Any())
                 throw new AnimatorInitializationException($"No Keyframes to initialize!");
@@ -106,6 +107,7 @@ namespace HunterCombatMR.Models.Animation.Entity
                     Uninitialize();
 
                 CreateKeyFrames(frameData);
+                LoopStyle = loop;
                 _initialized = true;
                 Play();
             }
@@ -132,7 +134,7 @@ namespace HunterCombatMR.Models.Animation.Entity
         public void Play()
         {
             if (_flags.HasFlag(AnimationFlags.Paused))
-                _flags &= AnimationFlags.Paused;
+                _flags &= ~AnimationFlags.Paused;
 
             _playing = true;
         }
@@ -141,7 +143,7 @@ namespace HunterCombatMR.Models.Animation.Entity
         public void Stop(bool replay)
         {
             if (_flags.HasFlag(AnimationFlags.Paused))
-                _flags &= AnimationFlags.Paused;
+                _flags &= ~AnimationFlags.Paused;
 
             Frame = FrameIndex.Zero;
             _playing = false;
@@ -193,9 +195,9 @@ namespace HunterCombatMR.Models.Animation.Entity
             Frame = calculatedFrames;
         }
 
-        private void CreateKeyFrames(IEnumerable<IKeyframeData> frameData)
+        private void CreateKeyFrames(IEnumerable<FrameLength> frameData)
         {
-            _keyframes = frameData.Cast<Keyframe>().ToArray();
+            _keyframes = frameData.Select(x => new Keyframe(x)).ToArray();
 
             ArrayUtils.ResizeAndFillArray(ref _keyframeTable, _keyframes.Sum(x => x.Frames), 0);
 
@@ -235,7 +237,8 @@ namespace HunterCombatMR.Models.Animation.Entity
         private void SetKeyframeTable(FrameIndex index,
             int keyframe)
         {
-            for (int f = index; f < _keyframes[keyframe].Frames; f++)
+            int current = index.Value;
+            for (int f = index; f < (_keyframes[keyframe].Frames + current); f++)
             {
                 _keyframeTable[f] = keyframe;
                 index = f;
@@ -244,7 +247,7 @@ namespace HunterCombatMR.Models.Animation.Entity
             keyframe++;
 
             if (keyframe < _keyframes.Length && keyframe < AnimationConstants.MaxKeyframes)
-                SetKeyframeTable(keyframe, index);
+                SetKeyframeTable(++index, keyframe);
         }
     }
 }

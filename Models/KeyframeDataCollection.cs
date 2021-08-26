@@ -8,7 +8,6 @@ namespace HunterCombatMR.Models
 {
     public class KeyframeDataCollection<TReference, TData>
         : IDictionary<string, TReference>
-        where TData : class
         where TReference : IKeyframeDataReference
     {
         private protected KeyframeData<TData>[] _frameData;

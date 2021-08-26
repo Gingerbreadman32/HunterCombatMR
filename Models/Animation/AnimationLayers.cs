@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HunterCombatMR.Builders.Animation;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace HunterCombatMR.Models.Animation
@@ -6,10 +7,6 @@ namespace HunterCombatMR.Models.Animation
     public sealed class AnimationLayers
         : KeyframeDataCollection<Layer, LayerData>
     {
-        public AnimationLayers()
-            : base()
-        { }
-
         public AnimationLayers(AnimationLayers copy)
             : base(copy)
         { }

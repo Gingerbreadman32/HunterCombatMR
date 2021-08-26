@@ -57,7 +57,7 @@ namespace HunterCombatMR.Models.Player
             frameRectangle.SetSheetPositionFromFrame(frameInfo.SheetFrame);
             DrawData value = new DrawData(texture, frameInfo.Position, frameRectangle, color);
 
-            value = value.SetSpriteOrientation(drawPlayer, frameInfo, frameRectangle);
+            value = value.SetSpriteOrientation(drawPlayer, frameInfo.Orientation, frameRectangle);
             value.position += positionVector - frameRectangle.Size() / 2;
 
             return value;

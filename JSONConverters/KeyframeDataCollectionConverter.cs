@@ -11,7 +11,6 @@ namespace HunterCombatMR.JSONConverters
 {
     public abstract class KeyframeDataCollectionConverter<TReference, TData>
         : JsonConverter
-        where TData : class
         where TReference : IKeyframeDataReference
     {
         public abstract bool ReferencesAreContent { get; }

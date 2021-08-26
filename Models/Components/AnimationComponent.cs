@@ -15,7 +15,7 @@ namespace HunterCombatMR.Models.Components
             Animator = new EntityAnimator(animation);
         }
 
-        public EntityAnimation Animation { get => _animation; set { _animation = value; Animator.Initialize(_animation.Layers.FrameData); } }
+        public EntityAnimation Animation { get => _animation; set { _animation = value; Animator.Initialize(_animation.FrameData, _animation.LoopStyle); } }
         public EntityAnimator Animator { get; }
 
         [TriggerParameter(CommonTriggerParams.FrameTime)]

@@ -17,7 +17,7 @@ namespace HunterCombatMR.Models.Animation
         public const int Scale = 6;
     }
 
-    public class LayerData
+    public struct LayerData
             : ICompact<string>
     {
         internal LayerData(int? depth,
@@ -80,7 +80,7 @@ namespace HunterCombatMR.Models.Animation
         /// <summary>
         /// The amount of transparency the layer will have.
         /// </summary>
-        public float Alpha { get; set; } = 255f;
+        public float Alpha { get; set; }
 
         /// <summary>
         /// Overrides the layer depth defined by the layer at this frame. Leave null if the normal
@@ -109,7 +109,7 @@ namespace HunterCombatMR.Models.Animation
         /// </summary>
         public int SheetFrame { get; set; }
 
-        public float Scale { get; set; } = 1f;
+        public float Scale { get; set; }
 
         public string[] Save()
                     => new string[]

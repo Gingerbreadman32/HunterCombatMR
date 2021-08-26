@@ -25,6 +25,7 @@ namespace HunterCombatMR.UI.Elements
             SetDisplayInformation(infoArgs);
             OnClick += HighlightFrame;
             OnRightClick += DeselectAllFrames;
+            _displayText = "";
         }
 
         public LayerTextInfo DisplayInfo { get; private set; }

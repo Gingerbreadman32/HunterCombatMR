@@ -573,11 +573,11 @@ namespace HunterCombatMR.UI
         private void DisplayLayers(EntityAnimation animation,
             int keyFrame)
         {
-            foreach (var layer in animation.Layers.GetOrderedActiveLayerData(keyFrame))
+            foreach (var layer in animation.GetOrderedActiveLayerData(keyFrame))
             {
                 if (!_layerlist._items.Any(x => (x as LayerText).LayerRef.Equals(layer)))
                 {
-                    _layerlist.Add(new LayerText(layer, LayerTextInfo.None));
+                    //_layerlist.Add(new LayerText(layer.Key, LayerTextInfo.None));
                 }
             }
         }
@@ -600,7 +600,7 @@ namespace HunterCombatMR.UI
             FrameLength newLength = amount + keyFrame.Frames;
 
             EditorUtils.EditingAnimation.Layers[currentKeyframeIndex].Frames = newLength;
-            animator.Initialize(EditorUtils.EditingAnimation.Layers.FrameData);
+            //animator.Initialize(EditorUtils.EditingAnimation.Layers.FrameData);
 
             SetToClosestFrame(animator.Frame, animator.GetTotalFrames());
         }
@@ -666,7 +666,7 @@ namespace HunterCombatMR.UI
             {
                 return;
             }
-
+            /*
             var component = CurrentPlayer.EntityReference.GetComponent<AnimationComponent>();
             var key = component.Animator.GetCurrentKeyFrame();
             var layer = component.Animation.Layers[HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Single(), key];
@@ -681,7 +681,7 @@ namespace HunterCombatMR.UI
             if (newFrame < 0)
                 newFrame = totalFrames - 1;
 
-            layer.FrameData.SheetFrame = newFrame;
+            layer.FrameData.SheetFrame = newFrame;*/
         }
 
         private void NextTextureFrame(UIMouseEvent evt, UIElement listeningElement)
