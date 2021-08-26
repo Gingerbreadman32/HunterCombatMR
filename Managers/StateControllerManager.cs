@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.Interfaces.Entity;
-using HunterCombatMR.Interfaces.State;
+﻿using HunterCombatMR.Interfaces.State;
 using HunterCombatMR.Services;
 using System;
 using System.Collections.Generic;
@@ -35,9 +34,10 @@ namespace HunterCombatMR.Managers
         protected override void OnInitialize()
         {
             _stateControllers = new List<IControllerEffect>();
-            foreach (var controller in GetType().Assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(IControllerEffect)) && !x.IsAbstract))
+            var test = GetType().Assembly.GetTypes().Where(x => typeof(IControllerEffect).IsAssignableFrom(x));
+            foreach (var controller in test.Where( x=> !x.IsAbstract))
             {
-                _stateControllers.Add(controller as IControllerEffect);
+                _stateControllers.Add((IControllerEffect)Activator.CreateInstance(controller));
             }
         }
     }
