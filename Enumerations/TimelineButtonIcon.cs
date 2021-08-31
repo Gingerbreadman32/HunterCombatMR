@@ -1,5 +1,5 @@
 ﻿using HunterCombatMR.Attributes;
-using HunterCombatMR.UI;
+using HunterCombatMR.Constants;
 
 namespace HunterCombatMR.Enumerations
 {

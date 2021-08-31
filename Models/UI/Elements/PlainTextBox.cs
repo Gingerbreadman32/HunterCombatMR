@@ -3,7 +3,7 @@ using HunterCombatMR.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HunterCombatMR.UI.Elements
+namespace HunterCombatMR.Models.UI.Elements
 {
     public class PlainTextBox
         : TextBoxBase

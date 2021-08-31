@@ -1,10 +1,10 @@
 using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Managers;
+using HunterCombatMR.Models.UI;
+using HunterCombatMR.Models.UI.Elements;
 using HunterCombatMR.Services;
 using HunterCombatMR.Systems;
-using HunterCombatMR.UI;
-using HunterCombatMR.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;

@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.Builders.Animation;
+using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
@@ -8,7 +9,7 @@ using System.Linq;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI.AnimationTimeline
+namespace HunterCombatMR.Models.UI.AnimationTimeline
 {
     public class TimelineButton
         : UIElement
@@ -120,7 +121,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             _iconTexture = ModContent.GetTexture(Icon.GetTexturePath());
 
             Width.Set(_buttonTexture.Width * ImageScale, 0f);
-            Height.Set((_buttonTexture.Height / _states) * ImageScale, 0f);
+            Height.Set(_buttonTexture.Height / _states * ImageScale, 0f);
         }
 
         public void StartCooldown()
@@ -173,14 +174,14 @@ namespace HunterCombatMR.UI.AnimationTimeline
                 effects: SpriteEffects.None,
                 layerDepth: 0f);
 
-            spriteBatch.Draw(position: GetDimensions().Position() + (ButtonPadding * ImageScale) + (iconOffset * ImageScale),
+            spriteBatch.Draw(position: GetDimensions().Position() + ButtonPadding * ImageScale + iconOffset * ImageScale,
                 texture: _iconTexture,
                 sourceRectangle: null,
                 color: Color.White,
                 rotation: 0f,
                 origin: Vector2.Zero,
                 scale: ImageScale,
-                effects: (_flippedIcons.Contains(_icon)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                effects: _flippedIcons.Contains(_icon) ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
                 layerDepth: 0f);
         }
     }

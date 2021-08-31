@@ -2,7 +2,7 @@
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Models.Components;
-using HunterCombatMR.UI.Elements;
+using HunterCombatMR.Models.UI.Elements;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ using Terraria.ID;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.Models.UI
 {
     internal class DebugUI
         : UIState
@@ -62,7 +62,7 @@ namespace HunterCombatMR.UI
             _bufferpanel = new UIPanel();
             _bufferpanel.Width.Set(0f, 0.18f);
             _bufferpanel.Height.Set(0f, 0.1f);
-            _bufferpanel.BackgroundColor = Microsoft.Xna.Framework.Color.Red;
+            _bufferpanel.BackgroundColor = Color.Red;
             _bufferpanel.BackgroundColor.A = 50;
             _bufferpanel.HAlign = 0.65f;
             _bufferpanel.VAlign = 0.05f;
@@ -96,7 +96,7 @@ namespace HunterCombatMR.UI
                 return;
 
             var inputs = Player.EntityReference.GetComponent<InputComponent>().BufferedInputs;
-            
+
             foreach (var buffer in inputs.ToArray())
             {
                 _bufferList.Add(new UIText($"{buffer.Input.ToString()} - {buffer.FramesSinceBuffered} - {buffer.FramesHeld}", 0.5f));
@@ -123,7 +123,7 @@ namespace HunterCombatMR.UI
                         };
                     _popUps.Add(upButton);
 
-                    var enableButton = new PopUpButton((selected.LayerRef.Name != null) ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
+                    var enableButton = new PopUpButton(selected.LayerRef.Name != null ? '\u2713' : '\u2715', 40f, 40f, selected, new Vector2(120f, 0f)).WithFadedMouseOver();
                     enableButton.OnClick += (evt, list) =>
                     {
                         //selected.Layer.ToggleVisibility(currentKeyFrame);

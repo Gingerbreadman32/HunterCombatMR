@@ -11,7 +11,7 @@ using System.Linq;
 using Terraria;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI.Elements
+namespace HunterCombatMR.Models.UI.Elements
 {
     internal class LayerText
         : UIElement

@@ -1,12 +1,10 @@
 ﻿using HunterCombatMR.Builders.Animation;
 using HunterCombatMR.Enumerations;
-using HunterCombatMR.Interfaces;
-using HunterCombatMR.Models;
 using System;
 using System.Linq;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI.AnimationTimeline
+namespace HunterCombatMR.Models.UI.AnimationTimeline
 {
     public partial class Timeline
     {
@@ -19,7 +17,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             var newButton = new TimelineButton(name, iconType, Scale, activeCondition: conditionEvent)
             {
                 Top = new StyleDimension(20f * Scale, 0f),
-                Left = new StyleDimension((28f * Scale) + (30f * currentButtons * Scale), 0f)
+                Left = new StyleDimension(28f * Scale + 30f * currentButtons * Scale, 0f)
             };
             newButton.ClickActionEvent += buttonEvent;
 
@@ -28,9 +26,9 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         private bool AddButtonCondition(AnimationBuilder animation,
             TimelineButton button)
-            => (TimelineButton.DefaultCondition(animation, button)) 
+            => TimelineButton.DefaultCondition(animation, button)
                 && !(!ShowAllFrames && animation.Keyframes.Sum(x => x.Value) == _maxFrames)
-                    || (ShowAllFrames && Animator.GetTotalFrames() == _maxFrames);
+                    || ShowAllFrames && Animator.GetTotalFrames() == _maxFrames;
 
         private void AddButtonLogic()
         {
@@ -47,7 +45,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         private bool DeleteButtonCondition(AnimationBuilder animation,
             TimelineButton button)
-            => (TimelineButton.DefaultCondition(animation, button)) && (Animator.Keyframes.Count() > 1);
+            => TimelineButton.DefaultCondition(animation, button) && Animator.Keyframes.Count() > 1;
 
         private void DeleteButtonLogic()
         {
@@ -65,7 +63,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             AddButton(TimelineButtonNames.RemoveKeyButton, TimelineButtonIcon.Minus, DeleteButtonLogic, DeleteButtonCondition);
             AddButton(TimelineButtonNames.MoveLeftKeyButton, TimelineButtonIcon.LeftArrow, MoveButtonLogic(false), MoveLeftButtonCondition);
             AddButton(TimelineButtonNames.MoveRightKeyButton, TimelineButtonIcon.RightArrow, MoveButtonLogic(true), MoveRightButtonCondition);
-            Buttons = Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))).Select(x => (x as TimelineButton));
+            Buttons = Elements.Where(x => x.GetType().IsAssignableFrom(typeof(TimelineButton))).Select(x => x as TimelineButton);
         }
 
         private bool LoopButtonCondition(AnimationBuilder animation,
@@ -107,7 +105,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private void LoopButtonLogic()
         {
             if (!Animator.LoopStyle.Equals(LoopStyle.PlayPause))
-                Animator.LoopStyle = (Animator.LoopStyle + 1);
+                Animator.LoopStyle = Animator.LoopStyle + 1;
             else
                 Animator.LoopStyle = 0;
 
@@ -126,27 +124,27 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         private bool MoveLeftButtonCondition(AnimationBuilder animation,
             TimelineButton button)
-            => (TimelineButton.DefaultCondition(animation, button)) && (Animator.GetCurrentKeyframe() > 0);
+            => TimelineButton.DefaultCondition(animation, button) && Animator.GetCurrentKeyframe() > 0;
 
         private bool MoveRightButtonCondition(AnimationBuilder animation,
             TimelineButton button)
-                    => (TimelineButton.DefaultCondition(animation, button))
-                        && (Animator.GetCurrentKeyframe() < Animator.Keyframes.Count() - 1);
+                    => TimelineButton.DefaultCondition(animation, button)
+                        && Animator.GetCurrentKeyframe() < Animator.Keyframes.Count() - 1;
 
         private bool PlayPauseButtonCondition(AnimationBuilder animation,
             TimelineButton button)
         {
             if (TimelineButton.DefaultCondition(animation, button))
             {
-                button.Icon = (Animator.Flags.HasFlag(AnimationFlags.Paused))
+                button.Icon = Animator.Flags.HasFlag(AnimationFlags.Paused)
                     ? TimelineButtonIcon.Play
                     : TimelineButtonIcon.Pause;
 
                 return true;
             }
 
-                return false;
-            
+            return false;
+
         }
 
         private void PlayPauseButtonLogic()

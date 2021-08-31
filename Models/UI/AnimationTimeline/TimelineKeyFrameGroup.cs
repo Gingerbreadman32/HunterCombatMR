@@ -1,11 +1,12 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Constants;
+using HunterCombatMR.Enumerations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI.AnimationTimeline
+namespace HunterCombatMR.Models.UI.AnimationTimeline
 {
     internal class TimelineKeyFrameGroup
         : UIElement,
@@ -181,12 +182,12 @@ namespace HunterCombatMR.UI.AnimationTimeline
         }
 
         private string ActiveTexture(string texture)
-                    => (IsActive) ? texture + "active" : texture;
+                    => IsActive ? texture + "active" : texture;
 
         private int CalculateWidth()
         {
-            int totalFrameLength = (!ParentTimeline.ShowAllFrames) ? 1 : _frames;
-            return ((_texture.Width * Scale) + (_seperatorTexture.Width * Scale)) * totalFrameLength + (_seperatorTexture.Width) * Scale;
+            int totalFrameLength = !ParentTimeline.ShowAllFrames ? 1 : _frames;
+            return (_texture.Width * Scale + _seperatorTexture.Width * Scale) * totalFrameLength + _seperatorTexture.Width * Scale;
         }
 
         private void SetTexture()

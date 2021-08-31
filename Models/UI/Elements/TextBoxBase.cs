@@ -6,7 +6,7 @@ using Terraria.GameInput;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace HunterCombatMR.UI.Elements
+namespace HunterCombatMR.Models.UI.Elements
 {
     /// <summary>
     /// Shamelessly ripped from UIInputTextField, defines a UI text box that can be manipulated onscreen without triggering the chat.

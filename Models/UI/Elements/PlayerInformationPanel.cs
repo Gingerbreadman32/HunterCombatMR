@@ -6,7 +6,7 @@ using System.Linq;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 
-namespace HunterCombatMR.UI.Elements
+namespace HunterCombatMR.Models.UI.Elements
 {
     internal class PlayerInformationPanel
         : UIPanel

@@ -1,15 +1,13 @@
 ﻿using HunterCombatMR.Builders.Animation;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
-using HunterCombatMR.Models;
-using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI.Elements
+namespace HunterCombatMR.Models.UI.Elements
 {
     public class LayerInformationPanel
         : CollapsingUIPanel

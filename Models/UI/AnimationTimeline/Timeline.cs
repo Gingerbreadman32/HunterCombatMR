@@ -1,8 +1,8 @@
 ﻿using HunterCombatMR.Builders.Animation;
+using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
-using HunterCombatMR.Models;
 using HunterCombatMR.Models.Animation;
-using HunterCombatMR.UI.Elements;
+using HunterCombatMR.Models.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Linq;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI.AnimationTimeline
+namespace HunterCombatMR.Models.UI.AnimationTimeline
 {
     public partial class Timeline
         : UIElement

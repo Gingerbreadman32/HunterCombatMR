@@ -1,12 +1,10 @@
 ﻿using HunterCombatMR.Builders.Animation;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
-using HunterCombatMR.Interfaces;
-using HunterCombatMR.Models;
 using HunterCombatMR.Models.Animation;
 using HunterCombatMR.Models.Components;
-using HunterCombatMR.UI.AnimationTimeline;
-using HunterCombatMR.UI.Elements;
+using HunterCombatMR.Models.UI.AnimationTimeline;
+using HunterCombatMR.Models.UI.Elements;
 using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,7 +18,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI
+namespace HunterCombatMR.Models.UI
 {
     public class EditorUI
         : UIState
@@ -65,7 +63,7 @@ namespace HunterCombatMR.UI
         {
             get
             {
-                return _layerlist?._items.Select(x => (x as LayerText)) ?? new List<LayerText>();
+                return _layerlist?._items.Select(x => x as LayerText) ?? new List<LayerText>();
             }
         }
 
@@ -88,7 +86,7 @@ namespace HunterCombatMR.UI
             _layerpanel = new UIPanel();
             _layerpanel.Width.Set(0, 0.15f);
             _layerpanel.Height.Set(0, 0.15f);
-            _layerpanel.BackgroundColor = Microsoft.Xna.Framework.Color.Blue;
+            _layerpanel.BackgroundColor = Color.Blue;
             _layerpanel.BackgroundColor.A = 50;
             _layerpanel.HAlign = 0f;
             _layerpanel.VAlign = 0.5f;
@@ -117,7 +115,7 @@ namespace HunterCombatMR.UI
             _testlistpanel = new UIPanel();
             _testlistpanel.Width.Set(0, 0.15f);
             _testlistpanel.Height.Set(0, 0.15f);
-            _testlistpanel.BackgroundColor = Microsoft.Xna.Framework.Color.YellowGreen;
+            _testlistpanel.BackgroundColor = Color.YellowGreen;
             _testlistpanel.BackgroundColor.A = 50;
             _testlistpanel.Top = new StyleDimension(_layerpanel.GetDimensions().Y, 0f);
             _testlistpanel.Left = new StyleDimension(_layerpanel.GetDimensions().X + _layerpanel.GetDimensions().Width, 0);
@@ -227,7 +225,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0f
             }.WithFadedMouseOver();
-            _subtimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(-1), evt, listen, EditorModePreset.InEditor, true));
+            _subtimebutton.OnClick += (evt, listen) => ButtonAction((x, y) => FrameTimeLogic(-1), evt, listen, EditorModePreset.InEditor, true);
 
             _currentframetime = new UIText("0")
             {
@@ -244,7 +242,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0.20f
             }.WithFadedMouseOver();
-            _addtimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(1), evt, listen, EditorModePreset.InEditor, true));
+            _addtimebutton.OnClick += (evt, listen) => ButtonAction((x, y) => FrameTimeLogic(1), evt, listen, EditorModePreset.InEditor, true);
 
             _defaulttimebutton = new UIAutoScaleTextTextPanel<string>("Default")
             {
@@ -256,7 +254,7 @@ namespace HunterCombatMR.UI
                 },
                 HAlign = 0.5f
             }.WithFadedMouseOver();
-            _defaulttimebutton.OnClick += ((evt, listen) => ButtonAction((x, y) => FrameTimeLogic(0), evt, listen, new EditorMode[] { }, true)); // Gonna just remove this
+            _defaulttimebutton.OnClick += (evt, listen) => ButtonAction((x, y) => FrameTimeLogic(0), evt, listen, new EditorMode[] { }, true); // Gonna just remove this
 
             _frametotal = new UIText("0")
             {
@@ -471,7 +469,7 @@ namespace HunterCombatMR.UI
             }
 
             // Animation Name Text Box
-            _animationname.Hidden = (!inEditor || EditorUtils.EditingAnimation == null);
+            _animationname.Hidden = !inEditor || EditorUtils.EditingAnimation == null;
             _animationname.DefaultText = EditorUtils.EditingAnimation?.Name;
 
             if (Main.mouseLeft && !_animationname.IsMouseHovering)
@@ -549,7 +547,7 @@ namespace HunterCombatMR.UI
                 return;
 
             if (modeRestriction == null || modeRestriction.Contains(HunterCombatMR.Instance.EditorInstance.CurrentEditMode) &&
-                    (!animationNeeded || (animationNeeded && EditorUtils.EditingAnimation != null)))
+                    (!animationNeeded || animationNeeded && EditorUtils.EditingAnimation != null))
             {
                 action(evt, listen);
                 Main.PlaySound(SoundID.MenuTick);
@@ -617,7 +615,7 @@ namespace HunterCombatMR.UI
             }
             return frame;
         }
-        
+
         private void LayerPanelUpdate(int currentKeyFrame)
         {
             LayerBuilder layer = null;
@@ -625,7 +623,8 @@ namespace HunterCombatMR.UI
             try
             {
                 layer = EditorUtils.EditingAnimation.GetLayer(EditorUtils.HighlightedLayerNames.Single());
-            } catch
+            }
+            catch
             {
                 hasLayer = false;
             }
@@ -655,7 +654,7 @@ namespace HunterCombatMR.UI
             if (_layerInfoPanel.IsCollapsed)
                 _layerInfoPanel.Reveal();
         }
-        
+
         private void LoadAnimationForPlayer(string name)
         {
             //var newAnim = ContentUtils.Get<ICustomAnimationV2>(name);

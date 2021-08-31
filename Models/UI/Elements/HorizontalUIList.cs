@@ -3,7 +3,7 @@ using System.Linq;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
-namespace HunterCombatMR.UI.Elements
+namespace HunterCombatMR.Models.UI.Elements
 {
     internal class HorizontalUIList<T>
         : UIList

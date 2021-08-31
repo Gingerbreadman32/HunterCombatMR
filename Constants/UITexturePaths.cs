@@ -1,4 +1,4 @@
-﻿namespace HunterCombatMR.UI
+﻿namespace HunterCombatMR.Constants
 {
     internal static class UITexturePaths
     {

@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace HunterCombatMR.UI.Elements
+namespace HunterCombatMR.Models.UI.Elements
 {
     internal static class LayerInfoTextBoxLogic
     {

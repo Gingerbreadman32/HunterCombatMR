@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace HunterCombatMR.UI.Elements
+namespace HunterCombatMR.Models.UI.Elements
 {
     public class NumberInputBox
         : TextBoxBase
