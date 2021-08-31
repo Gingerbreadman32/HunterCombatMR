@@ -161,7 +161,7 @@ namespace HunterCombatMR.Systems
 
         private static void SetAnimation(int entityId, 
             int animationIndex,
-            EntityAnimation[] animationSet)
+            CustomAnimation[] animationSet)
         {
             if (animationIndex < 0)
             {

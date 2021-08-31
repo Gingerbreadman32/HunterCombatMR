@@ -11,11 +11,10 @@ namespace HunterCombatMR.Enumerations
         Alpha = 3
     }
 
-    public enum TweenType
+    public enum TweenProperties
     {
         None = 0,
-        Linear = 1,
-        Ease = 2,
-        Fade = 4,
+        EaseIn = 1,
+        EaseOut = 2,
     }
 }

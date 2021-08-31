@@ -1,6 +1,6 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Builders.Animation;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
-using HunterCombatMR.Interfaces.Animation;
 using HunterCombatMR.Models;
 using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
@@ -33,7 +33,7 @@ namespace HunterCombatMR.Services
 
         public EditorMode CurrentEditMode { get; set; }
 
-        public ICustomAnimationV2 CurrentAnimationEditing { get; set; }
+        public AnimationBuilder CurrentAnimationEditing { get; set; }
 
         public bool AnimationEdited { get; set; }
 
@@ -60,44 +60,22 @@ namespace HunterCombatMR.Services
             _onionSkin ^= true;
         }
 
-        public bool DrawOnionSkin(PlayerDrawInfo drawInfo,
-            ExtraAnimationData layerData,
-            int keyFrameToDraw,
-            Color color)
-        {
-            if (!_onionSkin)
-                return false;
-
-            color.A = 30;
-
-            foreach (var layer in layerData.Layers.Where(f => f.KeyFrames.ContainsKey(keyFrameToDraw) && f.IsActive(keyFrameToDraw)).OrderByDescending(x => x.KeyFrames[keyFrameToDraw].LayerDepth))
-            {
-                PlayerAnimation.CombatLimbDraw(drawInfo,
-                    layer.Texture, 
-                    layer.GetFrameRectangle(keyFrameToDraw), 
-                    layer.KeyFrames[keyFrameToDraw],
-                    color)
-                    .Draw(Main.spriteBatch);
-            }
-
-            return true;
-        }
-
-        public void AdjustPositionLogic(IEnumerable<LayerReference> layers,
+        public void AdjustPositionLogic(IEnumerable<LayerBuilder> layers,
             int direction = 1)
         {
             Vector2 mousePosition = new Vector2(Main.mouseX, Main.mouseY);
 
             var nudgeAmount = NudgeLogic();
 
-            foreach (LayerReference layer in layers)
+            foreach (var layer in layers)
             {
-                if (layer.FrameData.Orientation.Equals(SpriteEffects.FlipHorizontally))
+                if (layer.KeyframeEditing.Orientation.Equals(SpriteEffects.FlipHorizontally))
                     direction *= -1;
 
                 var layerNudgeAmount = nudgeAmount;
                 layerNudgeAmount.X *= direction;
-                //layer.FrameData.Position += layerNudgeAmount;
+                layer.KeyframeEditing.Position = new Point(layerNudgeAmount.X + layer.KeyframeEditing.Position.X, 
+                    layerNudgeAmount.Y + layer.KeyframeEditing.Position.Y);
             }
             /*
             if (SelectedLayer == layerName)
@@ -116,7 +94,7 @@ namespace HunterCombatMR.Services
             */
         }
 
-        private Vector2 NudgeLogic()
+        private Point NudgeLogic()
         {
             var highlightedNudge = new Point();
 
@@ -156,7 +134,7 @@ namespace HunterCombatMR.Services
                 _nudgeCooldown = _nudgeCooldownMax;
             }
 
-            return highlightedNudge.ToVector2();
+            return highlightedNudge;
         }
     }
 }

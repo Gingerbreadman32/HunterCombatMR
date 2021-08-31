@@ -1,6 +1,6 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Models;
-using HunterCombatMR.Models.Animation.Entity;
+using HunterCombatMR.Models.Animation;
 using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -22,7 +22,7 @@ namespace HunterCombatMR.Builders.Animation
             SpriteEffects orientation = SpriteEffects.None,
             int depth = 0)
         {
-            builder.AddKeyframe(new EntityAnimationLayerData(0, sheetNumber, sheetFrame, position, rotation, alpha, scale, orientation, depth));
+            builder.AddKeyframe(new LayerData(0, sheetNumber, sheetFrame, position, rotation, alpha, scale, orientation, depth));
             return builder;
         }
 
@@ -93,8 +93,8 @@ namespace HunterCombatMR.Builders.Animation
             _layerData = new LayerDataBuilder[0];
         }
 
-        public LayerBuilder(EntityAnimationLayer layer,
-            IEnumerable<EntityAnimationLayerData> layerData)
+        public LayerBuilder(Layer layer,
+            IEnumerable<LayerData> layerData)
         {
             _name = layer.Name;
             _layerData = layerData.Select(x => new LayerDataBuilder(x)).ToArray();
@@ -113,12 +113,7 @@ namespace HunterCombatMR.Builders.Animation
 
         public LayerDataBuilder KeyframeEditing { get; set; }
 
-        public LayerDataBuilder AddKeyframe()
-        {
-            return AddKeyframe(default(EntityAnimationLayerData));
-        }
-
-        public LayerDataBuilder AddKeyframe(EntityAnimationLayerData data)
+        public LayerDataBuilder AddKeyframe(LayerData data)
         {
             var builder = new LayerDataBuilder(data);
             builder.AnimationKeyframe = _layerData.Length;
@@ -132,15 +127,6 @@ namespace HunterCombatMR.Builders.Animation
             newBuilder.AnimationKeyframe = _layerData.Length;
             ArrayUtils.Add(ref _layerData, newBuilder);
             return newBuilder;
-        }
-
-        public LayerDataBuilder AddKeyframe(CopyKeyframe action,
-            int setKeyframe = 1)
-        {
-            if (_layerData.Length < 1)
-                throw new Exception("No keyframes to pull data from!");
-
-            return AddKeyframe(DuplicateKeyframe(action, setKeyframe));
         }
 
         public LayerDataBuilder DuplicateKeyframe(CopyKeyframe action, 
@@ -162,11 +148,11 @@ namespace HunterCombatMR.Builders.Animation
             }
         }
 
-        public EntityAnimationLayer Build()
+        public Layer Build()
         {
             Validate();
             var layerData = _layerData.Select(x => x.Build());
-            return new EntityAnimationLayer(_name, layerData);
+            return new Layer(_name, layerData);
         }
 
         public LayerDataBuilder GetLayerData(int index)
@@ -176,21 +162,14 @@ namespace HunterCombatMR.Builders.Animation
             return _layerData[index];
         }
 
+        public bool HasLayerData(FrameIndex keyFrame)
+            => _layerData.Any(x => x.AnimationKeyframe.Equals(keyFrame.Value));
+
         public LayerDataBuilder GetLatestLayerData()
         {
             if (!_layerData.Any())
                 throw new ArgumentOutOfRangeException($"There are no latest layer data. ");
             return _layerData.Last();
-        }
-
-        public LayerDataBuilder GetLayerData(FrameIndex animationKeyframeIndex)
-        {
-            var predicate = new Func<LayerDataBuilder, bool>(x => x.AnimationKeyframe.Equals(animationKeyframeIndex));
-            if (!_layerData.Any(predicate))
-            {
-                throw new ArgumentOutOfRangeException($"No layer data exists corresponding to animation frame of {animationKeyframeIndex}");
-            }
-            return _layerData.First(predicate);
         }
 
         public void RemoveKeyframe(int index)
@@ -200,7 +179,7 @@ namespace HunterCombatMR.Builders.Animation
             ArrayUtils.Remove(ref _layerData, index);
         }
 
-        public int SetLayerData(EntityAnimationLayerData data)
+        public int SetLayerData(LayerData data)
         {
             return SetLayerData(new LayerDataBuilder(data));
         }

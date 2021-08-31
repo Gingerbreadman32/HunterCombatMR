@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.Models.Animation.Entity;
+﻿using HunterCombatMR.Models.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -22,7 +22,7 @@ namespace HunterCombatMR.Builders.Animation
             Depth = data.Depth;
         }
 
-        public LayerDataBuilder(EntityAnimationLayerData data)
+        public LayerDataBuilder(LayerData data)
         {
             AnimationKeyframe = data.AnimationKeyframe;
             SheetIndex = data.SheetIndex;
@@ -81,9 +81,9 @@ namespace HunterCombatMR.Builders.Animation
         /// </summary>
         public int SheetIndex { get; set; }
 
-        public EntityAnimationLayerData Build()
+        public LayerData Build()
         {
-            return new EntityAnimationLayerData(AnimationKeyframe, SheetIndex, SheetFrame, Position, Rotation, Alpha, Scale, Orientation, Depth);
+            return new LayerData(AnimationKeyframe, SheetIndex, SheetFrame, Position, Rotation, Alpha, Scale, Orientation, Depth);
         }
     }
 }

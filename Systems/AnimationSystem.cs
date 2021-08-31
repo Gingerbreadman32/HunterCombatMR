@@ -1,11 +1,11 @@
 ﻿using HunterCombatMR.Constants;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Messages.AnimationSystem;
 using HunterCombatMR.Models.Animation;
-using HunterCombatMR.Models.Animation.Entity;
 using HunterCombatMR.Models.Components;
 using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
@@ -28,7 +28,7 @@ namespace HunterCombatMR.Systems
 
         public static DrawData SetDrawLayer(PlayerDrawInfo drawInfo,
             string layerName,
-            EntityAnimationLayerData layerData,
+            LayerData layerData,
             Color color)
         {
             var texture = TextureUtils.GetTextureFromTag(new TextureTag(layerName, Point.Zero));
@@ -113,6 +113,39 @@ namespace HunterCombatMR.Systems
             _changeMessages.Clear();
         }
 
+        internal void OnionSkinLogic(ref PlayerDrawInfo drawInfo)
+        {
+            /* Gotta just rework this, broken for now
+            if (AnimationController.CurrentAnimation != null && AnimationController.Animator.CurrentKeyFrameIndex > 0)
+            {
+                _showDefaultLayers = !HunterCombatMR.Instance.EditorInstance.DrawOnionSkin(drawInfo,
+                        AnimationController.Animator,
+                        AnimationController.Animator.CurrentKeyFrameIndex - 1,
+                        Color.White);
+            }
+            */
+
+            if (HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None))
+                return;
+
+            string[] propertiesToChange = new string[] {"hairColor", "eyeWhiteColor", "eyeColor",
+                    "faceColor", "bodyColor", "legColor", "shirtColor", "underShirtColor",
+                    "pantsColor", "shoeColor", "upperArmorColor", "middleArmorColor",
+                    "lowerArmorColor" };
+
+            var properties = drawInfo.GetType().GetFields();
+
+            object temp = drawInfo;
+
+            // @@warn cache this, probably shouldn't be using reflection like this every frame
+            foreach (var prop in properties.Where(x => propertiesToChange.Contains(x.Name)))
+            {
+                prop.SetValue(temp, MakeTransparent((Color)prop.GetValue(temp), 30));
+            }
+
+            drawInfo = (PlayerDrawInfo)temp;
+        }
+
         protected override void OnCreate()
         {
             _changeMessages = new List<Queue<ChangeAnimationMessage>>();
@@ -130,6 +163,14 @@ namespace HunterCombatMR.Systems
             {
                 component.Animation = messages.Dequeue().Animation;
             }
+        }
+
+        private Color MakeTransparent(Color original,
+                                            byte amount)
+        {
+            var newColor = original;
+            newColor.A = amount;
+            return newColor;
         }
     }
 }

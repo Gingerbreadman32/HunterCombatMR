@@ -5,13 +5,13 @@ namespace HunterCombatMR.Messages.AnimationSystem
     public struct ChangeAnimationMessage
     {
         public ChangeAnimationMessage(int entityId,
-            EntityAnimation animation)
+            CustomAnimation animation)
         {
             EntityId = entityId;
             Animation = animation;
         }
 
-        public EntityAnimation Animation { get; }
+        public CustomAnimation Animation { get; }
         public int EntityId { get; }
     }
 }

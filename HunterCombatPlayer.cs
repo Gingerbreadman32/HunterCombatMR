@@ -64,7 +64,7 @@ namespace HunterCombatMR
             {
                 _entity.RegisterComponent(new InputComponent(player.whoAmI));
                 StateSet stateSet = CreateTestStateSet();
-                EntityAnimation[] animationSet = CreateTestAnimationSet();
+                CustomAnimation[] animationSet = CreateTestAnimationSet();
 
                 _entity.RegisterComponent(new EntityStateComponent(stateSet, animationSet));
             }
@@ -125,9 +125,9 @@ namespace HunterCombatMR
             _entity.SendMessage(new InputResetMessage(_entity.Id));
         }
 
-        private static EntityAnimation[] CreateTestAnimationSet()
+        private static CustomAnimation[] CreateTestAnimationSet()
         {
-            var animations = new List<EntityAnimation>();
+            var animations = new List<CustomAnimation>();
 
             var builder = new AnimationBuilder("Test", AnimationType.Player, 12)
             {

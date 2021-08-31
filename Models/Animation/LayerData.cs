@@ -1,127 +1,122 @@
-﻿using HunterCombatMR.Interfaces;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
+using System.Diagnostics;
 
 namespace HunterCombatMR.Models.Animation
 {
-    public static class LayerDataParameters
-    {
-        public const int Alpha = 0;
-        public const int DepthOverride = 7;
-        public const int Orientation = 5;
-        public const int PositionX = 1;
-        public const int PositionY = 2;
-        public const int Rotation = 3;
-        public const int SheetFrame = 4;
-        public const int Scale = 6;
-    }
-
+    [DebuggerDisplay("{Alpha} {Position.X} {Position.Y} {Rotation} {SheetFrame} {Orientation.ToString()} {Scale} {Depth}")]
     public struct LayerData
-            : ICompact<string>
     {
-        internal LayerData(int? depth,
-            Vector2 pos,
-            float rot,
-            int frame,
-            SpriteEffects effects,
+        public LayerData(FrameIndex animFrame,
+            FrameIndex sheetNum,
+            FrameIndex sheetFrame,
+            Point position,
+            float rotation,
             float alpha,
-            float scale)
+            float scale,
+            SpriteEffects orientation,
+            int depth)
         {
-            DepthOverride = depth;
-            Position = pos;
-            Rotation = rot;
-            SheetFrame = frame;
-            Orientation = effects;
+            AnimationKeyframe = animFrame;
+            SheetIndex = sheetNum;
+            SheetFrame = sheetFrame;
+            Position = position;
+            Rotation = rotation;
             Alpha = alpha;
             Scale = scale;
+            Orientation = orientation;
+            Depth = depth;
         }
 
-        public LayerData(LayerData copy)
+        public LayerData(float[] data)
         {
-            DepthOverride = copy.DepthOverride;
-            Position = copy.Position;
-            Rotation = copy.Rotation;
-            SheetFrame = copy.SheetFrame;
-            Orientation = copy.Orientation;
-            Alpha = copy.Alpha;
-            Scale = copy.Scale;
+            AnimationKeyframe = (int)data[(int)Index.AnimationFrame];
+            SheetIndex = (int)data[(int)Index.SheetIndex];
+            SheetFrame = (int)data[(int)Index.SheetFrame];
+            Position = new Point((int)data[(int)Index.PositionX], (int)data[(int)Index.PositionY]);
+            Rotation = data[(int)Index.Rotation];
+            Alpha = data[(int)Index.Alpha];
+            Scale = data[(int)Index.Scale];
+            Orientation = (SpriteEffects)data[(int)Index.Orientation];
+            Depth = (int)data[(int)Index.Depth];
         }
 
-        /// <summary>
-        /// Initializes a new FrameInfo value using an array of floats for easy save/load.
-        /// </summary>
-        /// <param name="infoArray">The array of parameters in order.</param>
-        public LayerData(string[] infoArray)
+        private enum Index
         {
-            DepthOverride = null;
-            Position = new Vector2(float.Parse(infoArray[LayerDataParameters.PositionX]), float.Parse(infoArray[LayerDataParameters.PositionY]));
-            Rotation = float.Parse(infoArray[LayerDataParameters.Rotation]);
-            SheetFrame = int.Parse(infoArray[LayerDataParameters.SheetFrame]);
-            Orientation = (SpriteEffects)Enum.Parse(typeof(SpriteEffects), infoArray[LayerDataParameters.Orientation]);
-            Alpha = float.Parse(infoArray[LayerDataParameters.Alpha]);
-            Scale = float.Parse(infoArray[LayerDataParameters.Scale]);
-
-            if (infoArray.Length > LayerDataParameters.DepthOverride)
-                DepthOverride = new int?(int.Parse(infoArray[LayerDataParameters.DepthOverride]));
-        }
-
-        public LayerData(LayerFrameInfo legacy)
-        {
-            DepthOverride = legacy.LayerDepthOverride;
-            Position = legacy.Position;
-            Rotation = legacy.Rotation;
-            SheetFrame = legacy.SpriteFrame;
-            Orientation = legacy.SpriteOrientation;
-            Alpha = 255f;
-            Scale = 1f;
+            AnimationFrame = 0,
+            SheetIndex = 1,
+            SheetFrame = 2,
+            PositionX = 3,
+            PositionY = 4,
+            Rotation = 5,
+            Alpha = 6,
+            Scale = 7,
+            Orientation = 8,
+            Depth = 9
         }
 
         /// <summary>
         /// The amount of transparency the layer will have.
         /// </summary>
-        public float Alpha { get; set; }
+        public float Alpha { get; }
 
         /// <summary>
-        /// Overrides the layer depth defined by the layer at this frame. Leave null if the normal
-        /// depth should be used.
+        /// What frame of the layer's parent animation this data corresponds to.
         /// </summary>
-        public int? DepthOverride { get; set; }
+        public int AnimationKeyframe { get; }
+
+        /// <summary>
+        /// The layer depth defined by the layer at this frame.
+        /// </summary>
+        public int Depth { get; }
 
         /// <summary>
         /// Whether or not the sprite will be flipped horizontally or vertically using <seealso cref="SpriteEffects"/>.
         /// </summary>
-        public SpriteEffects Orientation { get; set; }
+        public SpriteEffects Orientation { get; }
 
         /// <summary>
         /// The position of the layer relative to the center of the player that the layer will be.
         /// </summary>
-        public Vector2 Position { get; set; }
+        public Point Position { get; }
 
         /// <summary>
         /// The rotation in radians
         /// </summary>
-        public float Rotation { get; set; }
+        public float Rotation { get; }
+
+        /// <summary>
+        /// The scale of the sprite.
+        /// </summary>
+        public float Scale { get; }
 
         /// <summary>
         /// Which frame of the spritesheet the layer will be on. Starting from frame 0 and goes down
         /// from the top of the sheet.
         /// </summary>
-        public int SheetFrame { get; set; }
+        public int SheetFrame { get; }
 
-        public float Scale { get; set; }
+        /// <summary>
+        /// Which sprite sheet to use from the corresponding animation set.
+        /// </summary>
+        public int SheetIndex { get; }
 
-        public string[] Save()
-                    => new string[]
-            {
-                Alpha.ToString(),
-                Position.X.ToString(),
-                Position.Y.ToString(),
-                Rotation.ToString(),
-                SheetFrame.ToString(),
-                Orientation.ToString(),
-                Scale.ToString(),
-                DepthOverride?.ToString() ?? null
-            };
+        public float[] Save()
+        {
+            var data = new float[10];
+
+            data[(int)Index.AnimationFrame] = AnimationKeyframe;
+            data[(int)Index.SheetIndex] = SheetIndex;
+            data[(int)Index.SheetFrame] = SheetFrame;
+            data[(int)Index.PositionX] = Position.X;
+            data[(int)Index.PositionY] = Position.Y;
+            data[(int)Index.Rotation] = Rotation;
+            data[(int)Index.Alpha] = Alpha;
+            data[(int)Index.Scale] = Scale;
+            data[(int)Index.Orientation] = (int)Orientation;
+            data[(int)Index.Depth] = Depth;
+
+            return data;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.Interfaces.Animation;
+﻿using HunterCombatMR.Builders.Animation;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.Utilities
@@ -11,7 +11,7 @@ namespace HunterCombatMR.Utilities
             set => HunterCombatMR.Instance.EditorInstance.AnimationEdited = value;
         }
 
-        public static ICustomAnimationV2 EditingAnimation
+        public static AnimationBuilder EditingAnimation
         {
             get => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing;
             set => HunterCombatMR.Instance.EditorInstance.CurrentAnimationEditing = value;

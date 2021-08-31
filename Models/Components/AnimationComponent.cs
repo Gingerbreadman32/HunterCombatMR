@@ -1,22 +1,21 @@
 ﻿using HunterCombatMR.Attributes;
 using HunterCombatMR.Constants;
 using HunterCombatMR.Models.Animation;
-using HunterCombatMR.Models.Animation.Entity;
 
 namespace HunterCombatMR.Models.Components
 {
     public struct AnimationComponent
     {
-        private EntityAnimation _animation;
+        private CustomAnimation _animation;
 
-        public AnimationComponent(EntityAnimation animation)
+        public AnimationComponent(CustomAnimation animation)
         {
             _animation = animation;
-            Animator = new EntityAnimator(animation);
+            Animator = new AnimationDef(animation);
         }
 
-        public EntityAnimation Animation { get => _animation; set { _animation = value; Animator.Initialize(_animation.FrameData, _animation.LoopStyle); } }
-        public EntityAnimator Animator { get; }
+        public CustomAnimation Animation { get => _animation; set { _animation = value; Animator.Initialize(_animation.FrameData, _animation.LoopStyle); } }
+        public AnimationDef Animator { get; }
 
         [TriggerParameter(CommonTriggerParams.FrameTime)]
         public int CurrentFrame { get => Animator.Frame; }

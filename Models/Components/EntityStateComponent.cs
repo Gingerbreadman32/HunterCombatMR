@@ -13,7 +13,7 @@ namespace HunterCombatMR.Models.Components
     public struct EntityStateComponent
     {
         public EntityStateComponent(IEnumerable<StateSet> stateSets,
-            IEnumerable<EntityAnimation> animationSet)
+            IEnumerable<CustomAnimation> animationSet)
         {
             StateSets = stateSets.ToArray();
             CurrentStateNumber = 0;
@@ -22,7 +22,7 @@ namespace HunterCombatMR.Models.Components
         }
 
         public EntityStateComponent(StateSet stateSet,
-            IEnumerable<EntityAnimation> animationSet)
+            IEnumerable<CustomAnimation> animationSet)
         {
             StateSets = new StateSet[] { stateSet };
             CurrentStateNumber = 0;
@@ -39,7 +39,7 @@ namespace HunterCombatMR.Models.Components
 
         public StateSet[] StateSets { get; set; }
 
-        public EntityAnimation[] AnimationSet { get; set; }
+        public CustomAnimation[] AnimationSet { get; set; }
 
         public EntityState GetCurrentState()
             => GetState(CurrentStateNumber);

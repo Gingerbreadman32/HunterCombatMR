@@ -2,7 +2,6 @@
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Models;
 using HunterCombatMR.Models.Animation;
-using HunterCombatMR.Models.Animation.Entity;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -32,6 +31,8 @@ namespace HunterCombatMR.Builders.Animation
         public FrameLength[] Keyframes { get => _keyframes; }
         public LoopStyle LoopType { get => _loop; set => _loop = value; }
         public string Name { get => _name; set => _name = value; }
+
+        public LayerBuilder[] Layers { get => _layers; }
 
         public void AddKeyframe(FrameLength length,
             CopyKeyframe action = CopyKeyframe.None,
@@ -68,18 +69,18 @@ namespace HunterCombatMR.Builders.Animation
             return builder;
         }
 
-        public LayerBuilder AddLayer(EntityAnimationLayer layer,
-            IEnumerable<EntityAnimationLayerData> layerData)
+        public LayerBuilder AddLayer(Layer layer,
+            IEnumerable<LayerData> layerData)
         {
             var builder = new LayerBuilder(layer, layerData);
             ArrayUtils.Add(ref _layers, builder);
             return builder;
         }
 
-        public EntityAnimation Build()
+        public CustomAnimation Build()
         {
             var layers = _layers.Select(x => x.Build());
-            return new EntityAnimation(_name, _type, layers, _loop, _keyframes);
+            return new CustomAnimation(_name, _type, layers, _loop, _keyframes);
         }
 
         public LayerBuilder GetLayer(string layerName)

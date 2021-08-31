@@ -18,7 +18,7 @@ namespace HunterCombatMR.Managers
             if (_commandCache.TryGetValue(name, out command))
                 return command;
 
-            command = Attribute.GetCustomAttribute(typeof(ActionInputs).GetField(name), typeof(GameCommand)) as GameCommand;
+            command = Attribute.GetCustomAttribute(typeof(DefinedInputs).GetField(name), typeof(GameCommand)) as GameCommand;
             if (command != null)
                 _commandCache.TryAdd(name, command);
 

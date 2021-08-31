@@ -1,10 +1,10 @@
-﻿using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Messages.InputSystem;
 using HunterCombatMR.Models.Components;
+using HunterCombatMR.Models.Input;
 using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
@@ -17,12 +17,12 @@ namespace HunterCombatMR.Systems
         : ModSystem<InputComponent>,
         IMessageHandler<InputResetMessage>
     {
-        private IEnumerable<ActionInputs> _concreteInputs;
+        private IEnumerable<DefinedInputs> _concreteInputs;
 
         public InputSystem()
             : base()
         {
-            _concreteInputs = new List<ActionInputs>((ActionInputs[])Enum.GetValues(typeof(ActionInputs))).
+            _concreteInputs = new List<DefinedInputs>((DefinedInputs[])Enum.GetValues(typeof(DefinedInputs))).
                 Where(x => !string.IsNullOrEmpty(x.GetGameCommand()));
         }
 
@@ -65,7 +65,7 @@ namespace HunterCombatMR.Systems
 
         private void CheckInputs(InputComponent component)
         {
-            foreach (ActionInputs input in _concreteInputs)
+            foreach (DefinedInputs input in _concreteInputs)
             {
                 SetNewestInput(input, component);
             }
@@ -76,7 +76,7 @@ namespace HunterCombatMR.Systems
             bufferedInputs.Clear();
         }
 
-        private void SetNewestInput(ActionInputs input,
+        private void SetNewestInput(DefinedInputs input,
             InputComponent component)
         {
             bool mouseInterface = component.Player >= 0 ? Main.player[component.Player].mouseInterface : false;

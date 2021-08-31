@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.AttackEngine.Models;
+﻿using HunterCombatMR.Models.Input;
 using System.Collections.Generic;
 
 namespace HunterCombatMR.Models.Components
