@@ -11,8 +11,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
         : UIElement,
         IComparable<TimelineKeyFrameGroup>
     {
-        #region Private Fields
-
         private const string _emptyFrame = UITexturePaths.TimelineTextures + "emptyframe";
         private const string _frame = UITexturePaths.TimelineTextures + "frame";
         private const string _fSeperator = UITexturePaths.TimelineTextures + "frameseperator";
@@ -23,18 +21,6 @@ namespace HunterCombatMR.UI.AnimationTimeline
         private Texture2D _texture;
         private FrameType _type;
 
-        public bool IsActive { get; set; }
-
-        public int KeyFrame { get; }
-
-        public Timeline ParentTimeline { get; }
-
-        public int Scale { get; set; }
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
         public TimelineKeyFrameGroup(Timeline parent,
             FrameType frameType,
             int keyFrameNumber,
@@ -42,16 +28,20 @@ namespace HunterCombatMR.UI.AnimationTimeline
             int frameAmount = 1)
         {
             ParentTimeline = parent;
-            KeyFrame = keyFrameNumber;
+            Keyframe = keyFrameNumber;
             _frames = frameAmount;
             Scale = scale;
             SetFrameType(frameType);
             SetTexture();
         }
 
-        #endregion Public Constructors
+        public bool IsActive { get; set; }
 
-        #region Public Methods
+        public int Keyframe { get; }
+
+        public Timeline ParentTimeline { get; }
+
+        public int Scale { get; set; }
 
         public void ActivateKeyFrame()
         {
@@ -66,7 +56,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
         public int CompareTo(TimelineKeyFrameGroup other)
         {
             if (other != null)
-                return KeyFrame.CompareTo(other.KeyFrame);
+                return Keyframe.CompareTo(other.Keyframe);
             else
                 throw new ArgumentNullException("Compared keyframe is null!");
         }
@@ -87,7 +77,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
             OnClick += (evt, list) =>
             {
                 var animator = ParentTimeline.Animator;
-                animator.CurrentFrame = animator.KeyFrames[KeyFrame].StartingFrameIndex;
+                animator.SetToKeyframe(Keyframe);
                 ParentTimeline.ResetFrames();
                 HunterCombatMR.Instance.EditorInstance.AnimationEdited = true;
             };
@@ -109,44 +99,11 @@ namespace HunterCombatMR.UI.AnimationTimeline
         {
             base.Update(gameTime);
 
-            if (ParentTimeline.Animator.CurrentKeyFrameIndex == KeyFrame)
+            if (ParentTimeline.Animator.GetCurrentKeyframe().Equals(Keyframe))
                 ActivateKeyFrame();
             else
                 DeactivateKeyFrame();
         }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private string ActiveTexture(string texture)
-            => (IsActive) ? texture + "active" : texture;
-
-        private int CalculateWidth()
-        {
-            int totalFrameLength = (!ParentTimeline.ShowAllFrames) ? 1 : _frames;
-            return ((_texture.Width * Scale) + (_seperatorTexture.Width * Scale)) * totalFrameLength + (_seperatorTexture.Width) * Scale;
-        }
-
-        private void SetTexture()
-        {
-            switch (_type)
-            {
-                case FrameType.Empty:
-                    _texture = ModContent.GetTexture(ActiveTexture(_emptyFrame));
-                    break;
-
-                case FrameType.Keyframe:
-                    _texture = ModContent.GetTexture(ActiveTexture(_keyFrame));
-                    break;
-            }
-
-            _seperatorTexture = ModContent.GetTexture(ActiveTexture(_seperator));
-        }
-
-        #endregion Private Methods
-
-        #region Protected Methods
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
@@ -223,6 +180,29 @@ namespace HunterCombatMR.UI.AnimationTimeline
             //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, RasterizerState.CullNone);
         }
 
-        #endregion Protected Methods
+        private string ActiveTexture(string texture)
+                    => (IsActive) ? texture + "active" : texture;
+
+        private int CalculateWidth()
+        {
+            int totalFrameLength = (!ParentTimeline.ShowAllFrames) ? 1 : _frames;
+            return ((_texture.Width * Scale) + (_seperatorTexture.Width * Scale)) * totalFrameLength + (_seperatorTexture.Width) * Scale;
+        }
+
+        private void SetTexture()
+        {
+            switch (_type)
+            {
+                case FrameType.Empty:
+                    _texture = ModContent.GetTexture(ActiveTexture(_emptyFrame));
+                    break;
+
+                case FrameType.Keyframe:
+                    _texture = ModContent.GetTexture(ActiveTexture(_keyFrame));
+                    break;
+            }
+
+            _seperatorTexture = ModContent.GetTexture(ActiveTexture(_seperator));
+        }
     }
 }

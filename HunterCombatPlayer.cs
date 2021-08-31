@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.AttackEngine.Models;
-using HunterCombatMR.Builders.Animation;
+﻿using HunterCombatMR.Builders.Animation;
 using HunterCombatMR.Builders.State;
 using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
@@ -28,14 +27,6 @@ namespace HunterCombatMR
     {
         private IModEntity _entity;
         private WeaponBase _equippedWeapon;
-
-        public HunterCombatPlayer()
-            : base()
-        {
-            StateController = new PlayerStateController(this);
-        }
-
-        public override bool CloneNewInstances => false;
         public IModEntity EntityReference { get => _entity; }
 
         public WeaponBase EquippedWeapon
@@ -45,7 +36,6 @@ namespace HunterCombatMR
         }
 
         public bool IsMainPlayer { get => player.whoAmI == Main.myPlayer; }
-        public PlayerStateController StateController { get; private set; }
 
         public override void Initialize()
         {
@@ -86,19 +76,6 @@ namespace HunterCombatMR
             base.PostSavePlayer();
         }
 
-        public override void PostUpdate()
-        {
-            if (Main.gameMenu)
-                return;
-
-            StateController.StateUpdate();
-        }
-
-        public override void PostUpdateRunSpeeds()
-        {
-            MountUpdate();
-        }
-
         public override bool PreItemCheck()
         {
             if (!HunterCombatMR.Instance.EditorInstance.CurrentEditMode.Equals(EditorMode.None) || EquippedWeapon != null)
@@ -112,11 +89,6 @@ namespace HunterCombatMR
             }
 
             return base.PreItemCheck();
-        }
-
-        public override void PreUpdateMovement()
-        {
-            StateController.MovementUpdate();
         }
 
         public override void UpdateDead()
@@ -216,15 +188,6 @@ namespace HunterCombatMR
                 .WithState(1, states[1])
                 .Build();
             return stateSet;
-        }
-
-        private void MountUpdate()
-        {
-            if (StateController.CurrentAction == null)
-                return;
-
-            if (player.mount.Active)
-                player.mount.Dismount(player);
         }
     }
 }

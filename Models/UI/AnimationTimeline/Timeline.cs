@@ -96,7 +96,7 @@ namespace HunterCombatMR.UI.AnimationTimeline
 
         public void ResetFrames()
         {
-            TimelineKeyFrameGroup keyFrame = (TimelineKeyFrameGroup)FrameList._items[Animator.GetCurrentKeyFrame()];
+            TimelineKeyFrameGroup keyFrame = (TimelineKeyFrameGroup)FrameList._items[Animator.GetCurrentKeyframe()];
 
             foreach (TimelineKeyFrameGroup offFrame in FrameList._items.Where(x => x != keyFrame))
             {

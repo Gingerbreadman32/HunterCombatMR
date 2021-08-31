@@ -70,12 +70,20 @@ namespace HunterCombatMR.Models.Animation
         /// <summary>
         /// The index of the current keyframe
         /// </summary>
-        public FrameIndex GetCurrentKeyFrame()
+        public FrameIndex GetCurrentKeyframe()
         {
             if (!_initialized)
                 throw new AnimatorInitializedException("Cannot get current key frame.");
 
             return _keyframeTable[Frame];
+        }
+
+        public void SetToKeyframe(FrameIndex keyframe)
+        {
+            if (keyframe > Keyframes.Length)
+                throw new ArgumentOutOfRangeException("No keyframes correspond to keyframe passed.");
+
+            Frame = _keyframeTable.First(x => x.Equals(keyframe));
         }
 
         /// <summary>

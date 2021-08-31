@@ -32,7 +32,7 @@ namespace HunterCombatMR.Items
             Main.NewText($"{item.Name} Equipped");
 
             player.EquippedWeapon = this;
-            player.StateController.CurrentMoveSet = ContentUtils.GetInstance<MoveSet>(MoveSet);
+            //player.StateController.CurrentMoveSet = ContentUtils.GetInstance<MoveSet>(MoveSet);
         }
 
         public override void RightClick(Player player)
@@ -52,7 +52,7 @@ namespace HunterCombatMR.Items
             Main.NewText($"{item.Name} Unequipped");
 
             player.EquippedWeapon = null;
-            player.StateController.CurrentMoveSet = null;
+            //player.StateController.CurrentMoveSet = null;
         }
 
         #endregion Public Methods

@@ -1,9 +1,7 @@
 ﻿using HunterCombatMR.Extensions;
-using HunterCombatMR.Managers;
 using HunterCombatMR.Models.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
@@ -15,7 +13,6 @@ namespace HunterCombatMR.UI.Elements
     {
         private const string _noneText = "N/A";
         private string[] _parameters = new string[6];
-        private readonly bool _stateVersion = true;
 
         public PlayerInformationPanel()
         {
@@ -76,33 +73,21 @@ namespace HunterCombatMR.UI.Elements
                 return;
 
             // Debug
-            if (_stateVersion)
+
+            if (!Player.EntityReference.HasComponent<EntityStateComponent>())
+                return;
+
+            var component = Player.EntityReference.GetComponent<EntityStateComponent>();
+            var currentState = component.GetCurrentState();
+
+            _parameters = new string[]
             {
-                if (!Player.EntityReference.HasComponent<EntityStateComponent>())
-                    return;
-
-                var component = Player.EntityReference.GetComponent<EntityStateComponent>();
-                var currentState = component.GetCurrentState();
-
-                _parameters = new string[]
-                {
                 $"State No.: {component.CurrentStateNumber}",
                 $"W. Status: {currentState.Definition.WorldStatus}",
                 $"A. Status: {currentState.Definition.ActionStatus}",
                 $"State Time: {component.CurrentStateInfo.Time}",
                 $"State Set: {component.CurrentStateInfo.StateSet}"
-                };
-            } else
-            {
-                _parameters = new string[5]
-                {
-                $"WStatus: {Player.StateController.State.ToString()} ({(int)Player.StateController.State})",
-                $"AStatus: {Player.StateController.ActionState.ToString()} ({(int)Player.StateController.ActionState})",
-                $"Vel: {Math.Round(Player.player.velocity.X, 2)}, {Math.Round(Player.player.velocity.Y, 2)}",
-                $"State No.: {ActionText()}",
-                $"Equip: {EquipText()}"
-                };
-            }
+            };
 
             for (var i = 0; i < _parameters.Length; i++)
             {

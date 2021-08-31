@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Builders.Animation;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Models;
 using HunterCombatMR.Models.Animation;
@@ -15,7 +16,7 @@ namespace HunterCombatMR.UI.Elements
     {
         private LayerTextInfo _infoFlags;
         private IEnumerable<LayerInfoTextBox> _textBoxes;
-        private LayerReference layerRef;
+        private LayerBuilder layerRef;
 
         public LayerInformationPanel(bool startCollapsed)
             : base(startCollapsed)
@@ -39,7 +40,7 @@ namespace HunterCombatMR.UI.Elements
         }
 
         public UIList InformationList { get; }
-        public LayerReference LayerRef { get => layerRef; set { layerRef = value; ResetInformationDisplay(); PopulateBoxes(); } }
+        public LayerBuilder LayerRef { get => layerRef; set { layerRef = value; ResetInformationDisplay(); PopulateBoxes(); } }
 
         internal LayerTextInfo VisableInformation
         {
@@ -87,14 +88,14 @@ namespace HunterCombatMR.UI.Elements
             foreach (LayerTextInfo block in infoBlocks.Where(x => !x.Equals(LayerTextInfo.None)))
             {
                 InformationList.Add(new LayerText(LayerRef, block));
-                if (block == LayerTextInfo.Coordinates || block == LayerTextInfo.TextureFrameRectangle)
+                if (block == LayerTextInfo.Coordinates)
                 {
                     var box1 = new LayerInfoTextBox("0", block, 4, false, false, null)
-                    { TextColor = Color.White, PositiveIntegersOnly = block == LayerTextInfo.TextureFrameRectangle, ZeroNotAllowed = block == LayerTextInfo.TextureFrameRectangle };
+                    { TextColor = Color.White, PositiveIntegersOnly = false, ZeroNotAllowed = false };
                     boxes.Add(box1);
                     InformationList.Add(box1);
                     var box2 = new LayerInfoTextBox("0", block, 4, false, false, null, 1)
-                    { TextColor = Color.White, PositiveIntegersOnly = block == LayerTextInfo.TextureFrameRectangle, ZeroNotAllowed = block == LayerTextInfo.TextureFrameRectangle };
+                    { TextColor = Color.White, PositiveIntegersOnly = false, ZeroNotAllowed = false };
                     boxes.Add(box2);
                     InformationList.Add(box2);
                 }

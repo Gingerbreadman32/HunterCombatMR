@@ -1,6 +1,7 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Builders.Animation;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
-using HunterCombatMR.Interfaces.Animation;
+using HunterCombatMR.Models;
 using HunterCombatMR.Models.Animation;
 using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
@@ -16,9 +17,9 @@ namespace HunterCombatMR.UI.Elements
         : UIElement
     {
         private string _displayText;
-        private LayerReference layerRef;
+        private LayerBuilder layerRef;
 
-        public LayerText(LayerReference layerRef,
+        public LayerText(LayerBuilder layerRef,
             LayerTextInfo infoArgs = LayerTextInfo.None)
         {
             LayerRef = layerRef;
@@ -29,7 +30,8 @@ namespace HunterCombatMR.UI.Elements
         }
 
         public LayerTextInfo DisplayInfo { get; private set; }
-        public LayerReference LayerRef { get => layerRef; set { layerRef = value; GenerateText(); } }
+        public FrameIndex Keyframe { get; set; }
+        public LayerBuilder LayerRef { get => layerRef; set { layerRef = value; GenerateText(); } }
 
         public string Text
         {
@@ -40,6 +42,7 @@ namespace HunterCombatMR.UI.Elements
         }
 
         public Color TextColor { get; set; } = Color.White;
+        public Texture2D Texture { get => TextureUtils.GetTextureFromTag(new TextureTag(LayerRef.Name, Point.Zero)); }
 
         public override void Recalculate()
         {
@@ -68,7 +71,7 @@ namespace HunterCombatMR.UI.Elements
             var MousePosition = new Vector2(Main.mouseX, Main.mouseY);
             if (Parent.GetElementAt(MousePosition) == this)
                 displayColor = Color.LightBlue;
-            else if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(LayerRef.Layer.Name)))
+            else if (HunterCombatMR.Instance.EditorInstance.HighlightedLayers.Any(x => x.Equals(LayerRef.Name)))
                 displayColor = Color.Red;
 
             CalculatedStyle innerDimensions = GetInnerDimensions();
@@ -84,19 +87,20 @@ namespace HunterCombatMR.UI.Elements
         {
             _displayText = "";
 
+            if (LayerRef is null)
+                return;
 
-                foreach (LayerTextInfo info in DisplayInfo.GetFlags())
-                {
-                    _displayText = InfoText(info);
-                }
-            
+            foreach (LayerTextInfo info in DisplayInfo.GetFlags())
+            {
+                _displayText = InfoText(info);
+            }
         }
 
         private string CoordinateInfoText()
-            => $"Coords: X- {LayerRef.FrameData.Position.X} Y- {LayerRef.FrameData.Position.Y} ";
+            => $"Coords: X- {LayerRef.GetLayerData(Keyframe).Position.X} Y- {LayerRef.GetLayerData(Keyframe).Position.Y} ";
 
         private string DepthInfoText()
-            => $"Depth: {LayerRef.CurrentDepth} ";
+            => $"Depth: {LayerRef.GetLayerData(Keyframe).Depth} ";
 
         private void DeselectAllFrames(UIMouseEvent evt, UIElement listeningElement)
         {
@@ -108,20 +112,20 @@ namespace HunterCombatMR.UI.Elements
         {
             if (Main.keyState.GetPressedKeys().Any(x => x.Equals(Keys.LeftShift)))
             {
-                if (!EditorUtils.HighlightedLayerNames.Any(x => x.Equals(LayerRef.Layer.Name)))
+                if (!EditorUtils.HighlightedLayerNames.Any(x => x.Equals(LayerRef.Name)))
                 {
-                    EditorUtils.HighlightedLayerNames.Add(LayerRef.Layer.Name);
+                    EditorUtils.HighlightedLayerNames.Add(LayerRef.Name);
                     return;
                 }
 
-                EditorUtils.HighlightedLayerNames.Remove(LayerRef.Layer.Name);
+                EditorUtils.HighlightedLayerNames.Remove(LayerRef.Name);
                 return;
             }
 
             EditorUtils.HighlightedLayerNames.Clear();
-            if (!EditorUtils.HighlightedLayerNames.Any(x => x.Equals(LayerRef.Layer.Name)))
+            if (!EditorUtils.HighlightedLayerNames.Any(x => x.Equals(LayerRef.Name)))
             {
-                EditorUtils.HighlightedLayerNames.Add(LayerRef.Layer.Name);
+                EditorUtils.HighlightedLayerNames.Add(LayerRef.Name);
             }
         }
 
@@ -151,14 +155,14 @@ namespace HunterCombatMR.UI.Elements
                     return TextureBoundsInfoText();
 
                 default:
-                    return LayerRef.Layer.Name;
+                    return LayerRef.Name;
             }
         }
 
         private string OrientationInfoText()
         {
             string text = "Orientation: ";
-            SpriteEffects orientation = LayerRef.FrameData.Orientation;
+            SpriteEffects orientation = LayerRef.GetLayerData(Keyframe).Orientation;
 
             switch (orientation)
             {
@@ -182,15 +186,15 @@ namespace HunterCombatMR.UI.Elements
         }
 
         private string RotationInfoText()
-            => $"Rotation: {MathHelper.ToDegrees(LayerRef.FrameData.Rotation)}° ";
+            => $"Rotation: {MathHelper.ToDegrees(LayerRef.GetLayerData(Keyframe).Rotation)}° ";
 
         private string TextureBoundsInfoText()
-            => $"Bounds: W- {LayerRef.Layer.Tag.Size.X} H- {LayerRef.Layer.Tag.Size.Y}";
+            => $"Bounds: W- {Texture.Width} H- {LayerRef.GetLayerData(Keyframe).SheetIndex}";
 
         private string TextureFrameInfoText()
-                    => $"Frame: {LayerRef.FrameData.SheetFrame}";
+                    => $"Frame: {LayerRef.GetLayerData(Keyframe).SheetFrame}";
 
         private string TextureNameInfoText()
-            => $"Texture Tag: {LayerRef.Layer.Tag.Name}";
+            => $"Texture Tag: {Texture.Name}";
     }
 }

@@ -21,7 +21,7 @@ namespace HunterCombatMR.Models.Components
         public int CurrentFrame { get => Animator.Frame; }
 
         [TriggerParameter(CommonTriggerParams.KeyframeTime)]
-        public int CurrentKeyFrame { get => Animator.GetCurrentKeyFrame(); }
+        public int CurrentKeyFrame { get => Animator.GetCurrentKeyframe(); }
 
         public int LastFrame { get => Animator.GetFinalFrame(); }
     }

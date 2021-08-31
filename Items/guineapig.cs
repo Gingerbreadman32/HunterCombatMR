@@ -1,5 +1,3 @@
-using HunterCombatMR.AttackEngine.Constants;
-using HunterCombatMR.AttackEngine.Models;
 using HunterCombatMR.Enumerations;
 using System.Collections.Generic;
 using Terraria;

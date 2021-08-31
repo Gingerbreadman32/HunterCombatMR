@@ -1,7 +1,7 @@
 ﻿using HunterCombatMR.Enumerations;
 using HunterCombatMR.Interfaces;
-using HunterCombatMR.Interfaces.Action;
 using HunterCombatMR.Models.MoveSet;
+using HunterCombatMR.Models.State;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,27 +11,28 @@ namespace HunterCombatMR.Models.Player
     public class ComboAction
         : IDisplayNamed
     {
-        public ComboAction(ICustomAction<HunterCombatPlayer> attack,
+        public ComboAction(string name,
+            EntityState attack,
             IEnumerable<ComboRoute> routes,
-            EntityWorldStatus state = EntityWorldStatus.NoStatus,
-            string name = null)
+            EntityWorldStatus state = EntityWorldStatus.NoStatus)
         {
-            Attack = attack ?? throw new ArgumentNullException(nameof(attack));
+            Attack = attack;
             Routes = routes ?? throw new ArgumentNullException(nameof(routes));
-            DisplayName = name ?? Attack.DisplayName;
+            DisplayName = name;
             PlayerStateRequired = state;
         }
 
-        public ComboAction(ICustomAction<HunterCombatPlayer> attack,
+        public ComboAction(string name,
+            EntityState attack,
             EntityWorldStatus state = EntityWorldStatus.NoStatus)
         {
-            Attack = attack ?? throw new ArgumentNullException(nameof(attack));
-            DisplayName = Attack.DisplayName;
+            Attack = attack;
+            DisplayName = name;
             Routes = new List<ComboRoute>();
             PlayerStateRequired = state;
         }
 
-        public ICustomAction<HunterCombatPlayer> Attack { get; }
+        public EntityState Attack { get; }
 
         public string DisplayName { get; }
 
