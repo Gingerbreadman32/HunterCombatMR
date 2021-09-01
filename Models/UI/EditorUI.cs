@@ -543,7 +543,8 @@ namespace HunterCombatMR.Models.UI
             EditorMode[] modeRestriction = null,
             bool animationNeeded = false)
         {
-            if (modeRestriction != null && modeRestriction.Length.Equals(0))
+            if ((modeRestriction != null && modeRestriction.Length.Equals(0))
+                || !CurrentPlayer.EntityReference.TryGetComponent(out AnimationComponent component))
                 return;
 
             if (modeRestriction == null || modeRestriction.Contains(HunterCombatMR.Instance.EditorInstance.CurrentEditMode) &&
@@ -551,7 +552,6 @@ namespace HunterCombatMR.Models.UI
             {
                 action(evt, listen);
                 Main.PlaySound(SoundID.MenuTick);
-                var component = CurrentPlayer.EntityReference.GetComponent<AnimationComponent>();
                 DisplayLayers(component.Animation, component.CurrentKeyFrame);
             }
         }
