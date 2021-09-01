@@ -1,9 +1,9 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Components;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Messages.InputSystem;
-using HunterCombatMR.Models.Components;
 using HunterCombatMR.Models.Input;
 using HunterCombatMR.Utilities;
 using System;

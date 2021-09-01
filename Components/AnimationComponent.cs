@@ -2,7 +2,7 @@
 using HunterCombatMR.Constants;
 using HunterCombatMR.Models.Animation;
 
-namespace HunterCombatMR.Models.Components
+namespace HunterCombatMR.Components
 {
     public struct AnimationComponent
     {

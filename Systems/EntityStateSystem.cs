@@ -1,11 +1,11 @@
-﻿using HunterCombatMR.Extensions;
+﻿using HunterCombatMR.Components;
+using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Messages.AnimationSystem;
 using HunterCombatMR.Messages.EntityStateSystem;
 using HunterCombatMR.Models.Animation;
-using HunterCombatMR.Models.Components;
 using HunterCombatMR.Models.State;
 using HunterCombatMR.Utilities;
 using System;

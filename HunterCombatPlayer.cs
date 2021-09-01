@@ -10,7 +10,7 @@ using HunterCombatMR.Messages.AnimationSystem;
 using HunterCombatMR.Messages.EntityStateSystem;
 using HunterCombatMR.Messages.InputSystem;
 using HunterCombatMR.Models.Animation;
-using HunterCombatMR.Models.Components;
+using HunterCombatMR.Components;
 using HunterCombatMR.Models.State;
 using HunterCombatMR.Models.State.Builders;
 using Microsoft.Xna.Framework;

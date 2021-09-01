@@ -1,7 +1,7 @@
-﻿using HunterCombatMR.Enumerations;
+﻿using HunterCombatMR.Components;
+using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Managers;
-using HunterCombatMR.Models.Components;
 using HunterCombatMR.Models.UI.Elements;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;

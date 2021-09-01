@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Constants;
+﻿using HunterCombatMR.Components;
+using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces.Entity;
@@ -6,7 +7,6 @@ using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Messages.AnimationSystem;
 using HunterCombatMR.Models.Animation;
-using HunterCombatMR.Models.Components;
 using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;

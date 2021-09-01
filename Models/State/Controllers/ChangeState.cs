@@ -1,8 +1,8 @@
-﻿using HunterCombatMR.Constants;
+﻿using HunterCombatMR.Components;
+using HunterCombatMR.Constants;
 using HunterCombatMR.Interfaces.State;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Messages.EntityStateSystem;
-using HunterCombatMR.Models.Components;
 using System;
 
 namespace HunterCombatMR.Models.State.Controllers

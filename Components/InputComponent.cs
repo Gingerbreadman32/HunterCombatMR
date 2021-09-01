@@ -1,7 +1,7 @@
 ﻿using HunterCombatMR.Models.Input;
 using System.Collections.Generic;
 
-namespace HunterCombatMR.Models.Components
+namespace HunterCombatMR.Components
 {
     public struct InputComponent
     {

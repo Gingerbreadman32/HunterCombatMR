@@ -1,5 +1,5 @@
-﻿using HunterCombatMR.Extensions;
-using HunterCombatMR.Models.Components;
+﻿using HunterCombatMR.Components;
+using HunterCombatMR.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Linq;

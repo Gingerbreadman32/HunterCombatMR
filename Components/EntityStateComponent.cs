@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HunterCombatMR.Models.Components
+namespace HunterCombatMR.Components
 {
     public struct EntityStateComponent
     {
@@ -31,7 +31,7 @@ namespace HunterCombatMR.Models.Components
         }
 
         public int CurrentStateNumber { get; set; }
-        
+
         public StateInfo CurrentStateInfo { get; set; }
 
         [TriggerParameter(CommonTriggerParams.StateTime)]

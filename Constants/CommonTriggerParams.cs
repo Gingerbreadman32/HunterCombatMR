@@ -1,5 +1,5 @@
 ﻿using HunterCombatMR.Attributes;
-using HunterCombatMR.Models.Components;
+using HunterCombatMR.Components;
 
 namespace HunterCombatMR.Constants
 {

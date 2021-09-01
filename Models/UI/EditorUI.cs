@@ -1,8 +1,8 @@
 ﻿using HunterCombatMR.Builders.Animation;
+using HunterCombatMR.Components;
 using HunterCombatMR.Enumerations;
 using HunterCombatMR.Extensions;
 using HunterCombatMR.Models.Animation;
-using HunterCombatMR.Models.Components;
 using HunterCombatMR.Models.UI.AnimationTimeline;
 using HunterCombatMR.Models.UI.Elements;
 using HunterCombatMR.Utilities;
