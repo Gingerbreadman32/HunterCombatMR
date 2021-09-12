@@ -38,6 +38,12 @@ namespace HunterCombatMR.Constants
         public const string StateTime = "time";
 
         /// <summary>
+        /// [EntityStateComponent] The state number of the current state of the entity.
+        /// </summary>
+        [ComponentDependency(typeof(EntityStateComponent))]
+        public const string StateNumber = "state";
+
+        /// <summary>
         /// [VanillaEntityComponent] The current x-based velocity of the entity.
         /// </summary>
         public const string VelocityX = "velx";

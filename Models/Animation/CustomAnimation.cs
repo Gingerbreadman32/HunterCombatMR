@@ -27,6 +27,6 @@ namespace HunterCombatMR.Models.Animation
         public LoopStyle LoopStyle { get; }
         public string Name { get; }
 
-        public int TotalFrames { get => FrameData.Sum(x => x); }
+        public int TotalFrames { get => FrameData?.Sum(x => x) ?? 0; }
     }
 }

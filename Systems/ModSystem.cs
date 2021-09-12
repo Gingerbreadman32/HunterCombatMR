@@ -24,10 +24,11 @@ namespace HunterCombatMR.Systems
 
         public IEnumerable<Type> MessageTypes { get => _messageTypes; }
 
-        protected virtual void OnCreate() { }
-
         public ref TComponent GetComponent(in IModEntity entity)
             => ref entity.GetComponent<TComponent>();
+
+        public ref TComponent GetComponent(int Id)
+            => ref ComponentManager.GetEntityComponent<TComponent>(Id);
 
         public bool HandleMessage<TMessage>(TMessage message)
         {
@@ -36,6 +37,9 @@ namespace HunterCombatMR.Systems
 
         public bool HasComponent(in IModEntity entity)
             => entity.HasComponent<TComponent>();
+
+        public bool HasComponent(int Id)
+            => ComponentManager.HasComponent<TComponent>(Id);
 
         public virtual void PostEntityUpdate()
         {
@@ -54,6 +58,18 @@ namespace HunterCombatMR.Systems
             IEnumerable<IModEntity> entities = new List<IModEntity>();
 
             return EntityManager.EntityList.Where(x => ComponentManager.HasComponent<TComponent>(x)).Select(x => EntityManager.GetEntity(x));
+        }
+
+        protected void ForEachComponentEntity(Action<IModEntity> method)
+        {
+            foreach (IModEntity entity in ReadEntities())
+            {
+                method.Invoke(entity);
+            }
+        }
+
+        protected virtual void OnCreate()
+        {
         }
 
         private void GetMessageTypes()

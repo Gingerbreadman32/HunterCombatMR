@@ -15,6 +15,33 @@ namespace HunterCombatMR.Utilities
             array[originalLength] = value;
         }
 
+        public static void AddOrInsert<T>(ref T[] array, 
+            T value, 
+            int index)
+        {
+            if (index >= array.Length)
+                Add(ref array, value);
+
+            if (index < 0)
+                throw new ArgumentOutOfRangeException("index", "Index cannot be less than 0!");
+
+            T[] start = new T[index];
+
+            if (index > 0)
+            {
+                Array.Copy(array, 0, start, 0, index);
+            }
+
+            Add(ref start, value);
+
+            var newLength = array.Length - index;
+            var newArray = new T[start.Length + newLength];
+            start.CopyTo(newArray, 0);
+            Array.Copy(array, index, newArray, start.Length, newLength);
+
+            array = newArray;
+        }
+
         public static void Remove<T>(ref T[] array, int index)
         {
             int arrayLength = array?.Length ?? 0;

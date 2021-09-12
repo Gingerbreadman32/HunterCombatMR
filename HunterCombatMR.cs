@@ -1,5 +1,6 @@
 using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
+using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Models.UI;
 using HunterCombatMR.Models.UI.Elements;
@@ -208,11 +209,12 @@ namespace HunterCombatMR
             _managersLoaded = true;
         }
 
-        private void LoadSystems()
+        private void LoadSystems(Type[] assemblyTypes)
         {
-            SystemManager.AddSystem(new InputSystem());
-            SystemManager.AddSystem(new EntityStateSystem());
-            SystemManager.AddSystem(new AnimationSystem());
+            foreach (var type in assemblyTypes.Where(t => !t.IsAbstract && typeof(IModSystem).IsAssignableFrom(t)))
+            {
+                SystemManager.AddSystem((IModSystem)Activator.CreateInstance(type));
+            }
         }
 
         private void ManagerSetup(Type[] assemblyTypes)
@@ -221,7 +223,7 @@ namespace HunterCombatMR
 
             InitializeManagers();
 
-            LoadSystems();
+            LoadSystems(assemblyTypes);
         }
     }
 }

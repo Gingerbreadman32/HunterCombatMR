@@ -1,5 +1,4 @@
-﻿using HunterCombatMR.Constants;
-using System;
+﻿using System;
 
 namespace HunterCombatMR.Models.State
 {
@@ -26,6 +25,11 @@ namespace HunterCombatMR.Models.State
         public bool IgnoreHitPause { get; }
 
         /// <summary>
+        /// The parameters being passed to the state controller.
+        /// </summary>
+        public object[] Parameters { get; }
+
+        /// <summary>
         /// The amount of times triggers need to fire within the lifetime of the state to activate. 0 will indicate it can only be called once.
         /// </summary>
         public int Persistency { get; }
@@ -41,11 +45,6 @@ namespace HunterCombatMR.Models.State
         /// The logic this controller will perform upon a trigger being hit. Must be within defined types.
         /// </summary>
         public string Type { get; }
-
-        /// <summary>
-        /// The parameters being passed to the state controller.
-        /// </summary>
-        public object[] Parameters { get; }
 
         public static bool Validate(StateTrigger[][] triggers,
                                             int persistency,

@@ -3,9 +3,8 @@ using HunterCombatMR.Extensions;
 using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
-using HunterCombatMR.Messages.AnimationSystem;
+using HunterCombatMR.Messages.BehaviorSystem;
 using HunterCombatMR.Messages.EntityStateSystem;
-using HunterCombatMR.Models.Animation;
 using HunterCombatMR.Models.State;
 using HunterCombatMR.Utilities;
 using System;
@@ -19,8 +18,8 @@ namespace HunterCombatMR.Systems
         IMessageHandler<SetWorldStatusMessage>,
         IMessageHandler<ChangeStateMessage>
     {
-        private List<SetWorldStatusMessage> _worldStatusMessages;
         private List<ChangeStateMessage> _changeStateMessages;
+        private List<SetWorldStatusMessage> _worldStatusMessages;
 
         public bool HandleMessage(SetWorldStatusMessage message)
         {
@@ -39,17 +38,7 @@ namespace HunterCombatMR.Systems
             if (InputCheckingUtils.PlayerInputBufferPaused())
                 return;
 
-            foreach (var entity in ReadEntities())
-            {
-                ref var component = ref entity.GetComponent<EntityStateComponent>();
-
-                SetWorldStatusFromMessages(entity, component);
-
-                EvaluateControllers(entity.Id, component.GetCurrentState());
-                component.CurrentStateInfo.Time++;
-
-                ChangeStateFromMessages(entity, ref component);
-            }
+            ForEachComponentEntity(UpdateEntityStates);
 
             _worldStatusMessages.Clear();
             _changeStateMessages.Clear();
@@ -61,13 +50,39 @@ namespace HunterCombatMR.Systems
             _changeStateMessages = new List<ChangeStateMessage>();
         }
 
-        private void EvaluateControllers(int entityId,
-            EntityState state)
+        private static void SetState(ref EntityStateComponent component,
+            int stateNumber,
+            int entityId)
         {
-            for (int c = 0; c < state.Controllers.Length; c++)
+            if (!ComponentManager.HasComponent<BehaviorComponent>(entityId))
+                return;
+
+            var behavior = ComponentManager.GetEntityComponent<BehaviorComponent>(entityId);
+
+            if (!behavior.TryGetState(stateNumber, out var state))
+                return;
+
+            component.StateInfo = new StateInfo(stateNumber, state);
+
+            if (state.Definition.Animation.HasValue)
+                SystemManager.SendMessage(new SetAnimationRequestMessage(entityId, state.Definition.Animation.Value));
+        }
+
+        private void ChangeStateFromMessages(IModEntity entity, ref EntityStateComponent component)
+        {
+            foreach (var stateMessage in _changeStateMessages.Where(x => x.EntityId.Equals(entity.Id)))
             {
-                if (EvaluateTriggers(state.Controllers[c].Triggers, entityId))
-                    StateControllerManager.InvokeController(state.Controllers[c].Type, entityId, state.Controllers[c].Parameters);
+                SetState(ref component, stateMessage.StateNumber, stateMessage.EntityId);
+            }
+        }
+
+        private void EvaluateControllers(int entityId,
+            StateInfo state)
+        {
+            for (int c = 0; c < state.StateControllerInfo.Length; c++)
+            {
+                if (EvaluateTriggers(state.StateControllerInfo[c].Definition.Triggers, entityId))
+                    StateControllerManager.InvokeController(state.StateControllerInfo[c].Definition.Type, entityId, state.StateControllerInfo[c].Definition.Parameters);
             }
         }
 
@@ -87,7 +102,7 @@ namespace HunterCombatMR.Systems
 
         // Make unit tests for this
         private bool EvaluateTriggers(StateTrigger[][] triggers,
-                    int entityId)
+                    int entityId) // Please refactor this, lol
         {
             bool qualified = false;
 
@@ -123,53 +138,20 @@ namespace HunterCombatMR.Systems
         {
             foreach (var worldMessage in _worldStatusMessages.Where(x => x.EntityId.Equals(entity.Id)))
             {
-                component.CurrentStateInfo.WorldStatus = worldMessage.Status;
+                component.StateInfo.WorldStatus = worldMessage.Status;
             }
         }
 
-        private void ChangeStateFromMessages(IModEntity entity, ref EntityStateComponent component)
+        private void UpdateEntityStates(IModEntity entity)
         {
-            foreach (var stateMessage in _changeStateMessages.Where(x => x.EntityId.Equals(entity.Id)))
-            {
-                SetState(ref component, stateMessage.StateNumber, stateMessage.EntityId);
-            }
-        }
+            ref var component = ref entity.GetComponent<EntityStateComponent>();
 
-        private static void SetState(ref EntityStateComponent component,
-            int stateNumber,
-            int entityId)
-        {
-            var state = component.GetState(stateNumber);
-            component.CurrentStateInfo = new StateInfo(component.CurrentStateInfo,
-                component.CurrentStateNumber,
-                component.GetState(stateNumber).Definition,
-                Array.FindIndex(component.StateSets, x => x.States.ContainsKey(stateNumber)));
-            component.CurrentStateNumber = stateNumber;
+            SetWorldStatusFromMessages(entity, component);
 
-            if (state.Definition.Animation.HasValue)
-            {
-                if (!ComponentManager.HasComponent<AnimationComponent>(entityId) && state.Definition.Animation.Value >= 0)
-                {
-                    ComponentManager.RegisterComponent(new AnimationComponent(component.AnimationSet[state.Definition.Animation.Value]), entityId);
-                    return;
-                }
+            EvaluateControllers(entity.Id, component.StateInfo);
+            component.StateInfo.Time++;
 
-                SetAnimation(entityId, state.Definition.Animation.Value, component.AnimationSet);
-            }
-
-        }
-
-        private static void SetAnimation(int entityId, 
-            int animationIndex,
-            CustomAnimation[] animationSet)
-        {
-            if (animationIndex < 0)
-            {
-                ComponentManager.RemoveComponent<AnimationComponent>(entityId);
-                return;
-            }
-
-            SystemManager.SendMessage(new ChangeAnimationMessage(entityId, animationSet[animationIndex]));
+            ChangeStateFromMessages(entity, ref component);
         }
     }
 }

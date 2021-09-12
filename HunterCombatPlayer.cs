@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using HunterCombatMR.Models.Behavior;
+using HunterCombatMR.Models.Input;
 
 namespace HunterCombatMR
 {
@@ -54,9 +56,13 @@ namespace HunterCombatMR
             {
                 _entity.RegisterComponent(new InputComponent(player.whoAmI));
                 StateSet stateSet = CreateTestStateSet();
-                CustomAnimation[] animationSet = CreateTestAnimationSet();
+                var animationSet = CreateTestAnimationSet();
 
-                _entity.RegisterComponent(new EntityStateComponent(stateSet, animationSet));
+                var behaviorComponent = new BehaviorComponent(new Behavior("Player", stateSet, animationSet, default(CommandList)));
+                behaviorComponent.InsertBehavior(new Behavior("Test"), 0);
+                behaviorComponent.InsertBehavior(new Behavior("Test2"), 1);
+                _entity.RegisterComponent(behaviorComponent);
+
             }
         }
 
@@ -97,9 +103,9 @@ namespace HunterCombatMR
             _entity.SendMessage(new InputResetMessage(_entity.Id));
         }
 
-        private static CustomAnimation[] CreateTestAnimationSet()
+        private static Dictionary<int, CustomAnimation> CreateTestAnimationSet()
         {
-            var animations = new List<CustomAnimation>();
+            var animations = new Dictionary<int, CustomAnimation>();
 
             var builder = new AnimationBuilder("Test", AnimationType.Player, 12)
             {
@@ -164,9 +170,9 @@ namespace HunterCombatMR
 
             builder.AddKeyframes(CopyKeyframe.None, 12, 4, 8, 16, 4, 12, 52);
 
-            animations.Add(builder.Build());
+            animations.Add(0, builder.Build());
 
-            return animations.ToArray();
+            return animations;
         }
 
         private static StateSet CreateTestStateSet()

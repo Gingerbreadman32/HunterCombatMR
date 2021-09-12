@@ -78,15 +78,14 @@ namespace HunterCombatMR.Models.UI.Elements
                 return;
 
             var component = Player.EntityReference.GetComponent<EntityStateComponent>();
-            var currentState = component.GetCurrentState();
+            var currentState = component.StateInfo;
 
             _parameters = new string[]
             {
-                $"State No.: {component.CurrentStateNumber}",
-                $"W. Status: {currentState.Definition.WorldStatus}",
-                $"A. Status: {currentState.Definition.ActionStatus}",
-                $"State Time: {component.CurrentStateInfo.Time}",
-                $"State Set: {component.CurrentStateInfo.StateSet}"
+                $"State No.: {component.StateNumber}",
+                $"W. Status: {currentState.WorldStatus}",
+                $"A. Status: {currentState.ActionStatus}",
+                $"State Time: {component.StateInfo.Time}"
             };
 
             for (var i = 0; i < _parameters.Length; i++)
@@ -106,7 +105,7 @@ namespace HunterCombatMR.Models.UI.Elements
 
         private string ActionText()
             => Player.EntityReference.HasComponent<EntityStateComponent>()
-                ? $"{Player.EntityReference.GetComponent<EntityStateComponent>().CurrentStateNumber}"
+                ? $"{Player.EntityReference.GetComponent<EntityStateComponent>().StateNumber}"
                 : _noneText;
 
         private string EquipText()

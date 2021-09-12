@@ -41,15 +41,18 @@ namespace HunterCombatMR.Models.State.Builders
     public class StateSetBuilder
     {
         private Dictionary<int, EntityState> _states;
+        private List<GlobalStateController> _globalControllers;
 
         public StateSetBuilder()
         {
             _states = new Dictionary<int, EntityState>();
+            _globalControllers = new List<GlobalStateController>();
         }
 
         public StateSetBuilder(StateSet copy)
         {
             _states = copy.States.ToDictionary(x => x.Key, x => x.Value);
+            _globalControllers = copy.GlobalStateControllers.ToList();
         }
 
         public IReadOnlyDictionary<int, EntityState> States { get => _states; }
@@ -61,6 +64,25 @@ namespace HunterCombatMR.Models.State.Builders
                 throw new Exception($"State list already contains a state with state no. of {stateNumber}");
             _states.Add(stateNumber, state);
         }
+
+        public void AddGlobalController(string name,
+            int priority,
+            StateController controller)
+        {
+            _globalControllers.Add(new GlobalStateController(name, controller, priority));
+        }
+
+        public void RemoveGlobalController(string name)
+        {
+            if (HasGlobalController(name))
+                _globalControllers.Remove(_globalControllers.Single(x => x.Name.Equals(name)));
+        }
+
+        public bool HasGlobalController(string name)
+            => _globalControllers.Any(x => x.Name.Equals(name));
+
+        public IEnumerable<GlobalStateController> ListGlobablControllersOfPriority(int priority)
+            => _globalControllers.Where(x => x.Priority.Equals(priority)).ToList();
 
         public void AddStates(IEnumerable<KeyValuePair<int, EntityState>> states)
         {
@@ -75,7 +97,7 @@ namespace HunterCombatMR.Models.State.Builders
             if (!_states.Any())
                 throw new Exception($"Stateset is empty. A stateset must have at least one state with a state no. of {StateNumberConstants.Default}!");
 
-            return new StateSet(_states);
+            return new StateSet(_states, _globalControllers);
         }
 
         public void RemoveState(int stateNumber)

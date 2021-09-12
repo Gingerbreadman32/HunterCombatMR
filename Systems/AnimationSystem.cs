@@ -106,9 +106,9 @@ namespace HunterCombatMR.Systems
                 ref var component = ref entity.GetComponent<AnimationComponent>();
 
                 component.Animator.Update();
-
-                ChangeAnimation(entity, ref component);
             }
+
+            ChangeAnimations();
 
             _changeMessages.Clear();
         }
@@ -151,17 +151,16 @@ namespace HunterCombatMR.Systems
             _changeMessages = new List<Queue<ChangeAnimationMessage>>();
         }
 
-        private void ChangeAnimation(IModEntity entity, ref AnimationComponent component)
+        private void ChangeAnimations()
         {
-            var messages = _changeMessages.SingleOrDefault(x => x.All(y => y.EntityId.Equals(entity.Id)));
-
-            if (messages == null)
-                return;
-
-            int total = messages.Count;
-            for (int m = 0; m < total; m++)
+            foreach (var messages in _changeMessages)
             {
-                component.Animation = messages.Dequeue().Animation;
+                int total = messages.Count;
+                for (int m = 0; m < total; m++)
+                {
+                    var newAnim = messages.Dequeue();
+                    SetAnimation(newAnim.EntityId, newAnim.NewAnimation);
+                }
             }
         }
 
@@ -171,6 +170,25 @@ namespace HunterCombatMR.Systems
             var newColor = original;
             newColor.A = amount;
             return newColor;
+        }
+
+        private void SetAnimation(int entityId,
+            CustomAnimation? animation)
+        {
+            if (HasComponent(entityId))
+            {
+                if (!animation.HasValue)
+                {
+                    ComponentManager.RemoveComponent<AnimationComponent>(entityId);
+                    return;
+                }
+
+                ref var component = ref GetComponent(entityId);
+                component.Animation = animation.Value;
+            }
+
+            if (animation.HasValue)
+                ComponentManager.RegisterComponent(new AnimationComponent(animation.Value), entityId);
         }
     }
 }

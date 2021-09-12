@@ -483,11 +483,11 @@ namespace HunterCombatMR.Models.UI
                 _layerlist.Clear();
             }
 
-            if (!CurrentPlayer.EntityReference.TryGetComponent(out EntityStateComponent component))
+            if (!CurrentPlayer.EntityReference.TryGetComponent(out BehaviorComponent component))
                 return;
 
             // Animation List Window
-            foreach (var animation in component.AnimationSet)
+            foreach (var animation in component.ListAnimations())
             {
                 UIAutoScaleTextTextPanel<string> animationButton = new UIAutoScaleTextTextPanel<string>(animation.Name)
                 {

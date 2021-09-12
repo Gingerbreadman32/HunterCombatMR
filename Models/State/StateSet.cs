@@ -15,15 +15,19 @@ namespace HunterCombatMR.Models.State
     /// </remarks>
     public struct StateSet
     {
+        private readonly GlobalStateController[] _globalControllers;
         private readonly IReadOnlyDictionary<int, EntityState> _states;
 
-        public StateSet(IDictionary<int, EntityState> states)
+        public StateSet(IDictionary<int, EntityState> states,
+            IEnumerable<GlobalStateController> globalControllers)
         {
             Validate(states, false);
 
             _states = new ReadOnlyDictionary<int, EntityState>(states);
+            _globalControllers = globalControllers.ToArray();
         }
 
+        public IReadOnlyCollection<GlobalStateController> GlobalStateControllers { get => _globalControllers; }
         public IReadOnlyDictionary<int, EntityState> States { get => _states; }
 
         public static bool Validate(IDictionary<int, EntityState> states,

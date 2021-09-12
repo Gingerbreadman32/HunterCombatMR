@@ -1,72 +1,82 @@
 ﻿using HunterCombatMR.Enumerations;
+using System.Linq;
 
 namespace HunterCombatMR.Models.State
 {
     /// <summary>
-    /// Stores all of the information about the current state of the entity. Exists only within the lifetime of the current state.
+    /// Stores all of the information about the current state of the entity; Exists only within the lifetime of the current state
     /// </summary>
     public class StateInfo
     {
         private StateControllerInfo[] _controllerInfo;
+        private StateDef _definition;
+        private int _previousStateNumber;
+        private int _stateNumber;
 
-        public StateControllerInfo[] StateControllerInfo { get => _controllerInfo; }
-
-        public StateInfo()
+        public StateInfo(int stateNo,
+            EntityState state)
         {
-            Time = 0;
-            StateSet = 0;
-            PreviousStateNumber = -1;
-            _controllerInfo = new StateControllerInfo[] { };
-
-            IgnoringPhysics = false;
-            ActionStatus = EntityActionStatus.Idle;
-            WorldStatus = EntityWorldStatus.NoStatus;
+            _stateNumber = -1;
             HasControl = true;
-        }
 
-        public StateInfo(StateInfo current,
-            int prevStateNo,
-            StateDef stateDef,
-            int setIndex = 0)
-        {
-            Time = 0;
-            StateSet = setIndex;
-            PreviousStateNumber = prevStateNo;
-            _controllerInfo = new StateControllerInfo[] { };
-            PreviousStateSet = current.StateSet;
-
-            IgnoringPhysics = stateDef.IgnorePhysics.GetValueOrDefault(current.IgnoringPhysics);
-            ActionStatus = stateDef.ActionStatus;
-            WorldStatus = stateDef.WorldStatus;
-            HasControl = stateDef.HasControl.GetValueOrDefault(current.HasControl);
+            SetToState(stateNo, state);
         }
 
         /// <summary>
-        /// How long the entity has been in the current state.
+        /// The entity's current action status within the state
+        /// </summary>
+        public EntityActionStatus ActionStatus { get; set; }
+
+        /// <summary>
+        /// The definition of the state, used to reset the state to its default parameters
+        /// </summary>
+        public StateDef Definition
+        {
+            get => _definition;
+            set => _definition = value;
+        }
+
+        public bool HasControl { get; set; }
+
+        /// <summary>
+        /// The state number of the previous state
+        /// </summary>
+        public int PreviousStateNumber { get => _previousStateNumber; }
+
+        public StateControllerInfo[] StateControllerInfo { get => _controllerInfo; }
+        public int StateNumber { get => _stateNumber; }
+
+        /// <summary>
+        /// How long the entity has been in the current state
         /// </summary>
         public int Time { get; set; }
 
         /// <summary>
-        /// The stateset this state is associated with.
+        /// The entity's current world status within the state
         /// </summary>
-        public int StateSet { get; set; }
-
-        /// <summary>
-        /// The state number of the previous state.
-        /// </summary>
-        public int PreviousStateNumber { get; set; }
-
-        /// <summary>
-        /// The index of the previous state's state set.
-        /// </summary>
-        public int PreviousStateSet { get; set; }
-
         public EntityWorldStatus WorldStatus { get; set; }
 
-        public EntityActionStatus ActionStatus { get; set; }
+        public void SetDefinition(StateDef definition)
+        {
+            _definition = definition;
+            WorldStatus = definition.WorldStatus;
+            ActionStatus = definition.ActionStatus;
+            HasControl = definition.HasControl.HasValue ? definition.HasControl.Value : HasControl;
+        }
 
-        public bool IgnoringPhysics { get; set; }
+        public void SetToState(int stateNo,
+                                            EntityState state,
+            bool resetTimer = true)
+        {
+            if (resetTimer)
+                Time = 0;
 
-        public bool HasControl { get; set; }
+            _previousStateNumber = StateNumber;
+            _stateNumber = stateNo;
+
+            _controllerInfo = state.Controllers.Select(x => new StateControllerInfo(x)).ToArray();
+
+            SetDefinition(state.Definition);
+        }
     }
 }
