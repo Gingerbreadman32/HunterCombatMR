@@ -12,8 +12,6 @@ namespace HunterCombatMR.Extensions
     /// </summary>
     public static class EnumExtensions
     {
-        #region Public Methods
-
         /// <summary>
         /// Gets the description of the specified enumeration
         /// </summary>
@@ -49,6 +47,21 @@ namespace HunterCombatMR.Extensions
             ?.TexurePathString
             ?? null;
 
-        #endregion Public Methods
+        public static bool Subset(this Enum @value,
+                Enum input)
+        {
+            if (@value.GetType() != input.GetType())
+                return false;
+
+            if (Convert.ToInt64(input).Equals(0))
+            {
+                if (!Convert.ToInt64(@value).Equals(0))
+                    return false;
+
+                return true;
+            }
+
+            return input.GetFlags().Where(num => !Convert.ToInt64(num).Equals(0)).All(num => @value.HasFlag(num));
+        }
     }
 }
