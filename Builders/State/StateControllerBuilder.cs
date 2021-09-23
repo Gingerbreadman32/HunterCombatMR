@@ -10,7 +10,7 @@ namespace HunterCombatMR.Builders.State
 {
     public static class StateControllerBuilderChainMethods
     {
-        public static StateControllerBuilder WithNewTrigger(this StateControllerBuilder builder,
+        public static StateControllerBuilder WithTriggerBuilder(this StateControllerBuilder builder,
             string parameter,
             string @operator,
             float value,
@@ -55,7 +55,7 @@ namespace HunterCombatMR.Builders.State
         }
 
         public static StateControllerBuilder WithParameters(this StateControllerBuilder builder,
-            IEnumerable<object> parameters)
+            params object[] parameters)
         {
             if (parameters == null || !parameters.Any() || parameters.Any(x => x == null))
                 throw new Exception("Parameters cannot be null or empty!");
@@ -99,7 +99,7 @@ namespace HunterCombatMR.Builders.State
         public int Persistency { get => _persistency; set => _persistency = value; }
         public Dictionary<int, List<StateTrigger>> Triggers { get => _triggers; set => _triggers = value; }
 
-        public void AddParameters(IEnumerable<object> parameters)
+        public void AddParameters(params object[] parameters)
         {
             _params.AddRange(parameters);
         }

@@ -59,8 +59,6 @@ namespace HunterCombatMR
                 var animationSet = CreateTestAnimationSet();
 
                 var behaviorComponent = new BehaviorComponent(new Behavior("Player", stateSet, animationSet, default(CommandList)));
-                behaviorComponent.InsertBehavior(new Behavior("Test"), 0);
-                behaviorComponent.InsertBehavior(new Behavior("Test2"), 1);
                 _entity.RegisterComponent(behaviorComponent);
 
             }
@@ -191,9 +189,17 @@ namespace HunterCombatMR
 
             var stateSet = new StateSetBuilder()
                 .WithState(StateNumberConstants.Default, states[0])
-                .WithState(1, states[1])
-                .Build();
-            return stateSet;
+                .WithState(1, states[1]);
+
+            stateSet.AddGlobalController("TestController", 
+                ControllerPriorities.Local, 
+                new StateControllerBuilder(StateControllerTypes.ChangeState)
+                    .WithTrigger("frame = 107", 1)
+                    .WithTrigger("state = 1", 1)
+                    .WithParameter(0)
+                    .Build());
+
+            return stateSet.Build();
         }
     }
 }

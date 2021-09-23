@@ -77,12 +77,12 @@ namespace HunterCombatMR.Systems
         }
 
         private void EvaluateControllers(int entityId,
-            StateInfo state)
+            StateControllerInfo[] controllers)
         {
-            for (int c = 0; c < state.StateControllerInfo.Length; c++)
+            for (int c = 0; c < controllers.Length; c++)
             {
-                if (EvaluateTriggers(state.StateControllerInfo[c].Definition.Triggers, entityId))
-                    StateControllerManager.InvokeController(state.StateControllerInfo[c].Definition.Type, entityId, state.StateControllerInfo[c].Definition.Parameters);
+                if (EvaluateTriggers(controllers[c].Definition.Triggers, entityId))
+                    StateControllerManager.InvokeController(controllers[c].Definition.Type, entityId, controllers[c].Parameters);
             }
         }
 
@@ -148,10 +148,20 @@ namespace HunterCombatMR.Systems
 
             SetWorldStatusFromMessages(entity, component);
 
-            EvaluateControllers(entity.Id, component.StateInfo);
+            EvaluateControllers(entity.Id, component.StateInfo.StateControllerInfo);
+            EvaluateGlobals(entity, component);
             component.StateInfo.Time++;
 
             ChangeStateFromMessages(entity, ref component);
+        }
+
+        private void EvaluateGlobals(IModEntity entity, EntityStateComponent component)
+        {
+            var priorities = component.GlobalControllers.Select(x => x.Priority).Distinct();
+            foreach (int priority in priorities)
+            {
+                EvaluateControllers(entity.Id, component.GlobalControllers.Where(x => x.Priority.Equals(priority)).Select(x => new StateControllerInfo(x.Controller)).ToArray());
+            }
         }
     }
 }

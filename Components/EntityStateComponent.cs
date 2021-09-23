@@ -7,10 +7,14 @@ namespace HunterCombatMR.Components
 {
     public struct EntityStateComponent
     {
-        public EntityStateComponent(StateInfo stateInfo)
+        public EntityStateComponent(StateInfo stateInfo,
+            GlobalStateController[] globalControllers)
         {
             StateInfo = stateInfo;
+            GlobalControllers = globalControllers;
         }
+
+        public GlobalStateController[] GlobalControllers { get; set; }
 
         public StateInfo StateInfo { get; set; }
 

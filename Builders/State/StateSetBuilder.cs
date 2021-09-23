@@ -1,4 +1,5 @@
 ﻿using HunterCombatMR.Constants;
+using HunterCombatMR.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,6 +71,13 @@ namespace HunterCombatMR.Models.State.Builders
             StateController controller)
         {
             _globalControllers.Add(new GlobalStateController(name, controller, priority));
+        }
+
+        public void AddGlobalController(string name,
+            ControllerPriorities priority,
+            StateController controller)
+        {
+            AddGlobalController(name, (int)priority, controller);
         }
 
         public void RemoveGlobalController(string name)

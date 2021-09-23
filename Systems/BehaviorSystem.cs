@@ -69,7 +69,7 @@ namespace HunterCombatMR.Systems
             ref var component = ref GetComponent(in entity);
             if (!entity.HasComponent<EntityStateComponent>() && component.TryGetState(0, out EntityState state))
             {
-                entity.RegisterComponent(new EntityStateComponent(new StateInfo(0, state)));
+                entity.RegisterComponent(new EntityStateComponent(new StateInfo(0, state), component.ActiveGlobalControllerList.ToArray()));
             }
         }
     }

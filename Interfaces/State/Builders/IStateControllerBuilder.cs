@@ -1,6 +1,4 @@
-﻿using HunterCombatMR.Constants;
-using HunterCombatMR.Models.State;
-using System.Collections.Generic;
+﻿using HunterCombatMR.Models.State;
 
 namespace HunterCombatMR.Interfaces.State.Builders
 {
@@ -10,8 +8,10 @@ namespace HunterCombatMR.Interfaces.State.Builders
         bool IgnoreHitPause { get; set; }
         int Persistency { get; set; }
 
-        void AddParameters(IEnumerable<object> parameters);
+        void AddParameters(params object[] parameters);
+
         void AddTrigger(StateTrigger trigger, int depth);
+
         StateController Build();
     }
 }

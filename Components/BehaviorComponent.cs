@@ -31,6 +31,14 @@ namespace HunterCombatMR.Components
             }
         }
 
+        public IReadOnlyCollection<GlobalStateController> ActiveGlobalControllerList
+        {
+            get
+            {
+                return Behaviors.Where(x => x.StateSet.HasValue).SelectMany(x => x.StateSet.Value.GlobalStateControllers).ToList();
+            }
+        }
+
         public Behavior[] Behaviors { get => _behaviors; }
 
         public bool TryGetState(int stateNumber, 

@@ -65,7 +65,7 @@ namespace HunterCombatMR.Models.State
         }
 
         public void SetToState(int stateNo,
-                                            EntityState state,
+            EntityState state,
             bool resetTimer = true)
         {
             if (resetTimer)
