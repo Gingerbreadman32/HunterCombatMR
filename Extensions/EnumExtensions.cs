@@ -18,20 +18,12 @@ namespace HunterCombatMR.Extensions
         /// <param name="value">The enum value</param>
         /// <returns>The description if it exists; otherwise, the string value of the enumeration.</returns>
         public static string GetDescription(this Enum value)
-            => value
-            .GetType()
-            .GetMember(value.ToString())
-            .FirstOrDefault()
-            ?.GetCustomAttribute<DescriptionAttribute>()
+            => value.GetAttribute<DescriptionAttribute>()
             ?.Description
             ?? value.ToString();
 
         public static IEnumerable<Enum> GetFlags(this Enum value)
-        {
-            foreach (Enum flag in Enum.GetValues(value.GetType()))
-                if (value.HasFlag(flag))
-                    yield return flag;
-        }
+            => Enum.GetValues(value.GetType()).OfType<Enum>().Where(x => value.HasFlag(x));
 
         /// <summary>
         /// Gets the texture path of the specified enumeration
@@ -39,13 +31,23 @@ namespace HunterCombatMR.Extensions
         /// <param name="value">The enum value</param>
         /// <returns>The texture path if it exists; otherwise, null.</returns>
         public static string GetTexturePath(this Enum value)
+            => value.GetAttribute<TexturePath>()
+            ?.TexurePathString
+            ?? null;
+
+        /// <summary>
+        /// Gets the description of the specified enumeration
+        /// </summary>
+        /// <param name="value">The enum value</param>
+        /// <returns>The description if it exists; otherwise, the string value of the enumeration.</returns>
+        public static T GetAttribute<T>(this Enum value)
+            where T : Attribute
             => value
             .GetType()
             .GetMember(value.ToString())
-            .FirstOrDefault()
-            ?.GetCustomAttribute<TexturePath>()
-            ?.TexurePathString
-            ?? null;
+            .SingleOrDefault()
+            ?.GetCustomAttribute<T>();
+
 
         public static bool Subset(this Enum @value,
                 Enum input)
