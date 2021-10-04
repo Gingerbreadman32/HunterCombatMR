@@ -1,4 +1,5 @@
-﻿using HunterCombatMR.Interfaces.Entity;
+﻿using HunterCombatMR.Attributes;
+using HunterCombatMR.Interfaces.Entity;
 using HunterCombatMR.Models.Entity;
 using HunterCombatMR.Services;
 using System;
@@ -7,6 +8,7 @@ using System.Linq;
 
 namespace HunterCombatMR.Managers
 {
+    [ManagerDependency(typeof(IdManager))]
     public sealed class EntityManager
         : ManagerBase
     {

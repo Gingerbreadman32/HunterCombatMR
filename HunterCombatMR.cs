@@ -1,11 +1,11 @@
+using HunterCombatMR.Attributes;
 using HunterCombatMR.Constants;
 using HunterCombatMR.Enumerations;
-using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Managers;
 using HunterCombatMR.Models.UI;
 using HunterCombatMR.Models.UI.Elements;
 using HunterCombatMR.Services;
-using HunterCombatMR.Systems;
+using HunterCombatMR.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -27,7 +27,7 @@ namespace HunterCombatMR
         private UserInterface _editorUIPanels;
         private UserInterface _editorUIPopUp;
         private GameTime _lastUpdateUiGameTime;
-        private ICollection<ManagerBase> _managers;
+        private IEnumerable<ManagerBase> _managers;
         private bool _managersInitialized;
         private bool _managersLoaded;
         private EditorUI _panelState;
@@ -46,25 +46,21 @@ namespace HunterCombatMR
 
         public override void Load()
         {
-            var assemblyTypes = GetType().Assembly.GetTypes();
-
-            ManagerSetup(assemblyTypes);
+            ManagerSetup();
             FileManager = new AnimationFileManager();
             Content = new ContentService(FileManager);
 
-            if (!Main.dedServ)
-            {
-                VariableTextures = new Dictionary<string, Texture2D>();
-                FileManager.SetupCustomFolders(new List<AnimationType>() { AnimationType.Player });
-                EditorInstance = new AnimationEditor();
+            if (Main.dedServ)
+                return;
 
-                _editorUIPanels = new UserInterface();
-                _panelState = new EditorUI();
-                _editorUIPopUp = new UserInterface();
-                _popUpState = new DebugUI();
-            }
+            VariableTextures = new Dictionary<string, Texture2D>();
+            FileManager.SetupCustomFolders(new List<AnimationType>() { AnimationType.Player });
+            EditorInstance = new AnimationEditor();
 
-            Content.SetupContent();
+            _editorUIPanels = new UserInterface();
+            _panelState = new EditorUI();
+            _editorUIPopUp = new UserInterface();
+            _popUpState = new DebugUI();
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -100,18 +96,6 @@ namespace HunterCombatMR
             }
         }
 
-        public override void PreUpdateEntities()
-        {
-            if (_managersInitialized)
-                SystemManager.PreUpdateEverything();
-        }
-
-        public override void PostUpdateEverything()
-        {
-            if (_managersInitialized)
-                SystemManager.PostUpdateEverything();
-        }
-
         public override void PostSetupContent()
         {
             var modTextures = (IDictionary<string, Texture2D>)typeof(HunterCombatMR).GetField("textures", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Instance);
@@ -125,6 +109,12 @@ namespace HunterCombatMR
             _panelState.PostSetupContent();
         }
 
+        public override void PostUpdateEverything()
+        {
+            if (_managersInitialized)
+                SystemManager.PostUpdateEverything();
+        }
+
         public override void PostUpdateInput()
         {
             if (_managersInitialized)
@@ -136,6 +126,12 @@ namespace HunterCombatMR
             EditorInstance.CloseEditor();
 
             base.PreSaveAndQuit();
+        }
+
+        public override void PreUpdateEntities()
+        {
+            if (_managersInitialized)
+                SystemManager.PreUpdateEverything();
         }
 
         public override void Unload()
@@ -184,46 +180,56 @@ namespace HunterCombatMR
             _managers = null;
         }
 
-        private void InitializeManagers()
+        private void InitializeManagers(IEnumerable<ManagerBase> managers)
         {
+            var dependents = new List<ManagerBase>();
+            int initialized = 0;
+            foreach (var manager in managers)
+            {
+                if (ManagerDependencyCheck(manager))
+                {
+                    dependents.Add(manager);
+                    continue;
+                }
+
+                manager.Initialize();
+                initialized++;
+            }
+
+            if (initialized == 0)
+                throw new StackOverflowException("No managers initialized in cycle, one or more manager dependencies are circular!");
+
+            if (dependents.Any())
+                InitializeManagers(dependents);
+        }
+
+        private bool ManagerDependencyCheck(ManagerBase manager)
+        {
+            var dependency = manager.GetType().GetCustomAttribute<ManagerDependency>();
+
+            if (dependency is null)
+                return false;
+
+            var managerReference = _managers.SingleOrDefault(x => x.GetType() == dependency.Manager);
+
+            if (managerReference is null)
+                throw new KeyNotFoundException("No managers loaded that correspond to given type!");
+
+            if (managerReference.Initialized)
+                return false;
+
+            return true;
+        }
+
+        private void ManagerSetup()
+        {
+            _managers = ReflectionUtils.InstatiateTypesFromInterface<ManagerBase>();
+            _managersLoaded = _managers.Any();
             if (!_managersLoaded)
                 throw new Exception("Managers not loaded or loaded improperly.");
 
-            foreach (var manager in _managers)
-            {
-                manager.Initialize();
-            }
-
-            _managersInitialized = true;
-        }
-
-        private void LoadManagers(Type[] assemblyTypes)
-        {
-            _managers = new List<ManagerBase>();
-
-            foreach (var type in assemblyTypes.Where(t => !t.IsAbstract && typeof(ManagerBase).IsAssignableFrom(t)))
-            {
-                _managers.Add((ManagerBase)Activator.CreateInstance(type));
-            }
-
-            _managersLoaded = true;
-        }
-
-        private void LoadSystems(Type[] assemblyTypes)
-        {
-            foreach (var type in assemblyTypes.Where(t => !t.IsAbstract && typeof(IModSystem).IsAssignableFrom(t)))
-            {
-                SystemManager.AddSystem((IModSystem)Activator.CreateInstance(type));
-            }
-        }
-
-        private void ManagerSetup(Type[] assemblyTypes)
-        {
-            LoadManagers(assemblyTypes);
-
-            InitializeManagers();
-
-            LoadSystems(assemblyTypes);
+            InitializeManagers(_managers);
+            _managersInitialized = _managers.All(x => x.Initialized);
         }
     }
 }

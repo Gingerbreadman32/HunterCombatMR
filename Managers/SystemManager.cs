@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Interfaces.System;
 using HunterCombatMR.Services;
+using HunterCombatMR.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +21,6 @@ namespace HunterCombatMR.Managers
 
         public static void PostInputUpdate()
         {
-            if (!Initialized)
-                return;
-
             foreach (var system in _systems)
             {
                 system.PostInputUpdate();
@@ -31,9 +29,6 @@ namespace HunterCombatMR.Managers
 
         public static void PostUpdateEverything()
         {
-            if (!Initialized)
-                return;
-
             foreach (var system in _systems)
             {
                 system.PostEntityUpdate();
@@ -42,9 +37,6 @@ namespace HunterCombatMR.Managers
 
         public static void PreUpdateEverything()
         {
-            if (!Initialized)
-                return;
-
             foreach (var system in _systems)
             {
                 system.PreEntityUpdate();
@@ -56,20 +48,9 @@ namespace HunterCombatMR.Managers
             if (message == null)
                 throw new ArgumentNullException("Message cannot be null!");
 
-            InitializeCheck();
             IModSystem system = GetSystemByMessageType(typeof(TMessage));
 
             return system.HandleMessage(message);
-        }
-
-        protected override void OnDispose()
-        {
-            _systems = null;
-        }
-
-        protected override void OnInitialize()
-        {
-            _systems = new List<IModSystem>();
         }
 
         internal static IModSystem GetSystemByComponentType(Type componentType)
@@ -88,10 +69,14 @@ namespace HunterCombatMR.Managers
             return system;
         }
 
-        private static void InitializeCheck()
+        protected override void OnDispose()
         {
-            if (!Initialized)
-                throw new Exception($"System Manager not initialized!");
+            _systems = null;
+        }
+
+        protected override void OnInitialize()
+        {
+            _systems = new List<IModSystem>(ReflectionUtils.InstatiateTypesFromInterface<IModSystem>());
         }
     }
 }

@@ -28,6 +28,16 @@ namespace HunterCombatMR.Utilities
             throw new ArgumentException("Expression is not a method", "expression");
         }
 
+        internal static IEnumerable<T> InstatiateTypesFromInterface<T>()
+        {
+            var types = new List<T>();
+            foreach (var type in typeof(T).Assembly.GetTypes().Where(x => typeof(T).IsAssignableFrom(x) && !x.IsAbstract))
+            {
+                types.Add((T)Activator.CreateInstance(type));
+            }
+            return types;
+        }
+
         // Will need to make set version of this later
         internal static Func<object, object> CreateGetMethodDelegate(PropertyInfo propertyReference) 
         {

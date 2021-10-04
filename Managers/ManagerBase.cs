@@ -2,13 +2,10 @@
 {
     public abstract class ManagerBase
     {
-        private static bool _initialized;
-        public static bool Initialized { get => _initialized; }
+        private bool _initialized;
+        public bool Initialized { get => _initialized; }
 
-        public ManagerBase()
-        {
-
-        }
+        public ManagerBase() { }
 
         public void Dispose()
         {
@@ -22,8 +19,8 @@
             _initialized = true;
         }
 
-        protected abstract void OnDispose();
+        protected virtual void OnDispose() { }
 
-        protected abstract void OnInitialize();
+        protected virtual void OnInitialize() { }
     }
 }

@@ -1,4 +1,4 @@
-﻿using HunterCombatMR.Interfaces.Entity;
+﻿using HunterCombatMR.Attributes;
 using HunterCombatMR.Services;
 using HunterCombatMR.Utilities;
 using System;
@@ -9,6 +9,7 @@ using System.Reflection;
 
 namespace HunterCombatMR.Managers
 {
+    [ManagerDependency(typeof(EntityManager))]
     public sealed class ComponentManager
         : ManagerBase
     {

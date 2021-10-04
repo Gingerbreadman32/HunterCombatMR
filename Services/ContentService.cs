@@ -85,11 +85,6 @@ namespace HunterCombatMR.Services
             }
         }
 
-        internal void SetupContent()
-        {
-            //LoadMoveSets();
-        }
-
         private string DuplicateNameFormat(string name,
                 int suffix)
         {
