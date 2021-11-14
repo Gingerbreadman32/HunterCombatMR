@@ -20,5 +20,10 @@
                     return false;
             }
         }
+
+        public static bool CheckWhiteSpace(string input,
+            int keyIndex)
+            => input.Length >= keyIndex + 2 && input[keyIndex - 1] == ' ' && input[keyIndex + 1] == ' ';
+        
     }
 }

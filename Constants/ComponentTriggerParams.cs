@@ -4,19 +4,19 @@ using HunterCombatMR.Components;
 namespace HunterCombatMR.Constants
 {
     /// <summary>
-    /// Common trigger params that should apply to most entity types.
+    /// Parameters that associate a component with a trigger script value
     /// Components required are specified and any entity without said component will not evaluate a trigger with that parameter.
     /// </summary>
-    public static class CommonTriggerParams
+    public static class ComponentTriggerParams
     {
         /// <summary>
-        /// [AnimationComponent] The current frame time of the entity.
+        /// The current frame time of the entity.
         /// </summary>
         [ComponentDependency(typeof(AnimationComponent))]
         public const string FrameTime = "frame";
 
         /// <summary>
-        /// [AnimationComponent] The current key frame time of the entity.
+        /// The current key frame time of the entity.
         /// </summary>
         [ComponentDependency(typeof(AnimationComponent))]
         public const string KeyframeTime = "kframe";
@@ -32,16 +32,22 @@ namespace HunterCombatMR.Constants
         public const string ScreenPositionY = "posy";
 
         /// <summary>
-        /// [EntityStateComponent] The time the entity has been in its current state.
+        /// The time the entity has been in its current state.
         /// </summary>
         [ComponentDependency(typeof(EntityStateComponent))]
         public const string StateTime = "time";
 
         /// <summary>
-        /// [EntityStateComponent] The state number of the current state of the entity.
+        /// The state number of the current state of the entity.
         /// </summary>
         [ComponentDependency(typeof(EntityStateComponent))]
         public const string StateNumber = "state";
+
+        /// <summary>
+        /// The full array of state variables for the current entity
+        /// </summary>
+        [ComponentDependency(typeof(EntityStateComponent))]
+        public const string StateVariables = "statevars";
 
         /// <summary>
         /// [VanillaEntityComponent] The current x-based velocity of the entity.

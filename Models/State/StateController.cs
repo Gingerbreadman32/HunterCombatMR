@@ -5,7 +5,7 @@ namespace HunterCombatMR.Models.State
     public struct StateController
     {
         public StateController(string type,
-            object[] parameters,
+            string[] parameters,
             StateTrigger[][] triggers,
             int persistency,
             bool noHitPause)
@@ -27,7 +27,7 @@ namespace HunterCombatMR.Models.State
         /// <summary>
         /// The parameters being passed to the state controller.
         /// </summary>
-        public object[] Parameters { get; }
+        public string[] Parameters { get; }
 
         /// <summary>
         /// The amount of times triggers need to fire within the lifetime of the state to activate. 0 will indicate it can only be called once.

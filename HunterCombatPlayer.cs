@@ -21,6 +21,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using HunterCombatMR.Models.Behavior;
 using HunterCombatMR.Models.Input;
+using HunterCombatMR.Controllers;
 
 namespace HunterCombatMR
 {
@@ -177,12 +178,12 @@ namespace HunterCombatMR
         {
             var states = new EntityState[2];
             states[0] = new StateBuilder()
-                .WithNewController(StateControllerTypes.ChangeState, 1, new StateTrigger("time = 100"))
+                .WithNewController(StateControllerTypes.ChangeState, "1", new StateTrigger("time = 100"))
                 .WithEntityStatuses(EntityWorldStatus.Grounded, EntityActionStatus.Idle)
                 .WithParameters(animation: -1)
                 .Build();
             states[1] = new StateBuilder()
-                .WithNewController(StateControllerTypes.ChangeState, 0, new StateTrigger("time = 250"))
+                .WithNewController(StateControllerTypes.ChangeState, "0", new StateTrigger("time = 250"))
                 .WithEntityStatuses(EntityWorldStatus.Grounded, EntityActionStatus.ActionStartup)
                 .WithParameters(animation: 0)
                 .Build();
@@ -191,12 +192,20 @@ namespace HunterCombatMR
                 .WithState(StateNumberConstants.Default, states[0])
                 .WithState(1, states[1]);
 
+            stateSet.AddGlobalController("TestController",
+                ControllerPriorities.Local,
+                new StateControllerBuilder(nameof(SetStateVar))
+                    .WithTrigger("frame = 107", 1)
+                    .WithTrigger("state = 1", 1)
+                    .WithParameters("0", "1")
+                    .Build());
+
             stateSet.AddGlobalController("TestController", 
                 ControllerPriorities.Local, 
                 new StateControllerBuilder(StateControllerTypes.ChangeState)
                     .WithTrigger("frame = 107", 1)
                     .WithTrigger("state = 1", 1)
-                    .WithParameter(0)
+                    .WithParameter("0")
                     .Build());
 
             return stateSet.Build();

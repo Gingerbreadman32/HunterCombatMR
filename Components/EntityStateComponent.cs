@@ -12,16 +12,20 @@ namespace HunterCombatMR.Components
         {
             StateInfo = stateInfo;
             GlobalControllers = globalControllers;
+            StateVars = new float[256];
         }
 
         public GlobalStateController[] GlobalControllers { get; set; }
 
+        [TriggerParameter(ComponentTriggerParams.StateVariables)]
+        public float[] StateVars { get; set; }
+
         public StateInfo StateInfo { get; set; }
 
-        [TriggerParameter(CommonTriggerParams.StateNumber)]
+        [TriggerParameter(ComponentTriggerParams.StateNumber)]
         public int StateNumber { get => StateInfo.StateNumber; }
 
-        [TriggerParameter(CommonTriggerParams.StateTime)]
+        [TriggerParameter(ComponentTriggerParams.StateTime)]
         public int StateTime { get => StateInfo.Time; }
 
         public EntityState GetCurrentState(Behavior behavior)

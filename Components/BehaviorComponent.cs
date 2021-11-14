@@ -22,7 +22,7 @@ namespace HunterCombatMR.Components
             _behaviors = new Behavior[] { behavior };
         }
 
-        public IReadOnlyDictionary<int, EntityState> ActiveStateList
+        public IReadOnlyDictionary<int, EntityState> ActiveStates
         {
             get
             {
@@ -31,7 +31,7 @@ namespace HunterCombatMR.Components
             }
         }
 
-        public IReadOnlyCollection<GlobalStateController> ActiveGlobalControllerList
+        public IReadOnlyCollection<GlobalStateController> ActiveGlobalControllers
         {
             get
             {

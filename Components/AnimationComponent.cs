@@ -17,10 +17,10 @@ namespace HunterCombatMR.Components
         public CustomAnimation Animation { get => _animation; set { _animation = value; Animator.Initialize(_animation.FrameData, _animation.LoopStyle); } }
         public AnimationDef Animator { get; }
 
-        [TriggerParameter(CommonTriggerParams.FrameTime)]
+        [TriggerParameter(ComponentTriggerParams.FrameTime)]
         public int CurrentFrame { get => Animator.Frame; }
 
-        [TriggerParameter(CommonTriggerParams.KeyframeTime)]
+        [TriggerParameter(ComponentTriggerParams.KeyframeTime)]
         public int CurrentKeyFrame { get => Animator.GetCurrentKeyframe(); }
 
         public int LastFrame { get => Animator.GetFinalFrame(); }

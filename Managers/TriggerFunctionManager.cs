@@ -1,5 +1,6 @@
 ﻿using HunterCombatMR.Attributes;
 using HunterCombatMR.Constants;
+using HunterCombatMR.Models;
 using HunterCombatMR.Services;
 using HunterCombatMR.Utilities;
 using System;
@@ -9,28 +10,29 @@ using System.Reflection;
 
 namespace HunterCombatMR.Managers
 {
-    public sealed class StateTriggerManager
+    [ManagerDependency(typeof(TriggerScriptManager))]
+    public sealed class TriggerFunctionManager
         : ManagerBase
     {
-        private static IDictionary<Tuple<Type, string>, Func<object, object>> _getPropertyDelegates;
-        private static IDictionary<string, Tuple<Type, string>> _triggerParameterDependencies;
+        private static IDictionary<ComponentProperty, Func<object, object>> _getPropertyDelegates;
+
+        private static IDictionary<string, ComponentProperty> _triggerParameterDependencies;
 
         public static object GetComponentProperty(in object componentRef,
             string trigger)
         {
             var componentType = componentRef.GetType();
 
-            if (!_getPropertyDelegates.Any(x => x.Key.Item1 == componentType))
-                throw new Exception("No component references exist for this type of component");
+            if (!_getPropertyDelegates.Any(x => x.Key.ComponentType.Equals(componentType)))
+                throw new Exception($"No component references exist for this type of component {componentType.Name}");
 
-            if (!_triggerParameterDependencies.ContainsKey(trigger) || _triggerParameterDependencies[trigger].Item1 != componentType)
+            if (!_triggerParameterDependencies.ContainsKey(trigger) || !_triggerParameterDependencies[trigger].ComponentType.Equals(componentType))
                 throw new Exception("Trigger parameter dependency does not match current component passed.");
 
-            var propertyName = _triggerParameterDependencies[trigger].Item2;
-            var propertyDetails = new Tuple<Type, string>(componentType, propertyName);
+            var propertyDetails = _triggerParameterDependencies[trigger];
 
-            if (!_getPropertyDelegates.Any(x => x.Key.Item2 == propertyName))
-                throw new Exception($"No component references exist for property {propertyName} in component type!");
+            if (!_getPropertyDelegates.ContainsKey(propertyDetails))
+                throw new Exception($"No component references exist for property {propertyDetails.PropertyName} in component type!");
 
             return _getPropertyDelegates[propertyDetails](componentRef);
         }
@@ -40,7 +42,7 @@ namespace HunterCombatMR.Managers
             if (!_triggerParameterDependencies.ContainsKey(trigger))
                 throw new Exception($"Trigger {trigger} has no saved component dependencies!");
 
-            return _triggerParameterDependencies[trigger].Item1;
+            return _triggerParameterDependencies[trigger].ComponentType;
         }
 
         protected override void OnDispose()
@@ -51,17 +53,15 @@ namespace HunterCombatMR.Managers
 
         protected override void OnInitialize()
         {
-            _triggerParameterDependencies = new Dictionary<string, Tuple<Type, string>>();
-            _getPropertyDelegates = new Dictionary<Tuple<Type, string>, Func<object, object>>();
+            _triggerParameterDependencies = new Dictionary<string, ComponentProperty>();
+            _getPropertyDelegates = new Dictionary<ComponentProperty, Func<object, object>>();
 
             GetTriggerParameterData();
         }
 
         private void GetTriggerParameterData()
         {
-            var commonTriggerParameters = ReflectionUtils.GatherConstantsFromStaticType(typeof(CommonTriggerParams));
-
-            foreach (var trigger in commonTriggerParameters.Where(x => x.CustomAttributes.Any()))
+            foreach (var trigger in TriggerScriptManager.ComponentFieldTriggerFunctions.Where(x => x.CustomAttributes.Any()))
             {
                 var attributeData = trigger.CustomAttributes.FirstOrDefault(x => x.AttributeType == typeof(ComponentDependency));
                 if (attributeData == null)
@@ -83,8 +83,7 @@ namespace HunterCombatMR.Managers
 
                 Func<object, object> result = ReflectionUtils.CreateGetMethodDelegate(propertyReference);
 
-                var propertyDetails = new Tuple<Type, string>(componentType,
-                    propertyReference.Name);
+                var propertyDetails = new ComponentProperty(componentType, propertyReference.Name);
 
                 _triggerParameterDependencies.Add(constantValue, propertyDetails);
                 _getPropertyDelegates.Add(propertyDetails, result);

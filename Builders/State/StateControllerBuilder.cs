@@ -45,17 +45,17 @@ namespace HunterCombatMR.Builders.State
         }
 
         public static StateControllerBuilder WithParameter(this StateControllerBuilder builder,
-            object parameter)
+            string parameter)
         {
             if (parameter == null)
                 throw new Exception("Parameter cannot be null!");
 
-            builder.AddParameters(new object[1] { parameter });
+            builder.AddParameters(parameter);
             return builder;
         }
 
         public static StateControllerBuilder WithParameters(this StateControllerBuilder builder,
-            params object[] parameters)
+            params string[] parameters)
         {
             if (parameters == null || !parameters.Any() || parameters.Any(x => x == null))
                 throw new Exception("Parameters cannot be null or empty!");
@@ -71,7 +71,7 @@ namespace HunterCombatMR.Builders.State
         private const int MAX_TRIGGER_DEPTH = 6; // Maybe move this out of here
 
         private bool _ignoreHitPause;
-        private List<object> _params;
+        private List<string> _params;
         private int _persistency;
         private Dictionary<int, List<StateTrigger>> _triggers;
         private string _type;
@@ -82,7 +82,7 @@ namespace HunterCombatMR.Builders.State
             _persistency = 1;
             _ignoreHitPause = false;
             _triggers = new Dictionary<int, List<StateTrigger>>();
-            _params = new List<object>();
+            _params = new List<string>();
         }
 
         public StateControllerBuilder(StateController copy)
@@ -91,7 +91,7 @@ namespace HunterCombatMR.Builders.State
             _persistency = copy.Persistency;
             _ignoreHitPause = copy.IgnoreHitPause;
             _triggers = ArrayUtils.JaggedArraytoDictionary(copy.Triggers).ToDictionary(x => x.Key, x => new List<StateTrigger>(x.Value));
-            _params = new List<object>(copy.Parameters);
+            _params = new List<string>(copy.Parameters);
         }
 
         public string ControllerType { get => _type; set => _type = value; }
@@ -99,7 +99,7 @@ namespace HunterCombatMR.Builders.State
         public int Persistency { get => _persistency; set => _persistency = value; }
         public Dictionary<int, List<StateTrigger>> Triggers { get => _triggers; set => _triggers = value; }
 
-        public void AddParameters(params object[] parameters)
+        public void AddParameters(params string[] parameters)
         {
             _params.AddRange(parameters);
         }

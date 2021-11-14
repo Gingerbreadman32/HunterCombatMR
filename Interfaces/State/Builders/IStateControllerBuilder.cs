@@ -8,7 +8,7 @@ namespace HunterCombatMR.Interfaces.State.Builders
         bool IgnoreHitPause { get; set; }
         int Persistency { get; set; }
 
-        void AddParameters(params object[] parameters);
+        void AddParameters(params string[] parameters);
 
         void AddTrigger(StateTrigger trigger, int depth);
 

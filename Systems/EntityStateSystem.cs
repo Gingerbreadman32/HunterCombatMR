@@ -89,15 +89,15 @@ namespace HunterCombatMR.Systems
         private bool EvaluateTrigger(StateTrigger trigger,
             int entityId)
         {
-            var type = StateTriggerManager.GetParameterComponentType(trigger.Parameter);
+            var componentType = TriggerFunctionManager.GetParameterComponentType(trigger.Parameter);
 
-            if (!ComponentManager.HasComponent(entityId, type))
+            if (!ComponentManager.HasComponent(entityId, componentType))
                 return false;
 
-            ref readonly var component = ref ComponentManager.GetEntityComponent(entityId, type);
-            var property = StateTriggerManager.GetComponentProperty(in component, trigger.Parameter);
+            ref readonly var component = ref ComponentManager.GetEntityComponent(entityId, componentType);
+            var property = TriggerFunctionManager.GetComponentProperty(in component, trigger.Parameter);
 
-            return Convert.ToSingle(property) == trigger.Value; // testing
+            return Convert.ToSingle(property) == trigger.Value; // Make Triggers get their value from the new TriggerScriptManager.ParseScript()
         }
 
         // Make unit tests for this

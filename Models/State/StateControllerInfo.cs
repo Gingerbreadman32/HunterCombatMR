@@ -17,6 +17,6 @@
         /// <summary>
         /// The parameters being passed to the state controller.
         /// </summary>
-        public object[] Parameters { get; set; }
+        public string[] Parameters { get; set; }
     }
 }
